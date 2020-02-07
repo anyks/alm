@@ -1,3 +1,70 @@
+# ANYKS Language Model (ALM)
+
+- [Design goals](#design-goals)
+- [Sponsors](#sponsors)
+- [Integration](#integration)
+  - [CMake](#cmake)
+  - [Package Managers](#package-managers)
+- [Examples](#examples)
+  - [JSON as first-class data type](#json-as-first-class-data-type)
+  - [Serialization / Deserialization](#serialization--deserialization)
+  - [STL-like access](#stl-like-access)
+  - [Conversion from STL containers](#conversion-from-stl-containers)
+  - [JSON Pointer and JSON Patch](#json-pointer-and-json-patch)
+  - [JSON Merge Patch](#json-merge-patch)
+  - [Implicit conversions](#implicit-conversions)
+  - [Conversions to/from arbitrary types](#arbitrary-types-conversions)
+  - [Specializing enum conversion](#specializing-enum-conversion)
+  - [Binary formats (BSON, CBOR, MessagePack, and UBJSON)](#binary-formats-bson-cbor-messagepack-and-ubjson)
+- [Supported compilers](#supported-compilers)
+- [License](#license)
+- [Contact](#contact)
+- [Thanks](#thanks)
+- [Used third-party tools](#used-third-party-tools)
+- [Projects using JSON for Modern C++](#projects-using-json-for-modern-c)
+- [Notes](#notes)
+- [Execute unit tests](#execute-unit-tests)
+
+## Цели дизайна
+
+Существует множество библиотек языковых моделей ([KenLM](https://github.com/kpu/kenlm), [SriLM](https://github.com/BitMindLab/SRILM), [IRSTLM](https://github.com/irstlm-team/irstlm)), и у каждой из них может быть причина для существования. Наша языковая модель преследовала следующие цели:
+
+- **Поддержка UTF-8**. Полная поддержка UTF-8 без сторонних зависимостей.
+
+- **Поддержка форматов данных**. Arpa, Vocab, Map Sequence, N-grams, Binary alm dictionary.
+
+- **Поддержка алгоритмов сглаживания**. Kneser-Nay, Modified Kneser-Nay, Witten-Bell, Additive, Good-Turing, Absolute discounting.
+
+- **Нормализация входных корпусов**. Приведение слов к нижнему регистру, умная токенизация, поддержка чёрного и белого списков.
+
+- **Модификация arpa**. Замена частот, Замена n-грамм, Добавление новых n-грамм с частотами, Удаление n-грамм.
+
+- **Прунинг**. Сокращение числа n-грамм которые не соответствуют указанным критериям качества.
+
+- **Чистка плохих n-грамм**. Удаление n-грамм у которых обратная частота backoff выше основной частоты.
+
+- **Восстановление arpa**. Восстановление повреждённых n-грамм в arpa с последующим перерасчётом их backoff частот.
+
+- **Поддержка дополнительных признаков слов**. Определение в тексте признаков: (чисел, римских чисел, диапазонов чисел, числовых аббривиатур, любых других пользовательских признаков с помощью скриптов написанных на языке Python3).
+
+- **Обработка грязных текстов**. В отличие от всех остальных языковых моделей, здесь мы умеем извлекать правильный контекст из текстовых файлов с грязными текстами.
+
+- **Полноценный учёт <unk> признака**. Учёт <unk> признака как полноценной n-граммы.
+
+- **Переопределение <unk> признака**. Возможность переопределения признака неизвестного слова.
+
+- **Препроцессинг обрабатываемых n-грамм**. Возможность предобрабатывать n-граммы перед добавлением в arpa с помощью пользовательских скриптов на языке Python3.
+
+- **Бинарный контейнер языковой модели**. Бинарный bALM контейнер поддерживает сжатие, шифрование и установку копирайтов.
+
+- **Удобная визуализация хода процесса**. В ALM реализовано несколько видов визуализаций: текстовая, графическая в виде индикатора процесса, логирование в файлы или консоль.
+
+- **Гарантированная сборка всех n-грамм**. В отличие от остальных языковых моделей, ALM гарантированно собирает все n-граммы из текста в независимости от их длины (кроме Modified Kneser-Nay), также возможно принудительно учитывать все n-граммы даже если они встретились всего 1 раз.
+
+
+
+
+
 **Edit a file, create a new file, and clone from Bitbucket in under 2 minutes**
 
 When you're done, you can delete the content in this README and update the file with details for others getting started with your repository.
