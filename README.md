@@ -93,9 +93,7 @@ $ make
 
 ## License
 
-<p align="right">
 ![MIT License](http://opensource.org/trademarks/opensource/OSI-Approved-License-100x137.png "MIT License")
-</p>
 
 The class is licensed under the [MIT License](http://opensource.org/licenses/MIT):
 
