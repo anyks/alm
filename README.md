@@ -70,21 +70,21 @@
 ### Linux и FreeBSD
 
 ```bash
-# mkdir ./build
-# cd ./build
+$ mkdir ./build
+$ cd ./build
 
-# cmake ..
-# make
+$ cmake ..
+$ make
 ```
 
 ### MacOS X
 
 ```bash
-# mkdir ./build
-# cd ./build
+$ mkdir ./build
+$ cd ./build
 
-# cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1d -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl@1.1/1.1.1d/include/lib ..
-# make
+$ cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1d -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl@1.1/1.1.1d/include/lib ..
+$ make
 ```
 
 ## Примеры
