@@ -1,6 +1,6 @@
 # ANYKS Language Model (ALM) C++11
 
-- [Цели проекта](#цели-проекта)
+- [Цели проекта](#markdown-header-)
 - [Sponsors](#sponsors)
 - [Integration](#integration)
   - [CMake](#cmake)
