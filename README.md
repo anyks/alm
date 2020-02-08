@@ -406,9 +406,9 @@ unq=9390
 	"author": "Name author",
 	"lictype": "License type",
 	"lictext": "License text",
-	"contacts": "...",
-	"password": "...",
-	"copyright": "..."
+	"contacts": "Contacts data",
+	"password": "Password if needed",
+	"copyright": "Copyright author"
 }
 ```
 
