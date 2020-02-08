@@ -433,6 +433,30 @@ def run(word, context):
 
 ---
 
+**Формат скрипта python определения собственных признаков слов**
+```python
+# -*- coding: utf-8 -*-
+
+def init():
+    """
+    Метод инициализации: выполняется только один раз при запуске приложения
+    """
+
+def run(using, word):
+    """
+    Метод запуска обработки: запускается при извлечении слова из текста
+    @using название признака слова
+    @word  обрабатываемое слово
+    """
+    if using and (using == "<usa>"):
+        if word and (word.lower() == "сша"): return "ok"
+    elif using and (using == "<russia>"):
+        if word and (word.lower() == "россия"): return "ok"
+    return "no"
+```
+
+---
+
 ## Примеры
 
 ### Пример обучения языковой модели
