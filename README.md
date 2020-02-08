@@ -5,6 +5,7 @@
 - [Цели проекта](#markdown-header-)
 - [Внешние зависимости](#markdown-header-_1)
 - [Сборка проекта](#markdown-header-_2)
+  - [Clone project](#markdown-header-clone-project)
   - [Linux и FreeBSD](#markdown-header-linux-freebsd)
   - [MacOS X](#markdown-header-macos-x)
 - [Описание форматов файлов](#markdown-header-_3)
