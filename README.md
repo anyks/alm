@@ -80,6 +80,12 @@
 
 ## Сборка проекта
 
+### Clone project
+
+```bash
+$ git clone --recursive https://forman@bitbucket.org/anyks/alm.git
+```
+
 ### Linux и FreeBSD
 
 ```bash
