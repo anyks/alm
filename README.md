@@ -27,6 +27,11 @@
   - [Пример удаления n-грамм у которых частота ниже backoff](#markdown-header-n-backoff)
   - [Пример пруннинга arpa](#markdown-header-arpa_2)
   - [Пример модификации arpa](#markdown-header-arpa_3)
+  - [Обучение с предобработкой полученных слов](#markdown-header-_7)
+  - [Обучение с использованием своих признаков](#markdown-header-_8)
+  - [Обучение с белым списком](#markdown-header-_9)
+  - [Обучение с чёрным списком](#markdown-header-_10)
+  - [Обучение с неизвестным словом](#markdown-header-_11)
 - [License](#markdown-header-license)
 - [Contact](#markdown-header-contact)
 
