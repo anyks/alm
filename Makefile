@@ -42,6 +42,7 @@ ifeq ($(OS), Darwin)
 	# Заголовочные файлы
 	INCLUDE = \
 		-I./include \
+		-I./json/include \
 		-I/usr/include \
 		-I/usr/local/include \
 		-I./lib/BigInt/include \
@@ -90,6 +91,7 @@ ifeq ($(OS), FreeBSD)
 	# Заголовочные файлы
 	INCLUDE = \
 		-I./include \
+		-I./json/include \
 		-I/usr/include \
 		-I/usr/local/include \
 		-I./lib/BigInt/include \
@@ -136,6 +138,7 @@ ifeq ($(OS), Linux)
 	# Заголовочные файлы
 	INCLUDE = \
 		-I./include \
+		-I./json/include \
 		-I/usr/include \
 		-I/usr/local/include \
 		-I./lib/BigInt/include \
