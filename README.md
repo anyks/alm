@@ -1,3 +1,5 @@
+[![ANYKS Smart language model](https://bitbucket.org/anyks/alm/raw/693d351f4c53fa40a273dfd75f452958721f6c12/img/banner.jpg)](https://anyks.com)
+
 # ANYKS Language Model (ALM) C++11
 
 - [Цели проекта](#markdown-header-)
