@@ -1,6 +1,6 @@
 # ANYKS Language Model (ALM) C++11
 
-- [Design goals](#design-goals)
+- [Цели проекта](#цели-проекта)
 - [Sponsors](#sponsors)
 - [Integration](#integration)
   - [CMake](#cmake)
@@ -528,6 +528,8 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method modify -modify replace -modify-file ./rep.txt -debug 1 -w-arpa ./lm.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab
 ```
+
+* * *
 
 ## License
 
