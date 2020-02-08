@@ -98,8 +98,6 @@ $ cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1d -DOPENSSL_LIBRAR
 $ make
 ```
 
-![Пример работы программы](https://bitbucket.org/anyks/alm/raw/326d04193748dacb92ef123ae76548094c4194ce/img/screen1.png "Пример работы программы")
-
 ## Описание форматов файлов
 
 ### Arpa
@@ -461,6 +459,8 @@ def run(using, word):
 ---
 
 ## Примеры
+
+![Пример работы программы](https://bitbucket.org/anyks/alm/raw/326d04193748dacb92ef123ae76548094c4194ce/img/screen1.png "Пример работы программы")
 
 ### Пример обучения языковой модели
 
