@@ -585,7 +585,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ./bin/alm.exe -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -unknown-word goga
 ```
 
-> При установки **своего неизвестного** слова, признак <unk> в arpa будет заменён на слово указанное в параметре [-unknown-word], в данном случае на слово **goga**.
+> В данном примере признак <unk> в arpa будет заменён на слово указанное в параметре [-unknown-word], в нашем случае на слово **goga**.
 
 * * *
 
