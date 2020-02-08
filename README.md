@@ -486,6 +486,15 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -w-bin ./lm.alm -w-bin-meta ./meta.json -w-bin-arpa -w-bin-usigns -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
 ```
 
+**Алгоритм сглаживания: Witten-Bell, сборка из бинарного контейнера**
+```bash
+$ ./alm -r-bin ./dict.alm -r-bin-meta ./meta.json -method train -debug 1 -size 3 -smoothing wittenbell -w-arpa ./lm.arpa
+```
+
+### Пример исправления arpa
+
+...
+
 ## License
 
 ![MIT License](http://opensource.org/trademarks/opensource/OSI-Approved-License-100x137.png "MIT License")
