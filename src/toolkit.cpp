@@ -1660,7 +1660,7 @@ void anyks::Toolkit::writeVocab(const string & filename, function <void (const u
 				// Получаем метаданные слова
 				auto meta = item.second.calc(this->info.ad, this->info.cw);
 				// Получаем данные слова
-				data = move(this->alphabet->format("%lld\t%s\t%lld | %lld | %f | %f | %f\n", item.first, item.second.c_str(), meta.oc, meta.dc, meta.tf, meta.idf, meta.wltf));
+				data = move(this->alphabet->format("%lld\t%s\t%lld | %lld | %f | %f | %f\n", item.first, item.second.real().c_str(), meta.oc, meta.dc, meta.tf, meta.idf, meta.wltf));
 				// Выполняем запись данных в файл
 				file.write(data.data(), data.size());
 				// Если функция вывода статуса передана
