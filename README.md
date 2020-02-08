@@ -99,11 +99,23 @@ $ make
 
 ## Описание форматов файлов
 
-...
+**Мета-данные бинарного контейнера**
+```json
+{
+	"aes": 128,                 // размер шифрования AES (128, 192, 256)
+	"name": "Name dictionary",  // название словаря
+	"author": "Name author",    // автор словаря
+	"lictype": "License type",  // тип лицензии
+	"lictext": "License text",  // текст лицензии
+	"contacts": "...",          // контактные данные автора
+	"password": "...",          // пароль шифрования (если требуется), шифрование производится только при установки пароля
+	"copyright": "..."          // копирайт владельца словаря
+}
+```
 
 ## Примеры
 
-### Пример обучения языковой модели и экспорта всех форматов данных
+### Пример обучения языковой модели
 
 **Алгоритм сглаживания: Witten-Bell, сборка из одного файла**
 ```bash
@@ -125,9 +137,9 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing kneserney -kneserney-modified -kneserney-prepares -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt
 ```
 
-**Алгоритм сглаживания: Witten-Bell, сборка из группы файлов бинарного контейнера**
+**Алгоритм сглаживания: Good-Turing, сборка из группы файлов бинарного контейнера**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -w-bin ./lm.alm -w-bin-meta ./meta.json -w-bin-arpa -w-bin-usigns -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -w-bin ./lm.alm -w-bin-meta ./meta.json -w-bin-arpa -w-bin-usigns -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
 ```
 
 ## License
