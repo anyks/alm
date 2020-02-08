@@ -1,29 +1,30 @@
 # ANYKS Language Model (ALM) C++11
 
 - [Цели проекта](#markdown-header-)
-- [Sponsors](#sponsors)
-- [Integration](#integration)
-  - [CMake](#cmake)
-  - [Package Managers](#package-managers)
-- [Examples](#examples)
-  - [JSON as first-class data type](#json-as-first-class-data-type)
-  - [Serialization / Deserialization](#serialization--deserialization)
-  - [STL-like access](#stl-like-access)
-  - [Conversion from STL containers](#conversion-from-stl-containers)
-  - [JSON Pointer and JSON Patch](#json-pointer-and-json-patch)
-  - [JSON Merge Patch](#json-merge-patch)
-  - [Implicit conversions](#implicit-conversions)
-  - [Conversions to/from arbitrary types](#arbitrary-types-conversions)
-  - [Specializing enum conversion](#specializing-enum-conversion)
-  - [Binary formats (BSON, CBOR, MessagePack, and UBJSON)](#binary-formats-bson-cbor-messagepack-and-ubjson)
-- [Supported compilers](#supported-compilers)
+- [Внешние зависимости](#sponsors)
+- [Сборка проекта](#sponsors)
+  - [Linux и FreeBSD](#cmake)
+  - [MacOS X](#package-managers)
+- [Описание форматов файлов](#examples)
+  - [Arpa](#json-as-first-class-data-type)
+  - [Ngrams](#serialization--deserialization)
+  - [Vocab](#stl-like-access)
+  - [Map](#conversion-from-stl-containers)
+  - [Файл добавления n-грамм в существующий файл arpa](#json-pointer-and-json-patch)
+  - [Файл изменения частот n-грамм в существующем файле arpa](#json-merge-patch)
+  - [Файл замены n-грамм в существующем файле arpa](#implicit-conversions)
+  - [Файл удаления n-грамм в существующем файле arpa](#arbitrary-types-conversions)
+  - [Мета-данные бинарного контейнера](#specializing-enum-conversion)
+  - [Формат скрипта python предобработки полученных слов](#binary-formats-bson-cbor-messagepack-and-ubjson)
+  - [Формат скрипта python определения собственных признаков слов](#binary-formats-bson-cbor-messagepack-and-ubjson)s
+- [Примеры](#supported-compilers)
+  - [Пример обучения языковой модели](#supported-compilers)
+  - [Пример исправления arpa](#supported-compilers)
+  - [Пример удаления n-грамм у которых частота ниже backoff](#supported-compilers)
+  - [Пример пруннинга arpa](#supported-compilers)
+  - [Пример модификации arpa](#supported-compilers)
 - [License](#license)
 - [Contact](#contact)
-- [Thanks](#thanks)
-- [Used third-party tools](#used-third-party-tools)
-- [Projects using JSON for Modern C++](#projects-using-json-for-modern-c)
-- [Notes](#notes)
-- [Execute unit tests](#execute-unit-tests)
 
 ## Цели проекта
 
@@ -99,7 +100,7 @@ $ make
 
 ## Описание форматов файлов
 
-**Arpa**
+### Arpa
 ```
 \data\
 ngram 1=52
@@ -152,7 +153,7 @@ ngram 3=15
 
 ---
 
-**Ngrams**
+### Ngrams
 ```
 \data\
 ad=1
@@ -229,7 +230,7 @@ ngram 3=306
 
 ---
 
-**Vocab**
+### Vocab
 ```
 \data\
 ad=1
@@ -281,7 +282,7 @@ unq=9390
 
 ---
 
-**Map**
+### Map
 ```
 1:{2022,1,0}|42:{57,1,0}|279603:{2,1,0}
 1:{2022,1,0}|42:{57,1,0}|320749:{2,1,0}
@@ -309,7 +310,7 @@ unq=9390
 
 ---
 
-**Файл добавления n-грамм в существующий файл arpa**
+### Файл добавления n-грамм в существующий файл arpa
 ```
 -3.002006	США
 -1.365296	границ США
@@ -326,7 +327,7 @@ unq=9390
 
 ---
 
-**Файл изменения частот n-грамм в существующем файле arpa**
+### Файл изменения частот n-грамм в существующем файле arpa
 ```
 -0.6588787	получайте удовольствие </s>
 -0.6588787	только в одном
@@ -347,7 +348,7 @@ unq=9390
 
 ---
 
-**Файл замены n-грамм в существующем файле arpa**
+### Файл замены n-грамм в существующем файле arpa
 ```
 коем случае нельзя	там да тут
 но тем не	да ты что
@@ -361,7 +362,7 @@ unq=9390
 
 ---
 
-**Файл удаления n-грамм в существующем файле arpa**
+### Файл удаления n-грамм в существующем файле arpa
 ```
 ну то есть
 ну очень большой
@@ -388,7 +389,7 @@ unq=9390
 
 ---
 
-**Мета-данные бинарного контейнера**
+### Мета-данные бинарного контейнера
 ```json
 {
 	"aes": 128,
@@ -413,7 +414,7 @@ unq=9390
 
 ---
 
-**Формат скрипта python предобработки полученных слов**
+### Формат скрипта python предобработки полученных слов
 ```python
 # -*- coding: utf-8 -*-
 
@@ -433,7 +434,7 @@ def run(word, context):
 
 ---
 
-**Формат скрипта python определения собственных признаков слов**
+### Формат скрипта python определения собственных признаков слов
 ```python
 # -*- coding: utf-8 -*-
 
