@@ -431,7 +431,7 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
 		// Если это признак начала предложения
 		case u_short(sign_t::start): result = "<s>"; break;
 		// Если это признак аббревиатуры
-		case u_short(sign_t::abbr): result = "<abr>"; break;
+		case u_short(sign_t::abbr): result = "<abbr>"; break;
 		// Если это признак даты
 		case u_short(sign_t::date): result = "<date>"; break;
 		// Если это признак времени

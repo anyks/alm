@@ -25,7 +25,7 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 		// Проверяем является ли слово неизвестным
 		else if(word.compare(L"<unk>") == 0) result = (size_t) sign_t::unk;
 		// Проверяем является ли слово аббревиатурой
-		else if(word.compare(L"<abr>") == 0) result = (size_t) sign_t::abbr;
+		else if(word.compare(L"<abbr>") == 0) result = (size_t) sign_t::abbr;
 		// Проверяем является ли слово датой
 		else if(word.compare(L"<date>") == 0) result = (size_t) sign_t::date;
 		// Проверяем является ли слово временем
