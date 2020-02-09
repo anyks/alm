@@ -22,8 +22,6 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 		if(word.compare(L"<s>") == 0) result = (size_t) sign_t::start;
 		// Проверяем является ли слово числом
 		else if(word.compare(L"<num>") == 0) result = (size_t) sign_t::num;
-		// Проверяем является ли слово числом с плавающей точкой
-		else if(word.compare(L"<dec>") == 0) result = (size_t) sign_t::dec;
 		// Проверяем является ли слово неизвестным
 		else if(word.compare(L"<unk>") == 0) result = (size_t) sign_t::unk;
 		// Проверяем является ли слово аббревиатурой
@@ -84,8 +82,6 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 						case 0: if(this->isOption(options_t::onlyGood)) idw = (size_t) sign_t::unk; break;
 						// Если это признак числа, запоминаем его
 						case (u_short) sign_t::num: if(!this->isOption(options_t::notNumber)) idw = (size_t) sign_t::num; break;
-						// Если это признак числа с плавающей точкой
-						case (u_short) sign_t::dec: if(!this->isOption(options_t::notNumber)) idw = (size_t) sign_t::dec; break;
 						// Если это признак аббривиатуры
 						case (u_short) sign_t::abbr: if(!this->isOption(options_t::notAbbr)) idw = (size_t) sign_t::abbr; break;
 						// Если это признак даты
@@ -516,8 +512,8 @@ void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
 	if(alphabet != nullptr){
 		// Устанавливаем переданный алфавит
 		this->alphabet = alphabet;
-		// Устанавливаем алфавит и смещение в 15 позиций (количество системных признаков arpa)
-		this->idw.set(this->alphabet, 15);
+		// Устанавливаем алфавит и смещение в 14 позиций (количество системных признаков arpa)
+		this->idw.set(this->alphabet, 14);
 	}
 }
 /**

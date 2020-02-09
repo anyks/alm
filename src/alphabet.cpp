@@ -611,20 +611,11 @@ const u_short anyks::Alphabet::numSign(const wstring & word) const {
 					// Получаем оставшуюся часть слова
 					const wstring & tmp = word.substr(1);
 					// Проверяем оставшуюся часть слова является числом
-					if(this->isNumber(tmp)){
+					if(this->isNumber(tmp) || this->isDecimal(tmp)){
 						// Определяем тип признака
 						switch(first){
 							// Это обычное число
 							case L'-': result = (u_short) sign_t::num;   break;
-							// Это приблизительное число
-							case L'~': result = (u_short) sign_t::aprox; break;
-						}
-					// Если это дробное число
-					} else if(this->isDecimal(tmp)) {
-						// Определяем тип признака
-						switch(first){
-							// Это обычное число
-							case L'-': result = (u_short) sign_t::dec;   break;
 							// Это приблизительное число
 							case L'~': result = (u_short) sign_t::aprox; break;
 						}
@@ -690,7 +681,7 @@ const u_short anyks::Alphabet::numSign(const wstring & word) const {
 								// Определяем тип разделителя
 								switch(word[i]){
 									case L',':
-									case L'.': result = (u_short) sign_t::dec;   break;
+									case L'.': result = (u_short) sign_t::num;   break;
 									case L'~': result = (u_short) sign_t::aprox; break;
 									case L'-': result = (u_short) sign_t::range; break;
 									case L'/': result = (u_short) sign_t::fract; break;

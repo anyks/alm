@@ -426,8 +426,6 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
 	switch(idw){
 		// Если это признак арабского или римского числа
 		case u_short(sign_t::num): result = "<num>"; break;
-		// Если это признак числа с плавающей точкой
-		case u_short(sign_t::dec): result = "<dec>"; break;
 		// Если это признак неизвестного слова
 		case u_short(sign_t::unk): result = "<unk>"; break;
 		// Если это признак начала предложения
@@ -863,7 +861,6 @@ const bool anyks::Arpa::event(const size_t idw) const {
 	return (
 		(idw != size_t(sign_t::num)) &&
 		(idw != size_t(sign_t::unk)) &&
-		(idw != size_t(sign_t::dec)) &&
 		(idw != size_t(sign_t::abbr)) &&
 		(idw != size_t(sign_t::date)) &&
 		(idw != size_t(sign_t::time)) &&
