@@ -583,6 +583,155 @@ const u_short anyks::Alphabet::errors(const wstring & word) const {
 	return result;
 }
 /**
+ * numSign Метод извлечения числового признака слова
+ * @param  word слово для проверки
+ * @return      результат проверки
+ */
+const u_short anyks::Alphabet::numSign(const wstring & word) const {
+	// Результат работы функции
+	u_short result = 0;
+	// Если слово передано
+	if(!word.empty()){
+		// Длина переданного слова
+		const size_t size = word.size();
+		// Если это не одна буква
+		if(size > 1){
+			// Получаем первый символ слова
+			const wchar_t first = word.front();
+			// Получаем последний символ слова
+			const wchar_t second = word.back();
+			// Проверяем является ли первый символ числом
+			const bool frontNum = this->isNumber({first});
+			// Определяем является ли последний символ числом
+			const bool backNum = this->isNumber({second});
+			// Если первый символ не является числом а второй является (-12, -15.64, -18,22, ~25, ~845.53, ~12,46)
+			if(!frontNum && backNum){
+				// Проверяем является ли первый символ (- или ~)
+				if((first == L'-') || (first == L'~')){
+					// Получаем оставшуюся часть слова
+					const wstring & tmp = word.substr(1);
+					// Проверяем оставшуюся часть слова является числом
+					if(this->isNumber(tmp)){
+						// Определяем тип признака
+						switch(first){
+							// Это обычное число
+							case L'-': result = (u_short) sign_t::num;   break;
+							// Это приблизительное число
+							case L'~': result = (u_short) sign_t::aprox; break;
+						}
+					// Если это дробное число
+					} else if(this->isDecimal(tmp)) {
+						// Определяем тип признака
+						switch(first){
+							// Это обычное число
+							case L'-': result = (u_short) sign_t::dec;   break;
+							// Это приблизительное число
+							case L'~': result = (u_short) sign_t::aprox; break;
+						}
+					// Сообщаем что это псевдо-число
+					} else result = (u_short) sign_t::anum;
+				// Если это не отрицательное и не приблизительное число (Дом-2)
+				} else {
+					// Ищем дефис в конце слова
+					size_t pos = word.rfind(L'-');
+					// Если дефис не найден и не найдено завершение слова в виде числа
+					if((pos == wstring::npos) || !this->isNumber(word.substr(pos + 1))){
+						// Сообщаем что это псевдо-число
+						result = (u_short) sign_t::anum;
+					}
+				}
+			// Если первый символ является числом а последний нет (2-й, 13-летний)
+			} else if(frontNum && !backNum) {
+				// Ищем дефис в конце слова
+				size_t pos = word.rfind(L'-');
+				// Проверяем является ли слово сокращением (не 25TM)
+				if(pos != wstring::npos){
+					// Получаем новое слово для проверки
+					const wstring & tmp = word.substr(pos + 1);
+					// Если это не псевдо-число (не 2-15tm)
+					if(!this->isANumber(tmp)){
+						// Слово запрещено для использования
+						bool noallow = false;
+						// Длина переданного слова
+						const size_t size = tmp.size();
+						// Переходим по всему списку
+						for(size_t i = 0, j = size - 1; j > (size / 2); i++, j--){
+							// Проверяем является ли слово арабским числом
+							noallow = (i == j ? !this->check(tmp[i]) : !this->check(tmp[i]) || !this->check(tmp[j]));
+							// Если хоть один символ является числом, выходим
+							if(noallow) break;
+						}
+						// Если слово разрешено, значит это аббревиатура
+						if(!noallow) result = (u_short) sign_t::abbr;
+						// Иначе запоминаем что это неизвестный символ (2-@tm)
+						else result = (u_short) sign_t::anum;
+					// Сообщаем что это псевдо-число
+					} else result = (u_short) sign_t::anum;
+				// Сообщаем что это псевдо-число
+				} else result = (u_short) sign_t::anum;
+			// Если оба символа являются числом (5353, 5353.243, 3:4, 18:00, 18:00:01, 18.02.2012, 18/02/2012, 2/3, 3х10, 3~4)
+			} else if(frontNum && backNum) {
+				// Если это число
+				if(this->isNumber(word)) result = (u_short) sign_t::num;
+				// Если это псевдо-число
+				else {
+					// Разделитель слова найден
+					bool delim = false;
+					// Запоминаем что это псевдо-число
+					result = (u_short) sign_t::anum;
+					// Переходим по всем символам слова
+					for(size_t i = 0; i < size; i++){
+						// Если плавающая точка найдена
+						if((word[i] == L'.') || (word[i] == L',') || (word[i] == L':') || (word[i] == L'/') || (word[i] == L'х') || (word[i] == L'~') || (word[i] == L'-')){
+							// Проверяем правые и левую части
+							delim = (this->isNumber(word.substr(0, i)) && this->isNumber(word.substr(i + 1)));
+							// Если число собрано
+							if(delim){
+								// Определяем тип разделителя
+								switch(word[i]){
+									case L',':
+									case L'.': result = (u_short) sign_t::dec;   break;
+									case L'~': result = (u_short) sign_t::aprox; break;
+									case L'-': result = (u_short) sign_t::range; break;
+									case L'/': result = (u_short) sign_t::fract; break;
+									case L'х': result = (u_short) sign_t::dimen; break;
+									case L':': result = (u_short) sign_t::score; break;
+								}
+							// Если число не собрано а являетс временем или датой
+							} else if((word[i] == L':') || (word[i] == L'.') || (word[i] == L'/')) {
+								// Список элементов слова
+								vector <wstring> words;
+								// Выполняем разбивку на составляющие
+								this->split(word, {word[i]}, words);
+								// Если список разбит правильно
+								if(words.size() == 3){
+									// Переходим по всему списку слова
+									for(auto & word : words){
+										// Если слово не является числом
+										if(!this->isNumber(word)) return 0;
+									}
+									// Определяем тип разделителя
+									switch(word[i]){
+										case L'/':
+										case L'.': result = (u_short) sign_t::date; break;
+										case L':': result = (u_short) sign_t::time; break;
+									}
+								}
+							}
+							// Выходим из цикла
+							break;
+						}
+					}
+				}
+			// Если это вообще не число, проверяем может это римское число
+			} else if(!frontNum && !backNum && (this->roman2Arabic(this->toLower(word)) > 0)) result = (u_short) sign_t::num;
+		// Если это число то выводим признак числа
+		} else if(this->isNumber(word)) result = (u_short) sign_t::num;
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * roman2Arabic Метод перевода римских цифр в арабские
  * @param  word римское число
  * @return      арабское число
@@ -850,6 +999,35 @@ const bool anyks::Alphabet::isNumber(const wstring & word) const {
 			}
 		// Если символ всего один, проверяем его так
 		} else result = (numbers.count(word[0]) > 0);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * isDecimal Метод проверки является ли слово дробным числом
+ * @param  word слово для проверки
+ * @return      результат проверки
+ */
+const bool anyks::Alphabet::isDecimal(const wstring & word) const {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передана
+	if(!word.empty()){
+		// Длина слова
+		const size_t length = word.length();
+		// Если длина слова больше 1-го символа
+		if(length > 1){
+			// Переходим по всем символам слова
+			for(size_t i = 0; i < length; i++){
+				// Если плавающая точка найдена
+				if((word[i] == L'.') || (word[i] == L',')){
+					// Проверяем правые и левую части
+					result = (this->isNumber(word.substr(0, i)) && this->isNumber(word.substr(i + 1)));
+					// Выходим из цикла
+					break;
+				}
+			}
+		}
 	}
 	// Выводим результат
 	return result;
@@ -1456,7 +1634,7 @@ void anyks::Alphabet::setalt(const wchar_t lid, const wchar_t alt){
  * @param text     входной текст для обработки
  * @param callback функция обратного вызова, на каждой итерации
  */
-void anyks::Alphabet::tokens(const string & text, function <const bool (const wstring &, const wstring &, const wstring &, const wchar_t, const size_t, const bool)> callback) const {
+void anyks::Alphabet::tokens(const string & text, function <const bool (const wstring &, const wstring &, const wchar_t, const size_t, const bool)> callback) const {
 	// Если текст передан, и текст не длинее 1024 символов
 	if(!text.empty()){
 		// Типы флагов
@@ -1467,14 +1645,13 @@ void anyks::Alphabet::tokens(const string & text, function <const bool (const ws
 			comp,   // Совпадающие слова
 			space,  // Пробел в тексте
 			punct,  // Знак пунктуации
-			nocort, // Не корректное слово
 			isolat, // Символ изоляции
 			reduct  // Сокращение слова
 		};
 		// Установленные флаги
-		bitset <9> flags;
+		bitset <8> flags;
 		// Полученные фразы
-		wstring etalon = L"", word = L"", first = L"", joined = L"";
+		wstring word = L"", first = L"", joined = L"";
 		/**
 		 * isFn Функция проверки на установку флага
 		 * @param flag флаг для проверки
@@ -1589,8 +1766,6 @@ void anyks::Alphabet::tokens(const string & text, function <const bool (const ws
 				wchar_t letter = wtext[i];
 				// Добавляем знак препинания в слово
 				word.append(1, letter);
-				// Собираем эталонную фразу
-				etalon.append(1, letter);
 				// Устанавливаем флаг
 				setFn(type_t::net);
 			// Снимаем установленный флаг
@@ -1607,80 +1782,59 @@ void anyks::Alphabet::tokens(const string & text, function <const bool (const ws
 				setFn(type_t::wrap, ((letter == L'\r') || (letter == L'\n')));
 				// Если это пробел или перенос строки - отключаем сокращение
 				if(isFn(type_t::space) || isFn(type_t::wrap) || isFn(type_t::end)) setFn(type_t::reduct, false);
-				// Если символ являлся правильным
-				if(!isFn(type_t::nocort)){
-					// Если это не специальные символы
-					if(!isFn(type_t::space) && !isFn(type_t::wrap) && !isFn(type_t::punct)){
-						// Проверяем букву на дефис
-						bool isHyphen = (
-							(letter == L'~') || (letter == L'-') || (letter == L'+') ||
-							(letter == L'=') || (letter == L'*') || (letter == L'/') ||
-							(letter == L':') || (letter == L'%') || (letter == L'|') ||
-							(letter == L'^') || (letter == L'&') || (letter == L'#') ||
-							(letter == L'\\')
-						);
-						// Проверяем является ли буква изоляционной
-						setFn(type_t::isolat, this->isIsolation(letter));
-						// Проверяем является ли символ правильным
-						setFn(type_t::nocort, (isFn(type_t::isolat) || (!isHyphen && !this->isNumber({letter}) && !this->check(letter))));
-						// Формируем эталонную фразу
-						if(!isFn(type_t::isolat)) etalon.append(1, letter);
-						// Если символ является правильным
-						if(!isFn(type_t::nocort)) word.append(1, letter);
-						// Очищаем слово, если символ является не корректным
-						else if(!isFn(type_t::isolat)) {
-							// Очищаем слово
-							word.clear();
-							// Очищаем эталонное слово
-							etalon.clear();
-						}
-						// Если это изоляция, убираем флаг не корректного символа
-						if(isFn(type_t::nocort) && isFn(type_t::isolat)) setFn(type_t::nocort, false);
-					// Если это знак пунктуации
-					} else if(isFn(type_t::punct) && !isFn(type_t::end)) {
-						// Отлавливаем дробные числа (324,24 или 324.24)
-						// Если это точка или запятая и собранное слово является числом
-						if(((letter == L'.') || (letter == L','))
-						&& this->isNumber(word)){
-							// Проверяем является ли следующая буква тоже числом
-							if(this->isNumber({wtext[i + 1]})){
-								// Добавляем знак препинания в слово
-								word.append(1, letter);
-								// Собираем эталонную фразу
-								etalon.append(1, letter);
-								// Снимаем установленный флаг
-								setFn(type_t::punct, false);
-							}
-						// Если это точка и размер слова очень короткий
-						} else if((letter == L'.') && (word.length() < 3)){
-							// Получаем следующую букву
-							wchar_t nextLetter = ((i + 1) >= wtext.length() ? 0 : wtext[i + 1]);
-							// Если следующая буква не является нормальным словом
-							if((nextLetter > 0) && !this->isSpace(nextLetter) && !isFn(type_t::wrap)){
-								// Добавляем знак препинания в слово
-								word.append(1, letter);
-								// Собираем эталонную фразу
-								etalon.append(1, letter);
-								// Запоминаем что это сокращение
-								setFn(type_t::reduct);
-								// Снимаем установленный флаг
-								setFn(type_t::punct, false);
-							}
-						// Если это точка и это режим слова сокращения
-						} else if((letter == L'.') && isFn(type_t::reduct)) {
+				// Если это не специальные символы
+				if((!isFn(type_t::space) && !isFn(type_t::wrap) && (!isFn(type_t::punct) ||
+				(letter == L':'))) || ((letter == L'.') && this->isNumber(word))){
+					// Проверяем букву на дефис
+					bool isHyphen = (
+						(letter == L'~') || (letter == L'-') || (letter == L'+') ||
+						(letter == L'=') || (letter == L'*') || (letter == L'/') ||
+						(letter == L':') || (letter == L'%') || (letter == L'|') ||
+						(letter == L'^') || (letter == L'&') || (letter == L'#') ||
+						(letter == L'\\')
+					);
+					// Проверяем является ли буква изоляционной
+					setFn(type_t::isolat, this->isIsolation(letter));
+					// Если символ является правильным
+					if(!isFn(type_t::isolat)) word.append(1, letter);
+					// Очищаем слово, если символ является не корректным
+					else if(!isFn(type_t::isolat)) word.clear();
+				// Если это знак пунктуации
+				} else if(isFn(type_t::punct) && !isFn(type_t::end)) {
+					// Отлавливаем дробные числа (324,24 или 324.24)
+					// Если это точка или запятая и собранное слово является числом
+					if(((letter == L'.') || (letter == L',')) && this->isNumber({word.back()})){
+						// Проверяем является ли следующая буква тоже числом
+						if(this->isNumber({wtext[i + 1]})){
 							// Добавляем знак препинания в слово
 							word.append(1, letter);
-							// Собираем эталонную фразу
-							etalon.append(1, letter);
 							// Снимаем установленный флаг
 							setFn(type_t::punct, false);
 						}
+					// Если это точка и размер слова очень короткий
+					} else if((letter == L'.') && (word.length() < 3)){
+						// Получаем следующую букву
+						wchar_t nextLetter = ((i + 1) >= wtext.length() ? 0 : wtext[i + 1]);
+						// Если следующая буква не является нормальным словом
+						if((nextLetter > 0) && !this->isSpace(nextLetter) && !isFn(type_t::wrap)){
+							// Добавляем знак препинания в слово
+							word.append(1, letter);
+							// Запоминаем что это сокращение
+							setFn(type_t::reduct);
+							// Снимаем установленный флаг
+							setFn(type_t::punct, false);
+						}
+					// Если это точка и это режим слова сокращения
+					} else if((letter == L'.') && isFn(type_t::reduct)) {
+						// Добавляем знак препинания в слово
+						word.append(1, letter);
+						// Снимаем установленный флаг
+						setFn(type_t::punct, false);
 					}
-				// Если слово было очищенно и это пробел, перенос строк или знак пункцтуации
-				} else if(isFn(type_t::space) || isFn(type_t::wrap) || isFn(type_t::punct)) setFn(type_t::nocort, false);
+				}
 				// Если это пробел или перенос слов
 				if((!word.empty() && !isFn(type_t::reduct) &&
-				(isFn(type_t::punct) || isFn(type_t::space) ||
+				((isFn(type_t::punct) && isFn(type_t::space)) || isFn(type_t::space) ||
 				isFn(type_t::wrap) || isFn(type_t::isolat))) || isFn(type_t::end)){
 					// Запоминаем первое слово
 					first = joined;
@@ -1689,12 +1843,11 @@ void anyks::Alphabet::tokens(const string & text, function <const bool (const ws
 					// Проверяем совпадают ли слова
 					setFn(type_t::comp, !(!word.empty() && (word.compare(joined) != 0)));
 					// Если и эталонное слово и вараинт слова получены
-					if((!etalon.empty() && !word.empty()) || isFn(type_t::end)){
+					if(!word.empty() || isFn(type_t::end)){
 						// Если вконце слова стоит дефис, удаляем слово
 						if((word[0] == L'-') && (word.back() == L'-')) word.clear();
 						// Выводим результат итерации
 						if(!callback(
-							(!isFn(type_t::net) ? etalon : L""),
 							(!isFn(type_t::comp) && !isFn(type_t::net) ? first : L""),
 							(!isFn(type_t::net) ? word : L""),
 							(isFn(type_t::punct) || isFn(type_t::isolat) ? letter : 0),
@@ -1707,8 +1860,6 @@ void anyks::Alphabet::tokens(const string & text, function <const bool (const ws
 					else joined = word;
 					// Очищаем полученное слово
 					word.clear();
-					// Очищаем эталонное слово
-					etalon.clear();
 				}
 			}
 		}

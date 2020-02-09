@@ -23,7 +23,7 @@ void anyks::Idw::setOffset(const u_short offset){
  */
 const size_t anyks::Idw::get(const wstring & word) const {
 	// Результат работы функции
-	size_t result = NOID;
+	size_t result = noID;
 	// Если слово передано
 	if(!word.empty() && !this->letters.empty()){
 		// Контрольная сумма

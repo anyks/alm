@@ -29,6 +29,7 @@
  */
 #include <nwt.hpp>
 #include <word.hpp>
+#include <types.hpp>
 #include <general.hpp>
 
 using namespace std;
@@ -218,6 +219,12 @@ namespace anyks {
 			 */
 			const u_short errors(const wstring & word) const;
 			/**
+			 * numSign Метод извлечения числового признака слова
+			 * @param  word слово для проверки
+			 * @return      результат проверки
+			 */
+			const u_short numSign(const wstring & word) const;
+			/**
 			 * roman2Arabic Метод перевода римских цифр в арабские
 			 * @param  word римское число
 			 * @return      арабское число
@@ -285,6 +292,12 @@ namespace anyks {
 			 * @return      результат проверки
 			 */
 			const bool isNumber(const wstring & word) const;
+			/**
+			 * isDecimal Метод проверки является ли слово дробным числом
+			 * @param  word слово для проверки
+			 * @return      результат проверки
+			 */
+			const bool isDecimal(const wstring & word) const;
 			/**
 			 * isANumber Метод проверки является ли косвенно слово числом
 			 * @param  word слово для проверки
@@ -429,7 +442,7 @@ namespace anyks {
 			 * @param text     входной текст для обработки
 			 * @param callback функция обратного вызова, на каждой итерации
 			 */
-			void tokens(const string & text, function <const bool (const wstring &, const wstring &, const wstring &, const wchar_t, const size_t, const bool)> callback) const;
+			void tokens(const string & text, function <const bool (const wstring &, const wstring &, const wchar_t, const size_t, const bool)> callback) const;
 		public:
 			/**
 			 * Alphabet Конструктор

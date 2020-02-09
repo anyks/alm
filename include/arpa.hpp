@@ -43,15 +43,6 @@ namespace anyks {
 	 */
 	typedef class Arpa {
 		public:
-			// Типы n-грамм
-			enum class types_t : u_short {
-				abbr = 5,   // Аббревиатура <abbr>
-				range = 4,  // Диапазон чисел <rng>
-				start = 1,  // Начало предложения <s>
-				finish = 6, // Конец предложения </s>
-				number = 2, // Арабские и Римские цифры <num>
-				unknown = 3 // Неизвестное слово <unk>
-			};
 			// Основные опции
 			enum class options_t : u_short {
 				debug,      // Флаг режима отладки
@@ -69,17 +60,13 @@ namespace anyks {
 			friend class ConstDiscount;
 			friend class NaturalDiscount;
 		public:
-			// Тип данных пары целых значений
-			typedef pair <size_t, size_t> pair_t;
 			// Упрощаем тип функции для получения слова
-			typedef function <const word_t * (const size_t)> idWord_t;
+			typedef function <const word_t * (const size_t)> words_t;
 		private:
 			// Максимальная длина n-граммы
 			static constexpr u_short MAXSIZE = 9;
 			// Значением постоянного эпсилон
 			static constexpr double EPSILON = 3e-06;
-			// Получаем максимальное значение идентификатора
-			static constexpr size_t NOID = numeric_limits <size_t>::max();
 		private:
 			// Нулевое значение логорифма
 			const float zero = log(0);
@@ -107,7 +94,7 @@ namespace anyks {
 				/**
 				 * Seq Конструктор
 				 */
-				Seq() : idw(NOID), oc(0), dc(0), ups(0), weight(0.0f), backoff(0.0f) {}
+				Seq() : idw(noID), oc(0), dc(0), ups(0), weight(0.0f), backoff(0.0f) {}
 			} __attribute__((packed)) seq_t;
 		private:
 			/**
@@ -160,7 +147,7 @@ namespace anyks {
 				/**
 				 * Vocab Конструктор
 				 */
-				Vocab() : oc(0), dc(0), idw(NOID), idd(NOID), weight(0.0f), backoff(0.0f), father(nullptr) {}
+				Vocab() : oc(0), dc(0), idw(noID), idd(noID), weight(0.0f), backoff(0.0f), father(nullptr) {}
 			} vocab_t;
 		private:
 			// Максимальный размер n-граммы
@@ -180,7 +167,7 @@ namespace anyks {
 			mutable std::map <u_short, list <vocab_t *>> ngrams;
 		private:
 			// Функция извлечения слова по его идентификатору
-			idWord_t getWord = nullptr;
+			words_t getWord = nullptr;
 			// Объект основного алфавита
 			const alphabet_t * alphabet = nullptr;
 		protected:
@@ -381,7 +368,7 @@ namespace anyks {
 			 * setWordMethod Метод установки функции получения слова
 			 * @param word функция получения слова
 			 */
-			void setWordMethod(idWord_t word);
+			void setWordMethod(words_t word);
 			/**
 			 * setSize Метод установки максимального размера n-граммы
 			 * @param size максимальный размер n-граммы
@@ -513,7 +500,7 @@ namespace anyks {
 			 * Arpa Конструктор
 			 * @param word функция получения слова
 			 */
-			Arpa(idWord_t word);
+			Arpa(words_t word);
 			/**
 			 * Arpa Конструктор
 			 * @param alphabet объект алфавита
@@ -524,7 +511,7 @@ namespace anyks {
 			 * @param alphabet объект алфавита
 			 * @param word     функция получения слова
 			 */
-			Arpa(const alphabet_t * alphabet, idWord_t word);
+			Arpa(const alphabet_t * alphabet, words_t word);
 			/**
 			 * ~Arpa Деструктор
 			 */
@@ -570,7 +557,7 @@ namespace anyks {
 			 * GoodTuring Конструктор
 			 * @param word функция получения слова
 			 */
-			GoodTuring(idWord_t word);
+			GoodTuring(words_t word);
 			/**
 			 * GoodTuring Конструктор
 			 * @param alphabet объект алфавита
@@ -581,7 +568,7 @@ namespace anyks {
 			 * @param alphabet объект алфавита
 			 * @param word     функция получения слова
 			 */
-			GoodTuring(const alphabet_t * alphabet, idWord_t word);
+			GoodTuring(const alphabet_t * alphabet, words_t word);
 	};
 	/**
 	 * Класс ConstDiscount
@@ -629,7 +616,7 @@ namespace anyks {
 			 * @param word     функция получения слова
 			 * @param discount значение дисконтирования
 			 */
-			ConstDiscount(idWord_t word, const double discount = 0.3);
+			ConstDiscount(words_t word, const double discount = 0.3);
 			/**
 			 * ConstDiscount Конструктор
 			 * @param alphabet объект алфавита
@@ -642,7 +629,7 @@ namespace anyks {
 			 * @param word     функция получения слова
 			 * @param discount значение дисконтирования
 			 */
-			ConstDiscount(const alphabet_t * alphabet, idWord_t word, const double discount = 0.3);
+			ConstDiscount(const alphabet_t * alphabet, words_t word, const double discount = 0.3);
 	};
 	/**
 	 * Класс NaturalDiscount
@@ -662,7 +649,7 @@ namespace anyks {
 			 * NaturalDiscount Конструктор
 			 * @param word функция получения слова
 			 */
-			NaturalDiscount(idWord_t word) : Arpa(word) {};
+			NaturalDiscount(words_t word) : Arpa(word) {};
 			/**
 			 * NaturalDiscount Конструктор
 			 * @param alphabet объект алфавита
@@ -673,7 +660,7 @@ namespace anyks {
 			 * @param alphabet объект алфавита
 			 * @param word     функция получения слова
 			 */
-			NaturalDiscount(const alphabet_t * alphabet, idWord_t word) : Arpa(alphabet, word) {};
+			NaturalDiscount(const alphabet_t * alphabet, words_t word) : Arpa(alphabet, word) {};
 	};
 	/**
 	 * Класс AddSmooth
@@ -712,7 +699,7 @@ namespace anyks {
 			 * @param word  функция получения слова
 			 * @param delta значение дельты для расчёта
 			 */
-			AddSmooth(idWord_t word, const double delta = 1.0);
+			AddSmooth(words_t word, const double delta = 1.0);
 			/**
 			 * AddSmooth Конструктор
 			 * @param alphabet объект алфавита
@@ -725,7 +712,7 @@ namespace anyks {
 			 * @param word     функция получения слова
 			 * @param delta    значение дельты для расчёта
 			 */
-			AddSmooth(const alphabet_t * alphabet, idWord_t word, const double delta = 1.0);
+			AddSmooth(const alphabet_t * alphabet, words_t word, const double delta = 1.0);
 	};
 	/**
 	 * Класс AddSmooth
@@ -754,7 +741,7 @@ namespace anyks {
 			 * WittenBell Конструктор
 			 * @param word функция получения слова
 			 */
-			WittenBell(idWord_t word) : Arpa(word) {};
+			WittenBell(words_t word) : Arpa(word) {};
 			/**
 			 * WittenBell Конструктор
 			 * @param alphabet объект алфавита
@@ -765,7 +752,7 @@ namespace anyks {
 			 * @param alphabet объект алфавита
 			 * @param word     функция получения слова
 			 */
-			WittenBell(const alphabet_t * alphabet, idWord_t word) : Arpa(alphabet, word) {};
+			WittenBell(const alphabet_t * alphabet, words_t word) : Arpa(alphabet, word) {};
 	};
 	/**
 	 * Класс KneserNey
@@ -830,7 +817,7 @@ namespace anyks {
 			 * @param modified модификация количества уже изменённых младших n-грамм
 			 * @param prepares необходимость изменения граммности, после вычисления
 			 */
-			KneserNey(idWord_t word, const bool modified = false, const bool prepares = false);
+			KneserNey(words_t word, const bool modified = false, const bool prepares = false);
 			/**
 			 * KneserNey Конструктор
 			 * @param alphabet объект алфавита
@@ -845,7 +832,7 @@ namespace anyks {
 			 * @param modified модификация количества уже изменённых младших n-грамм
 			 * @param prepares необходимость изменения граммности, после вычисления
 			 */
-			KneserNey(const alphabet_t * alphabet, idWord_t word, const bool modified = false, const bool prepares = false);
+			KneserNey(const alphabet_t * alphabet, words_t word, const bool modified = false, const bool prepares = false);
 	};
 	/**
 	 * Класс ModKneserNey
@@ -897,7 +884,7 @@ namespace anyks {
 			 * @param modified модификация количества уже изменённых младших n-грамм
 			 * @param prepares необходимость изменения граммности, после вычисления
 			 */
-			ModKneserNey(idWord_t word, const bool modified = false, const bool prepares = false);
+			ModKneserNey(words_t word, const bool modified = false, const bool prepares = false);
 			/**
 			 * ModKneserNey Конструктор
 			 * @param alphabet объект алфавита
@@ -912,7 +899,7 @@ namespace anyks {
 			 * @param modified модификация количества уже изменённых младших n-грамм
 			 * @param prepares необходимость изменения граммности, после вычисления
 			 */
-			ModKneserNey(const alphabet_t * alphabet, idWord_t word, const bool modified = false, const bool prepares = false);
+			ModKneserNey(const alphabet_t * alphabet, words_t word, const bool modified = false, const bool prepares = false);
 	};
 };
 

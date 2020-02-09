@@ -9,31 +9,49 @@
 #include "toolkit.hpp"
 
 /**
- * idw Метод генерирования идентификатора слова
+ * getIdws Метод генерирования идентификатора слова
  * @param  word слово для генерации
  * @return      идентификатор слова
  */
-const size_t anyks::Toolkit::idw(const wstring & word) const {
+const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 	// Результат работы функции
-	size_t result = NOID;
+	size_t result = noID;
 	// Если слово передано
 	if(!word.empty()){
 		// Проверяем является ли слово, началом предложения
-		if(word.compare(L"<s>") == 0) result = (size_t) arpa_t::types_t::start;
-		// Проверяем является ли слово аббревиатурой
-		else if(word.compare(L"<abr>") == 0) result = (size_t) arpa_t::types_t::abbr;
-		// Проверяем является ли слово диапазоном чисел
-		else if(word.compare(L"<rng>") == 0) result = (size_t) arpa_t::types_t::range;
-		// Проверяем является ли слово концом предложения
-		else if(word.compare(L"</s>") == 0) result = (size_t) arpa_t::types_t::finish;
+		if(word.compare(L"<s>") == 0) result = (size_t) sign_t::start;
 		// Проверяем является ли слово числом
-		else if(word.compare(L"<num>") == 0) result = (size_t) arpa_t::types_t::number;
+		else if(word.compare(L"<num>") == 0) result = (size_t) sign_t::num;
+		// Проверяем является ли слово числом с плавающей точкой
+		else if(word.compare(L"<dec>") == 0) result = (size_t) sign_t::dec;
 		// Проверяем является ли слово неизвестным
-		else if(word.compare(L"<unk>") == 0) result = (size_t) arpa_t::types_t::unknown;
+		else if(word.compare(L"<unk>") == 0) result = (size_t) sign_t::unk;
+		// Проверяем является ли слово аббревиатурой
+		else if(word.compare(L"<abr>") == 0) result = (size_t) sign_t::abbr;
+		// Проверяем является ли слово датой
+		else if(word.compare(L"<date>") == 0) result = (size_t) sign_t::date;
+		// Проверяем является ли слово временем
+		else if(word.compare(L"<time>") == 0) result = (size_t) sign_t::time;
+		// Проверяем является ли слово псевдо-числом
+		else if(word.compare(L"<anum>") == 0) result = (size_t) sign_t::anum;
+		// Проверяем является ли слово концом предложения
+		else if(word.compare(L"</s>") == 0) result = (size_t) sign_t::finish;
+		// Проверяем является ли слово диапазоном чисел
+		else if(word.compare(L"<range>") == 0) result = (size_t) sign_t::range;
+		// Проверяем является ли слово знаком пунктуации
+		else if(word.compare(L"<punct>") == 0) result = (size_t) sign_t::punct;
+		// Проверяем является ли слово приблизительным числом
+		else if(word.compare(L"<aprox>") == 0) result = (size_t) sign_t::aprox;
+		// Проверяем является ли слово числовым счётом
+		else if(word.compare(L"<score>") == 0) result = (size_t) sign_t::score;
+		// Проверяем является ли слово габаритными размерами
+		else if(word.compare(L"<dimen>") == 0) result = (size_t) sign_t::dimen;
+		// Проверяем является ли слово числовой дробью
+		else if(word.compare(L"<fract>") == 0) result = (size_t) sign_t::fract;
 		// Если это другое слово
 		else {
 			// Формируем идентификатор слова
-			result = this->idwrd.get(word);
+			result = this->idw.get(word);
 			// Проверяем является ли слово хорошим
 			if(this->goodwords.count(result) < 1){
 				// Подсчитываем количество дефисов
@@ -46,30 +64,56 @@ const size_t anyks::Toolkit::idw(const wstring & word) const {
 						if(sign.second.test(sign.second.name.real(), this->alphabet->convert(word))) return sign.first;
 					}
 				}
-				// Проверяем разрешено ли слово
-				if(!this->alphabet->isAllowed(word)) result = (size_t) arpa_t::types_t::unknown;
-				// Проверяем есть ли в конце изоляционный знак
-				else if(this->alphabet->isIsolation(word.back())) result = (size_t) arpa_t::types_t::unknown;
-				// Проверяем есть ли в начале изоляционный знак
-				else if(this->alphabet->isIsolation(word.front())) result = (size_t) arpa_t::types_t::unknown;
-				// Проверяем является ли слово числом
-				else if(!this->isOption(options_t::notNumber) && this->alphabet->isNumber(word)) result = (size_t) arpa_t::types_t::number;
-				// Если количество дефисов в слове больше 2-х
-				else if((hyphenCounts = this->alphabet->countLetter(word, L'-')) > 2) result = (size_t) arpa_t::types_t::unknown;
-				// Проверяем является ли слово типа (Дом-2)
-				else if((hyphenCounts == 1) && this->alphabet->checkHome2(word)) return result;
-				// Проверяем является ли слово аббривиатурой
-				else if(!this->isOption(options_t::notAbbr) && this->alphabet->isAbbreviation(word, hyphenCounts)) result = (size_t) arpa_t::types_t::abbr;
-				// Проверяем является ли слово римским числом
-				else if(!this->isOption(options_t::notRoman) && this->alphabet->roman2Arabic(word)) result = (size_t) arpa_t::types_t::number;
-				// Проверяем является ли слово диапазоном
-				else if(!this->isOption(options_t::notRange) && this->alphabet->isRangeNumber(word, L'-')) result = (size_t) arpa_t::types_t::range;
-				// Проверяем является ли слово диапазоном
-				else if(!this->isOption(options_t::notRange) && this->alphabet->isRangeNumber(word, L'~')) result = (size_t) arpa_t::types_t::range;
-				// Проверяем является ли слово странным числом
-				else if(!this->isOption(options_t::notANumber) && this->alphabet->isANumber(word)) result = (size_t) arpa_t::types_t::unknown;
-				// Если все проверки пройдены и включён флаг использовать слова только из списка хороших слов
-				else if(this->isOption(options_t::onlyGood)) result = (size_t) arpa_t::types_t::unknown;
+				// Проверяем является ли слово знаком пунктуации
+				if((word.length() == 1) && !this->isOption(options_t::notPunct) && this->alphabet->isPunct(word.front())){
+					// Запоминаем что это знак пунктуации
+					result = (size_t) sign_t::punct;
+				// Проверяем есть ли изоляционный знак и количество дефисов в слове больше 2-х
+				} else if(
+					this->alphabet->isIsolation(word.back()) ||
+					this->alphabet->isIsolation(word.front()) ||
+					((hyphenCounts = this->alphabet->countLetter(word, L'-')) > 2)
+				) result = (size_t) sign_t::unk;
+				// Если идентификатор определить не удалось
+				else {
+					// Идентификатор слова
+					size_t idw = 0;
+					// Пытаемся определить идентификатор слова
+					switch(this->alphabet->numSign(word)){
+						// Если признак не определён
+						case 0: if(this->isOption(options_t::onlyGood)) idw = (size_t) sign_t::unk; break;
+						// Если это признак числа, запоминаем его
+						case (u_short) sign_t::num: if(!this->isOption(options_t::notNumber)) idw = (size_t) sign_t::num; break;
+						// Если это признак числа с плавающей точкой
+						case (u_short) sign_t::dec: if(!this->isOption(options_t::notNumber)) idw = (size_t) sign_t::dec; break;
+						// Если это признак аббривиатуры
+						case (u_short) sign_t::abbr: if(!this->isOption(options_t::notAbbr)) idw = (size_t) sign_t::abbr; break;
+						// Если это признак даты
+						case (u_short) sign_t::date: if(!this->isOption(options_t::notDate)) idw = (size_t) sign_t::date; break;
+						// Если это признак времени
+						case (u_short) sign_t::time: if(!this->isOption(options_t::notTime)) idw = (size_t) sign_t::time; break;
+						// Если это признак приблизительного числа
+						case (u_short) sign_t::aprox: if(!this->isOption(options_t::notAprox)) idw = (size_t) sign_t::aprox; break;
+						// Если это признак псевдо-числа
+						case (u_short) sign_t::anum: if(!this->isOption(options_t::notANumber)) idw = (size_t) sign_t::anum; break;
+						// Если это признак диапазона чисел
+						case (u_short) sign_t::range: if(!this->isOption(options_t::notRange)) idw = (size_t) sign_t::range; break;
+						// Если это признак числового счёта
+						case (u_short) sign_t::score: if(!this->isOption(options_t::notScore)) idw = (size_t) sign_t::score; break;
+						// Если это признак габаритных размеров
+						case (u_short) sign_t::dimen: if(!this->isOption(options_t::notDimen)) idw = (size_t) sign_t::dimen; break;
+						// Если это признак числовой дроби
+						case (u_short) sign_t::fract: if(!this->isOption(options_t::notFract)) idw = (size_t) sign_t::fract; break;
+					}
+					// Если слово определено как число но это не число, значит это римское число
+					if((idw == (size_t) sign_t::num) && !this->alphabet->isNumber({word.back()})){
+						// Если не запрещено выводить римские числа, выводим его
+						if(!this->isOption(options_t::notRoman)) result = idw;
+					// Иначе запоминаем идентификатор так-как он передан
+					} else if(idw > 0) result = idw;
+					// Если слово не разрешено, устанавливаем неизвестное слово
+					else if(!this->alphabet->isAllowed(word)) result = (size_t) sign_t::unk;
+				}
 			}
 		}
 	}
@@ -226,7 +270,7 @@ const string anyks::Toolkit::getUsignWord(const size_t idw) const {
 	// Результат работы функции
 	string result = "";
 	// Если идентификатор передан
-	if((idw > 0) && (idw < NOID)){
+	if((idw > 0) && (idw < noID)){
 		// Ищем идентификатор признака
 		auto it = this->usigns.find(idw);
 		// Если такой идентификатор существует
@@ -247,7 +291,7 @@ const string anyks::Toolkit::getUsignWord(const size_t idw) const {
  */
 const size_t anyks::Toolkit::getUsignId(const string & name) const {
 	// Результат работы функции
-	size_t result = NOID;
+	size_t result = noID;
 	// Если слово передано
 	if(!name.empty()){
 		// Выполняем удаление экранирования
@@ -259,7 +303,7 @@ const size_t anyks::Toolkit::getUsignId(const string & name) const {
 			// Добавляем экранирование
 			word.append(">");
 			// Получаем идентификатор слова
-			const size_t idw = this->idwrd.get(this->alphabet->convert(word));
+			const size_t idw = this->idw.get(this->alphabet->convert(word));
 			// Если такой идентификатор существует, выводим его
 			result = (this->usigns.count(idw) > 0 ? idw : result);
 		}
@@ -313,7 +357,7 @@ void anyks::Toolkit::clearGoodwords(){
  */
 void anyks::Toolkit::addBadword(const size_t idw){
 	// Если идентификатор передан
-	if((idw > 0) && (idw < NOID)) this->badwords.emplace(idw);
+	if((idw > 0) && (idw < noID)) this->badwords.emplace(idw);
 }
 /**
  * addBadword Метод добавления похого слова в список
@@ -323,7 +367,7 @@ void anyks::Toolkit::addBadword(const string & word){
 	// Если слово передано
 	if(!word.empty()){
 		// Получаем идентификатор слова
-		const size_t idw = this->idwrd.get(this->alphabet->convert(word));
+		const size_t idw = this->idw.get(this->alphabet->convert(word));
 		// Добавляем слово в список плохих слов
 		this->addBadword(idw);
 	}
@@ -334,7 +378,7 @@ void anyks::Toolkit::addBadword(const string & word){
  */
 void anyks::Toolkit::addGoodword(const size_t idw){
 	// Если идентификатор передан
-	if((idw > 0) && (idw < NOID)) this->goodwords.emplace(idw);
+	if((idw > 0) && (idw < noID)) this->goodwords.emplace(idw);
 }
 /**
  * addGoodword Метод добавления хорошего слова в список
@@ -344,7 +388,7 @@ void anyks::Toolkit::addGoodword(const string & word){
 	// Если слово передано
 	if(!word.empty()){
 		// Получаем идентификатор слова
-		const size_t idw = this->idwrd.get(this->alphabet->convert(word));
+		const size_t idw = this->idw.get(this->alphabet->convert(word));
 		// Добавляем слово в список хороших слов
 		this->addGoodword(idw);
 	}
@@ -383,7 +427,7 @@ void anyks::Toolkit::setUsign(const string & name){
 			// Добавляем экранирование
 			word.append(">");
 			// Получаем идентификатор слова
-			userSign.idw = this->idwrd.get(this->alphabet->convert(word));
+			userSign.idw = this->idw.get(this->alphabet->convert(word));
 			// Если такого идентификатора нет в списке
 			if((userSign.idw > 0) && (this->usigns.count(userSign.idw) < 1)){
 				// Добавляем в пользовательский признак наши параметры
@@ -402,7 +446,7 @@ void anyks::Toolkit::setUnknown(const string & word){
 	// Если слово передано
 	if(!word.empty()){
 		// Формируем идентификатор слова
-		this->unknown = this->idwrd.get(this->alphabet->convert(word));
+		this->unknown = this->idw.get(this->alphabet->convert(word));
 		// Если идентификатор получен
 		if(this->unknown > 0){
 			// Если слова нет в словаре, добавляем его
@@ -472,8 +516,8 @@ void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
 	if(alphabet != nullptr){
 		// Устанавливаем переданный алфавит
 		this->alphabet = alphabet;
-		// Устанавливаем алфавит и смещение в 6 позиций (количество системных признаков arpa)
-		this->idwrd.set(this->alphabet, 6);
+		// Устанавливаем алфавит и смещение в 15 позиций (количество системных признаков arpa)
+		this->idw.set(this->alphabet, 15);
 	}
 }
 /**
@@ -529,9 +573,9 @@ void anyks::Toolkit::addWord(const wstring & word, const size_t idd){
 	// Если слово передано
 	if(!word.empty()){
 		// Получаем идентификатор слова
-		const size_t idw = this->idw(word);
+		const size_t idw = this->getIdw(word);
 		// Если идентификатор нормальный
-		if((idw > 0) && (idw < NOID) && this->arpa->event(idw) && (this->usigns.count(idw) < 1)){
+		if((idw > 0) && (idw < noID) && this->arpa->event(idw) && (this->usigns.count(idw) < 1)){
 			// Ищем слово в словаре
 			auto it = this->vocab.find(idw);
 			// Если слово найдено
@@ -571,16 +615,16 @@ void anyks::Toolkit::addWord(const wstring & word, const size_t idd){
 void anyks::Toolkit::addText(const string & text, const size_t idd){
 	// Если текст передан
 	if(!text.empty()){
+		// Идентификатор неизвестного слова
+		const size_t uid = (size_t) sign_t::unk;
+		// Идентификатор начала предложения
+		const size_t sid = (size_t) sign_t::start;
+		// Идентификатор конца предложения
+		const size_t fid = (size_t) sign_t::finish;
 		// Последовательность собранных слов
 		vector <string> words = {"<s>"};
-		// Идентификатор начала предложения
-		const size_t sid = (size_t) arpa_t::types_t::start;
-		// Идентификатор конца предложения
-		const size_t fid = (size_t) arpa_t::types_t::finish;
-		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) arpa_t::types_t::unknown;
 		// Список последовательностей для обучения
-		vector <arpa_t::pair_t> seq = {{sid, 0}};
+		vector <pair_t> seq = {{sid, 0}};
 		/**
 		 * unkFn Функция установки неизвестного слова в последовательность
 		 */
@@ -592,7 +636,6 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 		};
 		/**
 		 * modeFn Функция обработки разбитого текста
-		 * @param etalon эталонная исходная фраза
 		 * @param early  предыдущее слово
 		 * @param word   текущее слово
 		 * @param punct  знак пунктуации если он есть
@@ -600,7 +643,6 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 		 * @param stop   флаг завершения обработки
 		 */
 		auto modeFn = [&](
-			const wstring & etalon,
 			const wstring & early,
 			const wstring & word,
 			const wchar_t punct = 0,
@@ -628,17 +670,15 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 					}
 				}
 				// Если слово не разрешено
-				if(!this->alphabet->isAllowed(tmp) || (tmp.length() >= MAX_WORD_LENGTH)) unkFn();
+				if(tmp.length() >= MAX_WORD_LENGTH) unkFn();
 				// Если слово разрешено
 				else {
 					// Получаем идентификатор слова
-					const size_t idw = this->idw(tmp);
+					const size_t idw = this->getIdw(tmp);
 					// Если это плохое слово, заменяем его на неизвестное
-					if((idw == 0) || (this->badwords.count(idw) > 0)) unkFn();
+					if((idw == 0) || (idw == noID) || (this->badwords.count(idw) > 0)) unkFn();
 					// Иначе продолжаем дальше
 					else {
-						// Добавляем слово в словарь
-						this->addWord(tmp, idd);
 						// Если это неизвестное слово
 						if(idw == uid) unkFn();
 						// Иначе добавляем слово
@@ -652,13 +692,15 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 						}
 						// Если это изоляционный символ
 						if(this->alphabet->isIsolation(punct)) unkFn();
+						// Добавляем слово в словарь если разрешено
+						if(this->alphabet->isAllowed(tmp)) this->addWord(tmp, idd);
 					}
 				}
 			}
 			// Если найден знак пунктуации
 			if(stop || ((seq.size() > 2) && this->alphabet->isPunct(punct))){
 				// Идентификатор предыдущего слова
-				size_t idw = NOID;
+				size_t idw = noID;
 				// Удаляем следующие друг за другом неизвестные слова
 				for(auto it = seq.begin(); it != seq.end();){
 					/**
@@ -751,7 +793,7 @@ void anyks::Toolkit::loadInfoVocab(const vector <char> & buffer){
 		// Загружаем информационные данные словаря
 		memcpy(&this->info, buffer.data(), sizeof(this->info));
 		// Сбрасываем идентификатор последнего документа
-		this->info.idd = NOID;
+		this->info.idd = noID;
 	}
 }
 /**
@@ -783,7 +825,7 @@ void anyks::Toolkit::loadVocab(const vector <char> & buffer) const {
 		// Увеличиваем смещение
 		offset += sizeof(idw);
 		// Если идентификатор слова получен
-		if((idw > 0) && (idw < NOID)){
+		if((idw > 0) && (idw < noID)){
 			// Слово для добавления в словарь
 			word_t word = L"";
 			// Добавляем бинарные данные слова
@@ -844,16 +886,16 @@ void anyks::Toolkit::readArpas(const string & path, function <void (const u_shor
 	if(fullpath != nullptr){
 		// Тип извлечения данных
 		u_short type = 0;
+		// Список последовательностей для обучения
+		vector <pair_t> seq;
 		// Список слов n-граммы
 		vector <wstring> words;
-		// Список последовательностей для обучения
-		vector <arpa_t::pair_t> seq;
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
 		// Количество обработанных данных
 		size_t idd = 0, index = 0, pos = 0, loc = 0;
 		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) arpa_t::types_t::unknown;
+		const size_t uid = (size_t) sign_t::unk;
 		// Переходим по всему списку файлов в каталоге
 		fsys_t::rdir(fullpath, "arpa", [&](const string & filename, const uintmax_t dirSize){
 			// Выполняем считывание всех строк текста
@@ -903,11 +945,11 @@ void anyks::Toolkit::readArpas(const string & path, function <void (const u_shor
 											// Получаем слово
 											word = words.front();
 											// Получаем идентификатор слова
-											const size_t idw = this->idw(word);
+											const size_t idw = this->getIdw(word);
 											// Проверяем отсутствует ли слово в списке запрещённых слов
 											if(this->badwords.count(idw) < 1){
 												// Если это юниграмма и её еще нет в словаре
-												if((idw != (size_t) arpa_t::types_t::start) &&
+												if((idw != (size_t) sign_t::start) &&
 												((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word, idd);
 											}
 										}
@@ -916,7 +958,7 @@ void anyks::Toolkit::readArpas(const string & path, function <void (const u_shor
 											// Получаем слово
 											word = move(item);
 											// Получаем идентификатор слова
-											size_t idw = this->idw(word);
+											size_t idw = this->getIdw(word);
 											// Проверяем отсутствует ли слово в списке запрещённых слов
 											if(this->badwords.count(idw) < 1){
 												// Если это неизвестное слово
@@ -980,16 +1022,16 @@ void anyks::Toolkit::readNgrams(const string & path, function <void (const u_sho
 	if(fullpath != nullptr){
 		// Тип извлечения данных
 		u_short type = 0;
+		// Список последовательностей для обучения
+		vector <pair_t> seq;
 		// Список слов n-граммы
 		vector <wstring> words;
-		// Список последовательностей для обучения
-		vector <arpa_t::pair_t> seq;
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
 		// Количество обработанных данных
 		size_t index = 0, pos = 0, loc = 0;
 		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) arpa_t::types_t::unknown;
+		const size_t uid = (size_t) sign_t::unk;
 		// Определяем разрешены ли неизвестные слова
 		const bool allowUnk = this->isOption(options_t::allowUnk);
 		// Переходим по всему списку файлов в каталоге
@@ -1051,7 +1093,7 @@ void anyks::Toolkit::readNgrams(const string & path, function <void (const u_sho
 											// Получаем слово
 											word = move(words.front());
 											// Получаем идентификатор слова
-											size_t idw = this->idw(word);
+											size_t idw = this->getIdw(word);
 											// Проверяем отсутствует ли слово в списке запрещённых слов
 											if(this->badwords.count(idw) < 1){
 												// Если это неизвестное слово
@@ -1086,7 +1128,7 @@ void anyks::Toolkit::readNgrams(const string & path, function <void (const u_sho
 												// Получаем слово
 												word = move(item);
 												// Получаем идентификатор слова
-												size_t idw = this->idw(word);
+												size_t idw = this->getIdw(word);
 												// Проверяем отсутствует ли слово в списке запрещённых слов
 												if(this->badwords.count(idw) < 1){
 													// Если это неизвестное слово
@@ -1152,16 +1194,16 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 	if(!filename.empty() && fsys_t::isfile(filename)){
 		// Тип извлечения данных
 		u_short type = 0;
+		// Последовательность для добавления
+		vector <pair_t> seq;
 		// Список полученных слов последовательности
 		vector <wstring> words;
-		// Последовательность для добавления
-		vector <arpa_t::pair_t> seq;
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
 		// Количество обработанных данных
 		size_t index = 0, pos = 0, loc = 0;
 		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) arpa_t::types_t::unknown;
+		const size_t uid = (size_t) sign_t::unk;
 		// Выполняем считывание всех строк текста
 		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
 			// Если слово получено
@@ -1209,11 +1251,11 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 										// Получаем слово
 										word = words.front();
 										// Получаем идентификатор слова
-										const size_t idw = this->idw(word);
+										const size_t idw = this->getIdw(word);
 										// Проверяем отсутствует ли слово в списке запрещённых слов
 										if(this->badwords.count(idw) < 1){
 											// Если это юниграмма и её еще нет в словаре
-											if((idw != (size_t) arpa_t::types_t::start) &&
+											if((idw != (size_t) sign_t::start) &&
 											((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word);
 										}
 									}
@@ -1222,7 +1264,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 										// Получаем слово
 										word = move(item);
 										// Получаем идентификатор слова
-										size_t idw = this->idw(word);
+										size_t idw = this->getIdw(word);
 										// Проверяем отсутствует ли слово в списке запрещённых слов
 										if(this->badwords.count(idw) < 1){
 											// Если это неизвестное слово
@@ -1389,16 +1431,16 @@ void anyks::Toolkit::readVocab(const string & filename, function <void (const u_
 void anyks::Toolkit::readNgram(const string & filename, function <void (const u_short)> status){
 	// Если адрес файла передан
 	if(!filename.empty() && fsys_t::isfile(filename)){
+		// Последовательность для добавления
+		vector <pair_t> seq;
 		// Список полученных слов последовательности
 		vector <wstring> words;
-		// Последовательность для добавления
-		vector <arpa_t::pair_t> seq;
 		// Количество обработанных данных
 		size_t index = 0, pos = 0, loc = 0;
+		// Идентификатор неизвестного слова
+		const size_t uid = (size_t) sign_t::unk;
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100, type = 0;
-		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) arpa_t::types_t::unknown;
 		// Выполняем считывание всех строк текста
 		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
 			// Если слово получено
@@ -1456,7 +1498,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 										// Получаем слово
 										word = move(words.front());
 										// Получаем идентификатор слова
-										size_t idw = this->idw(word);
+										size_t idw = this->getIdw(word);
 										// Проверяем отсутствует ли слово в списке запрещённых слов
 										if(this->badwords.count(idw) < 1){
 											// Если это неизвестное слово
@@ -1491,7 +1533,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 											// Получаем слово
 											word = move(item);
 											// Получаем идентификатор слова
-											size_t idw = this->idw(word);
+											size_t idw = this->getIdw(word);
 											// Проверяем отсутствует ли слово в списке запрещённых слов
 											if(this->badwords.count(idw) < 1){
 												// Если это неизвестное слово
@@ -1785,18 +1827,18 @@ void anyks::Toolkit::writeNgrams(const string & filename, function <void (const 
 void anyks::Toolkit::modifyArpa(const string & filename, modify_t flag, function <void (const u_short)> status){
 	// Если адрес файла передан
 	if(!filename.empty() && fsys_t::isfile(filename)){
+		// Последовательность для добавления
+		vector <pair_t> seq;
 		// Список полученных слов последовательности
 		vector <wstring> words;
 		// Список добавленных слов в словарь
 		map <size_t, size_t> added;
-		// Последовательность для добавления
-		vector <arpa_t::pair_t> seq;
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
 		// Количество обработанных данных
 		size_t index = 0, pos = 0, loc = 0;
 		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) arpa_t::types_t::unknown;
+		const size_t uid = (size_t) sign_t::unk;
 		/**
 		 * cleanAddedFn Функция очистки добавленных слов
 		 */
@@ -1842,9 +1884,9 @@ void anyks::Toolkit::modifyArpa(const string & filename, modify_t flag, function
 					// Получаем слово
 					word = move(item);
 					// Получаем идентификатор слова
-					idw = this->idw(word);
+					idw = this->getIdw(word);
 					// Проверяем отсутствует ли слово в списке запрещённых слов
-					if((idw > 0) && (idw < NOID) && (this->badwords.count(idw) < 1)){
+					if((idw > 0) && (idw < noID) && (this->badwords.count(idw) < 1)){
 						// Если это неизвестное слово
 						if(idw == uid){
 							// Если неизвестное слово не установлено
@@ -1940,9 +1982,9 @@ void anyks::Toolkit::modifyArpa(const string & filename, modify_t flag, function
 							// Переходим по всему списку слов
 							for(size_t i = 0; i < words.size(); i++){
 								// Определяем идентификатор слова
-								idw = this->idw(words[i]);
+								idw = this->getIdw(words[i]);
 								// Если идентификатор получен
-								if((idw > 0) && (idw < NOID)) seq[i] = idw;
+								if((idw > 0) && (idw < noID)) seq[i] = idw;
 								// Если слово не получено, выходим
 								else {
 									// Очищаем список слов
@@ -1978,9 +2020,9 @@ void anyks::Toolkit::modifyArpa(const string & filename, modify_t flag, function
 									// Переходим по всему списку слов
 									for(size_t i = 0; i < words.size(); i++){
 										// Определяем идентификатор слова
-										idw = this->idw(words[i]);
+										idw = this->getIdw(words[i]);
 										// Если идентификатор получен
-										if((idw > 0) && (idw < NOID)){
+										if((idw > 0) && (idw < noID)){
 											// Устанавливаем идентификатор слова
 											seq2[i] = idw;
 											// Если слова нет в словаре и это не признак, добавляем в словарь
@@ -2119,7 +2161,7 @@ void anyks::Toolkit::readMaps(const string & path, function <void (const u_short
 									 * Если это не спец-слово и слово не существует в словаре или запрещено,
 									 * устанавливаем идентификатор неизвестного слова
 									 */
-									if(!noEvent && !isUsign && (!isWord || !isAllow)) idw = (size_t) arpa_t::types_t::unknown;
+									if(!noEvent && !isUsign && (!isWord || !isAllow)) idw = (size_t) sign_t::unk;
 									// Извлекаем параметров слова
 									this->alphabet->split(item.substr(pos + 2, item.length() - ((pos + 2) + 1)), L",", params);
 									// Если параметры получены
@@ -2225,7 +2267,7 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const u_sh
 								 * Если это не спец-слово и слово не существует в словаре или запрещено,
 								 * устанавливаем идентификатор неизвестного слова
 								 */
-								if(!noEvent && !isUsign && (!isWord || !isAllow)) idw = (size_t) arpa_t::types_t::unknown;
+								if(!noEvent && !isUsign && (!isWord || !isAllow)) idw = (size_t) sign_t::unk;
 								// Извлекаем параметров слова
 								this->alphabet->split(item.substr(pos + 2, item.length() - ((pos + 2) + 1)), L",", params);
 								// Если параметры получены
@@ -2376,7 +2418,7 @@ void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, cons
 			// Если скрипт получен
 			if(((this->scripts.count(2) > 0) && !this->usigns.empty()) || (this->scripts.count(1) > 0)){
 				// Создаём объект для работы с python
-				this->python = new python_t(&this->idwrd);
+				this->python = new python_t(&this->idw);
 				// Если нужно активировать режим отладки
 				if(this->isOption(options_t::debug)) this->python->setDebug();
 				// Ищем скрипт обработки слов

@@ -50,7 +50,7 @@ const size_t anyks::Arpa::midw(const vocab_t * context) const {
  * @param context контекст n-граммы
  * @return        регистр слова
  */
-const anyks::Arpa::pair_t anyks::Arpa::uppers(const vocab_t * context) const {
+const anyks::pair_t anyks::Arpa::uppers(const vocab_t * context) const {
 	// Результат работы функции
 	pair_t result = make_pair(0, 0);
 	// Если контекст передан
@@ -64,7 +64,7 @@ const anyks::Arpa::pair_t anyks::Arpa::uppers(const vocab_t * context) const {
  * @param  oc  встречаемость граммы
  * @return     регистр слова
  */
-const anyks::Arpa::pair_t anyks::Arpa::uppers(const std::map <size_t, size_t> & ups, const size_t oc) const {
+const anyks::pair_t anyks::Arpa::uppers(const std::map <size_t, size_t> & ups, const size_t oc) const {
 	// Результат работы функции
 	pair_t result = make_pair(0, 0);
 	// Если результат не пустой
@@ -286,7 +286,7 @@ const bool anyks::Arpa::checkIdw(const size_t idw, const u_short gram) const {
 			// Переходим по всему списку полученных n-грамм
 			for(auto & item : ngrams){
 				// Если в n-грамме есть дочерные граммы
-				if(!item->empty() && (item->idw != size_t(types_t::start))){
+				if(!item->empty() && (item->idw != size_t(sign_t::start))){
 					// Ищем слово в последовательности
 					auto it = item->find(idw);
 					// Если последовательность найдена и она пустая, зануляем её
@@ -424,18 +424,36 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
 	string result = "";
 	// Определяем тип записи
 	switch(idw){
-		// Если это начало предложения
-		case u_short(types_t::start): result = "<s>"; break;
-		// Если это аббревиатура
-		case u_short(types_t::abbr): result = "<abr>"; break;
-		// Если это диапазон чисел
-		case u_short(types_t::range): result = "<rng>"; break;
-		// Если это конец предложения
-		case u_short(types_t::finish): result = "</s>"; break;
-		// Если это арабское или римское число
-		case u_short(types_t::number): result = "<num>"; break;
-		// Если это неизвестное слово
-		case u_short(types_t::unknown): result = "<unk>"; break;
+		// Если это признак арабского или римского числа
+		case u_short(sign_t::num): result = "<num>"; break;
+		// Если это признак числа с плавающей точкой
+		case u_short(sign_t::dec): result = "<dec>"; break;
+		// Если это признак неизвестного слова
+		case u_short(sign_t::unk): result = "<unk>"; break;
+		// Если это признак начала предложения
+		case u_short(sign_t::start): result = "<s>"; break;
+		// Если это признак аббревиатуры
+		case u_short(sign_t::abbr): result = "<abr>"; break;
+		// Если это признак даты
+		case u_short(sign_t::date): result = "<date>"; break;
+		// Если это признак времени
+		case u_short(sign_t::time): result = "<time>"; break;
+		// Если это признак псевдо-числа
+		case u_short(sign_t::anum): result = "<anum>"; break;
+		// Если это признак конца предложения
+		case u_short(sign_t::finish): result = "</s>"; break;
+		// Если это признак диапазона чисел
+		case u_short(sign_t::range): result = "<range>"; break;
+		// Если это признак знака пунктуации
+		case u_short(sign_t::punct): result = "<punct>"; break;
+		// Если это признак приблизительного числа
+		case u_short(sign_t::aprox): result = "<aprox>"; break;
+		// Если это признак числового счёта
+		case u_short(sign_t::score): result = "<score>"; break;
+		// Если это признак габаритных размеров
+		case u_short(sign_t::dimen): result = "<dimen>"; break;
+		// Если это признак числовой дроби
+		case u_short(sign_t::fract): result = "<fract>"; break;
 		// Если это нормальное слово
 		default: {
 			// Получаем слово по его идентификатору
@@ -476,7 +494,7 @@ void anyks::Arpa::distribute(const double mass) const {
 		// Переходим по всему слов в контексте
 		for(auto & item : this->vocab){
 			// Если это не безсобытийная грамма (Начальная)
-			if(item.second.idw != size_t(types_t::start)){
+			if(item.second.idw != size_t(sign_t::start)){
 				// Считаем количество слов
 				numWords++;
 				// Получаем вес слова
@@ -499,7 +517,7 @@ void anyks::Arpa::distribute(const double mass) const {
 			// Переходим по всему слов в контексте
 			for(auto & item : this->vocab){
 				// Если это не безсобытийная грамма (Начальная)
-				if((item.second.idw != size_t(types_t::start))
+				if((item.second.idw != size_t(sign_t::start))
 				&& (item.second.weight == this->zero)){
 					// Устанавливаем новый размер
 					item.second.weight = log10(add);
@@ -518,7 +536,7 @@ void anyks::Arpa::distribute(const double mass) const {
 			// Переходим по всему слов в контексте
 			for(auto & item : this->vocab){
 				// Если это не безсобытийная грамма (Начальная)
-				if(item.second.idw != size_t(types_t::start)){
+				if(item.second.idw != size_t(sign_t::start)){
 					// Устанавливаем новый размер
 					item.second.weight = log10(pow(10, item.second.weight) + add);
 				}
@@ -563,7 +581,7 @@ void anyks::Arpa::fixupProbs(const u_short gram) const {
 					 * чтобы отличить его от внутренних узлов,
 					 * которые добавляются неявно.
 					 */
-					else if(value.second.idw != size_t(types_t::start)){
+					else if(value.second.idw != size_t(sign_t::start)){
 						// Устанавливаем ненулевую частоту юниграммы
 						value.second.weight = 1;
 					}
@@ -650,7 +668,7 @@ void anyks::Arpa::uniUppers(const size_t idw, std::set <size_t> & uppers) const 
 	// Очищаем список регистров слов
 	if(!uppers.empty()) uppers.clear();
 	// Если идентификатор передан
-	if((idw > 0) && (idw < NOID)){
+	if((idw > 0) && (idw < noID)){
 		// Список n-грамм для работы
 		list <vocab_t *> ngrams;
 		// Переходим по всем граммам корпуса
@@ -843,12 +861,21 @@ const string anyks::Arpa::stamp() const {
 const bool anyks::Arpa::event(const size_t idw) const {
 	// Если это не спец-слова, формируем слово
 	return (
-		(idw != size_t(types_t::abbr)) &&
-		(idw != size_t(types_t::start)) &&
-		(idw != size_t(types_t::range)) &&
-		(idw != size_t(types_t::finish)) &&
-		(idw != size_t(types_t::number)) &&
-		(idw != size_t(types_t::unknown))
+		(idw != size_t(sign_t::num)) &&
+		(idw != size_t(sign_t::unk)) &&
+		(idw != size_t(sign_t::dec)) &&
+		(idw != size_t(sign_t::abbr)) &&
+		(idw != size_t(sign_t::date)) &&
+		(idw != size_t(sign_t::time)) &&
+		(idw != size_t(sign_t::anum)) &&
+		(idw != size_t(sign_t::aprox)) &&
+		(idw != size_t(sign_t::start)) &&
+		(idw != size_t(sign_t::range)) &&
+		(idw != size_t(sign_t::score)) &&
+		(idw != size_t(sign_t::punct)) &&
+		(idw != size_t(sign_t::dimen)) &&
+		(idw != size_t(sign_t::fract)) &&
+		(idw != size_t(sign_t::finish))
 	);
 }
 /**
@@ -992,7 +1019,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 			// Список n-грамм для работы
 			list <vocab_t *> ngrams;
 			// Не существующий идентификатор
-			const size_t noid = NOID;
+			const size_t noid = noID;
 			// Список полученных последовательностей
 			std::map <size_t, vector <size_t>> variants;
 			/**
@@ -1037,7 +1064,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 					// Переходим по всему списку полученных n-грамм
 					for(auto & item : ngrams){
 						// Если в n-грамме есть дочерные граммы
-						if(!item->empty() && (item->idw != size_t(types_t::start))){
+						if(!item->empty() && (item->idw != size_t(sign_t::start))){
 							// Ищем первый элемент в списке
 							auto it = item->find(seq[0]);
 							// Ищем идентификатор
@@ -1137,7 +1164,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 				// Если последовательности переданы
 				if(!seq1.empty() && !seq2.empty()){
 					// Извлекаем n-грамму начала слова
-					auto it = this->vocab.find((size_t) types_t::start);
+					auto it = this->vocab.find((size_t) sign_t::start);
 					// Если n-грамма найдена
 					if(it != this->vocab.end()){
 						// Выполняем замену основных n-грамм
@@ -1302,7 +1329,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 					// Если слово пустое или там только конец предложения
 					if(!result && (it->second.size() == 1)){
 						// Если это конец предложения
-						result = (it->second.count((size_t) types_t::finish) > 0);
+						result = (it->second.count((size_t) sign_t::finish) > 0);
 					}
 					// Если всё хорошо, выполняем замену
 					if(result){
@@ -1401,7 +1428,7 @@ void anyks::Arpa::clear(){
  * setWordMethod Метод установки функции получения слова
  * @param word функция получения слова
  */
-void anyks::Arpa::setWordMethod(idWord_t word){
+void anyks::Arpa::setWordMethod(words_t word){
 	// Устанавливаем функцию получения слова
 	this->getWord = word;
 }
@@ -1844,11 +1871,11 @@ void anyks::Arpa::add(const vector <pair_t> & seq, const float weight, const flo
 				// Если частота не установлена
 				if(obj->weight == 0.0f) obj->weight = weightTmp;
 				// Увеличиваем основную частоту
-				else if(obj->idw != size_t(types_t::start)) obj->weight = log10(pow(10, obj->weight) + pow(10, weightTmp));
+				else if(obj->idw != size_t(sign_t::start)) obj->weight = log10(pow(10, obj->weight) + pow(10, weightTmp));
 				// Если частота отката не установлена
 				if(obj->backoff == 0.0f) obj->backoff = backoffTmp;
 				// Увеличиваем обратную частоту документа
-				else if(obj->idw != size_t(types_t::start)) obj->backoff = log10(pow(10, obj->backoff) + pow(10, backoffTmp));
+				else if(obj->idw != size_t(sign_t::start)) obj->backoff = log10(pow(10, obj->backoff) + pow(10, backoffTmp));
 			}
 			// Если регистры слова переданы, считаем их
 			if(item.second > 0){
@@ -1949,12 +1976,12 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
 				while(context->father != nullptr){
 					// Запоминаем результат
 					if((context->weight != this->zero)
-					&& (context->idw != size_t(types_t::start))) result += context->weight;
+					&& (context->idw != size_t(sign_t::start))) result += context->weight;
 					/**
 					 * Если мы вычисляем предельную вероятность контекста униграммы <s>,
 					 * мы должны искать </s> вместо неё, поскольку у начала предложения вес = 0.
 					 */
-					if(context->idw == size_t(types_t::start)) result += context->father->at((size_t) types_t::finish).weight;
+					if(context->idw == size_t(sign_t::start)) result += context->father->at((size_t) sign_t::finish).weight;
 					// Выполняем смещение
 					context = context->father;
 				}
@@ -2274,9 +2301,9 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 			// Размер скидки
 			double discount = 0.0f;
 			// Если это безсобытийная грамма (Начальная)
-			if(idw == size_t(types_t::start)){
+			if(idw == size_t(sign_t::start)){
 				// Если это не юниграмма или неизвестный символ
-				if((this->gram > 1) || (idw == size_t(types_t::unknown))){
+				if((this->gram > 1) || (idw == size_t(sign_t::unk))){
 					// Считаем количество безсобытийных грамм
 					this->param.nonevent++;
 					// Выходим
@@ -2370,7 +2397,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 					// Переходим по всему списку юниграмм
 					for(auto & value : this->vocab){
 						// Если это безсобытийная грамма (Начальная)
-						if(value.second.idw == size_t(types_t::start)) continue;
+						if(value.second.idw == size_t(sign_t::start)) continue;
 						// Выполняем первоначальный подсчёт грамм
 						estimate1Fn(value.second.oc);
 					}
@@ -2424,7 +2451,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 								// Переходим по всему списку грамм
 								for(auto & value : * item){
 									// Если это безсобытийная грамма (Начальная)
-									if(value.second.idw == size_t(types_t::start)) continue;
+									if(value.second.idw == size_t(sign_t::start)) continue;
 									// Выполняем первоначальный подсчёт грамм
 									estimate1Fn(value.second.oc);
 								}
@@ -2869,7 +2896,7 @@ void anyks::Arpa::save(const bool arpa, function <void (const vector <char> &, c
 			// Регистры слова
 			pair_t uppers;
 			// Идентификатор полученного и добавленного слова
-			size_t idw = NOID, aidw = 0;
+			size_t idw = noID, aidw = 0;
 			// Получаем объект данных
 			const vocab_t * obj = (vocab != nullptr ? vocab : &this->vocab);
 			// Если есть смысл обрабатывать варианты
@@ -2994,7 +3021,7 @@ void anyks::Arpa::map(function <void (const string &, const u_short)> callback, 
  * Arpa Конструктор
  * @param word функция получения слова
  */
-anyks::Arpa::Arpa(idWord_t word){
+anyks::Arpa::Arpa(words_t word){
 	// Устанавливаем функцию получения слова
 	this->setWordMethod(word);
 }
@@ -3011,7 +3038,7 @@ anyks::Arpa::Arpa(const alphabet_t * alphabet){
  * @param alphabet объект алфавита
  * @param word     функция получения слова
  */
-anyks::Arpa::Arpa(const alphabet_t * alphabet, idWord_t word){
+anyks::Arpa::Arpa(const alphabet_t * alphabet, words_t word){
 	// Устанавливаем функцию получения слова
 	this->setWordMethod(word);
 	// Устанавливаем алфавит
@@ -3076,7 +3103,7 @@ const bool anyks::GoodTuring::estimate(const u_short gram) const {
 				// Переходим по всем n-граммам
 				for(auto & value : * item){
 					// Если это безсобытийная грамма (Начальная)
-					if(this->midw(&value.second) == size_t(types_t::start)) continue;
+					if(this->midw(&value.second) == size_t(sign_t::start)) continue;
 					// Если встречаемость меньше максимального значения
 					else if(value.second.oc <= (maxCount + 1)) countOfCounts[value.second.oc]++;
 				}
@@ -3166,7 +3193,7 @@ const double anyks::GoodTuring::discount(const size_t count, const size_t total,
  * GoodTuring Конструктор
  * @param word функция получения слова
  */
-anyks::GoodTuring::GoodTuring(idWord_t word) : Arpa(word) {
+anyks::GoodTuring::GoodTuring(words_t word) : Arpa(word) {
 	// Выполняем инициализацию данных
 	this->init();
 }
@@ -3183,7 +3210,7 @@ anyks::GoodTuring::GoodTuring(const alphabet_t * alphabet) : Arpa(alphabet) {
  * @param alphabet объект алфавита
  * @param word     функция получения слова
  */
-anyks::GoodTuring::GoodTuring(const alphabet_t * alphabet, idWord_t word) : Arpa(alphabet, word) {
+anyks::GoodTuring::GoodTuring(const alphabet_t * alphabet, words_t word) : Arpa(alphabet, word) {
 	// Выполняем инициализацию данных
 	this->init();
 }
@@ -3241,7 +3268,7 @@ anyks::ConstDiscount::ConstDiscount(const double discount){
  * @param word     функция получения слова
  * @param discount значение дисконтирования
  */
-anyks::ConstDiscount::ConstDiscount(idWord_t word, const double discount) : Arpa(word) {
+anyks::ConstDiscount::ConstDiscount(words_t word, const double discount) : Arpa(word) {
 	// Выполняем инициализацию данных
 	this->init(discount);
 }
@@ -3260,7 +3287,7 @@ anyks::ConstDiscount::ConstDiscount(const alphabet_t * alphabet, const double di
  * @param word     функция получения слова
  * @param discount значение дисконтирования
  */
-anyks::ConstDiscount::ConstDiscount(const alphabet_t * alphabet, idWord_t word, const double discount) : Arpa(alphabet, word) {
+anyks::ConstDiscount::ConstDiscount(const alphabet_t * alphabet, words_t word, const double discount) : Arpa(alphabet, word) {
 	// Выполняем инициализацию данных
 	this->init(discount);
 }
@@ -3328,7 +3355,7 @@ anyks::AddSmooth::AddSmooth(const double delta){
  * @param word  функция получения слова
  * @param delta значение дельты для расчёта
  */
-anyks::AddSmooth::AddSmooth(idWord_t word, const double delta) : Arpa(word) {
+anyks::AddSmooth::AddSmooth(words_t word, const double delta) : Arpa(word) {
 	// Выполняем инициализацию данных
 	this->init(delta);
 }
@@ -3347,7 +3374,7 @@ anyks::AddSmooth::AddSmooth(const alphabet_t * alphabet, const double delta) : A
  * @param word     функция получения слова
  * @param delta    значение дельты для расчёта
  */
-anyks::AddSmooth::AddSmooth(const alphabet_t * alphabet, idWord_t word, const double delta) : Arpa(alphabet, word) {
+anyks::AddSmooth::AddSmooth(const alphabet_t * alphabet, words_t word, const double delta) : Arpa(alphabet, word) {
 	// Выполняем инициализацию данных
 	this->init(delta);
 }
@@ -3402,7 +3429,7 @@ void anyks::KneserNey::prepare(const u_short gram) const {
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Если это не безсобытийная грамма (Начальная)
-				if(this->midw(&value.second) != size_t(types_t::start)){
+				if(this->midw(&value.second) != size_t(sign_t::start)){
 					// Обнуляем текущую встречаемость
 					value.second.oc = 0;
 					// Формируем ключ записи
@@ -3454,7 +3481,7 @@ const bool anyks::KneserNey::estimate(const u_short gram) const {
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Если это не безсобытийная грамма (Начальная)
-				if(this->midw(&value.second) == size_t(types_t::start)) continue;
+				if(this->midw(&value.second) == size_t(sign_t::start)) continue;
 				// Иначе продолжаем
 				else if(value.second.oc == 1) n1++;
 				else if(value.second.oc == 2) n2++;
@@ -3547,7 +3574,7 @@ anyks::KneserNey::KneserNey(const bool modified, const bool prepares){
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::KneserNey::KneserNey(idWord_t word, const bool modified, const bool prepares) : Arpa(word) {
+anyks::KneserNey::KneserNey(words_t word, const bool modified, const bool prepares) : Arpa(word) {
 	// Выполняем инициализацию
 	this->init(modified, prepares);
 }
@@ -3568,7 +3595,7 @@ anyks::KneserNey::KneserNey(const alphabet_t * alphabet, const bool modified, co
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::KneserNey::KneserNey(const alphabet_t * alphabet, idWord_t word, const bool modified, const bool prepares) : Arpa(alphabet, word) {
+anyks::KneserNey::KneserNey(const alphabet_t * alphabet, words_t word, const bool modified, const bool prepares) : Arpa(alphabet, word) {
 	// Выполняем инициализацию
 	this->init(modified, prepares);
 }
@@ -3608,7 +3635,7 @@ const bool anyks::ModKneserNey::estimate(const u_short gram) const {
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Если это не безсобытийная грамма (Начальная)
-				if(this->midw(&value.second) == size_t(types_t::start)) continue;
+				if(this->midw(&value.second) == size_t(sign_t::start)) continue;
 				// Иначе продолжаем
 				else if(value.second.oc == 1) n1++;
 				else if(value.second.oc == 2) n2++;
@@ -3695,7 +3722,7 @@ anyks::ModKneserNey::ModKneserNey(const bool modified, const bool prepares) : Kn
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::ModKneserNey::ModKneserNey(idWord_t word, const bool modified, const bool prepares) : KneserNey(word, modified, prepares) {
+anyks::ModKneserNey::ModKneserNey(words_t word, const bool modified, const bool prepares) : KneserNey(word, modified, prepares) {
 	// Выполняем инициализацию
 	this->init();
 }
@@ -3716,7 +3743,7 @@ anyks::ModKneserNey::ModKneserNey(const alphabet_t * alphabet, const bool modifi
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::ModKneserNey::ModKneserNey(const alphabet_t * alphabet, idWord_t word, const bool modified, const bool prepares) : KneserNey(alphabet, word, modified, prepares) {
+anyks::ModKneserNey::ModKneserNey(const alphabet_t * alphabet, words_t word, const bool modified, const bool prepares) : KneserNey(alphabet, word, modified, prepares) {
 	// Выполняем инициализацию
 	this->init();
 }

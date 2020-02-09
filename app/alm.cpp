@@ -73,14 +73,21 @@ void help(){
 	"\x1B[34m\x1B[1mflags:\x1B[0m\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m case-insensitive flag:                                                        [-lower-case | --lower-case]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m unknown word permission flag:                                                 [-allow-unk | --allow-unk]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to consider words from the white list only:                     [-only-good | --only-good]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to use interpolation in estimating:                             [-interpolate | --interpolate]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of Roman numerals:                             [-no-roman | --no-roman]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of custom attributes:                              [-no-usign | --no-usign]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing accounting of all collected n-grams:                            [-all-grams | --all-grams]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an date sign:                                   [-no-date | --no-date]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an time sign:                                   [-no-time | --no-time]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an score sign:                                  [-no-score | --no-score]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an fraction sign:                               [-no-fract | --no-fract]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an dimension sign:                              [-no-dimen | --no-dimen]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of custom attributes:                              [-no-usign | --no-usign]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of Roman numerals:                             [-no-roman | --no-roman]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an punctuation sign:                            [-no-punct | --no-punct]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an approximate sign:                            [-no-aprox | --no-aprox]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an abbreviation sign:                           [-no-abbr | --no-abbr]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of a sign of numbers:                          [-no-number | --no-number]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of a pseudo-number sign:                       [-no-a-number | --no-a-number]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to consider words from the white list only:                     [-only-good | --only-good]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of a sign of a range of numbers:                   [-no-range | --no-range]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of users signs:                              [-w-bin-usigns | --w-bin-usigns]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of toolkit options:                          [-w-bin-options | --w-bin-options]\r\n\r\n"
@@ -291,10 +298,24 @@ int main(int argc, char * argv[]){
 			if(env.is("no-roman")) toolkit.setOption(toolkit_t::options_t::notRoman);
 			// Отключаем системный признак детектирования чисел
 			if(env.is("no-number")) toolkit.setOption(toolkit_t::options_t::notNumber);
-			// Отключаем применение пользовательского признака для детектирования
+			// Отключаем применение пользовательского признака детектирования
 			if(env.is("no-usign")) toolkit.setOption(toolkit_t::options_t::notUserSign);
 			// Отключаем системный признак детектирования псевдо-чисел
 			if(env.is("no-a-number")) toolkit.setOption(toolkit_t::options_t::notANumber);
+			// Отключаем системный признак детектирования даты
+			if(env.is("no-date")) toolkit.setOption(toolkit_t::options_t::notDate);
+			// Отключаем системный признак детектирования времени
+			if(env.is("no-time")) toolkit.setOption(toolkit_t::options_t::notTime);
+			// Отключаем системный признак детектирования знаков пунктуации
+			if(env.is("no-punct")) toolkit.setOption(toolkit_t::options_t::notPunct);
+			// Отключаем системный признак детектирования числового счёта
+			if(env.is("no-score")) toolkit.setOption(toolkit_t::options_t::notScore);
+			// Отключаем системный признак детектирования габаритных размеров
+			if(env.is("no-dimen")) toolkit.setOption(toolkit_t::options_t::notDimen);
+			// Отключаем системный признак детектирования числовой дроби
+			if(env.is("no-fract")) toolkit.setOption(toolkit_t::options_t::notFract);
+			// Отключаем системный признак детектирования приблизительного числа
+			if(env.is("no-aprox")) toolkit.setOption(toolkit_t::options_t::notAprox);
 			// Если адрес файла чёрного списка получен
 			if((value = env.get("badwords")) != nullptr){
 				// Чёрный список слов

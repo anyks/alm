@@ -47,9 +47,6 @@ namespace anyks {
 			wstring letters = L"¶";
 			// Объект основного алфавита
 			const alphabet_t * alphabet = nullptr;
-		private:
-			// Получаем максимальное значение идентификатора
-			static constexpr size_t NOID = numeric_limits <size_t>::max();
 		public:
 			/**
 			 * setOffset Метод установки смещения в алфавите

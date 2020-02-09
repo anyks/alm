@@ -55,7 +55,7 @@ namespace anyks {
 				naturalDiscount
 			};
 			// Основные опции
-			enum class options_t : u_short {
+			enum class options_t : u_int {
 				debug,       // Флаг режима отладки
 				onlyGood,    // Флаг использования только слов из белого списка
 				allowUnk,    // Флаг разрешаюний использовать признак неизвестного слова
@@ -64,8 +64,15 @@ namespace anyks {
 				interpolate, // Флаг предписывающий выполнять интерполяцию при расчёте частот
 				notUserSign, // Флаг запрещающий использовать пользовательский признак
 				notAbbr,     // Флаг запрещающий детектировать аббривиатуры чисел
+				notDate,     // Флаг запрещающий детектировать дату
+				notTime,     // Флаг запрещающий детектировать время
 				notRange,    // Флаг запрещающий детектировать диапазоны арабских чисел
+				notPunct,    // Флаг запрещающий детекстировать знак пунктуации
+				notScore,    // Флаг запрещающий детектировать числовой счёт
+				notDimen,    // Флаг запрещающий детектировать габаритные размеры
+				notFract,    // Флаг запрещающий детектировать числовые дроби
 				notRoman,    // Флаг запрещающий детектировать римские числа
+				notAprox,    // Флаг запрещающий детектировать приблизительные значения чисел
 				notNumber,   // Флаг запрещающий детектировать арабские числа
 				notANumber   // Флаг запрещающий детектировать псевдо-арабские числа
 			};
@@ -85,9 +92,6 @@ namespace anyks {
 				Params() : mod(0.0), prepares(false), modified(false), algorithm(0) {}
 			} params_t;
 		private:
-			// Получаем максимальное значение идентификатора
-			static constexpr size_t NOID = numeric_limits <size_t>::max();
-		private:
 			/**
 			 * Info Структура общей статистики
 			 */
@@ -99,7 +103,7 @@ namespace anyks {
 				/**
 				 * Info Конструктор
 				 */
-				Info() : ad(0), cw(0), unq(0), idd(NOID) {};
+				Info() : ad(0), cw(0), unq(0), idd(noID) {};
 			} __attribute__((packed)) info_t;
 			/**
 			 * UserSign Структура пользовательского признака
@@ -111,7 +115,7 @@ namespace anyks {
 				/**
 				 * Usersign Конструктор
 				 */
-				Usersign() : idw(NOID), name("") {}
+				Usersign() : idw(noID), name("") {}
 			} usign_t;
 		private:
 			// Замена неизвестному слову
@@ -119,14 +123,14 @@ namespace anyks {
 			// Размер n-грамм
 			u_short size = DEFNGRAM;
 		private:
+			// Объект идентификатора
+			idw_t idw;
 			// Общая статистика
 			info_t info;
-			// Объект идентификатора
-			idw_t idwrd;
 			// Параметры алгоритма сглаживания
 			params_t params;
 			// Флаги параметров
-			bitset <12> options;
+			bitset <19> options;
 			// Список плохих слов
 			set <size_t> badwords;
 			// Список хороших слов
@@ -148,11 +152,11 @@ namespace anyks {
 			const alphabet_t * alphabet = nullptr;
 		private:
 			/**
-			 * idw Метод генерирования идентификатора слова
+			 * getIdw Метод генерирования идентификатора слова
 			 * @param  word слово для генерации
 			 * @return      идентификатор слова
 			 */
-			const size_t idw(const wstring & word) const;
+			const size_t getIdw(const wstring & word) const;
 			/**
 			 * isOption Метод проверки наличия опции
 			 * @param option опция для проверки
