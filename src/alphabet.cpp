@@ -871,27 +871,6 @@ const bool anyks::Alphabet::altemp() const {
 	return this->alters.empty();
 }
 /**
- * check Метод проверки соответствии буквы
- * @param  letter буква для проверки
- * @return        результат проверки
- */
-const bool anyks::Alphabet::check(const wchar_t letter) const {
-	// Результат работы функции
-	bool result = false;
-	// Результат проверки
-	if(letter > 0){
-		// Если это не число, тогда выполняем проверку
-		if(!(result = this->isNumber({letter}))){
-			// Переводим букву в нижний регистр
-			const wstring & str = this->toLower(wstring(1, letter));
-			// Выполняем проверку буквы
-			result = (this->letters.count(str[0]) > 0);
-		}
-	}
-	// Выводим результат
-	return result;
-}
-/**
  * isAlt Метод проверки существования альтернативной буквы
  * @param  letter буква для проверки
  * @return        результат проверки
@@ -903,6 +882,26 @@ const bool anyks::Alphabet::isAlt(const wchar_t letter) const {
 	if((letter > 0) && !this->alters.empty()){
 		// Выполняем проверку
 		result = (this->alters.count(letter) > 0);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * isMath Метод определения математических операий
+ * @param letter буква для проверки
+ * @return       результат проверки
+ */
+const bool anyks::Alphabet::isMath(const wchar_t letter) const {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(letter > 0){
+		// Выполняем проверку
+		result = (
+			(letter == L'+') || (letter == L'-')
+			|| (letter == L'=') || (letter == L'/')
+			|| (letter == L'*') || (letter == L'^')
+		);
 	}
 	// Выводим результат
 	return result;
@@ -1111,6 +1110,75 @@ const bool anyks::Alphabet::isAllowed(const wstring & word) const {
 	return result;
 }
 /**
+ * isSpecial Метод определения спец-символа
+ * @param letter буква для проверки
+ * @return       результат проверки
+ */
+const bool anyks::Alphabet::isSpecial(const wchar_t letter) const {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(letter > 0){
+		// Выполняем проверку
+		result = (
+			(letter == L'~') || (letter == L'_')
+			|| (letter == L'@') || (letter == L'#')
+			|| (letter == L'№') || (letter == L'%')
+			|| (letter == L'&') || (letter == L'$')
+			|| (letter == L'|') || (letter == L'\\')
+			|| (letter == L'<') || (letter == L'>')
+			|| (letter == L'§') || (letter == L'©')
+		);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * isIsolation Метод определения знака изоляции (кавычки, скобки)
+ * @param  letter буква для проверки
+ * @return        результат проверки
+ */
+const bool anyks::Alphabet::isIsolation(const wchar_t letter) const {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(letter > 0){
+		// Выполняем проверку
+		result = (
+			(letter == L'(') || (letter == L')')
+			|| (letter == L'[') || (letter == L']')
+			|| (letter == L'{') || (letter == L'}')
+			|| (letter == L'"') || (letter == L'\'')
+			|| (letter == L'«') || (letter == L'»')
+			|| (letter == L'„') || (letter == L'“')
+			|| (letter == L'`')
+		);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * check Метод проверки соответствии буквы
+ * @param  letter буква для проверки
+ * @return        результат проверки
+ */
+const bool anyks::Alphabet::check(const wchar_t letter) const {
+	// Результат работы функции
+	bool result = false;
+	// Результат проверки
+	if(letter > 0){
+		// Если это не число, тогда выполняем проверку
+		if(!(result = this->isNumber({letter}))){
+			// Переводим букву в нижний регистр
+			const wstring & str = this->toLower(wstring(1, letter));
+			// Выполняем проверку буквы
+			result = (this->letters.count(str[0]) > 0);
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * checkHome2 Метод проверки слова на Дом-2
  * @param  word слово для проверки
  * @return      результат работы метода
@@ -1125,7 +1193,7 @@ const bool anyks::Alphabet::checkHome2(const wstring & word) const {
 		// Ищим дефис в слове
 		if((pos = word.rfind(L"-")) != wstring::npos){
 			// Извлекаем суффикс слова
-			const wstring & suffix = word.substr(pos + 1, word.length() - (pos + 1));
+			const wstring & suffix = word.substr(pos + 1);
 			// Если только суффикс является числом выводим результат
 			result = (!this->isNumber(word.substr(0, pos)) && this->isNumber(suffix));
 		}
@@ -1187,29 +1255,6 @@ const bool anyks::Alphabet::checkHyphen(const wstring & str) const {
 			}
 		// Если символ всего один, проверяем его так
 		} else result = (str[0] == L'-');
-	}
-	// Выводим результат
-	return result;
-}
-/**
- * isIsolation Метод определения знака изоляции (кавычки, скобки)
- * @param  letter буква для проверки
- * @return        результат проверки
- */
-const bool anyks::Alphabet::isIsolation(const wchar_t letter) const {
-	// Результат работы функции
-	bool result = false;
-	// Если слово передано
-	if(letter > 0){
-		// Выполняем проверку
-		result = (
-			(letter == L'(') || (letter == L')')
-			|| (letter == L'[') || (letter == L']')
-			|| (letter == L'{') || (letter == L'}')
-			|| (letter == L'"') || (letter == L'\'')
-			|| (letter == L'«') || (letter == L'»')
-			|| (letter == L'„') || (letter == L'“')
-		);
 	}
 	// Выводим результат
 	return result;
@@ -1281,83 +1326,6 @@ const bool anyks::Alphabet::checkSimilars(const wstring & str) const {
 					result = (((i == (length - 1)) && first) || ((i == 0) && second) || (first && second));
 					// Выходим из цикла
 					if(result) break;
-				}
-			}
-		}
-	}
-	// Выводим результат
-	return result;
-}
-/**
- * isAbbreviation Метод проверки аббривиатуры
- * @param word  слово для проверки
- * @param count количество дефисов в строке
- * @return      результат проверки
- */
-const bool anyks::Alphabet::isAbbreviation(const wstring & word, const u_short count) const {
-	// Результат работы функции
-	bool result = false;
-	// Если слово передано
-	if(!word.empty() && this->isNumber({word.front()})){
-		// Если дефис всего один
-		if((count > 0 ? count == 1 : this->countLetter(word, L'-') == 1)){
-			// Ищем дефис
-			const size_t pos = word.rfind(L'-');
-			// Получаем размер суффикса
-			const u_short size = (word.length() - (pos + 1));
-			// Если размер суффикса соответствует
-			if((size > 0) && (size < 4)){
-				// Получаем суффикс слова
-				const wstring & suffix = word.substr(pos + 1, size);
-				// Результат проверка суффикса на валидность
-				bool valid = this->check(suffix.front());
-				// Если размер слова больше 1
-				if(size > 1){
-					// Выполняем переход по всем буквам слова
-					for(size_t i = 0, j = (size - 1); j > ((size / 2) - 1); i++, j--){
-						// Выполняем проверку соответствия словарю каждой буквы
-						if(!(valid = (i == j ? (this->check(suffix[i])) : (this->check(suffix[i])) && (this->check(suffix[j]))))) break;
-					}
-				}
-				// Выводим результат
-				result = (valid && !this->isNumber(suffix));
-			}
-		}
-	}
-	// Выводим результат
-	return result;
-}
-/**
- * isRangeNumber Метод проверки является ли слово диапазоном чисел
- * @param  word  слово для проверки
- * @param  delim символ разделителя
- * @return       результат проверки
- */
-const bool anyks::Alphabet::isRangeNumber(const wstring & word, const wchar_t delim) const {
-	// Результат работы функции
-	bool result = false;
-	// Если слово передано
-	if(!word.empty()){
-		// Длина слова
-		const size_t length = word.length();
-		// Если первая и последняя буквы это числа
-		if(this->isNumber({word.front()}) && this->isNumber({word.back()})){
-			// Выполняем поиск дефиса
-			const size_t pos = word.find(delim);
-			// Если позиция найдена
-			if(pos != wstring::npos){
-				// Найдены первое и второе число
-				bool first = false, second = false;
-				// Переходим по всему списку
-				for(int i = pos - 1, j = pos + 1; i > -1 || j < length; i--, j++){
-					// Запоминаем результат поиска первого числа
-					if(i > -1) first = this->isNumber({word[i]});
-					// Запоминаем результат поиска второго числа
-					if(j < length) second = this->isNumber({word[j]});
-					// Запоминаем результат
-					result = (first && second);
-					// Если результат не удачный, выходим
-					if(!result) break;
 				}
 			}
 		}

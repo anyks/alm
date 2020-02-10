@@ -257,17 +257,17 @@ namespace anyks {
 			 */
 			const bool altemp() const;
 			/**
-			 * check Метод проверки соответствии буквы
-			 * @param  letter буква для проверки
-			 * @return        результат проверки
-			 */
-			const bool check(const wchar_t letter) const;
-			/**
 			 * isAlt Метод проверки существования альтернативной буквы
 			 * @param  letter буква для проверки
 			 * @return        результат проверки
 			 */
 			const bool isAlt(const wchar_t letter) const;
+			/**
+			 * isMath Метод определения математических операий
+			 * @param letter буква для проверки
+			 * @return       результат проверки
+			 */
+			const bool isMath(const wchar_t letter) const;
 			/**
 			 * isLatian Метод проверки является ли строка латиницей
 			 * @param str строка для проверки
@@ -311,6 +311,25 @@ namespace anyks {
 			 */
 			const bool isAllowed(const wstring & word) const;
 			/**
+			 * isSpecial Метод определения спец-символа
+			 * @param letter буква для проверки
+			 * @return       результат проверки
+			 */
+			const bool isSpecial(const wchar_t letter) const;
+			/**
+			 * isIsolation Метод определения знака изоляции (кавычки, скобки)
+			 * @param  letter буква для проверки
+			 * @return        результат проверки
+			 */
+			const bool isIsolation(const wchar_t letter) const;
+		public:
+			/**
+			 * check Метод проверки соответствии буквы
+			 * @param  letter буква для проверки
+			 * @return        результат проверки
+			 */
+			const bool check(const wchar_t letter) const;
+			/**
 			 * checkHome2 Метод проверки слова на Дом-2
 			 * @param  word слово для проверки
 			 * @return      результат работы метода
@@ -329,31 +348,11 @@ namespace anyks {
 			 */
 			const bool checkHyphen(const wstring & str) const;
 			/**
-			 * isIsolation Метод определения знака изоляции (кавычки, скобки)
-			 * @param  letter буква для проверки
-			 * @return        результат проверки
-			 */
-			const bool isIsolation(const wchar_t letter) const;
-			/**
 			 * checkSimilars Метод проверки на симиляции букв с другими языками
 			 * @param  str строка для проверки
 			 * @return     результат проверки
 			 */
 			const bool checkSimilars(const wstring & str) const;
-			/**
-			 * isAbbreviation Метод проверки аббривиатуры
-			 * @param word  слово для проверки
-			 * @param count количество дефисов в строке
-			 * @return      результат проверки
-			 */
-			const bool isAbbreviation(const wstring & word, const u_short count = 0) const;
-			/**
-			 * isRangeNumber Метод проверки является ли слово диапазоном чисел
-			 * @param  word  слово для проверки
-			 * @param  delim символ разделителя
-			 * @return       результат проверки
-			 */
-			const bool isRangeNumber(const wstring & word, const wchar_t delim = L'-') const;
 		public:
 			/**
 			 * checkHypLat Метод поиска дефиса и латинского символа

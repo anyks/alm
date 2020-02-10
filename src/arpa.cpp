@@ -438,8 +438,12 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
 		case u_short(sign_t::time): result = "<time>"; break;
 		// Если это признак псевдо-числа
 		case u_short(sign_t::anum): result = "<anum>"; break;
+		// Если это символ математической операции
+		case u_short(sign_t::math): result = "<math>"; break;
 		// Если это признак конца предложения
 		case u_short(sign_t::finish): result = "</s>"; break;
+		// Если это спец-символ
+		case u_short(sign_t::specs): result = "<specs>"; break;
 		// Если это признак диапазона чисел
 		case u_short(sign_t::range): result = "<range>"; break;
 		// Если это признак знака пунктуации
@@ -867,6 +871,8 @@ const bool anyks::Arpa::event(const size_t idw) const {
 		(idw != size_t(sign_t::date)) &&
 		(idw != size_t(sign_t::time)) &&
 		(idw != size_t(sign_t::anum)) &&
+		(idw != size_t(sign_t::math)) &&
+		(idw != size_t(sign_t::specs)) &&
 		(idw != size_t(sign_t::aprox)) &&
 		(idw != size_t(sign_t::start)) &&
 		(idw != size_t(sign_t::range)) &&

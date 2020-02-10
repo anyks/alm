@@ -78,11 +78,13 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing accounting of all collected n-grams:                            [-all-grams | --all-grams]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an date sign:                                   [-no-date | --no-date]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an time sign:                                   [-no-time | --no-time]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an math sign:                                   [-no-math | --no-math]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an score sign:                                  [-no-score | --no-score]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an fraction sign:                               [-no-fract | --no-fract]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an dimension sign:                              [-no-dimen | --no-dimen]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of custom attributes:                              [-no-usign | --no-usign]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of Roman numerals:                             [-no-roman | --no-roman]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an special sign:                                [-no-special | --no-special]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an isolation sign:                              [-no-isolat | --no-isolat]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an punctuation sign:                            [-no-punct | --no-punct]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an approximate sign:                            [-no-aprox | --no-aprox]\r\n\r\n"
@@ -307,6 +309,8 @@ int main(int argc, char * argv[]){
 			if(env.is("no-date")) toolkit.setOption(toolkit_t::options_t::notDate);
 			// Отключаем системный признак детектирования времени
 			if(env.is("no-time")) toolkit.setOption(toolkit_t::options_t::notTime);
+			// Отключаем системный признак детектирования математических операций
+			if(env.is("no-math")) toolkit.setOption(toolkit_t::options_t::notMath);
 			// Отключаем системный признак детектирования знаков пунктуации
 			if(env.is("no-punct")) toolkit.setOption(toolkit_t::options_t::notPunct);
 			// Отключаем системный признак детектирования числового счёта
@@ -317,6 +321,8 @@ int main(int argc, char * argv[]){
 			if(env.is("no-fract")) toolkit.setOption(toolkit_t::options_t::notFract);
 			// Отключаем системный признак детектирования приблизительного числа
 			if(env.is("no-aprox")) toolkit.setOption(toolkit_t::options_t::notAprox);
+			// Отключаем системный призанк детектирования спец-символов
+			if(env.is("no-special")) toolkit.setOption(toolkit_t::options_t::notSpecs);
 			// Отключаем системный признак детектирования знака изоляции
 			if(env.is("no-isolat")) toolkit.setOption(toolkit_t::options_t::notIsolat);
 			// Если адрес файла чёрного списка получен

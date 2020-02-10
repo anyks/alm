@@ -34,6 +34,10 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 		else if(word.compare(L"<anum>") == 0) result = (size_t) sign_t::anum;
 		// Проверяем является ли слово концом предложения
 		else if(word.compare(L"</s>") == 0) result = (size_t) sign_t::finish;
+		// Проверяем является ли слово математической операцией
+		else if(word.compare(L"<math>") == 0) result = (size_t) sign_t::math;
+		// Проверяем является ли слово спец-символом
+		else if(word.compare(L"<specs>") == 0) result = (size_t) sign_t::specs;
 		// Проверяем является ли слово диапазоном чисел
 		else if(word.compare(L"<range>") == 0) result = (size_t) sign_t::range;
 		// Проверяем является ли слово знаком пунктуации
@@ -70,6 +74,14 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 					if(!this->isOption(options_t::notPunct) && this->alphabet->isPunct(word.front())){
 						// Запоминаем что это знак пунктуации
 						result = (size_t) sign_t::punct;
+					// Если это символ математической операции
+					} else if(!this->isOption(options_t::notMath) && this->alphabet->isMath(word.front())){
+						// Запоминаем что это символ математической операции
+						result = (size_t) sign_t::math;
+					// Если это спец-символ
+					} else if(!this->isOption(options_t::notSpecs) && this->alphabet->isSpecial(word.front())){
+						// Запоминаем что это знак изоляции
+						result = (size_t) sign_t::specs;
 					// Если это знак изоляции
 					} else if(!this->isOption(options_t::notIsolat) && this->alphabet->isIsolation(word.front())){
 						// Запоминаем что это знак изоляции
@@ -521,8 +533,8 @@ void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
 	if(alphabet != nullptr){
 		// Устанавливаем переданный алфавит
 		this->alphabet = alphabet;
-		// Устанавливаем алфавит и смещение в 15 позиций (количество системных признаков arpa)
-		this->idw.set(this->alphabet, 15);
+		// Устанавливаем алфавит и смещение в 17 позиций (количество системных признаков arpa)
+		this->idw.set(this->alphabet, 17);
 	}
 }
 /**
