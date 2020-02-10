@@ -452,6 +452,8 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
 		case u_short(sign_t::dimen): result = "<dimen>"; break;
 		// Если это признак числовой дроби
 		case u_short(sign_t::fract): result = "<fract>"; break;
+		// Если это признак изоляции
+		case u_short(sign_t::isolat): result = "<isolat>"; break;
 		// Если это нормальное слово
 		default: {
 			// Получаем слово по его идентификатору
@@ -872,6 +874,7 @@ const bool anyks::Arpa::event(const size_t idw) const {
 		(idw != size_t(sign_t::punct)) &&
 		(idw != size_t(sign_t::dimen)) &&
 		(idw != size_t(sign_t::fract)) &&
+		(idw != size_t(sign_t::isolat)) &&
 		(idw != size_t(sign_t::finish))
 	);
 }

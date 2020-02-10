@@ -46,6 +46,8 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 		else if(word.compare(L"<dimen>") == 0) result = (size_t) sign_t::dimen;
 		// Проверяем является ли слово числовой дробью
 		else if(word.compare(L"<fract>") == 0) result = (size_t) sign_t::fract;
+		// Проверяем является ли слово знаком изоляции
+		else if(word.compare(L"<isolat>") == 0) result = (size_t) sign_t::isolat;
 		// Если это другое слово
 		else {
 			// Формируем идентификатор слова
@@ -63,9 +65,16 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 					}
 				}
 				// Проверяем является ли слово знаком пунктуации
-				if((word.length() == 1) && !this->isOption(options_t::notPunct) && this->alphabet->isPunct(word.front())){
-					// Запоминаем что это знак пунктуации
-					result = (size_t) sign_t::punct;
+				if(word.length() == 1){
+					// Если это знак пунктуации
+					if(!this->isOption(options_t::notPunct) && this->alphabet->isPunct(word.front())){
+						// Запоминаем что это знак пунктуации
+						result = (size_t) sign_t::punct;
+					// Если это знак изоляции
+					} else if(!this->isOption(options_t::notIsolat) && this->alphabet->isIsolation(word.front())){
+						// Запоминаем что это знак изоляции
+						result = (size_t) sign_t::isolat;
+					}
 				// Проверяем есть ли изоляционный знак и количество дефисов в слове больше 2-х
 				} else if(
 					this->alphabet->isIsolation(word.back()) ||
@@ -512,8 +521,8 @@ void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
 	if(alphabet != nullptr){
 		// Устанавливаем переданный алфавит
 		this->alphabet = alphabet;
-		// Устанавливаем алфавит и смещение в 14 позиций (количество системных признаков arpa)
-		this->idw.set(this->alphabet, 14);
+		// Устанавливаем алфавит и смещение в 15 позиций (количество системных признаков arpa)
+		this->idw.set(this->alphabet, 15);
 	}
 }
 /**
@@ -686,8 +695,6 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 							// Добавляем слово в последовательность
 							seq.emplace_back(idw, uppers);
 						}
-						// Если это изоляционный символ
-						if(this->alphabet->isIsolation(punct)) unkFn();
 						// Добавляем слово в словарь если разрешено
 						if(this->alphabet->isAllowed(tmp)) this->addWord(tmp, idd);
 					}

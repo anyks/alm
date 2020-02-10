@@ -83,6 +83,7 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an dimension sign:                              [-no-dimen | --no-dimen]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of custom attributes:                              [-no-usign | --no-usign]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of Roman numerals:                             [-no-roman | --no-roman]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an isolation sign:                              [-no-isolat | --no-isolat]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an punctuation sign:                            [-no-punct | --no-punct]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an approximate sign:                            [-no-aprox | --no-aprox]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an abbreviation sign:                           [-no-abbr | --no-abbr]\r\n\r\n"
@@ -316,6 +317,8 @@ int main(int argc, char * argv[]){
 			if(env.is("no-fract")) toolkit.setOption(toolkit_t::options_t::notFract);
 			// Отключаем системный признак детектирования приблизительного числа
 			if(env.is("no-aprox")) toolkit.setOption(toolkit_t::options_t::notAprox);
+			// Отключаем системный признак детектирования знака изоляции
+			if(env.is("no-isolat")) toolkit.setOption(toolkit_t::options_t::notIsolat);
 			// Если адрес файла чёрного списка получен
 			if((value = env.get("badwords")) != nullptr){
 				// Чёрный список слов
