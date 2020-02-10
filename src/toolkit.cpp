@@ -692,11 +692,13 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 							size_t uppers = (seq.size() > 1 ? tmp.getUppers() : 0);
 							// Если название признака получено, устанавливаем его регистры
 							if(this->usigns.count(idw) > 0) uppers = 0;
+							// Устанавливаем регистр слова
+							tmp.setUppers(uppers);
 							// Добавляем слово в последовательность
 							seq.emplace_back(idw, uppers);
 						}
 						// Добавляем слово в словарь если разрешено
-						if(this->alphabet->isAllowed(tmp)) this->addWord(tmp, idd);
+						if(this->alphabet->isAllowed(tmp)) this->addWord(tmp.wreal(), idd);
 					}
 				}
 			}
@@ -953,7 +955,7 @@ void anyks::Toolkit::readArpas(const string & path, function <void (const u_shor
 											if(this->badwords.count(idw) < 1){
 												// Если это юниграмма и её еще нет в словаре
 												if((idw != (size_t) sign_t::start) &&
-												((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word, idd);
+												((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal(), idd);
 											}
 										}
 										// Переходим по всему списку слов
@@ -1259,7 +1261,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 										if(this->badwords.count(idw) < 1){
 											// Если это юниграмма и её еще нет в словаре
 											if((idw != (size_t) sign_t::start) &&
-											((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word);
+											((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal());
 										}
 									}
 									// Переходим по всему списку слов
@@ -1913,7 +1915,7 @@ void anyks::Toolkit::modifyArpa(const string & filename, modify_t flag, function
 								// Иначе увеличиваем количество слов
 								else added.at(idw)++;
 								// Добавляем слово в словарь
-								this->addWord(word);
+								this->addWord(word.wreal());
 							}
 						}
 					// Если слово найдено в всписке запрещённых
