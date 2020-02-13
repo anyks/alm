@@ -217,8 +217,7 @@ void anyks::Uri::parse(const wstring & text){
 			data_t domain = move(domainFn(text));
 			// Если данные домена не получены или протокол не найден
 			if((domain.type == types_t::null)
-			|| (domain.type == types_t::wrong)
-			|| domain.protocol.empty()){
+			|| (domain.type == types_t::wrong)){
 				// Выполняем поиск ip адресов
 				data_t ip = move(ipFn(text));
 				// Если результат получен

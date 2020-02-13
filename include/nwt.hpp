@@ -15,6 +15,8 @@
 #include <set>
 #include <regex>
 #include <sys/types.h>
+
+#include <iostream>
 /**
  * Наши модули
  */

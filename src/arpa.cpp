@@ -428,6 +428,8 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
 		case u_short(sign_t::num): result = "<num>"; break;
 		// Если это признак неизвестного слова
 		case u_short(sign_t::unk): result = "<unk>"; break;
+		// Если это признак url адреса
+		case u_short(sign_t::url): result = "<url>"; break;
 		// Если это признак начала предложения
 		case u_short(sign_t::start): result = "<s>"; break;
 		// Если это признак аббревиатуры
@@ -867,6 +869,7 @@ const bool anyks::Arpa::event(const size_t idw) const {
 	return (
 		(idw != size_t(sign_t::num)) &&
 		(idw != size_t(sign_t::unk)) &&
+		(idw != size_t(sign_t::url)) &&
 		(idw != size_t(sign_t::abbr)) &&
 		(idw != size_t(sign_t::date)) &&
 		(idw != size_t(sign_t::time)) &&

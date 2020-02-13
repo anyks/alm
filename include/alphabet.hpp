@@ -15,6 +15,7 @@
 #include <set>
 #include <map>
 #include <list>
+#include <stack>
 #include <bitset>
 #include <locale>
 #include <string>
@@ -204,6 +205,12 @@ namespace anyks {
 			 */
 			const wstring delHyphenInWord(const wstring & word) const;
 			/**
+			 * restore Метод восстановления текста из контекста
+			 * @param context токенизированный контекст
+			 * @return        результирующий текст
+			 */
+			const string restore(const vector <wstring> & context) const;
+			/**
 			 * replace Метод замены в тексте слово на другое слово
 			 * @param  text текст в котором нужно произвести замену
 			 * @param  word слово для поиска
@@ -268,6 +275,12 @@ namespace anyks {
 			 * @return       результат проверки
 			 */
 			const bool isMath(const wchar_t letter) const;
+			/**
+			 * isUpper Метод проверки символ на верхний регистр
+			 * @param letter буква для проверки
+			 * @return       результат проверки
+			 */
+			const bool isUpper(const wchar_t letter) const;
 			/**
 			 * isLatian Метод проверки является ли строка латиницей
 			 * @param str строка для проверки
@@ -438,10 +451,10 @@ namespace anyks {
 			void setalt(const wchar_t lid, const wchar_t alt);
 			/**
 			 * tokens Метод разбивки текста на токены
-			 * @param text     входной текст для обработки
-			 * @param callback функция обратного вызова, на каждой итерации
+			 * @param text    входной текст для обработки
+			 * @param функция обратного вызова, на каждой итерации
 			 */
-			void tokens(const string & text, function <const bool (const wstring &, const wstring &, const wchar_t, const size_t, const bool)> callback) const;
+			void tokens(const string & text, function <const bool (const wstring &, const vector <string> &, const bool, const bool)> callback) const;
 		public:
 			/**
 			 * Alphabet Конструктор

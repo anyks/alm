@@ -24,6 +24,8 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 		else if(word.compare(L"<num>") == 0) result = (size_t) sign_t::num;
 		// Проверяем является ли слово неизвестным
 		else if(word.compare(L"<unk>") == 0) result = (size_t) sign_t::unk;
+		// Проверяем является ли слово url адресом
+		else if(word.compare(L"<url>") == 0) result = (size_t) sign_t::url;
 		// Проверяем является ли слово аббревиатурой
 		else if(word.compare(L"<abbr>") == 0) result = (size_t) sign_t::abbr;
 		// Проверяем является ли слово датой
@@ -128,8 +130,22 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 						if(!this->isOption(options_t::notRoman)) result = idw;
 					// Иначе запоминаем идентификатор так-как он передан
 					} else if(idw > 0) result = idw;
-					// Если слово не разрешено, устанавливаем неизвестное слово
-					else if(!this->alphabet->isAllowed(word)) result = (size_t) sign_t::unk;
+					// Если это другое слово
+					else {
+						// Объект работы с uri адресами
+						uri_t uri(this->alphabet->convert(this->alphabet->get()));
+						// Выполняем парсинг uri адреса
+						uri.parse(word);
+						// Извлекаем данные uri адреса
+						auto resUri = uri.get();
+						// Если ссылка найдена
+						if((resUri.type != uri_t::types_t::null)
+						&& (resUri.type != uri_t::types_t::wrong)){
+							// Запоминаем что это  признак url адреса
+							result = (size_t) sign_t::url;
+						// Если слово не разрешено, устанавливаем неизвестное слово
+						} else if(!this->alphabet->isAllowed(word)) result = (size_t) sign_t::unk;
+					}
 				}
 			}
 		}
@@ -533,8 +549,8 @@ void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
 	if(alphabet != nullptr){
 		// Устанавливаем переданный алфавит
 		this->alphabet = alphabet;
-		// Устанавливаем алфавит и смещение в 17 позиций (количество системных признаков arpa)
-		this->idw.set(this->alphabet, 17);
+		// Устанавливаем алфавит и смещение в 18 позиций (количество системных признаков arpa)
+		this->idw.set(this->alphabet, 18);
 	}
 }
 /**
@@ -638,8 +654,6 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 		const size_t sid = (size_t) sign_t::start;
 		// Идентификатор конца предложения
 		const size_t fid = (size_t) sign_t::finish;
-		// Последовательность собранных слов
-		vector <string> words = {"<s>"};
 		// Список последовательностей для обучения
 		vector <pair_t> seq = {{sid, 0}};
 		/**
@@ -653,19 +667,12 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 		};
 		/**
 		 * modeFn Функция обработки разбитого текста
-		 * @param early  предыдущее слово
-		 * @param word   текущее слово
-		 * @param punct  знак пунктуации если он есть
-		 * @param pos    позиция текущего слова
-		 * @param stop   флаг завершения обработки
+		 * @param word  слово для обработки
+		 * @param ctx   контекст к которому принадлежит слово
+		 * @param reset флаг сброса контекста
+		 * @param stop  флаг завершения обработки
 		 */
-		auto modeFn = [&](
-			const wstring & early,
-			const wstring & word,
-			const wchar_t punct = 0,
-			const size_t pos = 0,
-			const bool stop = false
-		){
+		auto modeFn = [&](const wstring & word, const vector <string> & ctx, const bool reset, const bool stop){
 			// Если слово передано
 			if(!word.empty()){
 				// Получаем данные слова
@@ -676,14 +683,10 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
 					if(it != this->scripts.end()){
-						// Создаем слово для списка контекста
-						const string & seqWord = this->alphabet->convert(word);
 						// Выполняем внешний python скрипт
-						tmp = move(this->python->run(it->second.second, {seqWord}, words));
+						tmp = move(this->python->run(it->second.second, {tmp.real()}, ctx));
 						// Если результат не получен, возвращаем слово
 						if(tmp.empty()) tmp = move(word);
-						// Добавляем слово в список
-						words.push_back(seqWord);
 					}
 				}
 				// Если слово не разрешено
@@ -714,8 +717,8 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 					}
 				}
 			}
-			// Если найден знак пунктуации
-			if(stop || ((seq.size() > 2) && this->alphabet->isPunct(punct))){
+			// Если предложение завершено
+			if(stop || reset){
 				// Идентификатор предыдущего слова
 				size_t idw = noID;
 				// Удаляем следующие друг за другом неизвестные слова
@@ -748,8 +751,6 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 				if(seq.size() > 2) this->arpa->add(seq, idd);
 				// Очищаем список последовательностей
 				seq.clear();
-				// Очищаем список слов
-				words.clear();
 				// Добавляем в список начало предложения
 				seq.emplace_back(sid, 0);
 			}
@@ -1718,8 +1719,10 @@ void anyks::Toolkit::writeVocab(const string & filename, function <void (const u
 			for(auto & item : this->vocab){
 				// Получаем метаданные слова
 				auto meta = item.second.calc(this->info.ad, this->info.cw);
+				// Получаем слово для экспорта
+				const char * word = (this->isOption(options_t::lowerCase) ? item.second.c_str() : item.second.real().c_str());
 				// Получаем данные слова
-				data = move(this->alphabet->format("%lld\t%s\t%lld | %lld | %f | %f | %f\n", item.first, item.second.real().c_str(), meta.oc, meta.dc, meta.tf, meta.idf, meta.wltf));
+				data = move(this->alphabet->format("%lld\t%s\t%lld | %lld | %f | %f | %f\n", item.first, word, meta.oc, meta.dc, meta.tf, meta.idf, meta.wltf));
 				// Выполняем запись данных в файл
 				file.write(data.data(), data.size());
 				// Если функция вывода статуса передана

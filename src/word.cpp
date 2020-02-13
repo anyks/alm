@@ -10,11 +10,12 @@
 
 /**
  * strtrim Функция удаления начальных и конечных пробелов
- * @param str строка для обработки
- * @param loc локаль
- * @return    результат работы функции
+ * @param str  строка для обработки
+ * @param meta метаданные слова
+ * @param loc  локаль
+ * @return     результат работы функции
  */
-anyks::word_t strtrim(const anyks::word_t & str, const locale & loc = locale::classic()){
+anyks::word_t trim(const wstring & str, const anyks::ocdc_t & meta, const locale & loc = locale::classic()){
 	// Запоминаем итератор на первый левый символ
 	auto begin = str.begin();
 	// Переходим по всем символам в слове и проверяем является ли символ - символом пробела, если нашли то смещаем итератор
@@ -26,7 +27,7 @@ anyks::word_t strtrim(const anyks::word_t & str, const locale & loc = locale::cl
 	// Переходим по всем символам в слове и проверяем является ли символ - символом пробела, если нашли то смещаем итератор
 	while(rbegin != str.rend() && isspace(* rbegin, loc)) ++rbegin;
 	// Создаем результирующую строку
-	anyks::word_t result(wstring({begin, rbegin.base()}), str.getmeta());
+	anyks::word_t result(wstring{begin, rbegin.base()}, meta);
 	// Выводим результат
 	return result;
 }
@@ -113,7 +114,7 @@ void anyks::Word::wordCase(){
 		// Переходим по всем символам
 		for(size_t i = 0; i < word.length(); i++){
 			// Переводим букву в нижний регистр
-			letter = std::tolower(word[i], utf8);
+			letter = tolower(word[i], utf8);
 			// Если буквы не равны значит это верхний регистр
 			if(letter != word[i]){
 				// Переводим букву в нижний регистр
@@ -144,7 +145,7 @@ bool anyks::Word::isUpCase(wchar_t c){
 	// Объявляем локаль
 	const locale utf8("en_US.UTF-8");
 	// Если буквы не равны значит это верхний регистр
-	return (std::tolower(c, utf8) != c);
+	return (tolower(c, utf8) != c);
 }
 /**
  * str Метод конвертирования строки utf-8 в строку
@@ -1446,7 +1447,7 @@ size_t anyks::Word::rfind(wchar_t c, size_t pos) const {
  */
 anyks::Word anyks::Word::trim() const {
 	// Выводим результат
-	return strtrim(* this);
+	return ::trim(this->wstr(), this->getmeta());
 }
 /**
  * lower Метод приведения в нижний регистр
@@ -1458,9 +1459,9 @@ anyks::Word anyks::Word::lower() const {
 	// Объявляем локаль
 	const locale utf8("en_US.UTF-8");
 	// Переходим по всем символам
-	for(auto & c : word) c = std::tolower(c, utf8);
+	for(auto & c : word) c = tolower(c, utf8);
 	// Выводим результат
-	return strtrim(word_t(word, this->getmeta()));
+	return ::trim(word, this->getmeta());
 }
 /**
  * upper Метод приведения в верхний регистр
@@ -1472,9 +1473,9 @@ anyks::Word anyks::Word::upper() const {
 	// Объявляем локаль
 	const locale utf8("en_US.UTF-8");
 	// Переходим по всем символам
-	for(auto & c : word) c = std::toupper(c, utf8);
+	for(auto & c : word) c = toupper(c, utf8);
 	// Выводим результат
-	return strtrim(word_t(word, this->getmeta()));
+	return ::trim(word, this->getmeta());
 }
 /**
  * substr Метод обрезки сроки
@@ -1556,7 +1557,7 @@ const string anyks::Word::real() const {
 		// Переходим по всем символам
 		for(size_t i = 0; i < word.length(); i++){
 			// Проверяем существует ли позиция в списке регистров
-			if((1 << i) & this->uppers) word[i] = std::toupper(word[i], utf8);
+			if((1 << i) & this->uppers) word[i] = toupper(word[i], utf8);
 		}
 		// Выводим результат
 		return this->str(word);
@@ -1578,7 +1579,7 @@ const wstring anyks::Word::wreal() const {
 		// Переходим по всем символам
 		for(size_t i = 0; i < word.length(); i++){
 			// Проверяем существует ли позиция в списке регистров
-			if((1 << i) & this->uppers) word[i] = std::toupper(word[i], utf8);
+			if((1 << i) & this->uppers) word[i] = toupper(word[i], utf8);
 		}
 		// Выводим результат
 		return word;
@@ -1984,7 +1985,7 @@ istream & anyks::operator >> (istream & is, Word & word){
 	// Считываем в строку значение
 	is >> str;
 	// Устанавливаем значение
-	word.assign(word_t(str, word.getmeta()));
+	word.assign(str, word.getmeta());
 	// Добавляем метаданные
 	word.setmeta({1, 1});
 	// Выводим результат
