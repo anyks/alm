@@ -46,7 +46,7 @@ The are many libraries with language models: ([KenLM](https://github.com/kpu/ken
 
 - **Smoothing algorithms**: Kneser-Nay, Modified Kneser-Nay, Witten-Bell, Additive, Good-Turing, Absolute discounting.
 
-- **Normalisation and preprocessing for corpus**: Transferring corpus to lowercase, smart tokenization, possibility to create black- and white- lists.
+- **Normalisation and preprocessing for corpus**: Transferring corpus to lowercase, smart tokenization, possibility to create black - and white - lists.
 
 - **Arpa modification**: Frequencies and n-grams replacing, adding of new n-grams with frequencies, removing of n-grams.
 
