@@ -1,4 +1,4 @@
-[![ANYKS Smart language model](https://bitbucket.org/anyks/alm/raw/693d351f4c53fa40a273dfd75f452958721f6c12/site/img/banner.jpg)](https://anyks.com)
+[![ANYKS Smart language model](https://bitbucket.org/anyks/alm/raw/39e555357fd33427015fa33d6532ac7a89c6468d/site/img/banner.jpg)](https://anyks.com)
 
 # ANYKS LM (ALM) C++11
 
@@ -500,7 +500,7 @@ $ export $ALM_W-ARPA=./lm.arpa
 
 ## Examples
 
-![Program operation example](https://bitbucket.org/anyks/alm/raw/326d04193748dacb92ef123ae76548094c4194ce/img/screen1.png "Program operation example")
+![Program operation example](https://bitbucket.org/anyks/alm/raw/39e555357fd33427015fa33d6532ac7a89c6468d/site/img/screen1.png "Program operation example")
 
 ### Language Model training example
 
