@@ -162,24 +162,24 @@ ngram 3=15
 
 #### Description:
 
-- **"<s>"** - Sentence beginning token
-- **</s>** - Sentence end token
-- **<url>** - URL-address token
-- **<num>** - Number (arabic or roman) token
-- **<unk>** - Unknown word token
-- **<date>** - Date token (**18.07.2004** | **07/18/2004**)
-- **<time>** - Time token (**15:44:56**)
-- **<abbr>** - Abbreviation token (**1-й** | **2-е** | **20-я**)
-- **<anum>** - Pseudo-number token (combination of numbers and other symbols) (**T34** | **895-M-86** | **39km**)
-- **<math>** - Mathematical operation token (**+** | **-** | **=** | **/** | ***** | **^**)
-- **<range>** - Range of numbers token (**1-2** | **100-200** | **300-400**)
-- **<aprox>** - Approximate number token (**~93** | **~95.86** | **10~20**)
-- **<score>** - Score count token (**4:3** | **01:04**)
-- **<dimen>** - Dimensions token (**200x300** | **1920x1080**)
-- **<fract>** - Fraction token (**5/20** | **192/864**)
-- **<punct>** - Punctuation token (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
-- **<isolat>** - Isolation/quotation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
-- **<specs>** - Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **<** | **>**)
+> - **<s>** - Sentence beginning token
+> - **</s>** - Sentence end token
+> - **<url>** - URL-address token
+> - **<num>** - Number (arabic or roman) token
+> - **<unk>** - Unknown word token
+> - **<date>** - Date token (**18.07.2004** | **07/18/2004**)
+> - **<time>** - Time token (**15:44:56**)
+> - **<abbr>** - Abbreviation token (**1-й** | **2-е** | **20-я**)
+> - **<anum>** - Pseudo-number token (combination of numbers and other symbols) (**T34** | **895-M-86** | **39km**)
+> - **<math>** - Mathematical operation token (**+** | **-** | **=** | **/** | ***** | **^**)
+> - **<range>** - Range of numbers token (**1-2** | **100-200** | **300-400**)
+> - **<aprox>** - Approximate number token (**~93** | **~95.86** | **10~20**)
+> - **<score>** - Score count token (**4:3** | **01:04**)
+> - **<dimen>** - Dimensions token (**200x300** | **1920x1080**)
+> - **<fract>** - Fraction token (**5/20** | **192/864**)
+> - **<punct>** - Punctuation token (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
+> - **<isolat>** - Isolation/quotation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
+> - **<specs>** - Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **<** | **>**)
 
 ---
 
