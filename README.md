@@ -1,39 +1,40 @@
-[![ANYKS Smart language model](https://bitbucket.org/anyks/alm/raw/39e555357fd33427015fa33d6532ac7a89c6468d/site/img/banner.jpg)](https://anyks.com)
+[![ANYKS Smart language model](https://raw.githubusercontent.com/anyks/alm/master/site/img/banner.jpg)](https://anyks.com)
 
 # ANYKS LM (ALM) C++11
 
-- [Project goals and features](#markdown-header-)
-- [Requirements](#markdown-header-_1)
-- [To build and launch the project](#markdown-header-_2)
-  - [To clone the project](#markdown-header-clone-project)
-  - [Build on Linux and FreeBSD](#markdown-header-linux-freebsd)
-  - [Build on MacOS X](#markdown-header-macos-x)
-- [Files formats](#markdown-header-_3)
-  - [Arpa](#markdown-header-arpa)
-  - [Ngrams](#markdown-header-ngrams)
-  - [Vocab](#markdown-header-vocab)
-  - [Map](#markdown-header-map)
-  - [File of adding n-gram into existing arpa file](#markdown-header-n-arpa)
-  - [File of changing n-gram frequency in existing arpa file](#markdown-header-n-arpa_1)
-  - [File of replacing n-gram in existing arpa file](#markdown-header-n-arpa_2)
-  - [File of removing n-gram from existing arpa file](#markdown-header-n-arpa_3)
-  - [Binary container metadata](#markdown-header--)
-  - [The python script format to preprocess the received words](#markdown-header-python)
-  - [The python script format to define the word features](#markdown-header-python_1)
-- [Environment variables](#markdown-header-_4)
-- [Examples](#markdown-header-_4)
-  - [Language Model training example](#markdown-header-_5)
-  - [Arpa patch example](#markdown-header-arpa_1)
-  - [Example of removing n-grams with a frequency lower than backoff](#markdown-header-n-backoff)
-  - [Arpa pruning example](#markdown-header-arpa_2)
-  - [Arpa modification example](#markdown-header-arpa_3)
-  - [Training with preprocessing of received words](#markdown-header-_7)
-  - [Training using your own features](#markdown-header-_8)
-  - [Training using whitelist](#markdown-header-_9)
-  - [Training using blacklist](#markdown-header-_10)
-  - [Training with an unknown word](#markdown-header-_11)
-- [License](#markdown-header-license)
-- [Contact](#markdown-header-contact)
+- [Project goals and features](#user-content-project-goals-and-features)
+- [Requirements](#user-content-requirements)
+- [To build and launch the project](#user-content-to-build-and-launch-the-project)
+  - [To clone the project](#user-content-to-clone-the-project)
+  - [Build on Linux and FreeBSD](#user-content-build-on-linux-and-freebsd)
+  - [Build on MacOS X](#user-content-build-on-macos-x)
+- [Files formats](#user-content-files-formats)
+  - [Arpa](#user-content-arpa)
+  - [Ngrams](#user-content-ngrams)
+  - [Vocab](#user-content-vocab)
+  - [Map](#user-content-map)
+  - [File of adding n-gram into existing arpa file](#user-content-file-of-adding-n-gram-into-existing-arpa-file)
+  - [File of changing n-gram frequency in existing arpa file](#user-content-file-of-changing-n-gram-frequency-in-existing-arpa-file)
+  - [File of replacing n-gram in existing arpa file](#user-content-file-of-replacing-n-gram-in-existing-arpa-file)
+  - [File of removing n-gram from existing arpa file](#user-content-file-of-removing-n-gram-from-existing-arpa-file)
+  - [Binary container metadata](#user-content-binary-container-metadata)
+  - [The python script format to preprocess the received words](#user-content-the-python-script-format-to-preprocess-the-received-words)
+  - [The python script format to define the word features](#user-content-the-python-script-format-to-define-the-word-features)
+- [Environment variables](#user-content-environment-variables)
+- [Examples](#user-content-examples)
+  - [Language Model training example](#user-content-language-model-training-example)
+  - [Arpa patch example](#user-content-arpa-patch-example)
+  - [Example of removing n-grams with a frequency lower than backoff](#user-content-example-of-removing-n-grams-with-a-frequency-lower-than-backoff)
+  - [Arpa pruning example](#user-content-arpa-pruning-example)
+  - [Binary container information](#user-content-binary-container-information)
+  - [Arpa modification example](#user-content-arpa-modification-example)
+  - [Training with preprocessing of received words](#user-content-training-with-preprocessing-of-received-words)
+  - [Training using your own features](#user-content-training-using-your-own-features)
+  - [Training using whitelist](#user-content-training-using-whitelist)
+  - [Training using blacklist](#user-content-training-using-blacklist)
+  - [Training with an unknown word](#user-content-training-with-an-unknown-word)
+- [License](#user-content-license)
+- [Contact](#user-content-contact)
 
 ## Project goals and features
 
@@ -90,7 +91,7 @@ The are many libraries with language models: ([KenLM](https://github.com/kpu/ken
 ### To clone the project
 
 ```bash
-$ git clone --recursive https://forman@bitbucket.org/anyks/alm.git
+$ git clone --recursive https://github.com/anyks/alm.git
 ```
 
 ### Build on Linux and FreeBSD
@@ -511,7 +512,7 @@ $ export $ALM_W-ARPA=./lm.arpa
 
 ## Examples
 
-![Program operation example](https://bitbucket.org/anyks/alm/raw/39e555357fd33427015fa33d6532ac7a89c6468d/site/img/screen1.png "Program operation example")
+![Program operation example](https://raw.githubusercontent.com/anyks/alm/master/site/img/screen1.png "Program operation example")
 
 ### Language Model training example
 
@@ -594,7 +595,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -word-script ./wordTest.py
 ```
 
-> Sometimes it is necessary to change a word before it is added to arpa - this can be done using the script [**wordTest.py**](#markdown-header-python) the word and its context will be passed into script.
+> Sometimes it is necessary to change a word before it is added to arpa - this can be done using the script [**wordTest.py**](#user-content-the-python-script-format-to-preprocess-the-received-words) the word and its context will be passed into script.
 
 ### Training using your own features
 
@@ -602,7 +603,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -utokens "usa|russia" -utoken-script ./utokenTest.py
 ```
 
-> The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](#markdown-header-python_1) marks as feature, will be added to arpa with feature name.
+> The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](#user-content-the-python-script-format-to-define-the-word-features) marks as feature, will be added to arpa with feature name.
 
 ### Training using whitelist
 
@@ -648,7 +649,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 ## Contact
 
-If you have questions regarding the library, I would like to invite you to [open an issue at GitHub](https://github.com/nlohmann/json/issues/new/choose). Please describe your request, problem, or question as detailed as possible, and also mention the version of the library you are using as well as the version of your compiler and operating system. Opening an issue at GitHub allows other users and contributors to this library to collaborate.
+If you have questions regarding the library, I would like to invite you to [open an issue at GitHub](https://github.com/anyks/alm/issues/new/choose). Please describe your request, problem, or question as detailed as possible, and also mention the version of the library you are using as well as the version of your compiler and operating system. Opening an issue at GitHub allows other users and contributors to this library to collaborate.
 
 ---
 
