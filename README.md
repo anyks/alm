@@ -161,24 +161,24 @@ ngram 3=15
 
 #### Description:
 
-- **<s>** Sentence beginning token
-- **</s>** Sentence end token
-- **<url>** URL-address token
-- **<num>** Number (arabic or roman) token
-- **<unk>** Unknown word token
-- **<date>** Date token (**18.07.2004** | **07/18/2004**)
-- **<time>** Time token (**15:44:56**)
-- **<abbr>** Abbreviation token (**1-й** | **2-е** | **20-я**)
-- **<anum>** Pseudo-number token (**T34** | **895-M-86** | **39km**)
-- **<math>** Mathematical operation token (**+** | **-** | **=** | **/** | ***** | **^**)
-- **<range>** Range of numbers token (**1-2** | **100-200** | **300-400**)
-- **<aprox>** Approximate token (**~93** | **~95.86** | **10~20**)
-- **<score>** Account number token (**4:3** | **01:04**)
-- **<dimen>** Overall token (**200x300** | **1920x1080**)
-- **<fract>** Fraction token (**5/20** | **192/864**)
-- **<punct>** Punctuation token (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
-- **<isolat>** Isolation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
-- **<specs>** Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **<** | **>**)
+- **<s>** - Sentence beginning token
+- **</s>** - Sentence end token
+- **<url>** - URL-address token
+- **<num>** - Number (arabic or roman) token
+- **<unk>** - Unknown word token
+- **<date>** - Date token (**18.07.2004** | **07/18/2004**)
+- **<time>** - Time token (**15:44:56**)
+- **<abbr>** - Abbreviation token (**1-й** | **2-е** | **20-я**)
+- **<anum>** - Pseudo-number token (**T34** | **895-M-86** | **39km**)
+- **<math>** - Mathematical operation token (**+** | **-** | **=** | **/** | ***** | **^**)
+- **<range>** - Range of numbers token (**1-2** | **100-200** | **300-400**)
+- **<aprox>** - Approximate token (**~93** | **~95.86** | **10~20**)
+- **<score>** - Account number token (**4:3** | **01:04**)
+- **<dimen>** - Overall token (**200x300** | **1920x1080**)
+- **<fract>** - Fraction token (**5/20** | **192/864**)
+- **<punct>** - Punctuation token (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
+- **<isolat>** - Isolation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
+- **<specs>** - Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **<** | **>**)
 
 ---
 
@@ -255,9 +255,9 @@ ngram 3=306
 
 #### Description:
 
-- **ad** The number of documents in corpus
-- **cw** The number of words in all documents
-- **unq** The number of unique words collected in corpus
+- **ad** - The number of documents in corpus
+- **cw** - The number of words in all documents
+- **unq** - The number of unique words collected in corpus
 
 ---
 
@@ -306,12 +306,12 @@ unq=9390
 
 #### Description:
 
-- **oc** Occurrence in corpus
-- **dc** Occurrence in documents
-- **tf** Term frequency — the ratio of a word occurrence to the total number of words in a document. Thus, the importance of a word is evaluated within a single document, calculation formula is: [tf = oc / cw]
-- **idf** Inverse document frequency for word, calculation formula: [idf = log(ad / dc)]
-- **tf-idf** It's calculated by the formula: [tf-idf = tf * idf]
-- **wltf** Word rating, calculation formula: [wltf = 1 + log(tf * dc)]
+- **oc** - Occurrence in corpus
+- **dc** - Occurrence in documents
+- **tf** - Term frequency — the ratio of a word occurrence to the total number of words in a document. Thus, the importance of a word is evaluated within a single document, calculation formula is: [tf = oc / cw]
+- **idf** - Inverse document frequency for word, calculation formula: [idf = log(ad / dc)]
+- **tf-idf** - It's calculated by the formula: [tf-idf = tf * idf]
+- **wltf** - Word rating, calculation formula: [wltf = 1 + log(tf * dc)]
 
 ---
 
@@ -441,14 +441,14 @@ unq=9390
 
 #### Description:
 
-- **aes** AES Encryption Size (128, 192, 256) bits
-- **name** The dictionary name
-- **author** The author of the dictionary
-- **lictype** The license type
-- **lictext** The license text
-- **contacts** The author contact info
-- **password** An encryption password (if required), encryption is performed only when setting a password
-- **copyright** Copyright of the dictionary owner
+- **aes** - AES Encryption Size (128, 192, 256) bits
+- **name** - The dictionary name
+- **author** - The author of the dictionary
+- **lictype** - The license type
+- **lictext** - The license text
+- **contacts** - The author contact info
+- **password** - An encryption password (if required), encryption is performed only when setting a password
+- **copyright** - Copyright of the dictionary owner
 
 ---
 
