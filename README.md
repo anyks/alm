@@ -159,24 +159,26 @@ ngram 3=15
 |-----------------------|------------------------------|----------------------------|
 | -1.328447             | после того                   | -0.477121                  |
 
-- **<s>** Sentence beginning
-- **</s>** Sentence end
-- **<url>** Признак url адреса
-- **<num>** Number (arabic or roman)
-- **<unk>** Unknown word
-- **<date>** Признак даты (**18.07.2004** | **07/18/2004**)
-- **<time>** Признак времени (**15:44:56**)
-- **<abbr>** Abbreviation (**1-й** | **2-е** | **20-я**)
-- **<anum>** Признак псевдо-числа (**T34** | **895-M-86** | **39km**)
-- **<math>** Признак математической операции (**+** | **-** | **=** | **/** | ***** | **^**)
-- **<range>** Range of numbers (**1-2** | **100-200** | **300-400**)
-- **<aprox>** Признак приблизительного числа (**~93** | **~95.86** | **10~20**)
-- **<score>** Признак числового счёта (**4:3** | **01:04**)
-- **<dimen>** Признак габаритных размеров (**200x300** | **1920x1080**)
-- **<fract>** Признак числовой дроби (**5/20** | **192/864**)
-- **<punct>** Признак пунктуации (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
-- **<isolat>** Признак изоляции (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
-- **<specs>** Признак спец-символа (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **<** | **>**)
+#### Description:
+
+- **<s>** Sentence beginning token
+- **</s>** Sentence end token
+- **<url>** URL-address token
+- **<num>** Number (arabic or roman) token
+- **<unk>** Unknown word token
+- **<date>** Date token (**18.07.2004** | **07/18/2004**)
+- **<time>** Time token (**15:44:56**)
+- **<abbr>** Abbreviation token (**1-й** | **2-е** | **20-я**)
+- **<anum>** Pseudo-number token (**T34** | **895-M-86** | **39km**)
+- **<math>** Mathematical operation token (**+** | **-** | **=** | **/** | ***** | **^**)
+- **<range>** Range of numbers token (**1-2** | **100-200** | **300-400**)
+- **<aprox>** Approximate token (**~93** | **~95.86** | **10~20**)
+- **<score>** Account number token (**4:3** | **01:04**)
+- **<dimen>** Overall token (**200x300** | **1920x1080**)
+- **<fract>** Fraction token (**5/20** | **192/864**)
+- **<punct>** Punctuation token (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
+- **<isolat>** Isolation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
+- **<specs>** Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **<** | **>**)
 
 ---
 
@@ -251,6 +253,8 @@ ngram 3=306
 |-----------------------|------------------------------|----------------------------|
 | только в одном        | 2                            | 1                          |
 
+#### Description:
+
 - **ad** The number of documents in corpus
 - **cw** The number of words in all documents
 - **unq** The number of unique words collected in corpus
@@ -300,6 +304,8 @@ unq=9390
 |-----------------------|-----------|----------------------------|----------------------------|----------|----------|-----------|
 | 2282345502            | новый     | 10                         | 1                          | 0.000420 | 0.000000 | -6.776199 |
 
+#### Description:
+
 - **oc** Occurrence in corpus
 - **dc** Occurrence in documents
 - **tf** Term frequency — the ratio of a word occurrence to the total number of words in a document. Thus, the importance of a word is evaluated within a single document, calculation formula is: [tf = oc / cw]
@@ -348,6 +354,7 @@ unq=9390
 -19.18453	можно и тоже
 ...
 ```
+
 | N-gram frequency      | Separator   | N-gram       |
 |-----------------------|-------------|--------------|
 | -0.988534             | \t          | у границ США |
@@ -369,6 +376,7 @@ unq=9390
 -0.6588787	вообще не хочу
 ...
 ```
+
 | N-gram frequency      | Separator   | N-gram            |
 |-----------------------|-------------|-------------------|
 | -0.6588787            | \t          | мужчины и женщины |
@@ -383,6 +391,7 @@ unq=9390
 в СМИ	в ФСБ
 Шах	Мат
 ```
+
 | Existing N-gram       | Separator   | New N-gram        |
 |-----------------------|-------------|-------------------|
 | но тем не             | \t          | да ты что         |
@@ -429,6 +438,8 @@ unq=9390
 	"copyright": "Copyright author"
 }
 ```
+
+#### Description:
 
 - **aes** AES Encryption Size (128, 192, 256) bits
 - **name** The dictionary name
