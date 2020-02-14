@@ -65,7 +65,7 @@ The are many libraries with language models: ([KenLM](https://github.com/kpu/ken
 
 - **N-grams preprocessing**: Ability to pre-process n-grams before adding to arpa using custom Python3 scripts.
 
-- **Binary container with Language Model**: The binary bALM container supports compression, encryption and installation of copyrights.
+- **Binary container with Language Model**: The binary container supports compression, encryption and installation of copyrights.
 
 - **Convenient visualization of the process**: ALM implements several types of visualizations: textual, graphic, visualization in the form of a process indicator, and logging to files or console.
 
@@ -169,15 +169,15 @@ ngram 3=15
 - **<date>** - Date token (**18.07.2004** | **07/18/2004**)
 - **<time>** - Time token (**15:44:56**)
 - **<abbr>** - Abbreviation token (**1-й** | **2-е** | **20-я**)
-- **<anum>** - Pseudo-number token (**T34** | **895-M-86** | **39km**)
+- **<anum>** - Pseudo-number token (combination of numbers and other symbols) (**T34** | **895-M-86** | **39km**)
 - **<math>** - Mathematical operation token (**+** | **-** | **=** | **/** | ***** | **^**)
 - **<range>** - Range of numbers token (**1-2** | **100-200** | **300-400**)
-- **<aprox>** - Approximate token (**~93** | **~95.86** | **10~20**)
-- **<score>** - Account number token (**4:3** | **01:04**)
-- **<dimen>** - Overall token (**200x300** | **1920x1080**)
+- **<aprox>** - Approximate number token (**~93** | **~95.86** | **10~20**)
+- **<score>** - Score count token (**4:3** | **01:04**)
+- **<dimen>** - Dimensions token (**200x300** | **1920x1080**)
 - **<fract>** - Fraction token (**5/20** | **192/864**)
 - **<punct>** - Punctuation token (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
-- **<isolat>** - Isolation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
+- **<isolat>** - Isolation/quotation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
 - **<specs>** - Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **<** | **>**)
 
 ---
@@ -481,15 +481,15 @@ def init():
     Initialization Method: Runs only once at application startup
     """
 
-def run(using, word):
+def run(token, word):
     """
     Processing start method: starts when a word is extracted from text
-    @using word token name
+    @token word token name
     @word  word for processing
     """
-    if using and (using == "<usa>"):
+    if token and (token == "<usa>"):
         if word and (word.lower() == "usa"): return "ok"
-    elif using and (using == "<russia>"):
+    elif token and (token == "<russia>"):
         if word and (word.lower() == "russia"): return "ok"
     return "no"
 ```
@@ -537,7 +537,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 
 **Smoothing Algorithm: Good-Turing, build from a group of files from binary container**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -w-bin ./lm.alm -w-bin-meta ./meta.json -w-bin-arpa -w-bin-usigns -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -w-bin ./lm.alm -w-bin-meta ./meta.json -w-bin-arpa -w-bin-utokens -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
 ```
 
 **Smoothing Algorithm: Witten-Bell, build from binary container**
@@ -594,10 +594,10 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ### Training using your own features
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -usings "usa|russia" -using-script ./usingTest.py
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -utokens "usa|russia" -utoken-script ./utokenTest.py
 ```
 
-> The example adds its own features **usa** and **russia**, when processing text all words, that script [**usingTest.py**](#markdown-header-python_1) marks as feature, will be added to arpa with feature name.
+> The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](#markdown-header-python_1) marks as feature, will be added to arpa with feature name.
 
 ### Training using whitelist
 
@@ -613,7 +613,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -badwords ./badwords.txt
 ```
 
-> If you specify a black list during training, all the words indicated in the black list will be equated with the sign **<unk>**.
+> If you specify a black list during training, all the words indicated in the black list will be equated with the token **<unk>**.
 
 ### Training with an unknown word
 
