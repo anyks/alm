@@ -88,7 +88,7 @@
 
 ## Сборка проекта
 
-### Клонирование проекта, флаг **--recursive** обязателен
+### Клонирование проекта, флаг [--recursive] обязателен
 
 ```bash
 $ git clone --recursive https://github.com/anyks/alm.git
