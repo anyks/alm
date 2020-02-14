@@ -162,7 +162,7 @@ ngram 3=15
 
 #### Description:
 
-- **<s>** - Sentence beginning token
+- **"<s>"** - Sentence beginning token
 - **</s>** - Sentence end token
 - **<url>** - URL-address token
 - **<num>** - Number (arabic or roman) token
