@@ -1,77 +1,77 @@
-[![ANYKS Smart language model](https://bitbucket.org/anyks/alm/raw/693d351f4c53fa40a273dfd75f452958721f6c12/site/img/banner.jpg)](https://anyks.com)
+[![ANYKS Smart language model](https://bitbucket.org/anyks/alm/raw/693d351f4c53fa40a273dfd75f452958721f6c12/img/banner.jpg)](https://anyks.com)
 
 # ANYKS LM (ALM) C++11
 
-- [Project goals and features](#markdown-header-)
-- [Requirements](#markdown-header-_1)
-- [To build and launch the project](#markdown-header-_2)
-  - [To clone the project](#markdown-header-clone-project)
-  - [Build on Linux and FreeBSD](#markdown-header-linux-freebsd)
-  - [Build on MacOS X](#markdown-header-macos-x)
-- [Files formats](#markdown-header-_3)
+- [Цели проекта](#markdown-header-)
+- [Внешние зависимости](#markdown-header-_1)
+- [Сборка проекта](#markdown-header-_2)
+  - [Clone project](#markdown-header-clone-project)
+  - [Linux и FreeBSD](#markdown-header-linux-freebsd)
+  - [MacOS X](#markdown-header-macos-x)
+- [Описание форматов файлов](#markdown-header-_3)
   - [Arpa](#markdown-header-arpa)
   - [Ngrams](#markdown-header-ngrams)
   - [Vocab](#markdown-header-vocab)
   - [Map](#markdown-header-map)
-  - [File of adding n-gram into existing arpa file](#markdown-header-n-arpa)
-  - [File of changing n-gram frequency in existing arpa file](#markdown-header-n-arpa_1)
-  - [File of replacing n-gram in existing arpa file](#markdown-header-n-arpa_2)
-  - [File of removing n-gram from existing arpa file](#markdown-header-n-arpa_3)
-  - [Binary container metadata](#markdown-header--)
-  - [The python script format to preprocess the received words](#markdown-header-python)
-  - [The python script format to define the word features](#markdown-header-python_1)
-- [Environment variables](#markdown-header-_4)
-- [Examples](#markdown-header-_4)
-  - [Language Model training example](#markdown-header-_5)
-  - [Arpa patch example](#markdown-header-arpa_1)
-  - [Example of removing n-grams with a frequency lower than backoff](#markdown-header-n-backoff)
-  - [Arpa pruning example](#markdown-header-arpa_2)
-  - [Arpa modification example](#markdown-header-arpa_3)
-  - [Training with preprocessing of received words](#markdown-header-_7)
-  - [Training using your own features](#markdown-header-_8)
-  - [Training using whitelist](#markdown-header-_9)
-  - [Training using blacklist](#markdown-header-_10)
-  - [Training with an unknown word](#markdown-header-_11)
+  - [Файл добавления n-грамм в существующий файл arpa](#markdown-header-n-arpa)
+  - [Файл изменения частот n-грамм в существующем файле arpa](#markdown-header-n-arpa_1)
+  - [Файл замены n-грамм в существующем файле arpa](#markdown-header-n-arpa_2)
+  - [Файл удаления n-грамм в существующем файле arpa](#markdown-header-n-arpa_3)
+  - [Мета-данные бинарного контейнера](#markdown-header--)
+  - [Формат скрипта python предобработки полученных слов](#markdown-header-python)
+  - [Формат скрипта python определения собственных признаков слов](#markdown-header-python_1)
+- [Переменные окружения](#markdown-header-_4)
+- [Примеры](#markdown-header-_4)
+  - [Пример обучения языковой модели](#markdown-header-_5)
+  - [Пример исправления arpa](#markdown-header-arpa_1)
+  - [Пример удаления n-грамм у которых частота ниже backoff](#markdown-header-n-backoff)
+  - [Пример пруннинга arpa](#markdown-header-arpa_2)
+  - [Пример модификации arpa](#markdown-header-arpa_3)
+  - [Обучение с предобработкой полученных слов](#markdown-header-_7)
+  - [Обучение с использованием своих признаков](#markdown-header-_8)
+  - [Обучение с белым списком](#markdown-header-_9)
+  - [Обучение с чёрным списком](#markdown-header-_10)
+  - [Обучение с неизвестным словом](#markdown-header-_11)
 - [License](#markdown-header-license)
 - [Contact](#markdown-header-contact)
 
-## Project goals and features
+## Цели проекта
 
-The are many libraries with language models: ([KenLM](https://github.com/kpu/kenlm), [SriLM](https://github.com/BitMindLab/SRILM), [IRSTLM](https://github.com/irstlm-team/irstlm)), and each of these models may have a reason to exist. But our language model has the following goals and features:
+Существует множество библиотек языковых моделей ([KenLM](https://github.com/kpu/kenlm), [SriLM](https://github.com/BitMindLab/SRILM), [IRSTLM](https://github.com/irstlm-team/irstlm)), и у каждой из них может быть причина для существования. Наша языковая модель преследовала следующие цели:
 
-- **UTF-8 support**: Full UTF-8 support without third-party dependencies.
+- **Поддержка UTF-8**: Полная поддержка UTF-8 без сторонних зависимостей.
 
-- **Support of many data formats**: Arpa, Vocab, Map Sequence, N-grams, Binary alm dictionary.
+- **Поддержка форматов данных**: Arpa, Vocab, Map Sequence, N-grams, Binary alm dictionary.
 
-- **Smoothing algorithms**: Kneser-Nay, Modified Kneser-Nay, Witten-Bell, Additive, Good-Turing, Absolute discounting.
+- **Поддержка алгоритмов сглаживания**: Kneser-Nay, Modified Kneser-Nay, Witten-Bell, Additive, Good-Turing, Absolute discounting.
 
-- **Normalisation and preprocessing for corpus**: Transferring corpus to lowercase, smart tokenization, possibility to create black- and white- lists.
+- **Нормализация входных корпусов**: Приведение слов к нижнему регистру, умная токенизация, поддержка чёрного и белого списков.
 
-- **Arpa modification**: Frequencies and n-grams replacing, adding of new n-grams with frequencies, removing of n-grams.
+- **Модификация arpa**: Замена частот, замена n-грамм, добавление новых n-грамм с частотами, удаление n-грамм.
 
-- **Pruning**: Reducing the number of n -grams that do not meet the specified quality criteria.
+- **Прунинг**: Сокращение числа n-грамм которые не соответствуют указанным критериям качества.
 
-- **Removing of bad n-grams**: Removing of n-grams that have backoff frequency is higher than usual frequency.
+- **Чистка плохих n-грамм**: Удаление n-грамм у которых обратная частота backoff выше основной частоты.
 
-- **Arpa recovery**: Recovery of damaged n-grams in arpa with subsequent recalculation of their backoff frequencies.
+- **Восстановление arpa**: Восстановление повреждённых n-грамм в arpa с последующим перерасчётом их backoff частот.
 
-- **Support of additional word features**: Features extraction: (numbers, roman numbers, ranges of numbers, numeric abbreviations, any other custom attributes) using scripts written in Python3.
+- **Поддержка дополнительных признаков слов**: Определение в тексте признаков: (чисел, римских чисел, диапазонов чисел, числовых аббривиатур, любых других пользовательских признаков с помощью скриптов написанных на языке Python3).
 
-- **Preprocessing of "dirty" texts**: Unlike all other language models, here we can extract the correct context from files with "dirty" texts.
+- **Обработка грязных текстов**: В отличие от всех остальных языковых моделей, здесь мы умеем извлекать правильный контекст из текстовых файлов с грязными текстами.
 
-- **Accounting of <unk> token**: Accounting of <unk> token as full n-gram.
+- **Полноценный учёт <unk> признака**: Учёт <unk> признака как полноценной n-граммы.
 
-- **Redefinition of <unk> token**: Possibility to redefine an attribute of an unknown token.
+- **Переопределение <unk> признака**: Возможность переопределения признака неизвестного слова.
 
-- **N-grams preprocessing**: Ability to pre-process n-grams before adding to arpa using custom Python3 scripts.
+- **Препроцессинг обрабатываемых n-грамм**: Возможность предобрабатывать n-граммы перед добавлением в arpa с помощью пользовательских скриптов на языке Python3.
 
-- **Binary container with Language Model**: The binary bALM container supports compression, encryption and installation of copyrights.
+- **Бинарный контейнер языковой модели**: Бинарный bALM контейнер поддерживает сжатие, шифрование и установку копирайтов.
 
-- **Convenient visualization of the process**: ALM implements several types of visualizations: textual, graphic, visualization in the form of a process indicator, and logging to files or console.
+- **Удобная визуализация хода процесса**: В ALM реализовано несколько видов визуализаций: текстовая, графическая в виде индикатора процесса, логирование в файлы или консоль.
 
-- **Collection of all n-grams**: Unlike other language models, ALM is guaranteed to assemble all n-grams from the text, regardless of their length (except for Modified Kneser-Nay), also it is possible to force all n-grams to be taken into account even if they occur only 1 time.
+- **Гарантированная сборка всех n-грамм**: В отличие от остальных языковых моделей, ALM гарантированно собирает все n-граммы из текста в независимости от их длины (кроме Modified Kneser-Nay), также возможно принудительно учитывать все n-граммы даже если они встретились всего 1 раз.
 
-## Requirements
+## Внешние зависимости
 
 - [Zlib](http://www.zlib.net)
 
@@ -85,15 +85,15 @@ The are many libraries with language models: ([KenLM](https://github.com/kpu/ken
 
 - [BigInteger](http://mattmccutchen.net/bigint)
 
-## To build and launch the project
+## Сборка проекта
 
-### To clone the project
+### Clone project
 
 ```bash
 $ git clone --recursive https://forman@bitbucket.org/anyks/alm.git
 ```
 
-### Build on Linux and FreeBSD
+### Linux и FreeBSD
 
 ```bash
 $ mkdir ./build
@@ -103,7 +103,7 @@ $ cmake ..
 $ make
 ```
 
-### Build on MacOS X
+### MacOS X
 
 ```bash
 $ mkdir ./build
@@ -113,7 +113,7 @@ $ cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1d -DOPENSSL_LIBRAR
 $ make
 ```
 
-## Files formats
+## Описание форматов файлов
 
 ### Arpa
 ```
@@ -155,21 +155,21 @@ ngram 3=15
 \end\
 ```
 
-| Frequency             | N-gram                       | Reverse frequency          |
+| Частота               | N-грамма                     | Обратная частота           |
 |-----------------------|------------------------------|----------------------------|
 | -1.328447             | после того                   | -0.477121                  |
 
-- **<s>** Sentence beginning
-- **</s>** Sentence end
+- **<s>** Признак начала предложения
+- **</s>** Признак конеца предложения
 - **<url>** Признак url адреса
-- **<num>** Number (arabic or roman)
-- **<unk>** Unknown word
+- **<num>** Признак числа (арабское или римское)
+- **<unk>** Признак неизвестного слова
 - **<date>** Признак даты (**18.07.2004** | **07/18/2004**)
 - **<time>** Признак времени (**15:44:56**)
-- **<abbr>** Abbreviation (**1-й** | **2-е** | **20-я**)
+- **<abbr>** Признак аббревиатуры (**1-й** | **2-е** | **20-я**)
 - **<anum>** Признак псевдо-числа (**T34** | **895-M-86** | **39km**)
 - **<math>** Признак математической операции (**+** | **-** | **=** | **/** | ***** | **^**)
-- **<range>** Range of numbers (**1-2** | **100-200** | **300-400**)
+- **<range>** Признак диапазона чисел (**1-2** | **100-200** | **300-400**)
 - **<aprox>** Признак приблизительного числа (**~93** | **~95.86** | **10~20**)
 - **<score>** Признак числового счёта (**4:3** | **01:04**)
 - **<dimen>** Признак габаритных размеров (**200x300** | **1920x1080**)
@@ -247,13 +247,13 @@ ngram 3=306
 \end\
 ```
 
-| N-gram                | Occurrence in corpus         | Occurrence in documents    |
+| N-грамма              | Встречаемость в корпусе      | Встречаемость в документах |
 |-----------------------|------------------------------|----------------------------|
 | только в одном        | 2                            | 1                          |
 
-- **ad** The number of documents in corpus
-- **cw** The number of words in all documents
-- **unq** The number of unique words collected in corpus
+- **ad** Количество документов в корпусе
+- **cw** Количество слов во всех документах корпуса
+- **unq** Количество уникальных собранных слов
 
 ---
 
@@ -296,16 +296,16 @@ unq=9390
 ...
 ```
 
-| Word Id               | Word      | Occurrence in corpus       | Occurrence in documents    | tf       | tf-idf   | wltf      |
+| Идентификатор слова   | Слово     | Встречаемость в корпусе    | Встречаемость в документах | tf       | tf-idf   | wltf      |
 |-----------------------|-----------|----------------------------|----------------------------|----------|----------|-----------|
 | 2282345502            | новый     | 10                         | 1                          | 0.000420 | 0.000000 | -6.776199 |
 
-- **oc** Occurrence in corpus
-- **dc** Occurrence in documents
-- **tf** Term frequency — the ratio of a word occurrence to the total number of words in a document. Thus, the importance of a word is evaluated within a single document, calculation formula is: [tf = oc / cw]
-- **idf** Inverse document frequency for word, calculation formula: [idf = log(ad / dc)]
-- **tf-idf** It's calculated by the formula: [tf-idf = tf * idf]
-- **wltf** Word rating, calculation formula: [wltf = 1 + log(tf * dc)]
+- **oc** Встречаемость в корпусе
+- **dc** Встречаемость в документах
+- **tf** (term frequency — частота слова) — отношение числа вхождений некоторого слова к общему числу слов документа. Таким образом, оценивается важность слова в пределах отдельного документа, расчитывается как: [tf = oc / cw]
+- **idf** (inverse document frequency — обратная частота документа) — инверсия частоты, с которой некоторое слово встречается в документах коллекции, расчитывается как: [idf = log(ad / dc)]
+- **tf-idf** Расчитывается как: [tf-idf = tf * idf]
+- **wltf** Рейтинг слова, расчитывается как: [wltf = 1 + log(tf * dc)]
 
 ---
 
@@ -333,11 +333,11 @@ unq=9390
 ...
 ```
 
-> This file is for technical use only. In combination with the **vocab** file, you can combine several language models, modify, store, distribute and extract any formats (arpa, ngrams, vocab, alm).
+> Содержимое этого файла имеет чисто техническое значение. В сочетании с файлом **vocab** можно объединять несколько языковых моделей, модифицировать, хранить, распространять и извлекать любые форматы (arpa, ngrams, vocab, alm).
 
 ---
 
-### File of adding n-gram into existing arpa file
+### Файл добавления n-грамм в существующий файл arpa
 ```
 -3.002006	США
 -1.365296	границ США
@@ -348,13 +348,13 @@ unq=9390
 -19.18453	можно и тоже
 ...
 ```
-| N-gram frequency      | Separator   | N-gram       |
+| Частота n-граммы      | Разделитель | N-грамма     |
 |-----------------------|-------------|--------------|
 | -0.988534             | \t          | у границ США |
 
 ---
 
-### File of changing n-gram frequency in existing arpa file
+### Файл изменения частот n-грамм в существующем файле arpa
 ```
 -0.6588787	получайте удовольствие </s>
 -0.6588787	только в одном
@@ -369,13 +369,13 @@ unq=9390
 -0.6588787	вообще не хочу
 ...
 ```
-| N-gram frequency      | Separator   | N-gram            |
+| Частота n-граммы      | Разделитель | N-грамма          |
 |-----------------------|-------------|-------------------|
 | -0.6588787            | \t          | мужчины и женщины |
 
 ---
 
-### File of replacing n-gram in existing arpa file
+### Файл замены n-грамм в существующем файле arpa
 ```
 коем случае нельзя	там да тут
 но тем не	да ты что
@@ -383,13 +383,13 @@ unq=9390
 в СМИ	в ФСБ
 Шах	Мат
 ```
-| Existing N-gram       | Separator   | New N-gram        |
+| Существующая n-грамма | Разделитель | Новая n-грамма    |
 |-----------------------|-------------|-------------------|
 | но тем не             | \t          | да ты что         |
 
 ---
 
-### File of removing n-gram from existing arpa file
+### Файл удаления n-грамм в существующем файле arpa
 ```
 ну то есть
 ну очень большой
@@ -416,7 +416,7 @@ unq=9390
 
 ---
 
-### Binary container metadata
+### Мета-данные бинарного контейнера
 ```json
 {
 	"aes": 128,
@@ -430,65 +430,65 @@ unq=9390
 }
 ```
 
-- **aes** AES Encryption Size (128, 192, 256) bits
-- **name** The dictionary name
-- **author** The author of the dictionary
-- **lictype** The license type
-- **lictext** The license text
-- **contacts** The author contact info
-- **password** An encryption password (if required), encryption is performed only when setting a password
-- **copyright** Copyright of the dictionary owner
+- **aes** Размер шифрования AES (128, 192, 256) бит
+- **name** Название словаря
+- **author** Автор словаря
+- **lictype** Тип лицензии
+- **lictext** Текст лицензии
+- **contacts** Контактные данные автора
+- **password** Пароль шифрования (если требуется), шифрование производится только при установки пароля
+- **copyright** Копирайт владельца словаря
 
 ---
 
-### The python script format to preprocess the received words
+### Формат скрипта python предобработки полученных слов
 ```python
 # -*- coding: utf-8 -*-
 
 def init():
     """
-    Initialization Method: Runs only once at application startup
+    Метод инициализации: выполняется только один раз при запуске приложения
     """
 
 def run(word, context):
     """
-    Processing start method: starts when a word is extracted from text
-    @word    word for processing
-    @context sequence of previous words as an array
+    Метод запуска обработки: запускается при извлечении слова из текста
+    @word    обрабатываемое слово
+    @context последовательность предыдущих слов в виде массива
     """
     return word
 ```
 
 ---
 
-### The python script format to define the word features
+### Формат скрипта python определения собственных признаков слов
 ```python
 # -*- coding: utf-8 -*-
 
 def init():
     """
-    Initialization Method: Runs only once at application startup
+    Метод инициализации: выполняется только один раз при запуске приложения
     """
 
 def run(using, word):
     """
-    Processing start method: starts when a word is extracted from text
-    @using word token name
-    @word  word for processing
+    Метод запуска обработки: запускается при извлечении слова из текста
+    @using название признака слова
+    @word  обрабатываемое слово
     """
     if using and (using == "<usa>"):
-        if word and (word.lower() == "usa"): return "ok"
+        if word and (word.lower() == "сша"): return "ok"
     elif using and (using == "<russia>"):
-        if word and (word.lower() == "russia"): return "ok"
+        if word and (word.lower() == "россия"): return "ok"
     return "no"
 ```
 
 ---
 
-### Environment variables
+### Переменные окружения
 
-- All parameters can be passed through environment variables. Variables begin with the prefix **ALM_** and must written in upper case, their names correspond to the application parameters.
-- If both application parameters and environment variables are specified at the same time, application parameters will take precedence.
+- Все параметры можно передавать через переменные окружения. Переменные начинаются с префикса **ALM_** и должны записываться в верхнем регистре, в остальном названия их соответствуют параметрам приложения.
+- Если одновременно указаны и параметры приложения и переменные окружения, приоритет будут иметь параметры приложения.
 
 ```bash
 $ export $ALM_SMOOTHING=wittenbell
@@ -498,119 +498,119 @@ $ export $ALM_W-ARPA=./lm.arpa
 
 ---
 
-## Examples
+## Примеры
 
-![Program operation example](https://bitbucket.org/anyks/alm/raw/326d04193748dacb92ef123ae76548094c4194ce/img/screen1.png "Program operation example")
+![Пример работы программы](https://bitbucket.org/anyks/alm/raw/326d04193748dacb92ef123ae76548094c4194ce/img/screen1.png "Пример работы программы")
 
-### Language Model training example
+### Пример обучения языковой модели
 
-**Smoothing Algorithm: Witten-Bell, single-file build**
+**Алгоритм сглаживания: Witten-Bell, сборка из одного файла**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./text.txt
 ```
 
-**Smoothing Algorithm: Absolute discounting, build from a group of files**
+**Алгоритм сглаживания: Absolute discounting, сборка из группы файлов**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing cdiscount -discount 0.3 -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt
 ```
 
-**Smoothing Algorithm: Additive, build from a group of files**
+**Алгоритм сглаживания: Additive, сборка из группы файлов**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing addsmooth -delta 0.3 -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt
 ```
 
-**Smoothing Algorithm: Kneser-Nay, build from a group of files**
+**Алгоритм сглаживания: Kneser-Nay, сборка из группы файлов**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing kneserney -kneserney-modified -kneserney-prepares -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt
 ```
 
-**Smoothing Algorithm: Good-Turing, build from a group of files from binary container**
+**Алгоритм сглаживания: Good-Turing, сборка из группы файлов бинарного контейнера**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -w-bin ./lm.alm -w-bin-meta ./meta.json -w-bin-arpa -w-bin-usigns -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
 ```
 
-**Smoothing Algorithm: Witten-Bell, build from binary container**
+**Алгоритм сглаживания: Witten-Bell, сборка из бинарного контейнера**
 ```bash
 $ ./alm -r-bin ./lm.alm -r-bin-meta ./meta.json -method train -debug 1 -size 3 -smoothing wittenbell -w-arpa ./lm.arpa
 ```
 
-### Arpa patch example
+### Пример исправления arpa
 
 ```bash
 ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method repair -debug 1 -w-arpa ./lm2.arpa -allow-unk -interpolate -r-arpa ./lm1.arpa
 ```
 
-### Example of removing n-grams with a frequency lower than backoff
+### Пример удаления n-грамм у которых частота ниже backoff
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method sweep -debug 1 -w-arpa ./lm2.arpa -allow-unk -interpolate -r-arpa ./lm1.arpa
 ```
 
-### Arpa pruning example
+### Пример пруннинга arpa
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method prune -debug 1 -w-arpa ./lm2.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab -prune-threshold 0.003 -prune-max-gram 2
 ```
 
-### Arpa modification example
+### Пример модификации arpa
 
-**Adding n-gram to arpa**
+**Добавление в arpa n-грамм**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method modify -modify emplace -modify-file ./app.txt -debug 1 -w-arpa ./lm.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab
 ```
 
-**Changing n-gram frequencies in arpa**
+**Изменение частот n-грамм в arpa**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method modify -modify change -modify-file ./chg.txt -debug 1 -w-arpa ./lm.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab
 ```
 
-**Removing n-gram from arpa**
+**Удаление n-грамм в arpa**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method modify -modify remove -modify-file ./rm.txt -debug 1 -w-arpa ./lm.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab
 ```
 
-**Changing n-gram in arpa**
+**Изменение n-грамм в arpa**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method modify -modify replace -modify-file ./rep.txt -debug 1 -w-arpa ./lm.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab
 ```
 
-### Training with preprocessing of received words
+### Обучение с предобработкой полученных слов
 
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -word-script ./wordTest.py
 ```
 
-> Sometimes it is necessary to change a word before it is added to arpa - this can be done using the script [**wordTest.py**](#markdown-header-python) the word and its context will be passed into script.
+> Иногда требуется изменить слово прежде чем оно будет добавлено в arpa - это можно сделать с помощью скрипта [**wordTest.py**](#markdown-header-python) в который будет передано слово и его контекст.
 
-### Training using your own features
+### Обучение с использованием своих признаков
 
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -usings "usa|russia" -using-script ./usingTest.py
 ```
 
-> The example adds its own features **usa** and **russia**, when processing text all words, that script [**usingTest.py**](#markdown-header-python_1) marks as feature, will be added to arpa with feature name.
+> В примере добавлены свои признаки **usa** и **russia**, при обработки текста все слова которые скрипт [**usingTest.py**](#markdown-header-python_1) подтвердит как указанный признак, будут добавлены в arpa с названием признака.
 
-### Training using whitelist
+### Обучение с белым списком
 
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -goodwords ./goodwords.txt
 ```
 
-> If you specify a whitelist during training, all words specified in the white list will be forcibly added to arpa.
+> Если указать белый список при обучении, все слова указанные в белом списке будут принудительно добавлены в arpa.
 
-### Training using blacklist
+### Обучение с чёрным списком
 
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -badwords ./badwords.txt
 ```
 
-> If you specify a black list during training, all the words indicated in the black list will be equated with the sign **<unk>**.
+> Если указать чёрный список при обучении, все слова указанные в чёрном списке будут приравнены к признаку **<unk>**.
 
-### Training with an unknown word
+### Обучение с неизвестным словом
 
 ```bash
 ./bin/alm.exe -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -unknown-word goga
 ```
 
-> In this example the token **<unk>** in arpa will be replaced by the word specified in the parameter [-unknown-word | --unknown-word=<value>], in our case it's word **goga**.
+> В данном примере, признак **<unk>** в arpa будет заменён на слово указанное в параметре [-unknown-word | --unknown-word=<value>], в нашем случае на слово **goga**.
 
 * * *
 
