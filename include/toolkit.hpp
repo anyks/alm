@@ -56,29 +56,29 @@ namespace anyks {
 			};
 			// Основные опции
 			enum class options_t : u_int {
-				debug,       // Флаг режима отладки
-				onlyGood,    // Флаг использования только слов из белого списка
-				allowUnk,    // Флаг разрешаюний использовать признак неизвестного слова
-				allGrams,    // Флаг предписывающий использовать все полученные n-граммы
-				lowerCase,   // Флаг предписывающий использовать слова в нижнем регистре
-				interpolate, // Флаг предписывающий выполнять интерполяцию при расчёте частот
-				notUserSign, // Флаг запрещающий использовать пользовательский признак
-				notUrl,      // Флаг запрещающий детектировать url адреса
-				notAbbr,     // Флаг запрещающий детектировать аббривиатуры чисел
-				notDate,     // Флаг запрещающий детектировать дату
-				notTime,     // Флаг запрещающий детектировать время
-				notMath,     // Флаг запрещающий детектировать математические операции
-				notSpecs,    // Флаг запрещающий детектировать спец-символы
-				notRange,    // Флаг запрещающий детектировать диапазоны арабских чисел
-				notPunct,    // Флаг запрещающий детекстировать знак пунктуации
-				notScore,    // Флаг запрещающий детектировать числовой счёт
-				notDimen,    // Флаг запрещающий детектировать габаритные размеры
-				notFract,    // Флаг запрещающий детектировать числовые дроби
-				notRoman,    // Флаг запрещающий детектировать римские числа
-				notAprox,    // Флаг запрещающий детектировать приблизительные значения чисел
-				notIsolat,   // Флаг запрещающий детектировать символ изоляции
-				notNumber,   // Флаг запрещающий детектировать арабские числа
-				notANumber   // Флаг запрещающий детектировать псевдо-арабские числа
+				debug,        // Флаг режима отладки
+				onlyGood,     // Флаг использования только слов из белого списка
+				allowUnk,     // Флаг разрешаюний использовать токен неизвестного слова
+				allGrams,     // Флаг предписывающий использовать все полученные n-граммы
+				lowerCase,    // Флаг предписывающий использовать слова в нижнем регистре
+				interpolate,  // Флаг предписывающий выполнять интерполяцию при расчёте частот
+				notUserToken, // Флаг запрещающий использовать пользовательский токен
+				notUrl,       // Флаг запрещающий детектировать url адреса
+				notAbbr,      // Флаг запрещающий детектировать аббривиатуры чисел
+				notDate,      // Флаг запрещающий детектировать дату
+				notTime,      // Флаг запрещающий детектировать время
+				notMath,      // Флаг запрещающий детектировать математические операции
+				notSpecs,     // Флаг запрещающий детектировать спец-символы
+				notRange,     // Флаг запрещающий детектировать диапазоны арабских чисел
+				notPunct,     // Флаг запрещающий детекстировать знак пунктуации
+				notScore,     // Флаг запрещающий детектировать числовой счёт
+				notDimen,     // Флаг запрещающий детектировать габаритные размеры
+				notFract,     // Флаг запрещающий детектировать числовые дроби
+				notRoman,     // Флаг запрещающий детектировать римские числа
+				notAprox,     // Флаг запрещающий детектировать приблизительные значения чисел
+				notIsolat,    // Флаг запрещающий детектировать символ изоляции
+				notNumber,    // Флаг запрещающий детектировать арабские числа
+				notANumber    // Флаг запрещающий детектировать псевдо-арабские числа
 			};
 			// Флаги модификации
 			enum class modify_t : u_short {emplace, remove, change, replace};
@@ -110,17 +110,17 @@ namespace anyks {
 				Info() : ad(0), cw(0), unq(0), idd(noID) {};
 			} __attribute__((packed)) info_t;
 			/**
-			 * UserSign Структура пользовательского признака
+			 * UserToken Структура пользовательского токена
 			 */
-			typedef struct Usersign {
+			typedef struct UserToken {
 				size_t idw;                                            // Идентификатор слова
-				word_t name;                                           // Название признака
+				word_t name;                                           // Название токена
 				function <bool (const string &, const string &)> test; // Функция проверки
 				/**
-				 * Usersign Конструктор
+				 * UserToken Конструктор
 				 */
-				Usersign() : idw(noID), name("") {}
-			} usign_t;
+				UserToken() : idw(noID), name("") {}
+			} utoken_t;
 		private:
 			// Замена неизвестному слову
 			size_t unknown = 0;
@@ -139,8 +139,8 @@ namespace anyks {
 			set <size_t> badwords;
 			// Список хороших слов
 			set <size_t> goodwords;
-			// Список пользовательских признаков
-			map <size_t, usign_t> usigns;
+			// Список пользовательских токенов
+			map <size_t, utoken_t> utokens;
 			// Словарь всех слов в системе
 			mutable map <size_t, word_t> vocab;
 			// Список скриптов python
@@ -184,7 +184,12 @@ namespace anyks {
 			 * getOptions Метод извлечения установленных опций
 			 * @return установленные опции
 			 */
-			const u_short getOptions() const;
+			const u_int getOptions() const;
+			/**
+			 * getParams Метод извлечения параметров алгоритма сжатия
+			 * @return параметры алгоритма сжатия
+			 */
+			const params_t & getParams() const;
 			/**
 			 * getUnknown Метод извлечения неизвестного слова
 			 * @return установленное неизвестное слово
@@ -196,20 +201,10 @@ namespace anyks {
 			 */
 			const string getWordScript() const;
 			/**
-			 * getUsignScript Метод извлечения скрипта обработки пользовательских признаков
-			 * @return адрес скрипта python обработки пользовательских признаков
+			 * getUserTokenScript Метод извлечения скрипта обработки пользовательских токенов
+			 * @return адрес скрипта python обработки пользовательских токенов
 			 */
-			const string getUsignScript() const;
-			/**
-			 * getParams Метод извлечения параметров алгоритма сжатия
-			 * @return параметры алгоритма сжатия
-			 */
-			const params_t & getParams() const;
-			/**
-			 * getUsigns Метод извлечения списка пользовательских признаков
-			 * @return список пользовательских признаков
-			 */
-			const vector <string> getUsigns() const;
+			const string getUserTokenScript() const;
 			/**
 			 * getBadwords Метод извлечения чёрного списка
 			 * @return чёрный список слов
@@ -221,26 +216,27 @@ namespace anyks {
 			 */
 			const set <size_t> & getGoodwords() const;
 			/**
-			 * getUsignWord Метод получения пользовательского признака по его идентификатору
-			 * @param idw идентификатор пользовательского признака
-			 * @return    пользовательский признак соответствующий идентификатору
+			 * getUserTokens Метод извлечения списка пользовательских токенов
+			 * @return список пользовательских токенов
 			 */
-			const string getUsignWord(const size_t idw) const;
+			const vector <string> getUserTokens() const;
 			/**
-			 * getUsignId Метод получения идентификатора пользовательского признака
-			 * @param name слово для которого нужно получить идентификатор
-			 * @return     идентификатор пользовательского признака соответствующий слову
+			 * getUserTokenWord Метод получения пользовательского токена по его идентификатору
+			 * @param idw идентификатор пользовательского токена
+			 * @return    пользовательский токен соответствующий идентификатору
 			 */
-			const size_t getUsignId(const string & name) const;
+			const string getUserTokenWord(const size_t idw) const;
+			/**
+			 * getUserTokenId Метод получения идентификатора пользовательского токена
+			 * @param name слово для которого нужно получить идентификатор
+			 * @return     идентификатор пользовательского токена соответствующий слову
+			 */
+			const size_t getUserTokenId(const string & name) const;
 		public:
 			/**
 			 * clear Метод очистки
 			 */
 			void clear();
-			/**
-			 * Метод очистки пользовательских признаков
-			 */
-			void clearUsigns();
 			/**
 			 * clearBadwords Метод очистки списка плохих слов
 			 */
@@ -249,6 +245,10 @@ namespace anyks {
 			 * clearGoodwords Метод очистки списка хороших слов
 			 */
 			void clearGoodwords();
+			/**
+			 * clearUserTokens Метод очистки пользовательских токенов
+			 */
+			void clearUserTokens();
 		public:
 			/**
 			 * addBadword Метод добавления идентификатора похого слова в список
@@ -256,40 +256,41 @@ namespace anyks {
 			 */
 			void addBadword(const size_t idw);
 			/**
-			 * addBadword Метод добавления похого слова в список
-			 * @param word слово для добавления
-			 */
-			void addBadword(const string & word);
-			/**
 			 * addGoodword Метод добавления идентификатора хорошего слова в список
 			 * @param idw идентификатор слова
 			 */
 			void addGoodword(const size_t idw);
 			/**
+			 * addBadword Метод добавления похого слова в список
+			 * @param word слово для добавления
+			 */
+			void addBadword(const string & word);
+			/**
 			 * addGoodword Метод добавления хорошего слова в список
 			 * @param word слово для добавления
 			 */
 			void addGoodword(const string & word);
+		public:
 			/**
-			 * setOptions Метод установки опций
-			 * @param options опции для установки
+			 * setUnknown Метод установки неизвестного слова
+			 * @param word слово для добавления
 			 */
-			void setOptions(const u_short options);
+			void setUnknown(const string & word);
 			/**
 			 * setLogfile Метод установка файла для вывода логов
 			 * @param logifle адрес файла для вывода отладочной информации
 			 */
 			void setLogfile(const char * logfile);
 			/**
-			 * setUsign Метод добавления признака пользователя
-			 * @param name слово - обозначение признака
+			 * setOptions Метод установки опций
+			 * @param options опции для установки
 			 */
-			void setUsign(const string & name);
+			void setOptions(const u_int options);
 			/**
-			 * setUnknown Метод установки неизвестного слова
-			 * @param word слово для добавления
+			 * setUserToken Метод добавления токена пользователя
+			 * @param name слово - обозначение токена
 			 */
-			void setUnknown(const string & word);
+			void setUserToken(const string & name);
 			/**
 			 * setOption Метод подключения опции модуля
 			 * @param option опция для подключения
@@ -306,11 +307,6 @@ namespace anyks {
 			 */
 			void setWordScript(const string & script);
 			/**
-			 * setUsignScript Метод установки скрипта обработки пользовательских признаков
-			 * @param script скрипт python обработки пользовательских признаков
-			 */
-			void setUsignScript(const string & script);
-			/**
 			 * setSize Метод установки размера n-граммы
 			 * @param size размер n-граммы
 			 */
@@ -320,6 +316,11 @@ namespace anyks {
 			 * @param alphabet объект алфавита
 			 */
 			void setAlphabet(const alphabet_t * alphabet);
+			/**
+			 * setUserTokenScript Метод установки скрипта обработки пользовательских токенов
+			 * @param script скрипт python обработки пользовательских токенов
+			 */
+			void setUserTokenScript(const string & script);
 			/**
 			 * addBadwords Метод добавления списка идентификаторов плохих слов в список
 			 * @param badwords список идентификаторов плохих слов
@@ -341,23 +342,23 @@ namespace anyks {
 			 */
 			void addGoodwords(const vector <string> & goodwords);
 			/**
-			 * addWord Метод добавления слова в словарь
-			 * @param word слово для добавления
-			 * @param idd  идентификатор документа
-			 */
-			void addWord(const wstring & word, const size_t idd = 0);
-			/**
 			 * addText Метод добавления текста для расчёта
 			 * @param text текст который нужно добавить
 			 * @param idd  идентификатор документа
 			 */
 			void addText(const string & text, const size_t idd = 0);
 			/**
-			 * setUsignMethod Метод добавления функции обработки пользовательского признака
-			 * @param name слово - обозначение признака
-			 * @param fn   внешняя функция обрабатывающая пользовательский признак
+			 * addWord Метод добавления слова в словарь
+			 * @param word слово для добавления
+			 * @param idd  идентификатор документа
 			 */
-			void setUsignMethod(const string & name, function <bool (const string &, const string &)> fn);
+			void addWord(const wstring & word, const size_t idd = 0);
+			/**
+			 * setUserTokenMethod Метод добавления функции обработки пользовательского токена
+			 * @param name слово - обозначение токена
+			 * @param fn   внешняя функция обрабатывающая пользовательский токен
+			 */
+			void setUserTokenMethod(const string & name, function <bool (const string &, const string &)> fn);
 		public:
 			/**
 			 * sweep Метод удаления низкочастотных n-грамм arpa
@@ -375,15 +376,33 @@ namespace anyks {
 			 */
 			void repair(function <void (const u_short)> status = nullptr);
 			/**
+			 * modify Метод модификации arpa
+			 * @param filename адрес файла для чтения
+			 * @param flag     флаг модификации arpa
+			 * @param status   функция вывода статуса модификации
+			 */
+			void modify(const string & filename, modify_t flag, function <void (const u_short)> status = nullptr);
+			/**
+			 * prune Метод прунинга языковой модели
+			 * @param threshold порог частоты прунинга
+			 * @param mingram   значение минимальной n-граммы за которую нельзя прунить
+			 * @param status    функция вывода статуса обучения
+			 */
+			void prune(const double threshold, const u_short mingram, function <void (const u_short)> status = nullptr) const;
+			/**
+			 * init Метод инициализации языковой модели
+			 * @param algorithm алгоритм расчёта языковой модели
+			 * @param modified  количество уже изменённых младших заказов
+			 * @param prepares  необходимость изменения счёта, после вычисления
+			 * @param mod       дополнительный параметр дельты
+			 */
+			void init(const algorithm_t algorithm, const bool modified = false, const bool prepares = false, const double mod = 0.0);
+		public:
+			/**
 			 * loadInfoVocab Метод загрузки бинарных информационных данных словаря
 			 * @param buffer буфер бинарных информационных данных словаря
 			 */
 			void loadInfoVocab(const vector <char> & buffer);
-			/**
-			 * saveInfoVocab Метод сохранения бинарных информационных данных словаря
-			 * @param buffer буфер бинарных информационных данных словаря
-			 */
-			void saveInfoVocab(vector <char> & buffer) const;
 			/**
 			 * loadVocab Метод загрузки бинарных данных в словарь
 			 * @param buffer буфер с бинарными данными
@@ -396,11 +415,49 @@ namespace anyks {
 			 * @param arpa   нужно добавить только данные arpa
 			 */
 			void loadArpa(const vector <char> & buffer, const bool arpa = false) const;
+		public:
+			/**
+			 * saveInfoVocab Метод сохранения бинарных информационных данных словаря
+			 * @param buffer буфер бинарных информационных данных словаря
+			 */
+			void saveInfoVocab(vector <char> & buffer) const;
 			/**
 			 * saveVocab Метод извлечения данных словаря в бинарном виде
 			 * @param callback функция обратного вызова
 			 */
 			void saveVocab(function <void (const vector <char> &, const u_short)> callback) const;
+			/**
+			 * writeArpa Метод записи данных в файл arpa
+			 * @param filename адрес файла для записи
+			 * @param status   функция вывода статуса записи
+			 */
+			void writeArpa(const string & filename, function <void (const u_short)> status = nullptr) const;
+			/**
+			 * writeVocab Метод записи данных словаря в файл
+			 * @param filename адрес файла для записи
+			 * @param status   функция вывода статуса записи
+			 */
+			void writeVocab(const string & filename, function <void (const u_short)> status = nullptr) const;
+			/**
+			 * writeNgrams Метод записи данных в файлы ngrams
+			 * @param filename адрес файла для записи
+			 * @param status   функция вывода статуса записи
+			 */
+			void writeNgrams(const string & filename, function <void (const u_short)> status = nullptr) const;
+			/**
+			 * saveArpa Метод извлечения данных n-грамм в бинарном виде
+			 * @param callback функция обратного вызова
+			 * @param arpa     нужно добавить только данные arpa
+			 */
+			void saveArpa(function <void (const vector <char> &, const u_short)> callback, const bool arpa = false) const;
+			/**
+			 * writeMap Метод записи карты последовательности в файл
+			 * @param filename адрес map файла карты последовательности
+			 * @param status   функция вывода статуса записи
+			 * @param delim    разделитель последовательностей
+			 */
+			void writeMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|") const;
+		public:
 			/**
 			 * readArpas Метод чтения данных из каталога файлов arpa
 			 * @param path   адрес где лежат arpa файлы
@@ -432,44 +489,6 @@ namespace anyks {
 			 */
 			void readNgram(const string & filename, function <void (const u_short)> status = nullptr);
 			/**
-			 * writeArpa Метод записи данных в файл arpa
-			 * @param filename адрес файла для записи
-			 * @param status   функция вывода статуса записи
-			 */
-			void writeArpa(const string & filename, function <void (const u_short)> status = nullptr) const;
-			/**
-			 * writeVocab Метод записи данных словаря в файл
-			 * @param filename адрес файла для записи
-			 * @param status   функция вывода статуса записи
-			 */
-			void writeVocab(const string & filename, function <void (const u_short)> status = nullptr) const;
-			/**
-			 * writeNgrams Метод записи данных в файлы ngrams
-			 * @param filename адрес файла для записи
-			 * @param status   функция вывода статуса записи
-			 */
-			void writeNgrams(const string & filename, function <void (const u_short)> status = nullptr) const;
-			/**
-			 * modifyArpa Метод модификации arpa
-			 * @param filename адрес файла для чтения
-			 * @param flag     флаг модификации arpa
-			 * @param status   функция вывода статуса модификации
-			 */
-			void modifyArpa(const string & filename, modify_t flag, function <void (const u_short)> status = nullptr);
-			/**
-			 * saveArpa Метод извлечения данных n-грамм в бинарном виде
-			 * @param callback функция обратного вызова
-			 * @param arpa     нужно добавить только данные arpa
-			 */
-			void saveArpa(function <void (const vector <char> &, const u_short)> callback, const bool arpa = false) const;
-			/**
-			 * prune Метод прунинга языковой модели
-			 * @param threshold порог частоты прунинга
-			 * @param mingram   значение минимальной n-граммы за которую нельзя прунить
-			 * @param status    функция вывода статуса обучения
-			 */
-			void prune(const double threshold, const u_short mingram, function <void (const u_short)> status = nullptr) const;
-			/**
 			 * readMaps Метод добавления - объединения карт последовательностей
 			 * @param path   адрес где лежат map файлы
 			 * @param status функция вывода статуса чтения
@@ -483,21 +502,6 @@ namespace anyks {
 			 * @param delim    разделитель последовательностей
 			 */
 			void readMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|");
-			/**
-			 * writeMap Метод записи карты последовательности в файл
-			 * @param filename адрес map файла карты последовательности
-			 * @param status   функция вывода статуса записи
-			 * @param delim    разделитель последовательностей
-			 */
-			void writeMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|") const;
-			/**
-			 * init Метод инициализации языковой модели
-			 * @param algorithm алгоритм расчёта языковой модели
-			 * @param modified  количество уже изменённых младших заказов
-			 * @param prepares  необходимость изменения счёта, после вычисления
-			 * @param mod       дополнительный параметр дельты
-			 */
-			void init(const algorithm_t algorithm, const bool modified = false, const bool prepares = false, const double mod = 0.0);
 		public:
 			/**
 			 * Toolkit Конструктор

@@ -286,7 +286,7 @@ const bool anyks::Arpa::checkIdw(const size_t idw, const u_short gram) const {
 			// Переходим по всему списку полученных n-грамм
 			for(auto & item : ngrams){
 				// Если в n-грамме есть дочерные граммы
-				if(!item->empty() && (item->idw != size_t(sign_t::start))){
+				if(!item->empty() && (item->idw != size_t(token_t::start))){
 					// Ищем слово в последовательности
 					auto it = item->find(idw);
 					// Если последовательность найдена и она пустая, зануляем её
@@ -424,42 +424,42 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
 	string result = "";
 	// Определяем тип записи
 	switch(idw){
-		// Если это признак арабского или римского числа
-		case u_short(sign_t::num): result = "<num>"; break;
-		// Если это признак неизвестного слова
-		case u_short(sign_t::unk): result = "<unk>"; break;
-		// Если это признак url адреса
-		case u_short(sign_t::url): result = "<url>"; break;
-		// Если это признак начала предложения
-		case u_short(sign_t::start): result = "<s>"; break;
-		// Если это признак аббревиатуры
-		case u_short(sign_t::abbr): result = "<abbr>"; break;
-		// Если это признак даты
-		case u_short(sign_t::date): result = "<date>"; break;
-		// Если это признак времени
-		case u_short(sign_t::time): result = "<time>"; break;
-		// Если это признак псевдо-числа
-		case u_short(sign_t::anum): result = "<anum>"; break;
+		// Если это токен арабского или римского числа
+		case u_short(token_t::num): result = "<num>"; break;
+		// Если это токен неизвестного слова
+		case u_short(token_t::unk): result = "<unk>"; break;
+		// Если это токен url адреса
+		case u_short(token_t::url): result = "<url>"; break;
+		// Если это токен начала предложения
+		case u_short(token_t::start): result = "<s>"; break;
+		// Если это токен аббревиатуры
+		case u_short(token_t::abbr): result = "<abbr>"; break;
+		// Если это токен даты
+		case u_short(token_t::date): result = "<date>"; break;
+		// Если это токен времени
+		case u_short(token_t::time): result = "<time>"; break;
+		// Если это токен псевдо-числа
+		case u_short(token_t::anum): result = "<anum>"; break;
 		// Если это символ математической операции
-		case u_short(sign_t::math): result = "<math>"; break;
-		// Если это признак конца предложения
-		case u_short(sign_t::finish): result = "</s>"; break;
+		case u_short(token_t::math): result = "<math>"; break;
+		// Если это токен конца предложения
+		case u_short(token_t::finish): result = "</s>"; break;
 		// Если это спец-символ
-		case u_short(sign_t::specs): result = "<specs>"; break;
-		// Если это признак диапазона чисел
-		case u_short(sign_t::range): result = "<range>"; break;
-		// Если это признак знака пунктуации
-		case u_short(sign_t::punct): result = "<punct>"; break;
-		// Если это признак приблизительного числа
-		case u_short(sign_t::aprox): result = "<aprox>"; break;
-		// Если это признак числового счёта
-		case u_short(sign_t::score): result = "<score>"; break;
-		// Если это признак габаритных размеров
-		case u_short(sign_t::dimen): result = "<dimen>"; break;
-		// Если это признак числовой дроби
-		case u_short(sign_t::fract): result = "<fract>"; break;
-		// Если это признак изоляции
-		case u_short(sign_t::isolat): result = "<isolat>"; break;
+		case u_short(token_t::specs): result = "<specs>"; break;
+		// Если это токен диапазона чисел
+		case u_short(token_t::range): result = "<range>"; break;
+		// Если это токен знака пунктуации
+		case u_short(token_t::punct): result = "<punct>"; break;
+		// Если это токен приблизительного числа
+		case u_short(token_t::aprox): result = "<aprox>"; break;
+		// Если это токен числового счёта
+		case u_short(token_t::score): result = "<score>"; break;
+		// Если это токен габаритных размеров
+		case u_short(token_t::dimen): result = "<dimen>"; break;
+		// Если это токен числовой дроби
+		case u_short(token_t::fract): result = "<fract>"; break;
+		// Если это токен изоляции
+		case u_short(token_t::isolat): result = "<isolat>"; break;
 		// Если это нормальное слово
 		default: {
 			// Получаем слово по его идентификатору
@@ -500,7 +500,7 @@ void anyks::Arpa::distribute(const double mass) const {
 		// Переходим по всему слов в контексте
 		for(auto & item : this->vocab){
 			// Если это не безсобытийная грамма (Начальная)
-			if(item.second.idw != size_t(sign_t::start)){
+			if(item.second.idw != size_t(token_t::start)){
 				// Считаем количество слов
 				numWords++;
 				// Получаем вес слова
@@ -523,7 +523,7 @@ void anyks::Arpa::distribute(const double mass) const {
 			// Переходим по всему слов в контексте
 			for(auto & item : this->vocab){
 				// Если это не безсобытийная грамма (Начальная)
-				if((item.second.idw != size_t(sign_t::start))
+				if((item.second.idw != size_t(token_t::start))
 				&& (item.second.weight == this->zero)){
 					// Устанавливаем новый размер
 					item.second.weight = log10(add);
@@ -542,7 +542,7 @@ void anyks::Arpa::distribute(const double mass) const {
 			// Переходим по всему слов в контексте
 			for(auto & item : this->vocab){
 				// Если это не безсобытийная грамма (Начальная)
-				if(item.second.idw != size_t(sign_t::start)){
+				if(item.second.idw != size_t(token_t::start)){
 					// Устанавливаем новый размер
 					item.second.weight = log10(pow(10, item.second.weight) + add);
 				}
@@ -587,7 +587,7 @@ void anyks::Arpa::fixupProbs(const u_short gram) const {
 					 * чтобы отличить его от внутренних узлов,
 					 * которые добавляются неявно.
 					 */
-					else if(value.second.idw != size_t(sign_t::start)){
+					else if(value.second.idw != size_t(token_t::start)){
 						// Устанавливаем ненулевую частоту юниграммы
 						value.second.weight = 1;
 					}
@@ -867,24 +867,24 @@ const string anyks::Arpa::stamp() const {
 const bool anyks::Arpa::event(const size_t idw) const {
 	// Если это не спец-слова, формируем слово
 	return (
-		(idw != size_t(sign_t::num)) &&
-		(idw != size_t(sign_t::unk)) &&
-		(idw != size_t(sign_t::url)) &&
-		(idw != size_t(sign_t::abbr)) &&
-		(idw != size_t(sign_t::date)) &&
-		(idw != size_t(sign_t::time)) &&
-		(idw != size_t(sign_t::anum)) &&
-		(idw != size_t(sign_t::math)) &&
-		(idw != size_t(sign_t::specs)) &&
-		(idw != size_t(sign_t::aprox)) &&
-		(idw != size_t(sign_t::start)) &&
-		(idw != size_t(sign_t::range)) &&
-		(idw != size_t(sign_t::score)) &&
-		(idw != size_t(sign_t::punct)) &&
-		(idw != size_t(sign_t::dimen)) &&
-		(idw != size_t(sign_t::fract)) &&
-		(idw != size_t(sign_t::isolat)) &&
-		(idw != size_t(sign_t::finish))
+		(idw != size_t(token_t::num)) &&
+		(idw != size_t(token_t::unk)) &&
+		(idw != size_t(token_t::url)) &&
+		(idw != size_t(token_t::abbr)) &&
+		(idw != size_t(token_t::date)) &&
+		(idw != size_t(token_t::time)) &&
+		(idw != size_t(token_t::anum)) &&
+		(idw != size_t(token_t::math)) &&
+		(idw != size_t(token_t::specs)) &&
+		(idw != size_t(token_t::aprox)) &&
+		(idw != size_t(token_t::start)) &&
+		(idw != size_t(token_t::range)) &&
+		(idw != size_t(token_t::score)) &&
+		(idw != size_t(token_t::punct)) &&
+		(idw != size_t(token_t::dimen)) &&
+		(idw != size_t(token_t::fract)) &&
+		(idw != size_t(token_t::isolat)) &&
+		(idw != size_t(token_t::finish))
 	);
 }
 /**
@@ -1073,7 +1073,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 					// Переходим по всему списку полученных n-грамм
 					for(auto & item : ngrams){
 						// Если в n-грамме есть дочерные граммы
-						if(!item->empty() && (item->idw != size_t(sign_t::start))){
+						if(!item->empty() && (item->idw != size_t(token_t::start))){
 							// Ищем первый элемент в списке
 							auto it = item->find(seq[0]);
 							// Ищем идентификатор
@@ -1173,7 +1173,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 				// Если последовательности переданы
 				if(!seq1.empty() && !seq2.empty()){
 					// Извлекаем n-грамму начала слова
-					auto it = this->vocab.find((size_t) sign_t::start);
+					auto it = this->vocab.find((size_t) token_t::start);
 					// Если n-грамма найдена
 					if(it != this->vocab.end()){
 						// Выполняем замену основных n-грамм
@@ -1338,7 +1338,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 					// Если слово пустое или там только конец предложения
 					if(!result && (it->second.size() == 1)){
 						// Если это конец предложения
-						result = (it->second.count((size_t) sign_t::finish) > 0);
+						result = (it->second.count((size_t) token_t::finish) > 0);
 					}
 					// Если всё хорошо, выполняем замену
 					if(result){
@@ -1880,11 +1880,11 @@ void anyks::Arpa::add(const vector <pair_t> & seq, const float weight, const flo
 				// Если частота не установлена
 				if(obj->weight == 0.0f) obj->weight = weightTmp;
 				// Увеличиваем основную частоту
-				else if(obj->idw != size_t(sign_t::start)) obj->weight = log10(pow(10, obj->weight) + pow(10, weightTmp));
+				else if(obj->idw != size_t(token_t::start)) obj->weight = log10(pow(10, obj->weight) + pow(10, weightTmp));
 				// Если частота отката не установлена
 				if(obj->backoff == 0.0f) obj->backoff = backoffTmp;
 				// Увеличиваем обратную частоту документа
-				else if(obj->idw != size_t(sign_t::start)) obj->backoff = log10(pow(10, obj->backoff) + pow(10, backoffTmp));
+				else if(obj->idw != size_t(token_t::start)) obj->backoff = log10(pow(10, obj->backoff) + pow(10, backoffTmp));
 			}
 			// Если регистры слова переданы, считаем их
 			if(item.second > 0){
@@ -1985,12 +1985,12 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
 				while(context->father != nullptr){
 					// Запоминаем результат
 					if((context->weight != this->zero)
-					&& (context->idw != size_t(sign_t::start))) result += context->weight;
+					&& (context->idw != size_t(token_t::start))) result += context->weight;
 					/**
 					 * Если мы вычисляем предельную вероятность контекста униграммы <s>,
 					 * мы должны искать </s> вместо неё, поскольку у начала предложения вес = 0.
 					 */
-					if(context->idw == size_t(sign_t::start)) result += context->father->at((size_t) sign_t::finish).weight;
+					if(context->idw == size_t(token_t::start)) result += context->father->at((size_t) token_t::finish).weight;
 					// Выполняем смещение
 					context = context->father;
 				}
@@ -2310,9 +2310,9 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 			// Размер скидки
 			double discount = 0.0f;
 			// Если это безсобытийная грамма (Начальная)
-			if(idw == size_t(sign_t::start)){
+			if(idw == size_t(token_t::start)){
 				// Если это не юниграмма или неизвестный символ
-				if((this->gram > 1) || (idw == size_t(sign_t::unk))){
+				if((this->gram > 1) || (idw == size_t(token_t::unk))){
 					// Считаем количество безсобытийных грамм
 					this->param.nonevent++;
 					// Выходим
@@ -2406,7 +2406,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 					// Переходим по всему списку юниграмм
 					for(auto & value : this->vocab){
 						// Если это безсобытийная грамма (Начальная)
-						if(value.second.idw == size_t(sign_t::start)) continue;
+						if(value.second.idw == size_t(token_t::start)) continue;
 						// Выполняем первоначальный подсчёт грамм
 						estimate1Fn(value.second.oc);
 					}
@@ -2460,7 +2460,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 								// Переходим по всему списку грамм
 								for(auto & value : * item){
 									// Если это безсобытийная грамма (Начальная)
-									if(value.second.idw == size_t(sign_t::start)) continue;
+									if(value.second.idw == size_t(token_t::start)) continue;
 									// Выполняем первоначальный подсчёт грамм
 									estimate1Fn(value.second.oc);
 								}
@@ -2920,14 +2920,14 @@ void anyks::Arpa::save(const bool arpa, function <void (const vector <char> &, c
 						idw = sequence.idw;
 						// Получаем лучший регистр слова
 						uppers = move(this->uppers(item.second.uppers, item.second.oc));
+						// Формируем блок слова
+						sequence.ups = uppers.first;
 						// Извлекаем основные данные
 						sequence.idw     = item.second.idw;
 						sequence.weight  = item.second.weight;
 						sequence.backoff = item.second.backoff;
 						// Если нужно извлечь все данные
 						if(!arpa){
-							// Формируем блок слова
-							sequence.ups = uppers.first;
 							sequence.oc  = item.second.oc;
 							sequence.dc  = item.second.dc;
 						}
@@ -3112,7 +3112,7 @@ const bool anyks::GoodTuring::estimate(const u_short gram) const {
 				// Переходим по всем n-граммам
 				for(auto & value : * item){
 					// Если это безсобытийная грамма (Начальная)
-					if(this->midw(&value.second) == size_t(sign_t::start)) continue;
+					if(this->midw(&value.second) == size_t(token_t::start)) continue;
 					// Если встречаемость меньше максимального значения
 					else if(value.second.oc <= (maxCount + 1)) countOfCounts[value.second.oc]++;
 				}
@@ -3438,7 +3438,7 @@ void anyks::KneserNey::prepare(const u_short gram) const {
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Если это не безсобытийная грамма (Начальная)
-				if(this->midw(&value.second) != size_t(sign_t::start)){
+				if(this->midw(&value.second) != size_t(token_t::start)){
 					// Обнуляем текущую встречаемость
 					value.second.oc = 0;
 					// Формируем ключ записи
@@ -3490,7 +3490,7 @@ const bool anyks::KneserNey::estimate(const u_short gram) const {
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Если это не безсобытийная грамма (Начальная)
-				if(this->midw(&value.second) == size_t(sign_t::start)) continue;
+				if(this->midw(&value.second) == size_t(token_t::start)) continue;
 				// Иначе продолжаем
 				else if(value.second.oc == 1) n1++;
 				else if(value.second.oc == 2) n2++;
@@ -3644,7 +3644,7 @@ const bool anyks::ModKneserNey::estimate(const u_short gram) const {
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Если это не безсобытийная грамма (Начальная)
-				if(this->midw(&value.second) == size_t(sign_t::start)) continue;
+				if(this->midw(&value.second) == size_t(token_t::start)) continue;
 				// Иначе продолжаем
 				else if(value.second.oc == 1) n1++;
 				else if(value.second.oc == 2) n2++;

@@ -764,11 +764,11 @@ const u_short anyks::Alphabet::errors(const wstring & word) const {
 	return result;
 }
 /**
- * numSign Метод извлечения числового признака слова
+ * idwToken Метод извлечения идентификатора токена
  * @param  word слово для проверки
  * @return      результат проверки
  */
-const u_short anyks::Alphabet::numSign(const wstring & word) const {
+const u_short anyks::Alphabet::idwToken(const wstring & word) const {
 	// Результат работы функции
 	u_short result = 0;
 	// Если слово передано
@@ -793,15 +793,15 @@ const u_short anyks::Alphabet::numSign(const wstring & word) const {
 					const wstring & tmp = word.substr(1);
 					// Проверяем оставшуюся часть слова является числом
 					if(this->isNumber(tmp) || this->isDecimal(tmp)){
-						// Определяем тип признака
+						// Определяем тип токена
 						switch(first){
 							// Это обычное число
-							case L'-': result = (u_short) sign_t::num;   break;
+							case L'-': result = (u_short) token_t::num;   break;
 							// Это приблизительное число
-							case L'~': result = (u_short) sign_t::aprox; break;
+							case L'~': result = (u_short) token_t::aprox; break;
 						}
 					// Сообщаем что это псевдо-число
-					} else result = (u_short) sign_t::anum;
+					} else result = (u_short) token_t::anum;
 				// Если это не отрицательное и не приблизительное число (Дом-2)
 				} else {
 					// Ищем дефис в конце слова
@@ -809,7 +809,7 @@ const u_short anyks::Alphabet::numSign(const wstring & word) const {
 					// Если дефис не найден и не найдено завершение слова в виде числа
 					if((pos == wstring::npos) || !this->isNumber(word.substr(pos + 1))){
 						// Сообщаем что это псевдо-число
-						result = (u_short) sign_t::anum;
+						result = (u_short) token_t::anum;
 					}
 				}
 			// Если первый символ является числом а последний нет (2-й, 13-летний)
@@ -834,23 +834,23 @@ const u_short anyks::Alphabet::numSign(const wstring & word) const {
 							if(noallow) break;
 						}
 						// Если слово разрешено, значит это аббревиатура
-						if(!noallow) result = (u_short) sign_t::abbr;
+						if(!noallow) result = (u_short) token_t::abbr;
 						// Иначе запоминаем что это неизвестный символ (2-@tm)
-						else result = (u_short) sign_t::anum;
+						else result = (u_short) token_t::anum;
 					// Сообщаем что это псевдо-число
-					} else result = (u_short) sign_t::anum;
+					} else result = (u_short) token_t::anum;
 				// Сообщаем что это псевдо-число
-				} else result = (u_short) sign_t::anum;
+				} else result = (u_short) token_t::anum;
 			// Если оба символа являются числом (5353, 5353.243, 3:4, 18:00, 18:00:01, 18.02.2012, 18/02/2012, 2/3, 3х10, 3~4)
 			} else if(frontNum && backNum) {
 				// Если это число
-				if(this->isNumber(word)) result = (u_short) sign_t::num;
+				if(this->isNumber(word)) result = (u_short) token_t::num;
 				// Если это псевдо-число
 				else {
 					// Разделитель слова найден
 					bool delim = false;
 					// Запоминаем что это псевдо-число
-					result = (u_short) sign_t::anum;
+					result = (u_short) token_t::anum;
 					// Переходим по всем символам слова
 					for(size_t i = 0; i < size; i++){
 						// Если плавающая точка найдена
@@ -862,12 +862,12 @@ const u_short anyks::Alphabet::numSign(const wstring & word) const {
 								// Определяем тип разделителя
 								switch(word[i]){
 									case L',':
-									case L'.': result = (u_short) sign_t::num;   break;
-									case L'~': result = (u_short) sign_t::aprox; break;
-									case L'-': result = (u_short) sign_t::range; break;
-									case L'/': result = (u_short) sign_t::fract; break;
-									case L'х': result = (u_short) sign_t::dimen; break;
-									case L':': result = (u_short) sign_t::score; break;
+									case L'.': result = (u_short) token_t::num;   break;
+									case L'~': result = (u_short) token_t::aprox; break;
+									case L'-': result = (u_short) token_t::range; break;
+									case L'/': result = (u_short) token_t::fract; break;
+									case L'х': result = (u_short) token_t::dimen; break;
+									case L':': result = (u_short) token_t::score; break;
 								}
 							// Если число не собрано а являетс временем или датой
 							} else if((word[i] == L':') || (word[i] == L'.') || (word[i] == L'/')) {
@@ -885,8 +885,8 @@ const u_short anyks::Alphabet::numSign(const wstring & word) const {
 									// Определяем тип разделителя
 									switch(word[i]){
 										case L'/':
-										case L'.': result = (u_short) sign_t::date; break;
-										case L':': result = (u_short) sign_t::time; break;
+										case L'.': result = (u_short) token_t::date; break;
+										case L':': result = (u_short) token_t::time; break;
 									}
 								}
 							}
@@ -896,9 +896,9 @@ const u_short anyks::Alphabet::numSign(const wstring & word) const {
 					}
 				}
 			// Если это вообще не число, проверяем может это римское число
-			} else if(!frontNum && !backNum && (this->roman2Arabic(this->toLower(word)) > 0)) result = (u_short) sign_t::num;
-		// Если это число то выводим признак числа
-		} else if(this->isNumber(word)) result = (u_short) sign_t::num;
+			} else if(!frontNum && !backNum && (this->roman2Arabic(this->toLower(word)) > 0)) result = (u_short) token_t::num;
+		// Если это число то выводим токен числа
+		} else if(this->isNumber(word)) result = (u_short) token_t::num;
 	}
 	// Выводим результат
 	return result;

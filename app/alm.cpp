@@ -76,23 +76,24 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to consider words from the white list only:                     [-only-good | --only-good]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to use interpolation in estimating:                             [-interpolate | --interpolate]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing accounting of all collected n-grams:                            [-all-grams | --all-grams]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an date sign:                                   [-no-date | --no-date]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an time sign:                                   [-no-time | --no-time]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an math sign:                                   [-no-math | --no-math]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an score sign:                                  [-no-score | --no-score]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an fraction sign:                               [-no-fract | --no-fract]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an dimension sign:                              [-no-dimen | --no-dimen]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of custom attributes:                              [-no-usign | --no-usign]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of Roman numerals:                             [-no-roman | --no-roman]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an special sign:                                [-no-special | --no-special]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an isolation sign:                              [-no-isolat | --no-isolat]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an punctuation sign:                            [-no-punct | --no-punct]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an approximate sign:                            [-no-aprox | --no-aprox]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an abbreviation sign:                           [-no-abbr | --no-abbr]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of a sign of numbers:                          [-no-number | --no-number]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of a pseudo-number sign:                       [-no-a-number | --no-a-number]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of a sign of a range of numbers:                   [-no-range | --no-range]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of users signs:                              [-w-bin-usigns | --w-bin-usigns]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an date token:                                  [-no-token-date | --no-token-date]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an time token:                                  [-no-token-time | --no-token-time]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an math token:                                  [-no-token-math | --no-token-math]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an score token:                                 [-no-token-score | --no-token-score]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an fraction token:                              [-no-token-fract | --no-token-fract]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an dimension token:                             [-no-token-dimen | --no-token-dimen]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of custom attributes:                              [-no-token-user | --no-token-user]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of Roman numerals:                             [-no-token-roman | --no-token-roman]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an special token:                               [-no-token-special | --no-token-special]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an isolation token:                             [-no-token-isolat | --no-token-isolat]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an punctuation token:                           [-no-token-punct | --no-token-punct]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an approximate token:                           [-no-token-aprox | --no-token-aprox]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an url address token:                           [-no-token-url | --no-token-url]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an abbreviation token:                          [-no-token-abbr | --no-token-abbr]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of a token of numbers:                         [-no-token-number | --no-token-number]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of a pseudo-number token:                      [-no-a-token-number | --no-a-token-number]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of a token of a range of numbers:                  [-no-token-range | --no-token-range]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of users tokens:                             [-w-bin-utokens | --w-bin-utokens]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of toolkit options:                          [-w-bin-options | --w-bin-options]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of blacklisted words:                        [-w-bin-badwords | --w-bin-badwords]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of whitelisted words:                        [-w-bin-goodwords | --w-bin-goodwords]\r\n\r\n"
@@ -106,7 +107,7 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m whitelisted file address:                           [-goodwords <value> | --goodwords=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m unknown word name:                                  [-unknown-word <value> | --unknown-word=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m script python3 - word preprocessing:                [-word-script <value> | --word-script=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m script python3 - custom attribute detector:         [-usign-script <value> | --usign-script=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m script python3 - custom attribute detector:         [-utoken-script <value> | --utoken-script=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m text file training corpus:                          [-corpus <value> | --corpus=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m extension files corpus:                             [-ext <value> | --ext=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with text corpus:                    [-path <value> | --path=<value>]\r\n\r\n"
@@ -128,7 +129,7 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.arpa files:                   [-r-arpas <value> | --r-arpas=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m pruning frequency threshold:                        [-prune-threshold <value> | --prune-threshold=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m the maximum size of n-grams of pruning:             [-prune-max-gram <value> | --prune-max-gram=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m list of custom attributes:                          [-usigns <value> | --usigns=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m list of custom attributes:                          [-utokens <value> | --utokens=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m modification flag for modify method:                [-modify <value> | --modify=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m delta size for smoothing by addsmooth algorithm:    [-delta <value> | --delta=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m discount size for smoothing by cdiscount algorithm: [-discount <value> | --discount=<value>]\r\n\r\n"
@@ -283,7 +284,7 @@ int main(int argc, char * argv[]){
 			toolkit.setLogfile(env.get("log"));
 			// Устанавливаем режим отладки
 			if(debug == 2) toolkit.setOption(toolkit_t::options_t::debug);
-			// Разрешаем использовать признак неизвестного слова
+			// Разрешаем использовать токен неизвестного слова
 			if(env.is("allow-unk")) toolkit.setOption(toolkit_t::options_t::allowUnk);
 			// Разрешаем использовать абсолютно все полученные n-граммы
 			if(env.is("all-grams")) toolkit.setOption(toolkit_t::options_t::allGrams);
@@ -293,38 +294,40 @@ int main(int argc, char * argv[]){
 			if(env.is("interpolate")) toolkit.setOption(toolkit_t::options_t::interpolate);
 			// Устанавливаем запрет на все слова кроме тех, что находятся в белом списке
 			if(env.is("only-good")) toolkit.setOption(toolkit_t::options_t::onlyGood);
-			// Отключаем системный признак детектирования аббревиатур
-			if(env.is("no-abbr")) toolkit.setOption(toolkit_t::options_t::notAbbr);
-			// Отключаем системный признак детектирования диапазонов чисел
-			if(env.is("no-range")) toolkit.setOption(toolkit_t::options_t::notRange);
-			// Отключаем системный признак детектирования римских чисел
-			if(env.is("no-roman")) toolkit.setOption(toolkit_t::options_t::notRoman);
-			// Отключаем системный признак детектирования чисел
-			if(env.is("no-number")) toolkit.setOption(toolkit_t::options_t::notNumber);
-			// Отключаем применение пользовательского признака детектирования
-			if(env.is("no-usign")) toolkit.setOption(toolkit_t::options_t::notUserSign);
-			// Отключаем системный признак детектирования псевдо-чисел
-			if(env.is("no-a-number")) toolkit.setOption(toolkit_t::options_t::notANumber);
-			// Отключаем системный признак детектирования даты
-			if(env.is("no-date")) toolkit.setOption(toolkit_t::options_t::notDate);
-			// Отключаем системный признак детектирования времени
-			if(env.is("no-time")) toolkit.setOption(toolkit_t::options_t::notTime);
-			// Отключаем системный признак детектирования математических операций
-			if(env.is("no-math")) toolkit.setOption(toolkit_t::options_t::notMath);
-			// Отключаем системный признак детектирования знаков пунктуации
-			if(env.is("no-punct")) toolkit.setOption(toolkit_t::options_t::notPunct);
-			// Отключаем системный признак детектирования числового счёта
-			if(env.is("no-score")) toolkit.setOption(toolkit_t::options_t::notScore);
-			// Отключаем системный признак детектирования габаритных размеров
-			if(env.is("no-dimen")) toolkit.setOption(toolkit_t::options_t::notDimen);
-			// Отключаем системный признак детектирования числовой дроби
-			if(env.is("no-fract")) toolkit.setOption(toolkit_t::options_t::notFract);
-			// Отключаем системный признак детектирования приблизительного числа
-			if(env.is("no-aprox")) toolkit.setOption(toolkit_t::options_t::notAprox);
+			// Отключаем системный токен url адресов
+			if(env.is("no-token-url")) toolkit.setOption(toolkit_t::options_t::notUrl);
+			// Отключаем системный токен детектирования даты
+			if(env.is("no-token-date")) toolkit.setOption(toolkit_t::options_t::notDate);
+			// Отключаем системный токен детектирования времени
+			if(env.is("no-token-time")) toolkit.setOption(toolkit_t::options_t::notTime);
+			// Отключаем системный токен детектирования математических операций
+			if(env.is("no-token-math")) toolkit.setOption(toolkit_t::options_t::notMath);
+			// Отключаем системный токен детектирования аббревиатур
+			if(env.is("no-token-abbr")) toolkit.setOption(toolkit_t::options_t::notAbbr);
+			// Отключаем системный токен детектирования диапазонов чисел
+			if(env.is("no-token-range")) toolkit.setOption(toolkit_t::options_t::notRange);
+			// Отключаем системный токен детектирования римских чисел
+			if(env.is("no-token-roman")) toolkit.setOption(toolkit_t::options_t::notRoman);
+			// Отключаем системный токен детектирования знаков пунктуации
+			if(env.is("no-token-punct")) toolkit.setOption(toolkit_t::options_t::notPunct);
+			// Отключаем системный токен детектирования числового счёта
+			if(env.is("no-token-score")) toolkit.setOption(toolkit_t::options_t::notScore);
+			// Отключаем системный токен детектирования габаритных размеров
+			if(env.is("no-token-dimen")) toolkit.setOption(toolkit_t::options_t::notDimen);
+			// Отключаем системный токен детектирования числовой дроби
+			if(env.is("no-token-fract")) toolkit.setOption(toolkit_t::options_t::notFract);
+			// Отключаем системный токен детектирования приблизительного числа
+			if(env.is("no-token-aprox")) toolkit.setOption(toolkit_t::options_t::notAprox);
 			// Отключаем системный призанк детектирования спец-символов
-			if(env.is("no-special")) toolkit.setOption(toolkit_t::options_t::notSpecs);
-			// Отключаем системный признак детектирования знака изоляции
-			if(env.is("no-isolat")) toolkit.setOption(toolkit_t::options_t::notIsolat);
+			if(env.is("no-token-special")) toolkit.setOption(toolkit_t::options_t::notSpecs);
+			// Отключаем системный токен детектирования знака изоляции
+			if(env.is("no-token-isolat")) toolkit.setOption(toolkit_t::options_t::notIsolat);
+			// Отключаем системный токен детектирования чисел
+			if(env.is("no-token-number")) toolkit.setOption(toolkit_t::options_t::notNumber);
+			// Отключаем применение пользовательского токена детектирования
+			if(env.is("no-token-user")) toolkit.setOption(toolkit_t::options_t::notUserToken);
+			// Отключаем системный токен детектирования псевдо-чисел
+			if(env.is("no-a-token-number")) toolkit.setOption(toolkit_t::options_t::notANumber);
 			// Если адрес файла чёрного списка получен
 			if((value = env.get("badwords")) != nullptr){
 				// Чёрный список слов
@@ -351,20 +354,20 @@ int main(int argc, char * argv[]){
 			}
 			// Если неизвестное слово получено
 			if((value = env.get("unknown-word")) != nullptr) toolkit.setUnknown(value);
-			// Если пользовательские признаки получены
-			if(((value = env.get("usigns")) != nullptr) && (string(value).compare("-yes-") != 0)){
-				// Список пользовательских признаков
-				vector <wstring> signs;
-				// Выполняем извлечение пользовательских признаков
-				alphabet.split(value, "|", signs);
-				// Если список признаков получен
-				if(!signs.empty()){
+			// Если пользовательские токены получены
+			if(((value = env.get("utokens")) != nullptr) && (string(value).compare("-yes-") != 0)){
+				// Список пользовательских токенов
+				vector <wstring> tokens;
+				// Выполняем извлечение пользовательских токенов
+				alphabet.split(value, "|", tokens);
+				// Если список токенов получен
+				if(!tokens.empty()){
 					// Если адрес скрипта получен
-					if((value = env.get("usign-script")) != nullptr){
+					if((value = env.get("utoken-script")) != nullptr){
 						// Устанавливаем адрес скрипта
-						toolkit.setUsignScript(value);
-						// Переходим по всему списку признаков
-						for(auto & item : signs) toolkit.setUsign(alphabet.convert(item));
+						toolkit.setUserTokenScript(value);
+						// Переходим по всему списку токенов
+						for(auto & item : tokens) toolkit.setUserToken(alphabet.convert(item));
 					}
 				}
 			}
@@ -914,7 +917,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Выполняем модификацию файла
-						toolkit.modifyArpa(value, modify, [debug, &pss](const u_short status){
+						toolkit.modify(value, modify, [debug, &pss](const u_short status){
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1040,14 +1043,14 @@ int main(int argc, char * argv[]){
 				if(debug == 1) ablm.setFlag(ablm_t::flag_t::debug);
 				// Устанавливаем флаг сохранения только arpa данных
 				if(env.is("w-bin-arpa")) ablm.setFlag(ablm_t::flag_t::onlyArpa);
-				// Устанавливаем флаг экспорта пользовательских признаков
-				if(env.is("w-bin-usigns")) ablm.setFlag(ablm_t::flag_t::expUsigns);
 				// Устанавливаем флаг экспорта опций тулкита
 				if(env.is("w-bin-options")) ablm.setFlag(ablm_t::flag_t::expOptions);
 				// Устанавливаем флаг экспорта скрипта предобработки текста
 				if(env.is("w-bin-preword")) ablm.setFlag(ablm_t::flag_t::expPreword);
 				// Устанавливаем флаг экспорта чёрного списка слов
 				if(env.is("w-bin-badwords")) ablm.setFlag(ablm_t::flag_t::expBadwords);
+				// Устанавливаем флаг экспорта пользовательских токенов
+				if(env.is("w-bin-utokens")) ablm.setFlag(ablm_t::flag_t::expUserTokens);
 				// Устанавливаем флаг экспорта белого списка слов
 				if(env.is("w-bin-goodwords")) ablm.setFlag(ablm_t::flag_t::expGoodwords);
 				// Выполняем инициализацию словаря

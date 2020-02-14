@@ -19,41 +19,41 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 	// Если слово передано
 	if(!word.empty()){
 		// Проверяем является ли слово, началом предложения
-		if(word.compare(L"<s>") == 0) result = (size_t) sign_t::start;
+		if(word.compare(L"<s>") == 0) result = (size_t) token_t::start;
 		// Проверяем является ли слово числом
-		else if(word.compare(L"<num>") == 0) result = (size_t) sign_t::num;
+		else if(word.compare(L"<num>") == 0) result = (size_t) token_t::num;
 		// Проверяем является ли слово неизвестным
-		else if(word.compare(L"<unk>") == 0) result = (size_t) sign_t::unk;
+		else if(word.compare(L"<unk>") == 0) result = (size_t) token_t::unk;
 		// Проверяем является ли слово url адресом
-		else if(word.compare(L"<url>") == 0) result = (size_t) sign_t::url;
+		else if(word.compare(L"<url>") == 0) result = (size_t) token_t::url;
 		// Проверяем является ли слово аббревиатурой
-		else if(word.compare(L"<abbr>") == 0) result = (size_t) sign_t::abbr;
+		else if(word.compare(L"<abbr>") == 0) result = (size_t) token_t::abbr;
 		// Проверяем является ли слово датой
-		else if(word.compare(L"<date>") == 0) result = (size_t) sign_t::date;
+		else if(word.compare(L"<date>") == 0) result = (size_t) token_t::date;
 		// Проверяем является ли слово временем
-		else if(word.compare(L"<time>") == 0) result = (size_t) sign_t::time;
+		else if(word.compare(L"<time>") == 0) result = (size_t) token_t::time;
 		// Проверяем является ли слово псевдо-числом
-		else if(word.compare(L"<anum>") == 0) result = (size_t) sign_t::anum;
+		else if(word.compare(L"<anum>") == 0) result = (size_t) token_t::anum;
 		// Проверяем является ли слово концом предложения
-		else if(word.compare(L"</s>") == 0) result = (size_t) sign_t::finish;
+		else if(word.compare(L"</s>") == 0) result = (size_t) token_t::finish;
 		// Проверяем является ли слово математической операцией
-		else if(word.compare(L"<math>") == 0) result = (size_t) sign_t::math;
+		else if(word.compare(L"<math>") == 0) result = (size_t) token_t::math;
 		// Проверяем является ли слово спец-символом
-		else if(word.compare(L"<specs>") == 0) result = (size_t) sign_t::specs;
+		else if(word.compare(L"<specs>") == 0) result = (size_t) token_t::specs;
 		// Проверяем является ли слово диапазоном чисел
-		else if(word.compare(L"<range>") == 0) result = (size_t) sign_t::range;
+		else if(word.compare(L"<range>") == 0) result = (size_t) token_t::range;
 		// Проверяем является ли слово знаком пунктуации
-		else if(word.compare(L"<punct>") == 0) result = (size_t) sign_t::punct;
+		else if(word.compare(L"<punct>") == 0) result = (size_t) token_t::punct;
 		// Проверяем является ли слово приблизительным числом
-		else if(word.compare(L"<aprox>") == 0) result = (size_t) sign_t::aprox;
+		else if(word.compare(L"<aprox>") == 0) result = (size_t) token_t::aprox;
 		// Проверяем является ли слово числовым счётом
-		else if(word.compare(L"<score>") == 0) result = (size_t) sign_t::score;
+		else if(word.compare(L"<score>") == 0) result = (size_t) token_t::score;
 		// Проверяем является ли слово габаритными размерами
-		else if(word.compare(L"<dimen>") == 0) result = (size_t) sign_t::dimen;
+		else if(word.compare(L"<dimen>") == 0) result = (size_t) token_t::dimen;
 		// Проверяем является ли слово числовой дробью
-		else if(word.compare(L"<fract>") == 0) result = (size_t) sign_t::fract;
+		else if(word.compare(L"<fract>") == 0) result = (size_t) token_t::fract;
 		// Проверяем является ли слово знаком изоляции
-		else if(word.compare(L"<isolat>") == 0) result = (size_t) sign_t::isolat;
+		else if(word.compare(L"<isolat>") == 0) result = (size_t) token_t::isolat;
 		// Если это другое слово
 		else {
 			// Формируем идентификатор слова
@@ -62,12 +62,12 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 			if(this->goodwords.count(result) < 1){
 				// Подсчитываем количество дефисов
 				u_short hyphenCounts = 0;
-				// Если нужно проверить пользовательские признаки
-				if(!this->isOption(options_t::notUserSign) && !this->usigns.empty()){
-					// Переходим по всему списку пользовательских признаков
-					for(auto & sign : this->usigns){
-						// Если сработал пользовательский признак
-						if(sign.second.test(sign.second.name.real(), this->alphabet->convert(word))) return sign.first;
+				// Если нужно проверить пользовательские токены
+				if(!this->isOption(options_t::notUserToken) && !this->utokens.empty()){
+					// Переходим по всему списку пользовательских токенов
+					for(auto & token : this->utokens){
+						// Если сработал пользовательский токен
+						if(token.second.test(token.second.name.real(), this->alphabet->convert(word))) return token.first;
 					}
 				}
 				// Проверяем является ли слово знаком пунктуации
@@ -75,57 +75,57 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 					// Если это знак пунктуации
 					if(!this->isOption(options_t::notPunct) && this->alphabet->isPunct(word.front())){
 						// Запоминаем что это знак пунктуации
-						result = (size_t) sign_t::punct;
+						result = (size_t) token_t::punct;
 					// Если это символ математической операции
 					} else if(!this->isOption(options_t::notMath) && this->alphabet->isMath(word.front())){
 						// Запоминаем что это символ математической операции
-						result = (size_t) sign_t::math;
+						result = (size_t) token_t::math;
 					// Если это спец-символ
 					} else if(!this->isOption(options_t::notSpecs) && this->alphabet->isSpecial(word.front())){
 						// Запоминаем что это знак изоляции
-						result = (size_t) sign_t::specs;
+						result = (size_t) token_t::specs;
 					// Если это знак изоляции
 					} else if(!this->isOption(options_t::notIsolat) && this->alphabet->isIsolation(word.front())){
 						// Запоминаем что это знак изоляции
-						result = (size_t) sign_t::isolat;
+						result = (size_t) token_t::isolat;
 					}
 				// Проверяем есть ли изоляционный знак и количество дефисов в слове больше 2-х
 				} else if(
 					this->alphabet->isIsolation(word.back()) ||
 					this->alphabet->isIsolation(word.front()) ||
 					((hyphenCounts = this->alphabet->countLetter(word, L'-')) > 2)
-				) result = (size_t) sign_t::unk;
+				) result = (size_t) token_t::unk;
 				// Если идентификатор определить не удалось
 				else {
 					// Идентификатор слова
 					size_t idw = 0;
 					// Пытаемся определить идентификатор слова
-					switch(this->alphabet->numSign(word)){
-						// Если признак не определён
-						case 0: if(this->isOption(options_t::onlyGood)) idw = (size_t) sign_t::unk; break;
-						// Если это признак числа, запоминаем его
-						case (u_short) sign_t::num: if(!this->isOption(options_t::notNumber)) idw = (size_t) sign_t::num; break;
-						// Если это признак аббривиатуры
-						case (u_short) sign_t::abbr: if(!this->isOption(options_t::notAbbr)) idw = (size_t) sign_t::abbr; break;
-						// Если это признак даты
-						case (u_short) sign_t::date: if(!this->isOption(options_t::notDate)) idw = (size_t) sign_t::date; break;
-						// Если это признак времени
-						case (u_short) sign_t::time: if(!this->isOption(options_t::notTime)) idw = (size_t) sign_t::time; break;
-						// Если это признак приблизительного числа
-						case (u_short) sign_t::aprox: if(!this->isOption(options_t::notAprox)) idw = (size_t) sign_t::aprox; break;
-						// Если это признак псевдо-числа
-						case (u_short) sign_t::anum: if(!this->isOption(options_t::notANumber)) idw = (size_t) sign_t::anum; break;
-						// Если это признак диапазона чисел
-						case (u_short) sign_t::range: if(!this->isOption(options_t::notRange)) idw = (size_t) sign_t::range; break;
-						// Если это признак числового счёта
-						case (u_short) sign_t::score: if(!this->isOption(options_t::notScore)) idw = (size_t) sign_t::score; break;
-						// Если это признак габаритных размеров
-						case (u_short) sign_t::dimen: if(!this->isOption(options_t::notDimen)) idw = (size_t) sign_t::dimen; break;
-						// Если это признак числовой дроби
-						case (u_short) sign_t::fract: if(!this->isOption(options_t::notFract)) idw = (size_t) sign_t::fract; break;
+					switch(this->alphabet->idwToken(word)){
+						// Если токен не определён
+						case 0: if(this->isOption(options_t::onlyGood)) idw = (size_t) token_t::unk; break;
+						// Если это токен числа, запоминаем его
+						case (u_short) token_t::num: if(!this->isOption(options_t::notNumber)) idw = (size_t) token_t::num; break;
+						// Если это токен аббривиатуры
+						case (u_short) token_t::abbr: if(!this->isOption(options_t::notAbbr)) idw = (size_t) token_t::abbr; break;
+						// Если это токен даты
+						case (u_short) token_t::date: if(!this->isOption(options_t::notDate)) idw = (size_t) token_t::date; break;
+						// Если это токен времени
+						case (u_short) token_t::time: if(!this->isOption(options_t::notTime)) idw = (size_t) token_t::time; break;
+						// Если это токен приблизительного числа
+						case (u_short) token_t::aprox: if(!this->isOption(options_t::notAprox)) idw = (size_t) token_t::aprox; break;
+						// Если это токен псевдо-числа
+						case (u_short) token_t::anum: if(!this->isOption(options_t::notANumber)) idw = (size_t) token_t::anum; break;
+						// Если это токен диапазона чисел
+						case (u_short) token_t::range: if(!this->isOption(options_t::notRange)) idw = (size_t) token_t::range; break;
+						// Если это токен числового счёта
+						case (u_short) token_t::score: if(!this->isOption(options_t::notScore)) idw = (size_t) token_t::score; break;
+						// Если это токен габаритных размеров
+						case (u_short) token_t::dimen: if(!this->isOption(options_t::notDimen)) idw = (size_t) token_t::dimen; break;
+						// Если это токен числовой дроби
+						case (u_short) token_t::fract: if(!this->isOption(options_t::notFract)) idw = (size_t) token_t::fract; break;
 					}
 					// Если слово определено как число но это не число, значит это римское число
-					if((idw == (size_t) sign_t::num) && !this->alphabet->isNumber({word.back()})){
+					if((idw == (size_t) token_t::num) && !this->alphabet->isNumber({word.back()})){
 						// Если не запрещено выводить римские числа, выводим его
 						if(!this->isOption(options_t::notRoman)) result = idw;
 					// Иначе запоминаем идентификатор так-как он передан
@@ -141,10 +141,10 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 						// Если ссылка найдена
 						if((resUri.type != uri_t::types_t::null)
 						&& (resUri.type != uri_t::types_t::wrong)){
-							// Запоминаем что это  признак url адреса
-							result = (size_t) sign_t::url;
+							// Запоминаем что это токен url адреса
+							result = (size_t) token_t::url;
 						// Если слово не разрешено, устанавливаем неизвестное слово
-						} else if(!this->alphabet->isAllowed(word)) result = (size_t) sign_t::unk;
+						} else if(!this->alphabet->isAllowed(word)) result = (size_t) token_t::unk;
 					}
 				}
 			}
@@ -197,9 +197,17 @@ const u_short anyks::Toolkit::getSize() const {
  * getOptions Метод извлечения установленных опций
  * @return установленные опции
  */
-const u_short anyks::Toolkit::getOptions() const {
+const u_int anyks::Toolkit::getOptions() const {
 	// Выводим установленные опции
 	return this->options.to_ulong();
+}
+/**
+ * getParams Метод извлечения параметров алгоритма сжатия
+ * @return параметры алгоритма сжатия
+ */
+const anyks::Toolkit::params_t & anyks::Toolkit::getParams() const {
+	// Выводим параметры алгоритма сжатия
+	return this->params;
 }
 /**
  * getUnknown Метод извлечения неизвестного слова
@@ -236,10 +244,10 @@ const string anyks::Toolkit::getWordScript() const {
 	return result;
 }
 /**
- * getUsignScript Метод извлечения скрипта обработки пользовательских признаков
- * @return адрес скрипта python обработки пользовательских признаков
+ * getUserTokenScript Метод извлечения скрипта обработки пользовательских токенов
+ * @return адрес скрипта python обработки пользовательских токенов
  */
-const string anyks::Toolkit::getUsignScript() const {
+const string anyks::Toolkit::getUserTokenScript() const {
 	// Результат работы функции
 	string result = "";
 	// Если скрипты установлены
@@ -248,32 +256,6 @@ const string anyks::Toolkit::getUsignScript() const {
 		auto it = this->scripts.find(2);
 		// Если скрипт обработки слов установлен
 		if(it != this->scripts.end()) result = it->second.first;
-	}
-	// Выводим результат
-	return result;
-}
-/**
- * getParams Метод извлечения параметров алгоритма сжатия
- * @return параметры алгоритма сжатия
- */
-const anyks::Toolkit::params_t & anyks::Toolkit::getParams() const {
-	// Выводим параметры алгоритма сжатия
-	return this->params;
-}
-/**
- * getUsigns Метод извлечения списка пользовательских признаков
- * @return список пользовательских признаков
- */
-const vector <string> anyks::Toolkit::getUsigns() const {
-	// Результат работы функции
-	vector <string> result;
-	// Если пользовательские признаки есть
-	if(!this->usigns.empty()){
-		// Переходим по всем пользовательским признакам
-		for(auto & sign : this->usigns){
-			// Добавляем в список признак слова
-			result.push_back(this->getUsignWord(sign.first));
-		}
 	}
 	// Выводим результат
 	return result;
@@ -295,19 +277,37 @@ const set <size_t> & anyks::Toolkit::getGoodwords() const {
 	return this->goodwords;
 }
 /**
- * getUsignWord Метод получения пользовательского признака по его идентификатору
- * @param idw идентификатор пользовательского признака
- * @return    пользовательский признак соответствующий идентификатору
+ * getUserTokens Метод извлечения списка пользовательских токенов
+ * @return список пользовательских токенов
  */
-const string anyks::Toolkit::getUsignWord(const size_t idw) const {
+const vector <string> anyks::Toolkit::getUserTokens() const {
+	// Результат работы функции
+	vector <string> result;
+	// Если пользовательские токены есть
+	if(!this->utokens.empty()){
+		// Переходим по всем пользовательским токенам
+		for(auto & token : this->utokens){
+			// Добавляем в список токен слова
+			result.push_back(this->getUserTokenWord(token.first));
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * getUserTokenWord Метод получения пользовательского токена по его идентификатору
+ * @param idw идентификатор пользовательского токена
+ * @return    пользовательский токен соответствующий идентификатору
+ */
+const string anyks::Toolkit::getUserTokenWord(const size_t idw) const {
 	// Результат работы функции
 	string result = "";
 	// Если идентификатор передан
 	if((idw > 0) && (idw < noID)){
-		// Ищем идентификатор признака
-		auto it = this->usigns.find(idw);
+		// Ищем идентификатор токена
+		auto it = this->utokens.find(idw);
 		// Если такой идентификатор существует
-		if(it != this->usigns.end()){
+		if(it != this->utokens.end()){
 			// Выводим слово соответствующее идентификатору
 			result = move(it->second.name.real());
 			// Выполняем удаление экранирования
@@ -318,18 +318,18 @@ const string anyks::Toolkit::getUsignWord(const size_t idw) const {
 	return result;
 }
 /**
- * getUsignId Метод получения идентификатора пользовательского признака
+ * getUserTokenId Метод получения идентификатора пользовательского токена
  * @param name слово для которого нужно получить идентификатор
- * @return     идентификатор пользовательского признака соответствующий слову
+ * @return     идентификатор пользовательского токена соответствующий слову
  */
-const size_t anyks::Toolkit::getUsignId(const string & name) const {
+const size_t anyks::Toolkit::getUserTokenId(const string & name) const {
 	// Результат работы функции
 	size_t result = noID;
 	// Если слово передано
 	if(!name.empty()){
 		// Выполняем удаление экранирования
 		this->clearShielding(name, "<", ">"); {
-			// Название признака
+			// Название токена
 			string word = "<";
 			// Добавляем название
 			word.append(name);
@@ -338,7 +338,7 @@ const size_t anyks::Toolkit::getUsignId(const string & name) const {
 			// Получаем идентификатор слова
 			const size_t idw = this->idw.get(this->alphabet->convert(word));
 			// Если такой идентификатор существует, выводим его
-			result = (this->usigns.count(idw) > 0 ? idw : result);
+			result = (this->utokens.count(idw) > 0 ? idw : result);
 		}
 	}
 	// Выводим результат
@@ -354,21 +354,14 @@ void anyks::Toolkit::clear(){
 	this->arpa->clear();
 	// Очищаем словарь
 	this->vocab.clear();
-	// Очищаем список пользовательских признаков
-	this->usigns.clear();
+	// Очищаем список пользовательских токенов
+	this->utokens.clear();
 	// Очищаем список плохих слов
 	this->badwords.clear();
 	// Очищаем список хороших слов
 	this->goodwords.clear();
 	// Очищаем объект статистики
 	this->info = info_t();
-}
-/**
- * Метод очистки пользовательских признаков
- */
-void anyks::Toolkit::clearUsigns(){
-	// Очищаем список пользовательских признаков
-	this->usigns.clear();
 }
 /**
  * clearBadwords Метод очистки списка плохих слов
@@ -385,12 +378,27 @@ void anyks::Toolkit::clearGoodwords(){
 	this->goodwords.clear();
 }
 /**
+ * clearUserTokens Метод очистки пользовательских токенов
+ */
+void anyks::Toolkit::clearUserTokens(){
+	// Очищаем список пользовательских токенов
+	this->utokens.clear();
+}
+/**
  * addBadword Метод добавления идентификатора похого слова в список
  * @param idw идентификатор слова
  */
 void anyks::Toolkit::addBadword(const size_t idw){
 	// Если идентификатор передан
 	if((idw > 0) && (idw < noID)) this->badwords.emplace(idw);
+}
+/**
+ * addGoodword Метод добавления идентификатора хорошего слова в список
+ * @param idw идентификатор слова
+ */
+void anyks::Toolkit::addGoodword(const size_t idw){
+	// Если идентификатор передан
+	if((idw > 0) && (idw < noID)) this->goodwords.emplace(idw);
 }
 /**
  * addBadword Метод добавления похого слова в список
@@ -406,14 +414,6 @@ void anyks::Toolkit::addBadword(const string & word){
 	}
 }
 /**
- * addGoodword Метод добавления идентификатора хорошего слова в список
- * @param idw идентификатор слова
- */
-void anyks::Toolkit::addGoodword(const size_t idw){
-	// Если идентификатор передан
-	if((idw > 0) && (idw < noID)) this->goodwords.emplace(idw);
-}
-/**
  * addGoodword Метод добавления хорошего слова в список
  * @param word слово для добавления
  */
@@ -424,51 +424,6 @@ void anyks::Toolkit::addGoodword(const string & word){
 		const size_t idw = this->idw.get(this->alphabet->convert(word));
 		// Добавляем слово в список хороших слов
 		this->addGoodword(idw);
-	}
-}
-/**
- * setOptions Метод установки опций
- * @param options опции для установки
- */
-void anyks::Toolkit::setOptions(const u_short options){
-	// Устанавливаем опции модуля
-	this->options = options;
-}
-/**
- * setLogfile Метод установка файла для вывода логов
- * @param logifle адрес файла для вывода отладочной информации
- */
-void anyks::Toolkit::setLogfile(const char * logfile){
-	// Устанавливаем адрес log файла
-	this->logfile = logfile;
-}
-/**
- * setUsign Метод добавления признака пользователя
- * @param name слово - обозначение признака
- */
-void anyks::Toolkit::setUsign(const string & name){
-	// Если слово передано
-	if(!name.empty()){
-		// Создаём новый пользовательский признак
-		usign_t userSign;
-		// Выполняем удаление экранирования
-		this->clearShielding(name, "<", ">"); {
-			// Название признака
-			string word = "<";
-			// Добавляем название
-			word.append(name);
-			// Добавляем экранирование
-			word.append(">");
-			// Получаем идентификатор слова
-			userSign.idw = this->idw.get(this->alphabet->convert(word));
-			// Если такого идентификатора нет в списке
-			if((userSign.idw > 0) && (this->usigns.count(userSign.idw) < 1)){
-				// Добавляем в пользовательский признак наши параметры
-				userSign.name = move(word);
-				// Добавляем в список признакав, наш признак
-				this->usigns.emplace(userSign.idw, move(userSign));
-			}
-		}
 	}
 }
 /**
@@ -501,6 +456,51 @@ void anyks::Toolkit::setUnknown(const string & word){
 	}
 }
 /**
+ * setLogfile Метод установка файла для вывода логов
+ * @param logifle адрес файла для вывода отладочной информации
+ */
+void anyks::Toolkit::setLogfile(const char * logfile){
+	// Устанавливаем адрес log файла
+	this->logfile = logfile;
+}
+/**
+ * setOptions Метод установки опций
+ * @param options опции для установки
+ */
+void anyks::Toolkit::setOptions(const u_int options){
+	// Устанавливаем опции модуля
+	this->options = options;
+}
+/**
+ * setUserToken Метод добавления токена пользователя
+ * @param name слово - обозначение токена
+ */
+void anyks::Toolkit::setUserToken(const string & name){
+	// Если слово передано
+	if(!name.empty()){
+		// Создаём новый пользовательский токен
+		utoken_t userToken;
+		// Выполняем удаление экранирования
+		this->clearShielding(name, "<", ">"); {
+			// Название токена
+			string word = "<";
+			// Добавляем название
+			word.append(name);
+			// Добавляем экранирование
+			word.append(">");
+			// Получаем идентификатор слова
+			userToken.idw = this->idw.get(this->alphabet->convert(word));
+			// Если такого идентификатора нет в списке
+			if((userToken.idw > 0) && (this->utokens.count(userToken.idw) < 1)){
+				// Добавляем в пользовательский токен наши параметры
+				userToken.name = move(word);
+				// Добавляем в список токенов, наш токен
+				this->utokens.emplace(userToken.idw, move(userToken));
+			}
+		}
+	}
+}
+/**
  * setOption Метод подключения опции модуля
  * @param option опция для подключения
  */
@@ -525,14 +525,6 @@ void anyks::Toolkit::setWordScript(const string & script){
 	this->scripts.emplace(1, make_pair(script, 0));
 }
 /**
- * setUsignScript Метод установки скрипта обработки пользовательских признаков
- * @param script скрипт python обработки пользовательских признаков
- */
-void anyks::Toolkit::setUsignScript(const string & script){
-	// Выполняем добавление скрипта
-	this->scripts.emplace(2, make_pair(script, 0));
-}
-/**
  * setSize Метод установки размера n-граммы
  * @param size размер n-граммы
  */
@@ -549,9 +541,17 @@ void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
 	if(alphabet != nullptr){
 		// Устанавливаем переданный алфавит
 		this->alphabet = alphabet;
-		// Устанавливаем алфавит и смещение в 18 позиций (количество системных признаков arpa)
+		// Устанавливаем алфавит и смещение в 18 позиций (количество системных токенов arpa)
 		this->idw.set(this->alphabet, 18);
 	}
+}
+/**
+ * setUserTokenScript Метод установки скрипта обработки пользовательских токенов
+ * @param script скрипт python обработки пользовательских токенов
+ */
+void anyks::Toolkit::setUserTokenScript(const string & script){
+	// Выполняем добавление скрипта
+	this->scripts.emplace(2, make_pair(script, 0));
 }
 /**
  * addBadwords Метод добавления списка идентификаторов плохих слов в список
@@ -598,49 +598,6 @@ void anyks::Toolkit::addGoodwords(const vector <string> & goodwords){
 	}
 }
 /**
- * addWord Метод добавления слова в словарь
- * @param word слово для добавления
- * @param idd  идентификатор документа
- */
-void anyks::Toolkit::addWord(const wstring & word, const size_t idd){
-	// Если слово передано
-	if(!word.empty()){
-		// Получаем идентификатор слова
-		const size_t idw = this->getIdw(word);
-		// Если идентификатор нормальный
-		if((idw > 0) && (idw < noID) && this->arpa->event(idw) && (this->usigns.count(idw) < 1)){
-			// Ищем слово в словаре
-			auto it = this->vocab.find(idw);
-			// Если слово найдено
-			if(it != this->vocab.end()){
-				// Получаем метаданные
-				auto meta = it->second.getmeta();
-				// Увеличиваем встречаемость слова
-				meta.oc++;
-				// Если документ сменился
-				if(this->info.idd != idd) meta.dc++;
-				// Устанавливаем полученные метаданные
-				it->second.setmeta(meta);
-			// Иначе устанавливаем слово
-			} else {
-				// Добавляем слово в словарь
-				this->vocab.emplace(idw, word);
-				// Запоминаем количество уникальных слов
-				this->info.unq = this->vocab.size();
-			}
-		}
-		// Увеличиваем количество слов
-		this->info.cw++;
-		// Если документ сменился
-		if(this->info.idd != idd){
-			// Увеличиваем количество документов
-			this->info.ad++;
-			// Запоминаем идентификатор документа
-			this->info.idd = idd;
-		}
-	}
-}
-/**
  * addText Метод добавления текста для расчёта
  * @param text текст который нужно добавить
  * @param idd  идентификатор документа
@@ -649,11 +606,11 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 	// Если текст передан
 	if(!text.empty()){
 		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) sign_t::unk;
+		const size_t uid = (size_t) token_t::unk;
 		// Идентификатор начала предложения
-		const size_t sid = (size_t) sign_t::start;
+		const size_t sid = (size_t) token_t::start;
 		// Идентификатор конца предложения
-		const size_t fid = (size_t) sign_t::finish;
+		const size_t fid = (size_t) token_t::finish;
 		// Список последовательностей для обучения
 		vector <pair_t> seq = {{sid, 0}};
 		/**
@@ -705,8 +662,8 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 						else {
 							// Получаем регистры слова
 							size_t uppers = (seq.size() > 1 ? tmp.getUppers() : 0);
-							// Если название признака получено, устанавливаем его регистры
-							if(this->usigns.count(idw) > 0) uppers = 0;
+							// Если название токена получено, устанавливаем его регистры
+							if(this->utokens.count(idw) > 0) uppers = 0;
 							// Устанавливаем регистр слова
 							tmp.setUppers(uppers);
 							// Добавляем слово в последовательность
@@ -762,19 +719,62 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 	}
 }
 /**
- * setUsignMethod Метод добавления функции обработки пользовательского признака
- * @param name слово - обозначение признака
- * @param fn   внешняя функция обрабатывающая пользовательский признак
+ * addWord Метод добавления слова в словарь
+ * @param word слово для добавления
+ * @param idd  идентификатор документа
  */
-void anyks::Toolkit::setUsignMethod(const string & name, function <bool (const string &, const string &)> fn){
-	// Если название признака передано
+void anyks::Toolkit::addWord(const wstring & word, const size_t idd){
+	// Если слово передано
+	if(!word.empty()){
+		// Получаем идентификатор слова
+		const size_t idw = this->getIdw(word);
+		// Если идентификатор нормальный
+		if((idw > 0) && (idw < noID) && this->arpa->event(idw) && (this->utokens.count(idw) < 1)){
+			// Ищем слово в словаре
+			auto it = this->vocab.find(idw);
+			// Если слово найдено
+			if(it != this->vocab.end()){
+				// Получаем метаданные
+				auto meta = it->second.getmeta();
+				// Увеличиваем встречаемость слова
+				meta.oc++;
+				// Если документ сменился
+				if(this->info.idd != idd) meta.dc++;
+				// Устанавливаем полученные метаданные
+				it->second.setmeta(meta);
+			// Иначе устанавливаем слово
+			} else {
+				// Добавляем слово в словарь
+				this->vocab.emplace(idw, word);
+				// Запоминаем количество уникальных слов
+				this->info.unq = this->vocab.size();
+			}
+		}
+		// Увеличиваем количество слов
+		this->info.cw++;
+		// Если документ сменился
+		if(this->info.idd != idd){
+			// Увеличиваем количество документов
+			this->info.ad++;
+			// Запоминаем идентификатор документа
+			this->info.idd = idd;
+		}
+	}
+}
+/**
+ * setUserTokenMethod Метод добавления функции обработки пользовательского токена
+ * @param name слово - обозначение токена
+ * @param fn   внешняя функция обрабатывающая пользовательский токен
+ */
+void anyks::Toolkit::setUserTokenMethod(const string & name, function <bool (const string &, const string &)> fn){
+	// Если название токена передано
 	if(!name.empty()){
-		// Получаем идентификатор признака
-		const size_t idw = this->getUsignId(name);
-		// Ищем нам признак
-		auto it = this->usigns.find(idw);
-		// Если такой признак найден, устанавливаем функци
-		if(it != this->usigns.end()) it->second.test = fn;
+		// Получаем идентификатор токена
+		const size_t idw = this->getUserTokenId(name);
+		// Ищем нам токен
+		auto it = this->utokens.find(idw);
+		// Если такой токен найден, устанавливаем функци
+		if(it != this->utokens.end()) it->second.test = fn;
 	}
 }
 /**
@@ -802,6 +802,402 @@ void anyks::Toolkit::repair(function <void (const u_short)> status){
 	this->arpa->repair(status);
 }
 /**
+ * modify Метод модификации arpa
+ * @param filename адрес файла для чтения
+ * @param flag     флаг модификации arpa
+ * @param status   функция вывода статуса модификации
+ */
+void anyks::Toolkit::modify(const string & filename, modify_t flag, function <void (const u_short)> status){
+	// Если адрес файла передан
+	if(!filename.empty() && fsys_t::isfile(filename)){
+		// Последовательность для добавления
+		vector <pair_t> seq;
+		// Список полученных слов последовательности
+		vector <wstring> words;
+		// Список добавленных слов в словарь
+		map <size_t, size_t> added;
+		// Текущий и предыдущий статус
+		u_short actual = 0, past = 100;
+		// Количество обработанных данных
+		size_t index = 0, pos = 0, loc = 0;
+		// Идентификатор неизвестного слова
+		const size_t uid = (size_t) token_t::unk;
+		/**
+		 * cleanAddedFn Функция очистки добавленных слов
+		 */
+		auto cleanAddedFn = [&added, this]{
+			// Если список добавленных слов существует
+			if(!added.empty()){
+				// Переходим по списку добавленных слов
+				for(auto & item : added){
+					// Ищем слово в словаре
+					auto it = this->vocab.find(item.first);
+					// Если слово найдено
+					if(it != this->vocab.end()){
+						// Получаем метаданные слова
+						auto meta = it->second.getmeta();
+						// Если встречаемости равны, удаляем слово
+						if(meta.oc == item.second) this->vocab.erase(item.first);
+						// Меняем вероятность
+						else {
+							// Уменьшаем встречаемость
+							meta.oc -= item.second;
+							// Устанавливаем обратно метаданные
+							it->second.setmeta(meta);
+						}
+						// Уменьшаем общее количество добавленных слов
+						this->info.cw -= item.second;
+					}
+				}
+			}
+		};
+		/**
+		 * organizationSeqFn Функция организации последовательности
+		 * @param words список слов из которых нужно сделать последовательность
+		 */
+		auto organizationSeqFn = [&added, &seq, this](const vector <wstring> & words){
+			// Если список слов получен
+			if(!words.empty()){
+				// Идентификатор слова
+				size_t idw = 0;
+				// Полученное слово
+				word_t word = L"";
+				// Переходим по всему списку слов
+				for(auto & item : words){
+					// Получаем слово
+					word = move(item);
+					// Получаем идентификатор слова
+					idw = this->getIdw(word);
+					// Проверяем отсутствует ли слово в списке запрещённых слов
+					if((idw > 0) && (idw < noID) && (this->badwords.count(idw) < 1)){
+						// Если это неизвестное слово
+						if(idw == uid){
+							// Если неизвестное слово не установлено
+							if(this->unknown == 0) seq.emplace_back(idw, 0);
+							// Если неизвестное слово установлено
+							else if(this->unknown > 0) seq.emplace_back(this->unknown, this->vocab.at(this->unknown).getUppers());
+						// Добавляем слово в список
+						} else {
+							// Получаем регистры слова
+							size_t uppers = word.getUppers();
+							// Если название токена получено, устанавливаем его регистры
+							if(this->utokens.count(idw) > 0) uppers = 0;
+							// Добавляем слово в список последовательности
+							seq.emplace_back(idw, uppers);
+							// Если это правильное слово
+							if(this->arpa->event(idw) && (this->vocab.count(idw) < 1)){
+								// Если слово еще не добавлено
+								if(added.count(idw) < 1)
+									// Запоминаем что слово добавили
+									added.emplace(idw, 1);
+								// Иначе увеличиваем количество слов
+								else added.at(idw)++;
+								// Добавляем слово в словарь
+								this->addWord(word.wreal());
+							}
+						}
+					// Если слово найдено в всписке запрещённых
+					} else {
+						// Очищаем последовательность
+						seq.clear();
+						// Выходим из цикла
+						break;
+					}
+				}
+			}
+		};
+		// Выполняем считывание всех строк текста
+		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+			// Если слово получено
+			if(!text.empty()){
+				// Определяем тип модификации
+				switch((u_short) flag){
+					// Если это изменение n-грамм
+					case (u_short) modify_t::change:
+					// Если это добавление в файл n-грамм
+					case (u_short) modify_t::emplace: {
+						// Считываем данные слова
+						if((pos = text.find("\t")) != string::npos){
+							// Очищаем последовательность
+							seq.clear();
+							// Считываем частоту n-граммы
+							const string & weight = this->alphabet->trim(text.substr(0, pos));
+							// Считываем данные n-граммы
+							const string & ngram = this->alphabet->trim(text.substr(pos + 1, text.length() - (pos + 1)));
+							// Если частота и n-грамма получены
+							if(!weight.empty() && !ngram.empty()){
+								// Выполняем сплит n-грамм
+								this->alphabet->split(ngram, " ", words);
+								// Если список слов получен
+								if(!words.empty()){
+									// Формируем последовательность
+									organizationSeqFn(words);
+									// Добавляем последовательность в словарь
+									if(!seq.empty()){
+										// Если это добавления последовательности в arpa
+										if(flag == modify_t::emplace){
+											// Если добавление не выполнено
+											if(!this->arpa->emplace(seq, stof(weight))) cleanAddedFn();
+										// Если это изменение частот последовательности
+										} else if(flag == modify_t::change) {
+											// Выполняем инкрементацию частот
+											this->arpa->inc(seq, stof(weight));
+											// Выполняем неверно-добавленных слов
+											cleanAddedFn();
+										}
+										// Очищаем список добавленных слов
+										added.clear();
+									}
+								}
+							}
+						}
+					} break;
+					// Если это удаление из файла n-грамм
+					case (u_short) modify_t::remove: {
+						// Выполняем сплит n-грамм
+						this->alphabet->split(text, " ", words);
+						// Если список слов получен
+						if(!words.empty()){
+							// Идентификатор слова
+							size_t idw = 0;
+							// Последовательность для добавления
+							vector <size_t> seq(words.size());
+							// Переходим по всему списку слов
+							for(size_t i = 0; i < words.size(); i++){
+								// Определяем идентификатор слова
+								idw = this->getIdw(words[i]);
+								// Если идентификатор получен
+								if((idw > 0) && (idw < noID)) seq[i] = idw;
+								// Если слово не получено, выходим
+								else {
+									// Очищаем список слов
+									words.clear();
+									// Выходим из цикла
+									break;
+								}
+							}
+							// Удаляем последовательность из словаря
+							if(!words.empty()) this->arpa->del(seq);
+						}
+					} break;
+					// Если это замена n-грамм
+					case (u_short) modify_t::replace: {
+						// Считываем данные слова
+						if((pos = text.find("\t")) != string::npos){
+							// Очищаем последовательность
+							seq.clear();
+							// Считываем n-грамму которую нужно заменить
+							const string & fromNgram = this->alphabet->trim(text.substr(0, pos));
+							// Считываем n-грамму на которую нужно заменить
+							const string & toNgram = this->alphabet->trim(text.substr(pos + 1, text.length() - (pos + 1)));
+							// Если частота и n-грамма получены
+							if(!fromNgram.empty() && !toNgram.empty()){
+								// Выполняем сплит n-грамм
+								this->alphabet->split(fromNgram, " ", words);
+								// Если список слов получен
+								if(!words.empty()){
+									// Идентификатор слова
+									size_t idw = 0;
+									// Последовательность для добавления
+									vector <size_t> seq2(words.size());
+									// Переходим по всему списку слов
+									for(size_t i = 0; i < words.size(); i++){
+										// Определяем идентификатор слова
+										idw = this->getIdw(words[i]);
+										// Если идентификатор получен
+										if((idw > 0) && (idw < noID)){
+											// Устанавливаем идентификатор слова
+											seq2[i] = idw;
+											// Если слова нет в словаре и это не токен, добавляем в словарь
+											if(this->arpa->event(idw) && (this->vocab.count(idw) < 1)){
+												// Если слово еще не добавлено
+												if(added.count(idw) < 1)
+													// Запоминаем что слово добавили
+													added.emplace(idw, 1);
+												// Иначе увеличиваем количество слов
+												else added.at(idw)++;
+												// Добавляем слово в словарь
+												this->addWord(words[i]);
+											}
+										// Если слово не получено, выходим
+										} else {
+											// Очищаем список слов
+											words.clear();
+											// Выходим из цикла
+											break;
+										}
+									}
+									// Выполняем сплит n-грамм
+									if(!words.empty()) this->alphabet->split(toNgram, " ", words);
+									// Если список слов получен
+									if(!words.empty()){
+										// Формируем последовательность
+										organizationSeqFn(words);
+										// Добавляем последовательность в словарь
+										if(!seq.empty() && !seq2.empty()){
+											// Если замена не удалась
+											if(!this->arpa->replace(seq2, seq)) cleanAddedFn();
+											// Очищаем список добавленных слов
+											added.clear();
+										}
+									}
+								}
+							}
+						}
+					} break;
+				}
+			}
+			// Если функция вывода статуса передана
+			if(status != nullptr){
+				// Увеличиваем количество записанных n-грамм
+				index += text.size();
+				// Выполняем расчёт текущего статуса
+				actual = u_short(index / float(fileSize) * 100.0f);
+				// Если статус обновился
+				if(actual != past){
+					// Запоминаем текущий статус
+					past = actual;
+					// Выводим статус извлечения
+					status(actual);
+				}
+			}
+		});
+		// Выполняем исправление arpa
+		this->arpa->repair(status);
+	// Выводим сообщение об ошибке
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "modify file is not exist");
+}
+/**
+ * prune Метод прунинга языковой модели
+ * @param threshold порог частоты прунинга
+ * @param mingram   значение минимальной n-граммы за которую нельзя прунить
+ * @param status    функция вывода статуса обучения
+ */
+void anyks::Toolkit::prune(const double threshold, const u_short mingram, function <void (const u_short)> status) const {
+	// Выполняем прунинг arpa
+	this->arpa->prune(threshold, mingram, status);
+}
+/**
+ * init Метод инициализации языковой модели
+ * @param algorithm алгоритм расчёта языковой модели
+ * @param modified  количество уже изменённых младших заказов
+ * @param prepares  необходимость изменения счёта, после вычисления
+ * @param mod       дополнительный параметр дельты
+ */
+void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, const bool prepares, const double mod){
+	// Если память под arpa еще не выделена
+	if((this->arpa == nullptr) && (this->python == nullptr)){
+		// Экранируем возможность ошибки памяти
+		try {
+			/**
+			 * Функция получения слова по его идентификатору
+			 * @param idw идентификатор слова
+			 * @return    искомое слово
+			 */
+			auto getWordFn = [this](const size_t idw){
+				// Результат работы функции
+				const word_t * result = nullptr;
+				// Если нужно проверить пользовательские токены
+				if(!this->isOption(options_t::notUserToken) && (this->utokens.count(idw) > 0)){
+					// Получаем слово обозначения пользовательского токена
+					result = &this->utokens.at(idw).name;
+				// Если это не пользовательский токен
+				} else {
+					// Ищем слово по идентификатору
+					auto it = this->vocab.find(idw);
+					// Если слово найдено
+					if(it != this->vocab.end()) result = &it->second;
+				}
+				// Выводим результат
+				return result;
+			};
+			// Устанавливаем дополнительный параметр дельты
+			this->params.mod = mod;
+			// Устанавливаем необходимость изменения счёта, после вычисления
+			this->params.prepares = prepares;
+			// Устанавливаем количество уже изменённых младших заказов
+			this->params.modified = modified;
+			// Устанавливаем алгоритм сглаживания
+			this->params.algorithm = (u_short) algorithm;
+			// Определяем тип алгоритма расчёта языковой модели
+			switch((size_t) algorithm){
+				// Активируем алгоритм WittenBell
+				case (size_t) algorithm_t::wittenBell: this->arpa = new WittenBell(alphabet, getWordFn); break;
+				// Активируем алгоритм GoodTuring
+				case (size_t) algorithm_t::goodTuring: this->arpa = new GoodTuring(alphabet, getWordFn); break;
+				// Активируем алгоритм NaturalDiscount
+				case (size_t) algorithm_t::naturalDiscount: this->arpa = new NaturalDiscount(alphabet, getWordFn); break;
+				// Активируем алгоритм KneserNey
+				case (size_t) algorithm_t::kneserNey: this->arpa = new KneserNey(alphabet, getWordFn, modified, prepares); break;
+				// Активируем алгоритм AddSmooth
+				case (size_t) algorithm_t::addSmooth: this->arpa = new AddSmooth(alphabet, getWordFn, (mod > 0.0 ? mod : 1.0)); break;
+				// Активируем алгоритм ModKneserNey
+				case (size_t) algorithm_t::modKneserNey: this->arpa = new ModKneserNey(alphabet, getWordFn, modified, prepares); break;
+				// Активируем алгоритм ConstDiscount
+				case (size_t) algorithm_t::constDiscount: this->arpa = new ConstDiscount(alphabet, getWordFn, (mod > 0.0 ? mod : 0.3)); break;
+			}
+			// Устанавливаем размер n-граммы
+			this->arpa->setSize(this->size);
+			// Устанавливаем файл логирования
+			this->arpa->setLogfile(this->logfile);
+			// Если скрипт получен
+			if(((this->scripts.count(2) > 0) && !this->utokens.empty()) || (this->scripts.count(1) > 0)){
+				// Создаём объект для работы с python
+				this->python = new python_t(&this->idw);
+				// Если нужно активировать режим отладки
+				if(this->isOption(options_t::debug)) this->python->setDebug();
+				// Ищем скрипт обработки слов
+				auto it = this->scripts.find(1);
+				// Если скрипт обработки слов установлен
+				if(it != this->scripts.end()){
+					// Запоминаем идентификатор скрипта
+					it->second.second = this->python->add(it->second.first, 2);
+				}
+				// Ищем скрипт обработки пользовательских токенов
+				it = this->scripts.find(2);
+				// Если скрипт обработки пользовательских токенов установлен
+				if((it != this->scripts.end()) && !this->utokens.empty()){
+					// Выполняем добавление скрипта
+					const size_t sid = this->python->add(it->second.first, 2);
+					// Переходим по всему списку пользовательских токенов
+					for(auto & token : this->utokens){
+						// Добавляем в пользовательский токен функцию проверки
+						token.second.test = [sid, this](const string & token, const string & word){
+							// Результат работы функции
+							bool result = false;
+							// Если слово и токен переданы
+							if(!token.empty() && !word.empty()){
+								// Выполняем скрипт
+								const wstring & res = this->python->run(sid, {token, word});
+								// Проверяем результат
+								result = (this->alphabet->toLower(res).compare(L"ok") == 0);
+							}
+							// Выводим результат
+							return result;
+						};
+					}
+				}
+			}
+			// Если нужно активировать интерполяцию, активируем её
+			if(this->isOption(options_t::interpolate)
+			&& (algorithm != algorithm_t::constDiscount)
+			&& (algorithm != algorithm_t::addSmooth)) this->arpa->setOption(arpa_t::options_t::interpolate);
+			// Активируем флаг отладки если необходимо
+			if(this->isOption(options_t::debug)) this->arpa->setOption(arpa_t::options_t::debug);
+			// Активируем расчёт всех возможных грамм
+			if(this->isOption(options_t::allGrams)) this->arpa->setOption(arpa_t::options_t::allGrams);
+			// Активируем перевод слов в arpa к нижнему регистру
+			if(this->isOption(options_t::lowerCase)) this->arpa->setOption(arpa_t::options_t::lowerCase);
+		// Если происходит ошибка то игнорируем её
+		} catch(const bad_alloc &) {
+			// Выводим сообщение об ошибке, если режим отладки включён
+			if(this->isOption(options_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "bad alloc for init model language");
+			// Выходим из приложения
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+/**
  * loadInfoVocab Метод загрузки бинарных информационных данных словаря
  * @param buffer буфер бинарных информационных данных словаря
  */
@@ -813,18 +1209,6 @@ void anyks::Toolkit::loadInfoVocab(const vector <char> & buffer){
 		// Сбрасываем идентификатор последнего документа
 		this->info.idd = noID;
 	}
-}
-/**
- * saveInfoVocab Метод сохранения бинарных информационных данных словаря
- * @param buffer буфер бинарных информационных данных словаря
- */
-void anyks::Toolkit::saveInfoVocab(vector <char> & buffer) const {
-	// Очищаем переданный буфер данных
-	buffer.clear();
-	// Получаем бинарные информационные данные словаря
-	const char * bin = reinterpret_cast <const char *> (&this->info);
-	// Добавляем в буфер бинарные информационные данные словаря
-	buffer.insert(buffer.end(), bin, bin + sizeof(this->info));
 }
 /**
  * loadVocab Метод загрузки бинарных данных в словарь
@@ -863,6 +1247,18 @@ void anyks::Toolkit::loadArpa(const vector <char> & buffer, const bool arpa) con
 	this->arpa->load(buffer, arpa);
 }
 /**
+ * saveInfoVocab Метод сохранения бинарных информационных данных словаря
+ * @param buffer буфер бинарных информационных данных словаря
+ */
+void anyks::Toolkit::saveInfoVocab(vector <char> & buffer) const {
+	// Очищаем переданный буфер данных
+	buffer.clear();
+	// Получаем бинарные информационные данные словаря
+	const char * bin = reinterpret_cast <const char *> (&this->info);
+	// Добавляем в буфер бинарные информационные данные словаря
+	buffer.insert(buffer.end(), bin, bin + sizeof(this->info));
+}
+/**
  * saveVocab Метод извлечения данных словаря в бинарном виде
  * @param callback функция обратного вызова
  */
@@ -893,6 +1289,293 @@ void anyks::Toolkit::saveVocab(function <void (const vector <char> &, const u_sh
 	}
 }
 /**
+ * writeArpa Метод записи данных в файл arpa
+ * @param filename адрес файла для записи
+ * @param status   функция вывода статуса записи
+ */
+void anyks::Toolkit::writeArpa(const string & filename, function <void (const u_short)> status) const {
+	// Если адрес файла передан
+	if(!filename.empty()){
+		// Открываем файл на запись
+		ofstream file(filename, ios::binary);
+		// Если файл открыт
+		if(file.is_open()){
+			// Данные данных для записи
+			string data = "";
+			// Текущий и предыдущий статус
+			u_short actual = 0, past = 100;
+			// Количество n-грамм и количество всех n-грамм
+			size_t count = 0, counts = 0, index = 0;
+			// Получаем штамп файла
+			const string & stamp = this->arpa->stamp();
+			// Выполняем запись штампа в файл
+			file.write(stamp.data(), stamp.size());
+			// Формируем начало документа
+			data = "\\data\\\n";
+			// Выполняем запись данных в файл
+			file.write(data.data(), data.size());
+			// Переходим по всей длине n-граммы
+			for(u_short i = 1; i <= this->size; i++){
+				// Получаем количество n-грамм
+				count = this->arpa->count(i);
+				// Формируем количество n-грамм
+				data = move(this->alphabet->format("ngram %u=%u\n", i, count));
+				// Выполняем запись данных в файл
+				file.write(data.data(), data.size());
+				// Увеличиваем количество всех n-грамм
+				counts += count;
+			}
+			// Если количество элементов больше 0
+			if(counts > 0){
+				// Переходим по всей длине n-граммы
+				for(u_short i = 1; i <= this->size; i++){
+					// Получаем количество n-грамм
+					data = move(this->alphabet->format("\n\\%u-grams:\n", i));
+					// Выполняем запись данных в файл
+					file.write(data.data(), data.size());
+					// Выполняем извлечение данных n-граммы
+					this->arpa->data(i, [&](const string & ngram){
+						// Если строка получена
+						if(!ngram.empty()){
+							// Формируем тело n-граммы
+							data = move(this->alphabet->format("%s\n", ngram.c_str()));
+							// Выполняем запись данных в файл
+							file.write(data.data(), data.size());
+						}
+						// Если функция вывода статуса передана
+						if(status != nullptr){
+							// Увеличиваем количество записанных n-грамм
+							index++;
+							// Выполняем расчёт текущего статуса
+							actual = u_short(float(index) / float(counts) * 100.0f);
+							// Если статус обновился
+							if(actual != past){
+								// Запоминаем текущий статус
+								past = actual;
+								// Выводим статус извлечения
+								status(actual);
+							}
+						}
+					});
+				}
+			}
+			// Формируем конец документа
+			data = "\n\\end\\\n";
+			// Выполняем запись данных в файл
+			file.write(data.data(), data.size());
+			// Закрываем файл
+			file.close();
+		// Выводим сообщение об ошибке
+		} else this->alphabet->log("arpa file: %s is broken", alphabet_t::log_t::error, this->logfile, filename.c_str());
+	// Выводим сообщение об ошибке
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is empty");
+}
+/**
+ * writeVocab Метод записи данных словаря в файл
+ * @param filename адрес файла для записи
+ * @param status   функция вывода статуса записи
+ */
+void anyks::Toolkit::writeVocab(const string & filename, function <void (const u_short)> status) const {
+	// Если адрес файла передан
+	if(!filename.empty()){
+		// Открываем файл на запись
+		ofstream file(filename, ios::binary);
+		// Если файл открыт
+		if(file.is_open()){
+			// Данные данных для записи
+			string data = "";
+			// Количество извлечённых слов
+			size_t index = 0;
+			// Текущий и предыдущий статус
+			u_short actual = 0, past = 100;
+			// Получаем штамп файла
+			const string & stamp = this->arpa->stamp();
+			// Выполняем запись штампа в файл
+			file.write(stamp.data(), stamp.size());
+			// Формируем значение заголовка
+			data = "\\data\\\n";
+			// Выполняем запись данных в файл
+			file.write(data.data(), data.size());
+			// Получаем характеристики словаря
+			data = move(this->alphabet->format("ad=%lld\ncw=%lld\nunq=%lld\n\n", this->info.ad, this->info.cw, this->info.unq));
+			// Выполняем запись данных в файл
+			file.write(data.data(), data.size());
+			// Формируем значение тела
+			data = "\\words:\n";
+			// Выполняем запись данных в файл
+			file.write(data.data(), data.size());
+			// Переходим по всему списку слов
+			for(auto & item : this->vocab){
+				// Получаем метаданные слова
+				auto meta = item.second.calc(this->info.ad, this->info.cw);
+				// Получаем слово для экспорта
+				const string & word = (this->isOption(options_t::lowerCase) ? item.second.str() : item.second.real());
+				// Получаем данные слова
+				data = move(this->alphabet->format("%lld\t%s\t%lld | %lld | %f | %f | %f\n", item.first, word.c_str(), meta.oc, meta.dc, meta.tf, meta.idf, meta.wltf));
+				// Выполняем запись данных в файл
+				file.write(data.data(), data.size());
+				// Если функция вывода статуса передана
+				if(status != nullptr){
+					// Увеличиваем количество записанных слов
+					index++;
+					// Выполняем расчёт текущего статуса
+					actual = u_short(float(index) / float(this->info.unq) * 100.0f);
+					// Если статус обновился
+					if(actual != past){
+						// Запоминаем текущий статус
+						past = actual;
+						// Выводим статус извлечения
+						status(actual);
+					}
+				}
+			}
+			// Формируем значение тела
+			data = "\n\\end\\\n";
+			// Выполняем запись данных в файл
+			file.write(data.data(), data.size());
+			// Закрываем файл
+			file.close();
+		// Выводим сообщение об ошибке
+		} else this->alphabet->log("vocab file: %s is broken", alphabet_t::log_t::error, this->logfile, filename.c_str());
+	// Выводим сообщение об ошибке
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "vocab file is empty");
+}
+/**
+ * writeNgrams Метод записи данных в файлы ngrams
+ * @param filename адрес файла для записи
+ * @param status   функция вывода статуса записи
+ */
+void anyks::Toolkit::writeNgrams(const string & filename, function <void (const u_short)> status) const {
+	// Если адрес файла передан
+	if(!filename.empty()){
+		// Открываем файл на запись
+		ofstream file(filename, ios::binary);
+		// Если файл открыт
+		if(file.is_open()){
+			// Данные данных для записи
+			string data = "";
+			// Текущий и предыдущий статус
+			u_short actual = 0, past = 100;
+			// Количество n-грамм и количество всех n-грамм
+			size_t count = 0, counts = 0, index = 0;
+			// Получаем штамп файла
+			const string & stamp = this->arpa->stamp();
+			// Выполняем запись штампа в файл
+			file.write(stamp.data(), stamp.size());
+			// Формируем значение заголовка
+			data = "\\data\\\n";
+			// Выполняем запись данных в файл
+			file.write(data.data(), data.size());
+			// Получаем характеристики словаря
+			data = move(this->alphabet->format("ad=%lld\ncw=%lld\nunq=%lld\n\n", this->info.ad, this->info.cw, this->info.unq));
+			// Выполняем запись данных в файл
+			file.write(data.data(), data.size());
+			// Переходим по всей длине n-граммы
+			for(u_short i = 1; i <= this->size; i++){
+				// Получаем количество n-грамм
+				count = this->arpa->count(i);
+				// Формируем количество n-грамм
+				data = move(this->alphabet->format("ngram %u=%u\n", i, count));
+				// Выполняем запись данных в файл
+				file.write(data.data(), data.size());
+				// Увеличиваем количество всех n-грамм
+				counts += count;
+			}
+			// Если количество элементов больше 0
+			if(counts > 0){
+				// Переходим по всей длине n-граммы
+				for(u_short i = 1; i <= this->size; i++){
+					// Формируем значение тела
+					data = move(this->alphabet->format("\n\\%u-grams:\n", i));
+					// Выполняем запись данных в файл
+					file.write(data.data(), data.size());
+					// Выполняем извлечение данных n-граммы
+					this->arpa->grams(i, [&](const string & ngram){
+						// Если строка получена
+						if(!ngram.empty()){
+							// Формируем тело n-граммы
+							data = move(this->alphabet->format("%s\n", ngram.c_str()));
+							// Выполняем запись данных в файл
+							file.write(data.data(), data.size());
+						}
+						// Если функция вывода статуса передана
+						if(status != nullptr){
+							// Увеличиваем количество записанных n-грамм
+							index++;
+							// Выполняем расчёт текущего статуса
+							actual = u_short(float(index) / float(counts) * 100.0f);
+							// Если статус обновился
+							if(actual != past){
+								// Запоминаем текущий статус
+								past = actual;
+								// Выводим статус извлечения
+								status(actual);
+							}
+						}
+					});
+				}
+				// Формируем значение тела
+				data = "\n\\end\\\n";
+				// Выполняем запись данных в файл
+				file.write(data.data(), data.size());
+			// Сообщаем что arpa пустая
+			} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa is empty");
+			// Закрываем файл
+			file.close();
+		// Выводим сообщение об ошибке
+		} else this->alphabet->log("ngrams file: %s is broken", alphabet_t::log_t::error, this->logfile, filename.c_str());
+	// Выводим сообщение об ошибке
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ngrams file is empty");
+}
+/**
+ * saveArpa Метод извлечения данных n-грамм в бинарном виде
+ * @param callback функция обратного вызова
+ * @param arpa     нужно добавить только данные arpa
+ */
+void anyks::Toolkit::saveArpa(function <void (const vector <char> &, const u_short)> callback, const bool arpa) const {
+	// Выполняем извлечение данных arpa в бинарном виде
+	this->arpa->save(arpa, callback);
+}
+/**
+ * writeMap Метод записи карты последовательности в файл
+ * @param filename адрес map файла карты последовательности
+ * @param status   функция вывода статуса записи
+ * @param delim    разделитель последовательностей
+ */
+void anyks::Toolkit::writeMap(const string & filename, function <void (const u_short)> status, const string & delim) const {
+	// Если адрес файла передан
+	if(!filename.empty()){
+		// Открываем файл на запись
+		ofstream file(filename, ios::binary);
+		// Если файл открыт
+		if(file.is_open()){
+			// Текущий и предыдущий статус
+			u_short past = 100;
+			// Выполняем извлечение данных карты последовательностей
+			this->arpa->map([&](const string & str, const u_short actual){
+				// Если строка получена
+				if(!str.empty()){
+					// Получаем количество n-грамм
+					const string & data = this->alphabet->format("%s\n", str.c_str());
+					// Выполняем запись данных в файл
+					file.write(data.data(), data.size());
+				}
+				// Если функция вывода статуса передана
+				if((status != nullptr) && (actual != past)){
+					// Запоминаем текущий статус
+					past = actual;
+					// Выводим статус извлечения
+					status(actual);
+				}
+			}, delim);
+			// Закрываем файл
+			file.close();
+		// Выводим сообщение об ошибке
+		} else this->alphabet->log("map sequence file: %s is broken", alphabet_t::log_t::error, this->logfile, filename.c_str());
+	// Выводим сообщение об ошибке
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "map sequence file is empty");
+}
+/**
  * readArpas Метод чтения данных из каталога файлов arpa
  * @param path   адрес где лежат arpa файлы
  * @param status функция вывода статуса чтения
@@ -913,7 +1596,7 @@ void anyks::Toolkit::readArpas(const string & path, function <void (const u_shor
 		// Количество обработанных данных
 		size_t idd = 0, index = 0, pos = 0, loc = 0;
 		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) sign_t::unk;
+		const size_t uid = (size_t) token_t::unk;
 		// Переходим по всему списку файлов в каталоге
 		fsys_t::rdir(fullpath, "arpa", [&](const string & filename, const uintmax_t dirSize){
 			// Выполняем считывание всех строк текста
@@ -967,7 +1650,7 @@ void anyks::Toolkit::readArpas(const string & path, function <void (const u_shor
 											// Проверяем отсутствует ли слово в списке запрещённых слов
 											if(this->badwords.count(idw) < 1){
 												// Если это юниграмма и её еще нет в словаре
-												if((idw != (size_t) sign_t::start) &&
+												if((idw != (size_t) token_t::start) &&
 												((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal(), idd);
 											}
 										}
@@ -986,7 +1669,7 @@ void anyks::Toolkit::readArpas(const string & path, function <void (const u_shor
 													// Если неизвестное слово установлено
 													else if(this->unknown > 0) seq.emplace_back(this->unknown, this->vocab.at(this->unknown).getUppers());
 												// Добавляем слово в список последовательности
-												} else seq.emplace_back(idw, ((words.size() > 1) && (this->usigns.count(idw) > 0) ? 0 : word.getUppers()));
+												} else seq.emplace_back(idw, ((words.size() > 1) && (this->utokens.count(idw) > 0) ? 0 : word.getUppers()));
 											// Если слово найдено в всписке запрещённых
 											} else {
 												// Очищаем последовательность
@@ -1049,7 +1732,7 @@ void anyks::Toolkit::readNgrams(const string & path, function <void (const u_sho
 		// Количество обработанных данных
 		size_t index = 0, pos = 0, loc = 0;
 		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) sign_t::unk;
+		const size_t uid = (size_t) token_t::unk;
 		// Определяем разрешены ли неизвестные слова
 		const bool allowUnk = this->isOption(options_t::allowUnk);
 		// Переходим по всему списку файлов в каталоге
@@ -1124,8 +1807,8 @@ void anyks::Toolkit::readNgrams(const string & path, function <void (const u_sho
 												} else {
 													// Получаем регистры слова
 													size_t uppers = word.getUppers();
-													// Если название признака получено, устанавливаем его регистры
-													if(this->usigns.count(idw) > 0) uppers = 0;
+													// Если название токена получено, устанавливаем его регистры
+													if(this->utokens.count(idw) > 0) uppers = 0;
 													// Добавляем слово в список последовательности
 													seq.emplace_back(idw, uppers);
 													// Если это правильное слово
@@ -1159,8 +1842,8 @@ void anyks::Toolkit::readNgrams(const string & path, function <void (const u_sho
 													} else {
 														// Получаем регистры слова
 														size_t uppers = word.getUppers();
-														// Если название признака получено, устанавливаем его регистры
-														if(this->usigns.count(idw) > 0) uppers = 0;
+														// Если название токена получено, устанавливаем его регистры
+														if(this->utokens.count(idw) > 0) uppers = 0;
 														// Добавляем слово в список последовательности
 														seq.emplace_back(idw, uppers);
 													}
@@ -1221,7 +1904,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 		// Количество обработанных данных
 		size_t index = 0, pos = 0, loc = 0;
 		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) sign_t::unk;
+		const size_t uid = (size_t) token_t::unk;
 		// Выполняем считывание всех строк текста
 		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
 			// Если слово получено
@@ -1273,7 +1956,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 										// Проверяем отсутствует ли слово в списке запрещённых слов
 										if(this->badwords.count(idw) < 1){
 											// Если это юниграмма и её еще нет в словаре
-											if((idw != (size_t) sign_t::start) &&
+											if((idw != (size_t) token_t::start) &&
 											((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal());
 										}
 									}
@@ -1292,7 +1975,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 												// Если неизвестное слово установлено
 												else if(this->unknown > 0) seq.emplace_back(this->unknown, this->vocab.at(this->unknown).getUppers());
 											// Добавляем слово в список последовательности
-											} else seq.emplace_back(idw, ((words.size() > 1) && (this->usigns.count(idw) > 0) ? 0 : word.getUppers()));
+											} else seq.emplace_back(idw, ((words.size() > 1) && (this->utokens.count(idw) > 0) ? 0 : word.getUppers()));
 										// Если слово найдено в всписке запрещённых
 										} else {
 											// Очищаем последовательность
@@ -1456,7 +2139,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 		// Количество обработанных данных
 		size_t index = 0, pos = 0, loc = 0;
 		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) sign_t::unk;
+		const size_t uid = (size_t) token_t::unk;
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100, type = 0;
 		// Выполняем считывание всех строк текста
@@ -1529,8 +2212,8 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 											} else {
 												// Получаем регистры слова
 												size_t uppers = word.getUppers();
-												// Если название признака получено, устанавливаем его регистры
-												if(this->usigns.count(idw) > 0) uppers = 0;
+												// Если название токена получено, устанавливаем его регистры
+												if(this->utokens.count(idw) > 0) uppers = 0;
 												// Добавляем слово в список последовательности
 												seq.emplace_back(idw, uppers);
 												// Если это правильное слово
@@ -1561,7 +2244,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 													// Если неизвестное слово установлено
 													else if(this->unknown > 0) seq.emplace_back(this->unknown, this->vocab.at(this->unknown).getUppers());
 												// Добавляем слово в список последовательности
-												} else seq.emplace_back(idw, this->usigns.count(idw) > 0 ? 0 : word.getUppers());
+												} else seq.emplace_back(idw, this->utokens.count(idw) > 0 ? 0 : word.getUppers());
 											// Если слово найдено в всписке запрещённых
 											} else {
 												// Очищаем последовательность
@@ -1598,530 +2281,6 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 		this->info.unq = this->vocab.size();
 	// Выводим сообщение об ошибке
 	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ngrams file is not exist");
-}
-/**
- * writeArpa Метод записи данных в файл arpa
- * @param filename адрес файла для записи
- * @param status   функция вывода статуса записи
- */
-void anyks::Toolkit::writeArpa(const string & filename, function <void (const u_short)> status) const {
-	// Если адрес файла передан
-	if(!filename.empty()){
-		// Открываем файл на запись
-		ofstream file(filename, ios::binary);
-		// Если файл открыт
-		if(file.is_open()){
-			// Данные данных для записи
-			string data = "";
-			// Текущий и предыдущий статус
-			u_short actual = 0, past = 100;
-			// Количество n-грамм и количество всех n-грамм
-			size_t count = 0, counts = 0, index = 0;
-			// Получаем штамп файла
-			const string & stamp = this->arpa->stamp();
-			// Выполняем запись штампа в файл
-			file.write(stamp.data(), stamp.size());
-			// Формируем начало документа
-			data = "\\data\\\n";
-			// Выполняем запись данных в файл
-			file.write(data.data(), data.size());
-			// Переходим по всей длине n-граммы
-			for(u_short i = 1; i <= this->size; i++){
-				// Получаем количество n-грамм
-				count = this->arpa->count(i);
-				// Формируем количество n-грамм
-				data = move(this->alphabet->format("ngram %u=%u\n", i, count));
-				// Выполняем запись данных в файл
-				file.write(data.data(), data.size());
-				// Увеличиваем количество всех n-грамм
-				counts += count;
-			}
-			// Если количество элементов больше 0
-			if(counts > 0){
-				// Переходим по всей длине n-граммы
-				for(u_short i = 1; i <= this->size; i++){
-					// Получаем количество n-грамм
-					data = move(this->alphabet->format("\n\\%u-grams:\n", i));
-					// Выполняем запись данных в файл
-					file.write(data.data(), data.size());
-					// Выполняем извлечение данных n-граммы
-					this->arpa->data(i, [&](const string & ngram){
-						// Если строка получена
-						if(!ngram.empty()){
-							// Формируем тело n-граммы
-							data = move(this->alphabet->format("%s\n", ngram.c_str()));
-							// Выполняем запись данных в файл
-							file.write(data.data(), data.size());
-						}
-						// Если функция вывода статуса передана
-						if(status != nullptr){
-							// Увеличиваем количество записанных n-грамм
-							index++;
-							// Выполняем расчёт текущего статуса
-							actual = u_short(float(index) / float(counts) * 100.0f);
-							// Если статус обновился
-							if(actual != past){
-								// Запоминаем текущий статус
-								past = actual;
-								// Выводим статус извлечения
-								status(actual);
-							}
-						}
-					});
-				}
-			}
-			// Формируем конец документа
-			data = "\n\\end\\\n";
-			// Выполняем запись данных в файл
-			file.write(data.data(), data.size());
-			// Закрываем файл
-			file.close();
-		// Выводим сообщение об ошибке
-		} else this->alphabet->log("arpa file: %s is broken", alphabet_t::log_t::error, this->logfile, filename.c_str());
-	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is empty");
-}
-/**
- * writeVocab Метод записи данных словаря в файл
- * @param filename адрес файла для записи
- * @param status   функция вывода статуса записи
- */
-void anyks::Toolkit::writeVocab(const string & filename, function <void (const u_short)> status) const {
-	// Если адрес файла передан
-	if(!filename.empty()){
-		// Открываем файл на запись
-		ofstream file(filename, ios::binary);
-		// Если файл открыт
-		if(file.is_open()){
-			// Данные данных для записи
-			string data = "";
-			// Количество извлечённых слов
-			size_t index = 0;
-			// Текущий и предыдущий статус
-			u_short actual = 0, past = 100;
-			// Получаем штамп файла
-			const string & stamp = this->arpa->stamp();
-			// Выполняем запись штампа в файл
-			file.write(stamp.data(), stamp.size());
-			// Формируем значение заголовка
-			data = "\\data\\\n";
-			// Выполняем запись данных в файл
-			file.write(data.data(), data.size());
-			// Получаем характеристики словаря
-			data = move(this->alphabet->format("ad=%lld\ncw=%lld\nunq=%lld\n\n", this->info.ad, this->info.cw, this->info.unq));
-			// Выполняем запись данных в файл
-			file.write(data.data(), data.size());
-			// Формируем значение тела
-			data = "\\words:\n";
-			// Выполняем запись данных в файл
-			file.write(data.data(), data.size());
-			// Переходим по всему списку слов
-			for(auto & item : this->vocab){
-				// Получаем метаданные слова
-				auto meta = item.second.calc(this->info.ad, this->info.cw);
-				// Получаем слово для экспорта
-				const char * word = (this->isOption(options_t::lowerCase) ? item.second.c_str() : item.second.real().c_str());
-				// Получаем данные слова
-				data = move(this->alphabet->format("%lld\t%s\t%lld | %lld | %f | %f | %f\n", item.first, word, meta.oc, meta.dc, meta.tf, meta.idf, meta.wltf));
-				// Выполняем запись данных в файл
-				file.write(data.data(), data.size());
-				// Если функция вывода статуса передана
-				if(status != nullptr){
-					// Увеличиваем количество записанных слов
-					index++;
-					// Выполняем расчёт текущего статуса
-					actual = u_short(float(index) / float(this->info.unq) * 100.0f);
-					// Если статус обновился
-					if(actual != past){
-						// Запоминаем текущий статус
-						past = actual;
-						// Выводим статус извлечения
-						status(actual);
-					}
-				}
-			}
-			// Формируем значение тела
-			data = "\n\\end\\\n";
-			// Выполняем запись данных в файл
-			file.write(data.data(), data.size());
-			// Закрываем файл
-			file.close();
-		// Выводим сообщение об ошибке
-		} else this->alphabet->log("vocab file: %s is broken", alphabet_t::log_t::error, this->logfile, filename.c_str());
-	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "vocab file is empty");
-}
-/**
- * writeNgrams Метод записи данных в файлы ngrams
- * @param filename адрес файла для записи
- * @param status   функция вывода статуса записи
- */
-void anyks::Toolkit::writeNgrams(const string & filename, function <void (const u_short)> status) const {
-	// Если адрес файла передан
-	if(!filename.empty()){
-		// Открываем файл на запись
-		ofstream file(filename, ios::binary);
-		// Если файл открыт
-		if(file.is_open()){
-			// Данные данных для записи
-			string data = "";
-			// Текущий и предыдущий статус
-			u_short actual = 0, past = 100;
-			// Количество n-грамм и количество всех n-грамм
-			size_t count = 0, counts = 0, index = 0;
-			// Получаем штамп файла
-			const string & stamp = this->arpa->stamp();
-			// Выполняем запись штампа в файл
-			file.write(stamp.data(), stamp.size());
-			// Формируем значение заголовка
-			data = "\\data\\\n";
-			// Выполняем запись данных в файл
-			file.write(data.data(), data.size());
-			// Получаем характеристики словаря
-			data = move(this->alphabet->format("ad=%lld\ncw=%lld\nunq=%lld\n\n", this->info.ad, this->info.cw, this->info.unq));
-			// Выполняем запись данных в файл
-			file.write(data.data(), data.size());
-			// Переходим по всей длине n-граммы
-			for(u_short i = 1; i <= this->size; i++){
-				// Получаем количество n-грамм
-				count = this->arpa->count(i);
-				// Формируем количество n-грамм
-				data = move(this->alphabet->format("ngram %u=%u\n", i, count));
-				// Выполняем запись данных в файл
-				file.write(data.data(), data.size());
-				// Увеличиваем количество всех n-грамм
-				counts += count;
-			}
-			// Если количество элементов больше 0
-			if(counts > 0){
-				// Переходим по всей длине n-граммы
-				for(u_short i = 1; i <= this->size; i++){
-					// Формируем значение тела
-					data = move(this->alphabet->format("\n\\%u-grams:\n", i));
-					// Выполняем запись данных в файл
-					file.write(data.data(), data.size());
-					// Выполняем извлечение данных n-граммы
-					this->arpa->grams(i, [&](const string & ngram){
-						// Если строка получена
-						if(!ngram.empty()){
-							// Формируем тело n-граммы
-							data = move(this->alphabet->format("%s\n", ngram.c_str()));
-							// Выполняем запись данных в файл
-							file.write(data.data(), data.size());
-						}
-						// Если функция вывода статуса передана
-						if(status != nullptr){
-							// Увеличиваем количество записанных n-грамм
-							index++;
-							// Выполняем расчёт текущего статуса
-							actual = u_short(float(index) / float(counts) * 100.0f);
-							// Если статус обновился
-							if(actual != past){
-								// Запоминаем текущий статус
-								past = actual;
-								// Выводим статус извлечения
-								status(actual);
-							}
-						}
-					});
-				}
-				// Формируем значение тела
-				data = "\n\\end\\\n";
-				// Выполняем запись данных в файл
-				file.write(data.data(), data.size());
-			// Сообщаем что arpa пустая
-			} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa is empty");
-			// Закрываем файл
-			file.close();
-		// Выводим сообщение об ошибке
-		} else this->alphabet->log("ngrams file: %s is broken", alphabet_t::log_t::error, this->logfile, filename.c_str());
-	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ngrams file is empty");
-}
-/**
- * modifyArpa Метод модификации arpa
- * @param filename адрес файла для чтения
- * @param flag     флаг модификации arpa
- * @param status   функция вывода статуса модификации
- */
-void anyks::Toolkit::modifyArpa(const string & filename, modify_t flag, function <void (const u_short)> status){
-	// Если адрес файла передан
-	if(!filename.empty() && fsys_t::isfile(filename)){
-		// Последовательность для добавления
-		vector <pair_t> seq;
-		// Список полученных слов последовательности
-		vector <wstring> words;
-		// Список добавленных слов в словарь
-		map <size_t, size_t> added;
-		// Текущий и предыдущий статус
-		u_short actual = 0, past = 100;
-		// Количество обработанных данных
-		size_t index = 0, pos = 0, loc = 0;
-		// Идентификатор неизвестного слова
-		const size_t uid = (size_t) sign_t::unk;
-		/**
-		 * cleanAddedFn Функция очистки добавленных слов
-		 */
-		auto cleanAddedFn = [&added, this]{
-			// Если список добавленных слов существует
-			if(!added.empty()){
-				// Переходим по списку добавленных слов
-				for(auto & item : added){
-					// Ищем слово в словаре
-					auto it = this->vocab.find(item.first);
-					// Если слово найдено
-					if(it != this->vocab.end()){
-						// Получаем метаданные слова
-						auto meta = it->second.getmeta();
-						// Если встречаемости равны, удаляем слово
-						if(meta.oc == item.second) this->vocab.erase(item.first);
-						// Меняем вероятность
-						else {
-							// Уменьшаем встречаемость
-							meta.oc -= item.second;
-							// Устанавливаем обратно метаданные
-							it->second.setmeta(meta);
-						}
-						// Уменьшаем общее количество добавленных слов
-						this->info.cw -= item.second;
-					}
-				}
-			}
-		};
-		/**
-		 * organizationSeqFn Функция организации последовательности
-		 * @param words список слов из которых нужно сделать последовательность
-		 */
-		auto organizationSeqFn = [&added, &seq, this](const vector <wstring> & words){
-			// Если список слов получен
-			if(!words.empty()){
-				// Идентификатор слова
-				size_t idw = 0;
-				// Полученное слово
-				word_t word = L"";
-				// Переходим по всему списку слов
-				for(auto & item : words){
-					// Получаем слово
-					word = move(item);
-					// Получаем идентификатор слова
-					idw = this->getIdw(word);
-					// Проверяем отсутствует ли слово в списке запрещённых слов
-					if((idw > 0) && (idw < noID) && (this->badwords.count(idw) < 1)){
-						// Если это неизвестное слово
-						if(idw == uid){
-							// Если неизвестное слово не установлено
-							if(this->unknown == 0) seq.emplace_back(idw, 0);
-							// Если неизвестное слово установлено
-							else if(this->unknown > 0) seq.emplace_back(this->unknown, this->vocab.at(this->unknown).getUppers());
-						// Добавляем слово в список
-						} else {
-							// Получаем регистры слова
-							size_t uppers = word.getUppers();
-							// Если название признака получено, устанавливаем его регистры
-							if(this->usigns.count(idw) > 0) uppers = 0;
-							// Добавляем слово в список последовательности
-							seq.emplace_back(idw, uppers);
-							// Если это правильное слово
-							if(this->arpa->event(idw) && (this->vocab.count(idw) < 1)){
-								// Если слово еще не добавлено
-								if(added.count(idw) < 1)
-									// Запоминаем что слово добавили
-									added.emplace(idw, 1);
-								// Иначе увеличиваем количество слов
-								else added.at(idw)++;
-								// Добавляем слово в словарь
-								this->addWord(word.wreal());
-							}
-						}
-					// Если слово найдено в всписке запрещённых
-					} else {
-						// Очищаем последовательность
-						seq.clear();
-						// Выходим из цикла
-						break;
-					}
-				}
-			}
-		};
-		// Выполняем считывание всех строк текста
-		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
-			// Если слово получено
-			if(!text.empty()){
-				// Определяем тип модификации
-				switch((u_short) flag){
-					// Если это изменение n-грамм
-					case (u_short) modify_t::change:
-					// Если это добавление в файл n-грамм
-					case (u_short) modify_t::emplace: {
-						// Считываем данные слова
-						if((pos = text.find("\t")) != string::npos){
-							// Очищаем последовательность
-							seq.clear();
-							// Считываем частоту n-граммы
-							const string & weight = this->alphabet->trim(text.substr(0, pos));
-							// Считываем данные n-граммы
-							const string & ngram = this->alphabet->trim(text.substr(pos + 1, text.length() - (pos + 1)));
-							// Если частота и n-грамма получены
-							if(!weight.empty() && !ngram.empty()){
-								// Выполняем сплит n-грамм
-								this->alphabet->split(ngram, " ", words);
-								// Если список слов получен
-								if(!words.empty()){
-									// Формируем последовательность
-									organizationSeqFn(words);
-									// Добавляем последовательность в словарь
-									if(!seq.empty()){
-										// Если это добавления последовательности в arpa
-										if(flag == modify_t::emplace){
-											// Если добавление не выполнено
-											if(!this->arpa->emplace(seq, stof(weight))) cleanAddedFn();
-										// Если это изменение частот последовательности
-										} else if(flag == modify_t::change) {
-											// Выполняем инкрементацию частот
-											this->arpa->inc(seq, stof(weight));
-											// Выполняем неверно-добавленных слов
-											cleanAddedFn();
-										}
-										// Очищаем список добавленных слов
-										added.clear();
-									}
-								}
-							}
-						}
-					} break;
-					// Если это удаление из файла n-грамм
-					case (u_short) modify_t::remove: {
-						// Выполняем сплит n-грамм
-						this->alphabet->split(text, " ", words);
-						// Если список слов получен
-						if(!words.empty()){
-							// Идентификатор слова
-							size_t idw = 0;
-							// Последовательность для добавления
-							vector <size_t> seq(words.size());
-							// Переходим по всему списку слов
-							for(size_t i = 0; i < words.size(); i++){
-								// Определяем идентификатор слова
-								idw = this->getIdw(words[i]);
-								// Если идентификатор получен
-								if((idw > 0) && (idw < noID)) seq[i] = idw;
-								// Если слово не получено, выходим
-								else {
-									// Очищаем список слов
-									words.clear();
-									// Выходим из цикла
-									break;
-								}
-							}
-							// Удаляем последовательность из словаря
-							if(!words.empty()) this->arpa->del(seq);
-						}
-					} break;
-					// Если это замена n-грамм
-					case (u_short) modify_t::replace: {
-						// Считываем данные слова
-						if((pos = text.find("\t")) != string::npos){
-							// Очищаем последовательность
-							seq.clear();
-							// Считываем n-грамму которую нужно заменить
-							const string & fromNgram = this->alphabet->trim(text.substr(0, pos));
-							// Считываем n-грамму на которую нужно заменить
-							const string & toNgram = this->alphabet->trim(text.substr(pos + 1, text.length() - (pos + 1)));
-							// Если частота и n-грамма получены
-							if(!fromNgram.empty() && !toNgram.empty()){
-								// Выполняем сплит n-грамм
-								this->alphabet->split(fromNgram, " ", words);
-								// Если список слов получен
-								if(!words.empty()){
-									// Идентификатор слова
-									size_t idw = 0;
-									// Последовательность для добавления
-									vector <size_t> seq2(words.size());
-									// Переходим по всему списку слов
-									for(size_t i = 0; i < words.size(); i++){
-										// Определяем идентификатор слова
-										idw = this->getIdw(words[i]);
-										// Если идентификатор получен
-										if((idw > 0) && (idw < noID)){
-											// Устанавливаем идентификатор слова
-											seq2[i] = idw;
-											// Если слова нет в словаре и это не признак, добавляем в словарь
-											if(this->arpa->event(idw) && (this->vocab.count(idw) < 1)){
-												// Если слово еще не добавлено
-												if(added.count(idw) < 1)
-													// Запоминаем что слово добавили
-													added.emplace(idw, 1);
-												// Иначе увеличиваем количество слов
-												else added.at(idw)++;
-												// Добавляем слово в словарь
-												this->addWord(words[i]);
-											}
-										// Если слово не получено, выходим
-										} else {
-											// Очищаем список слов
-											words.clear();
-											// Выходим из цикла
-											break;
-										}
-									}
-									// Выполняем сплит n-грамм
-									if(!words.empty()) this->alphabet->split(toNgram, " ", words);
-									// Если список слов получен
-									if(!words.empty()){
-										// Формируем последовательность
-										organizationSeqFn(words);
-										// Добавляем последовательность в словарь
-										if(!seq.empty() && !seq2.empty()){
-											// Если замена не удалась
-											if(!this->arpa->replace(seq2, seq)) cleanAddedFn();
-											// Очищаем список добавленных слов
-											added.clear();
-										}
-									}
-								}
-							}
-						}
-					} break;
-				}
-			}
-			// Если функция вывода статуса передана
-			if(status != nullptr){
-				// Увеличиваем количество записанных n-грамм
-				index += text.size();
-				// Выполняем расчёт текущего статуса
-				actual = u_short(index / float(fileSize) * 100.0f);
-				// Если статус обновился
-				if(actual != past){
-					// Запоминаем текущий статус
-					past = actual;
-					// Выводим статус извлечения
-					status(actual);
-				}
-			}
-		});
-		// Выполняем исправление arpa
-		this->arpa->repair(status);
-	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "modify file is not exist");
-}
-/**
- * saveArpa Метод извлечения данных n-грамм в бинарном виде
- * @param callback функция обратного вызова
- * @param arpa     нужно добавить только данные arpa
- */
-void anyks::Toolkit::saveArpa(function <void (const vector <char> &, const u_short)> callback, const bool arpa) const {
-	// Выполняем извлечение данных arpa в бинарном виде
-	this->arpa->save(arpa, callback);
-}
-/**
- * prune Метод прунинга языковой модели
- * @param threshold порог частоты прунинга
- * @param mingram   значение минимальной n-граммы за которую нельзя прунить
- * @param status    функция вывода статуса обучения
- */
-void anyks::Toolkit::prune(const double threshold, const u_short mingram, function <void (const u_short)> status) const {
-	// Выполняем прунинг arpa
-	this->arpa->prune(threshold, mingram, status);
 }
 /**
  * readMaps Метод добавления - объединения карт последовательностей
@@ -2168,20 +2327,20 @@ void anyks::Toolkit::readMaps(const string & path, function <void (const u_short
 								bool noEvent = !this->arpa->event(idw);
 								// Проверяем существует ли слово в словаре
 								bool isWord = (this->vocab.count(idw) > 0);
-								// Проверяем является ли слово пользовательским признаком
-								bool isUsign = (this->usigns.count(idw) > 0);
+								// Проверяем является ли слово пользовательским токеном
+								bool isUtoken = (this->utokens.count(idw) > 0);
 								// Проверяем отсутствует ли слово в списке запрещённых слов
 								bool isAllow = (this->badwords.count(idw) < 1);
 								/**
 								 * Если это спец-слово, или слово существует в словаре оно также разрешено,
 								 * или в arpa разрешён учёт неизвестных слов
 								 */
-								if(noEvent || isUsign || ((isWord && isAllow) || allowUnk)){
+								if(noEvent || isUtoken || ((isWord && isAllow) || allowUnk)){
 									/**
 									 * Если это не спец-слово и слово не существует в словаре или запрещено,
 									 * устанавливаем идентификатор неизвестного слова
 									 */
-									if(!noEvent && !isUsign && (!isWord || !isAllow)) idw = (size_t) sign_t::unk;
+									if(!noEvent && !isUtoken && (!isWord || !isAllow)) idw = (size_t) token_t::unk;
 									// Извлекаем параметров слова
 									this->alphabet->split(item.substr(pos + 2, item.length() - ((pos + 2) + 1)), L",", params);
 									// Если параметры получены
@@ -2274,20 +2433,20 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const u_sh
 							bool noEvent = !this->arpa->event(idw);
 							// Проверяем существует ли слово в словаре
 							bool isWord = (this->vocab.count(idw) > 0);
-							// Проверяем является ли слово пользовательским признаком
-							bool isUsign = (this->usigns.count(idw) > 0);
+							// Проверяем является ли слово пользовательским токеном
+							bool isUtoken = (this->utokens.count(idw) > 0);
 							// Проверяем отсутствует ли слово в списке запрещённых слов
 							bool isAllow = (this->badwords.count(idw) < 1);
 							/**
 							 * Если это спец-слово, или слово существует в словаре оно также разрешено,
 							 * или в arpa разрешён учёт неизвестных слов
 							 */
-							if(noEvent || isUsign || ((isWord && isAllow) || allowUnk)){
+							if(noEvent || isUtoken || ((isWord && isAllow) || allowUnk)){
 								/**
 								 * Если это не спец-слово и слово не существует в словаре или запрещено,
 								 * устанавливаем идентификатор неизвестного слова
 								 */
-								if(!noEvent && !isUsign && (!isWord || !isAllow)) idw = (size_t) sign_t::unk;
+								if(!noEvent && !isUtoken && (!isWord || !isAllow)) idw = (size_t) token_t::unk;
 								// Извлекаем параметров слова
 								this->alphabet->split(item.substr(pos + 2, item.length() - ((pos + 2) + 1)), L",", params);
 								// Если параметры получены
@@ -2332,165 +2491,6 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const u_sh
 		});
 	// Выводим сообщение об ошибке
 	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "map sequence file is not exist");
-}
-/**
- * writeMap Метод записи карты последовательности в файл
- * @param filename адрес map файла карты последовательности
- * @param status   функция вывода статуса записи
- * @param delim    разделитель последовательностей
- */
-void anyks::Toolkit::writeMap(const string & filename, function <void (const u_short)> status, const string & delim) const {
-	// Если адрес файла передан
-	if(!filename.empty()){
-		// Открываем файл на запись
-		ofstream file(filename, ios::binary);
-		// Если файл открыт
-		if(file.is_open()){
-			// Текущий и предыдущий статус
-			u_short past = 100;
-			// Выполняем извлечение данных карты последовательностей
-			this->arpa->map([&](const string & str, const u_short actual){
-				// Если строка получена
-				if(!str.empty()){
-					// Получаем количество n-грамм
-					const string & data = this->alphabet->format("%s\n", str.c_str());
-					// Выполняем запись данных в файл
-					file.write(data.data(), data.size());
-				}
-				// Если функция вывода статуса передана
-				if((status != nullptr) && (actual != past)){
-					// Запоминаем текущий статус
-					past = actual;
-					// Выводим статус извлечения
-					status(actual);
-				}
-			}, delim);
-			// Закрываем файл
-			file.close();
-		// Выводим сообщение об ошибке
-		} else this->alphabet->log("map sequence file: %s is broken", alphabet_t::log_t::error, this->logfile, filename.c_str());
-	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "map sequence file is empty");
-}
-/**
- * init Метод инициализации языковой модели
- * @param algorithm алгоритм расчёта языковой модели
- * @param modified  количество уже изменённых младших заказов
- * @param prepares  необходимость изменения счёта, после вычисления
- * @param mod       дополнительный параметр дельты
- */
-void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, const bool prepares, const double mod){
-	// Если память под arpa еще не выделена
-	if((this->arpa == nullptr) && (this->python == nullptr)){
-		// Экранируем возможность ошибки памяти
-		try {
-			/**
-			 * Функция получения слова по его идентификатору
-			 * @param idw идентификатор слова
-			 * @return    искомое слово
-			 */
-			auto getWordFn = [this](const size_t idw){
-				// Результат работы функции
-				const word_t * result = nullptr;
-				// Если нужно проверить пользовательские признаки
-				if(!this->isOption(options_t::notUserSign) && (this->usigns.count(idw) > 0)){
-					// Получаем слово обозначения пользовательского признака
-					result = &this->usigns.at(idw).name;
-				// Если это не пользовательский признак
-				} else {
-					// Ищем слово по идентификатору
-					auto it = this->vocab.find(idw);
-					// Если слово найдено
-					if(it != this->vocab.end()) result = &it->second;
-				}
-				// Выводим результат
-				return result;
-			};
-			// Устанавливаем дополнительный параметр дельты
-			this->params.mod = mod;
-			// Устанавливаем необходимость изменения счёта, после вычисления
-			this->params.prepares = prepares;
-			// Устанавливаем количество уже изменённых младших заказов
-			this->params.modified = modified;
-			// Устанавливаем алгоритм сглаживания
-			this->params.algorithm = (u_short) algorithm;
-			// Определяем тип алгоритма расчёта языковой модели
-			switch((size_t) algorithm){
-				// Активируем алгоритм WittenBell
-				case (size_t) algorithm_t::wittenBell: this->arpa = new WittenBell(alphabet, getWordFn); break;
-				// Активируем алгоритм GoodTuring
-				case (size_t) algorithm_t::goodTuring: this->arpa = new GoodTuring(alphabet, getWordFn); break;
-				// Активируем алгоритм NaturalDiscount
-				case (size_t) algorithm_t::naturalDiscount: this->arpa = new NaturalDiscount(alphabet, getWordFn); break;
-				// Активируем алгоритм KneserNey
-				case (size_t) algorithm_t::kneserNey: this->arpa = new KneserNey(alphabet, getWordFn, modified, prepares); break;
-				// Активируем алгоритм AddSmooth
-				case (size_t) algorithm_t::addSmooth: this->arpa = new AddSmooth(alphabet, getWordFn, (mod > 0.0 ? mod : 1.0)); break;
-				// Активируем алгоритм ModKneserNey
-				case (size_t) algorithm_t::modKneserNey: this->arpa = new ModKneserNey(alphabet, getWordFn, modified, prepares); break;
-				// Активируем алгоритм ConstDiscount
-				case (size_t) algorithm_t::constDiscount: this->arpa = new ConstDiscount(alphabet, getWordFn, (mod > 0.0 ? mod : 0.3)); break;
-			}
-			// Устанавливаем размер n-граммы
-			this->arpa->setSize(this->size);
-			// Устанавливаем файл логирования
-			this->arpa->setLogfile(this->logfile);
-			// Если скрипт получен
-			if(((this->scripts.count(2) > 0) && !this->usigns.empty()) || (this->scripts.count(1) > 0)){
-				// Создаём объект для работы с python
-				this->python = new python_t(&this->idw);
-				// Если нужно активировать режим отладки
-				if(this->isOption(options_t::debug)) this->python->setDebug();
-				// Ищем скрипт обработки слов
-				auto it = this->scripts.find(1);
-				// Если скрипт обработки слов установлен
-				if(it != this->scripts.end()){
-					// Запоминаем идентификатор скрипта
-					it->second.second = this->python->add(it->second.first, 2);
-				}
-				// Ищем скрипт обработки пользовательских признаков
-				it = this->scripts.find(2);
-				// Если скрипт обработки пользовательских признаков установлен
-				if((it != this->scripts.end()) && !this->usigns.empty()){
-					// Выполняем добавление скрипта
-					const size_t sid = this->python->add(it->second.first, 2);
-					// Переходим по всему списку пользовательских признаков
-					for(auto & sign : this->usigns){
-						// Добавляем в пользовательский признак функцию проверки
-						sign.second.test = [sid, this](const string & sign, const string & word){
-							// Результат работы функции
-							bool result = false;
-							// Если слово и признак переданы
-							if(!sign.empty() && !word.empty()){
-								// Выполняем скрипт
-								const wstring & res = this->python->run(sid, {sign, word});
-								// Проверяем результат
-								result = (this->alphabet->toLower(res).compare(L"ok") == 0);
-							}
-							// Выводим результат
-							return result;
-						};
-					}
-				}
-			}
-			// Если нужно активировать интерполяцию, активируем её
-			if(this->isOption(options_t::interpolate)
-			&& (algorithm != algorithm_t::constDiscount)
-			&& (algorithm != algorithm_t::addSmooth)) this->arpa->setOption(arpa_t::options_t::interpolate);
-			// Активируем флаг отладки если необходимо
-			if(this->isOption(options_t::debug)) this->arpa->setOption(arpa_t::options_t::debug);
-			// Активируем расчёт всех возможных грамм
-			if(this->isOption(options_t::allGrams)) this->arpa->setOption(arpa_t::options_t::allGrams);
-			// Активируем перевод слов в arpa к нижнему регистру
-			if(this->isOption(options_t::lowerCase)) this->arpa->setOption(arpa_t::options_t::lowerCase);
-		// Если происходит ошибка то игнорируем её
-		} catch(const bad_alloc &) {
-			// Выводим сообщение об ошибке, если режим отладки включён
-			if(this->isOption(options_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "bad alloc for init model language");
-			// Выходим из приложения
-			exit(EXIT_FAILURE);
-		}
-	}
 }
 /**
  * Toolkit Конструктор

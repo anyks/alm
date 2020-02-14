@@ -226,11 +226,11 @@ namespace anyks {
 			 */
 			const u_short errors(const wstring & word) const;
 			/**
-			 * numSign Метод извлечения числового признака слова
+			 * idwToken Метод извлечения идентификатора токена
 			 * @param  word слово для проверки
 			 * @return      результат проверки
 			 */
-			const u_short numSign(const wstring & word) const;
+			const u_short idwToken(const wstring & word) const;
 			/**
 			 * roman2Arabic Метод перевода римских цифр в арабские
 			 * @param  word римское число

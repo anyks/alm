@@ -561,6 +561,11 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method prune -debug 1 -w-arpa ./lm2.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab -prune-threshold 0.003 -prune-max-gram 2
 ```
 
+### Binary container information
+```bash
+$ ./alm -r-bin ./lm.alm -r-bin-meta ./meta.json -method info
+```
+
 ### Arpa modification example
 
 **Adding n-gram to arpa**

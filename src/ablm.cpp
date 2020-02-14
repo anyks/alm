@@ -63,10 +63,10 @@ const bool anyks::AbLM::write(function <void (const u_short)> status){
 		// Устанавливаем опции модуля
 		this->aspl->set("options", this->toolkit->getOptions());
 	}
-	// Если нужно сохранить пользовательские признаки
-	if(this->isFlag(flag_t::expUsigns)){
-		// Устанавливаем пользовательские признаки
-		this->aspl->setStrings("usigns", this->toolkit->getUsigns());
+	// Если нужно сохранить пользовательские токены
+	if(this->isFlag(flag_t::expUserTokens)){
+		// Устанавливаем пользовательские токены
+		this->aspl->setStrings("utokens", this->toolkit->getUserTokens());
 	}
 	/**
 	 * Блок добавления скриптов python
@@ -96,10 +96,10 @@ const bool anyks::AbLM::write(function <void (const u_short)> status){
 			// Добавляем скрипт обработки слов
 			addScript("wordScript", this->toolkit->getWordScript());
 		}
-		// Если нужно сохранить пользовательские признаки
-		if(this->isFlag(flag_t::expUsigns)){
-			// Добавляем скрипт обработки пользовательских признаков
-			addScript("usignScript", this->toolkit->getUsignScript());
+		// Если нужно сохранить пользовательские токены
+		if(this->isFlag(flag_t::expUserTokens)){
+			// Добавляем скрипт обработки пользовательских токенов
+			addScript("utokenScript", this->toolkit->getUserTokenScript());
 		}
 	}
 	// Если нужно сохранить черный список слов
@@ -340,29 +340,29 @@ const bool anyks::AbLM::read(function <void (const u_short)> status, const bool 
 				}
 			}
 			/**
-			 * Блок извлечения неизвестного слова и пользовательских признаков
+			 * Блок извлечения неизвестного слова и пользовательских токенов
 			 */
 			{
-				// Пользовательские признаки
-				vector <string> usigns;
+				// Пользовательские токены
+				vector <string> utokens;
 				// Неизвестное слово и данные скрипта
 				string unknownWord = "", script = "";
 				// Считываем неизвестное слово если есть
 				this->aspl->get("unknown", unknownWord);
-				// Считываем пользовательские признаки
-				this->aspl->getStrings("usigns", usigns);
+				// Считываем пользовательские токены
+				this->aspl->getStrings("utokens", utokens);
 				// Если неизвестное слово получено
 				if(!unknownWord.empty()) this->toolkit->setUnknown(unknownWord);
-				// Если пользовательские признаки получены
-				if(!usigns.empty()){
-					// Переходим по всему списку признаков
-					for(auto & sign : usigns) this->toolkit->setUsign(sign);
+				// Если пользовательские токены получены
+				if(!utokens.empty()){
+					// Переходим по всему списку токенов
+					for(auto & token : utokens) this->toolkit->setUserToken(token);
 					// Извлекаем данные скрипта
-					this->aspl->get("usignScript", script);
+					this->aspl->get("utokenScript", script);
 					// Если скрипт получен
 					if(!script.empty()){
 						// Адрес файла скрипта
-						const string filename = "/tmp/almUsignScript.py";
+						const string filename = "/tmp/almUserTokenScript.py";
 						// Открываем файл на запись
 						ofstream file(filename, ios::binary);
 						// Если файл открыт
@@ -372,14 +372,14 @@ const bool anyks::AbLM::read(function <void (const u_short)> status, const bool 
 							// Закрываем файл
 							file.close();
 							// Устанавливаем адрес файла скрипта
-							this->toolkit->setUsignScript(filename);
+							this->toolkit->setUserTokenScript(filename);
 						}
 					// Если скрипт не получен
 					} else {
-						// Очищаем пользовательские признаки
-						this->toolkit->clearUsigns();
+						// Очищаем пользовательские токены
+						this->toolkit->clearUserTokens();
 						// Выполняем логирование
-						if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - script user sign is broken");
+						if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - script user token is broken");
 					}
 				}
 				// Извлекаем данные скрипта предобработки
@@ -435,7 +435,7 @@ const bool anyks::AbLM::read(function <void (const u_short)> status, const bool 
 			 */
 			{
 				// Список опций
-				u_short options = 0;
+				u_int options = 0;
 				// Выполняем извлечение списка опций
 				this->aspl->get("options", options);
 				// Устанавливаем опции модуля
