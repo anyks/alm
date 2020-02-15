@@ -33,6 +33,7 @@
   - [Training using whitelist](#user-content-training-using-whitelist)
   - [Training using blacklist](#user-content-training-using-blacklist)
   - [Training with an unknown word](#user-content-training-with-an-unknown-word)
+  - [Text tokenization](#user-content-text-tokenization)
 - [License](#user-content-license)
 - [Contact](#user-content-contact)
 
@@ -50,7 +51,7 @@ The are many libraries with language models: ([KenLM](https://github.com/kpu/ken
 
 - **Arpa modification**: Frequencies and n-grams replacing, adding of new n-grams with frequencies, removing of n-grams.
 
-- **Pruning**: Reducing the number of n -grams that do not meet the specified quality criteria.
+- **Pruning**: Reducing the number of n-grams that do not meet the specified quality criteria.
 
 - **Removing of bad n-grams**: Removing of n-grams that have backoff frequency is higher than usual frequency.
 
@@ -633,6 +634,43 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ```
 
 > In this example the token **&#60;unk&#62;** in arpa will be replaced by the word specified in the parameter [-unknown-word | --unknown-word=&#60;value&#62;], in our case it's word **goga**.
+
+### Text tokenization
+
+**Generating json file from text**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens -debug 1 -r-tokens-text ./text.txt -w-tokens-json ./tokens.json
+```
+
+**Correction of text files**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens -debug 1 -r-tokens-text ./text.txt -w-tokens-text ./text.txt
+```
+
+**Generating text from json file**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens -debug 1 -r-tokens-json ./tokens.json -w-tokens-text ./text.txt
+```
+
+**Generating json files from a group of texts**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens -debug 1 -r-tokens-path ./path_text -w-tokens-path ./path_json -ext txt
+```
+
+**Generating texts from a group of json files**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens -debug 1 -r-tokens-path ./path_json -w-tokens-path ./path_text -ext json
+```
+
+**Generating json from text string**
+```bash
+$ echo 'Hello World?' | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens
+```
+
+**Generating text string from json**
+```bash
+$ echo '[["Hello","World","?"]]' | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens
+```
 
 * * *
 

@@ -6,7 +6,7 @@
  *  site:     https://anyks.com
  */
 
-#include "python.hpp"
+#include <python.hpp>
 
 /**
  * clear Метод очистки списка скриптов

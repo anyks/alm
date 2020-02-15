@@ -42,7 +42,6 @@ ifeq ($(OS), Darwin)
 	# Заголовочные файлы
 	INCLUDE = \
 		-I./include \
-		-I./json/include \
 		-I/usr/include \
 		-I/usr/local/include \
 		-I./lib/BigInt/include \
@@ -91,7 +90,6 @@ ifeq ($(OS), FreeBSD)
 	# Заголовочные файлы
 	INCLUDE = \
 		-I./include \
-		-I./json/include \
 		-I/usr/include \
 		-I/usr/local/include \
 		-I./lib/BigInt/include \
@@ -138,7 +136,6 @@ ifeq ($(OS), Linux)
 	# Заголовочные файлы
 	INCLUDE = \
 		-I./include \
-		-I./json/include \
 		-I/usr/include \
 		-I/usr/local/include \
 		-I./lib/BigInt/include \
@@ -178,13 +175,14 @@ all:
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/toolkit.cpp -o $(BUILD)/toolkit.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/alphabet.cpp -o $(BUILD)/alphabet.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/progress.cpp -o $(BUILD)/progress.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
 	$(CC) $(LIBS) -shared -fPIC -o $(BIN)/libs/liblm.$(EXT) $(BUILD)/idw.o $(BUILD)/nwt.o \
 	$(BUILD)/env.o $(BUILD)/word.o $(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o \
-	$(BUILD)/toolkit.o $(BUILD)/alphabet.o $(BUILD)/progress.o $(BUILD)/levenshtein.o && \
+	$(BUILD)/toolkit.o $(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/progress.o && \
 	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/word.o \
-	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/alphabet.o \
-	$(BUILD)/progress.o $(BUILD)/levenshtein.o && \
+	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/tokenizer.o \
+	$(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/progress.o && \
 	$(CC) $(BUILD)/alm.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
 	rm -rf $(BUILD)
 
@@ -203,10 +201,11 @@ dev:
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/toolkit.cpp -o $(BUILD)/toolkit.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/alphabet.cpp -o $(BUILD)/alphabet.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/progress.cpp -o $(BUILD)/progress.o && \
+	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
 	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/word.o \
-	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/alphabet.o \
-	$(BUILD)/progress.o $(BUILD)/levenshtein.o && \
+	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/tokenizer.o \
+	$(BUILD)/alphabet.o $(BUILD)/progress.o $(BUILD)/levenshtein.o && \
 	$(CC) $(DEBUG) $(BUILD)/alm.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
 	rm -rf $(BUILD)
 
@@ -225,10 +224,11 @@ static:
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/toolkit.cpp -o $(BUILD)/toolkit.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/alphabet.cpp -o $(BUILD)/alphabet.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/progress.cpp -o $(BUILD)/progress.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
 	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/word.o \
-	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/alphabet.o \
-	$(BUILD)/progress.o $(BUILD)/levenshtein.o && \
+	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/tokenizer.o \
+	$(BUILD)/alphabet.o $(BUILD)/progress.o $(BUILD)/levenshtein.o && \
 	$(CC) $(BUILD)/alm.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
 	rm -rf $(BUILD)
 

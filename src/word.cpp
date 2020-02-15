@@ -6,7 +6,7 @@
  *  site:     https://anyks.com
  */
 
-#include "word.hpp"
+#include <word.hpp>
 
 /**
  * strtrim Функция удаления начальных и конечных пробелов

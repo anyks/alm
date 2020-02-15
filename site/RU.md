@@ -33,6 +33,7 @@
   - [Обучение с белым списком](#user-content-обучение-с-белым-списком)
   - [Обучение с чёрным списком](#user-content-обучение-с-чёрным-списком)
   - [Обучение с неизвестным словом](#user-content-обучение-с-неизвестным-словом)
+  - [Токенизация текста](#user-content-токенизация-текста)
 - [Лицензия](#user-content-лицензия)
 - [Контакты](#markdown-header-контакты)
 
@@ -629,10 +630,47 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ### Обучение с неизвестным словом
 
 ```bash
-./bin/alm.exe -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -unknown-word goga
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -unknown-word goga
 ```
 
 > В данном примере, токен **&#60;unk&#62;** в arpa будет заменён на слово указанное в параметре [-unknown-word | --unknown-word=&#60;value&#62;], в нашем случае на слово **goga**.
+
+### Токенизация текста
+
+**Формирование json файла из текста**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens -debug 1 -r-tokens-text ./text.txt -w-tokens-json ./tokens.json
+```
+
+**Исправление текстовых файлов**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens -debug 1 -r-tokens-text ./text.txt -w-tokens-text ./text.txt
+```
+
+**Формирование текста из json файла**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens -debug 1 -r-tokens-json ./tokens.json -w-tokens-text ./text.txt
+```
+
+**Формирование json файлов из группы текстов**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens -debug 1 -r-tokens-path ./path_text -w-tokens-path ./path_json -ext txt
+```
+
+**Формирование текстов из группы json файлов**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens -debug 1 -r-tokens-path ./path_json -w-tokens-path ./path_text -ext json
+```
+
+**Формирование json из строки**
+```bash
+$ echo 'Hello World?' | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens
+```
+
+**Формирование строки из json**
+```bash
+$ echo '[["Hello","World","?"]]' | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens
+```
 
 * * *
 

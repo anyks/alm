@@ -6,7 +6,7 @@
  *  site:     https://anyks.com
  */
 
-#include "idw.hpp"
+#include <idw.hpp>
 
 /**
  * setOffset Метод установки смещения в алфавите

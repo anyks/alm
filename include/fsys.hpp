@@ -34,6 +34,7 @@
  * Наши модули
  */
 #include <alphabet.hpp>
+#include <tokenizer.hpp>
 
 // Устанавливаем область видимости
 using namespace std;
@@ -78,6 +79,34 @@ namespace anyks {
 				// Создаем последний каталог
 				::mkdir(tmp, S_IRWXU);
 			}
+		}
+		/**
+		 * file Функция извлечения названия и расширения файла
+		 * @param filename адрес файла для извлечения его параметров
+		 */
+		static const pair <string, string> file(const string & filename){
+			// Результат работы функции
+			pair <string, string> result;
+			// Если файл передан
+			if(!filename.empty()){
+				// Позиция разделителя каталога
+				size_t pos = 0;
+				// Выполняем поиск разделителя каталога
+				if((pos = filename.rfind("/")) != string::npos){
+					// Извлекаем имя файла
+					const string & name = filename.substr(pos + 1);
+					// Ищем расширение файла
+					if((pos = name.rfind(".")) != string::npos){
+						// Устанавливаем имя файла
+						result.first = name.substr(0, pos);
+						// Устанавливаем расширение файла
+						result.second = name.substr(pos + 1);
+					// Устанавливаем только имя файла
+					} else result.first = move(name);
+				}
+			}
+			// Выводим результат
+			return result;
 		}
 		/**
 		 * rmdir Функция удаления каталога и всего содержимого
@@ -384,8 +413,8 @@ namespace anyks {
 			if(!filename.empty()){
 				// Если файл существует
 				if(isfile(filename)){
-					// Создаем объект словаря
-					alphabet_t alphabet;
+					// Создаём объект токенизатора
+					tokenizer_t tokenizer;
 					// Открываем файл на чтение
 					ifstream file(filename, ios::binary);
 					// Если файл открыт
@@ -401,7 +430,7 @@ namespace anyks {
 						// Считываем до тех пор пока все удачно
 						while(file.good()){
 							// Считываем строку из файла
-							alphabet.readline(file, text);
+							tokenizer.readline(file, text);
 							// Если текст получен
 							if(!text.empty()) callback(text, size);
 						}

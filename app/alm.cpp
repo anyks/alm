@@ -11,8 +11,11 @@
 #include <toolkit.hpp>
 #include <progress.hpp>
 
+// Устанавливаем область видимости
 using namespace std;
 using namespace anyks;
+// Активируем пространство имён json
+using json = nlohmann::json;
 
 /**
  * version Функция вывода версии приложения
@@ -68,6 +71,7 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m sweep:  high backoff n-gram removal method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m info:   binary dictionary information method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m repair: broken language model recovery method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m tokens: text tokenization method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m modify: method for modifying a language model\r\n"
 	"  \x1B[1m-\x1B[0m (emplace | remove | change | replace)\r\n\r\n\r\n"
 	"\x1B[34m\x1B[1mflags:\x1B[0m\r\n"
@@ -111,6 +115,12 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m text file training corpus:                          [-corpus <value> | --corpus=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m extension files corpus:                             [-ext <value> | --ext=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with text corpus:                    [-path <value> | --path=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m address *.txt text file for tokens export:          [-w-tokens-text <value> | --w-tokens-text=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m address *.json text file for tokens export:         [-w-tokens-json <value> | --w-tokens-json=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m address *.txt text file for tokens import:          [-r-tokens-text <value> | --r-tokens-text=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m address *.json text file for tokens import:         [-r-tokens-json <value> | --r-tokens-json=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m directory path with tokens files for read:          [-r-tokens-path <value> | --r-tokens-path=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m directory path with tokens files for write:         [-w-tokens-path <value> | --w-tokens-path=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m address *.alm binary file for export:               [-w-bin <value> | --w-bin=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m address *.json meta file for export:                [-w-bin-meta <value> | --w-bin-meta=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m address *.map file for export:                      [-w-map <value> | --w-map=<value>]\r\n\r\n"
@@ -136,7 +146,7 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m debug mode:                                         [-debug <value> | --debug=<value>]\r\n"
 	"  \x1B[1m-\x1B[0m (0 - off | 1 - progress | 2 - console)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m method application:                                 [-method <value> | --method=<value>]\r\n"
-	"  \x1B[1m-\x1B[0m (train | repair | modify | sweep | prune)\r\n\r\n"
+	"  \x1B[1m-\x1B[0m (train | repair | modify | sweep | prune | tokens | info)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m smoothing algorithm:                                [-smoothing <value> | --smoothing=<value>]\r\n"
 	"  \x1B[1m-\x1B[0m (goodturing | cdiscount | ndiscount | addsmooth | wittenbell | kneserney | mkneserney)\r\n\r\n";
 	// Выводим сообщение справки
@@ -174,7 +184,7 @@ int main(int argc, char * argv[]){
 	// Устанавливаем локаль
 	alphabet.setlocale("en_US.UTF-8");
 	// Объект отлова переменных
-	env_t env(ANYKS_LM_NAME, &alphabet);
+	env_t env(ANYKS_LM_NAME, "text", &alphabet);
 	// Выполняем чтение переданных параметров
 	env.read((const char **) argv, argc);
 	// Если это вывод справки
@@ -191,7 +201,10 @@ int main(int argc, char * argv[]){
 		exit(0);
 	}
 	// Проверяем существует ли бинарный файл
-	if(((value = env.get("r-bin")) != nullptr) && fsys_t::isfile(value)) binDictFile = value;
+	if(((value = env.get("r-bin")) != nullptr) && fsys_t::isfile(value)){
+		// Запоминаем адрес бинарного файла для чтения
+		binDictFile = value;
+	}
 	// Если алфавит снова не найден
 	if(binDictFile.empty() && ((value = env.get("alphabet")) == nullptr)){
 		// Выводим сообщение в консоль
@@ -238,7 +251,7 @@ int main(int argc, char * argv[]){
 			// Если общий размер n-граммы получен
 			if((value = env.get("size")) != nullptr) order = stoi(value);
 			// Если бинарный файл не указан
-			if(binDictFile.empty()){
+			if(binDictFile.empty() && !env.is("method", "tokens")){
 				// Если алгоритм получен
 				if(env.is("smoothing") && (string(env.get("smoothing")).compare("-yes-") != 0)){
 					// Проверяем правильность введённого алгоритма сглаживания
@@ -257,19 +270,25 @@ int main(int argc, char * argv[]){
 			// Если основной метод работы получен
 			if(env.is("method") && (string(env.get("method")).compare("-yes-") != 0)){
 				// Проверяем правильность введённого основного метода работы
-				if(!env.is("method", "train") &&
-				!env.is("method", "repair") &&
-				!env.is("method", "modify") &&
-				!env.is("method", "sweep") &&
+				if(!env.is("method", "info") &&
 				!env.is("method", "prune") &&
-				!env.is("method", "info"))
+				!env.is("method", "sweep") &&
+				!env.is("method", "train") &&
+				!env.is("method", "tokens") &&
+				!env.is("method", "repair") &&
+				!env.is("method", "modify"))
 					// Выводим сообщение в консоль
 					print(alphabet.format("the method name \"%s\" is bad", env.get("method")), env.get("log"));
 			// Сообщаем что метод не указан
 			} else print("toolkit method is not set", env.get("log"));
 			// Если ни один файл для сохранения не передан, выходим
-			if(!env.is("w-map") && !env.is("w-arpa") && !env.is("w-vocab") &&
-			!env.is("w-ngram") && !env.is("w-bin") && !env.is("method", "info")) print("file address to save is not specified", env.get("log"));
+			if(!env.is("w-map") && !env.is("w-arpa") &&
+			!env.is("w-vocab") && !env.is("w-ngram") &&
+			!env.is("w-bin") && !env.is("method", "info") &&
+			!env.is("method", "tokens")){
+				// Выводим сообщение и выходим из приложения
+				print("file address to save is not specified", env.get("log"));
+			}
 			// Если алгоритм сглаживания ConstDiscount или AddSmooth, запрашиваем дополнительные параметры
 			if(env.is("smoothing", "cdiscount") || env.is("smoothing", "addsmooth")){
 				// Считываем флаг дополнительной модификации
@@ -278,8 +297,10 @@ int main(int argc, char * argv[]){
 				if(value != nullptr) mod = stof(value);
 			}
 			/** Начало работы основных методов **/
+			// Создаём токенизатор
+			tokenizer_t tokenizer(&alphabet);
 			// Создаём объект тулкита языковой модели
-			toolkit_t toolkit(&alphabet, order);
+			toolkit_t toolkit(&alphabet, &tokenizer, order);
 			// Устанавливаем адрес файла для логирования
 			toolkit.setLogfile(env.get("log"));
 			// Устанавливаем режим отладки
@@ -418,6 +439,356 @@ int main(int argc, char * argv[]){
 					// Выходим из приложения∂
 					exit(0);
 				}
+			// Если это метод токенизации
+			} else if(env.is("method", "tokens")) {
+				// Идентификатор документа
+				size_t size = 0;
+				// Результат в формате json
+				json jsonData = {};
+				// Результат в формате txt
+				string textData = "";
+				// Статус и процентное соотношение
+				u_short status = 0, rate = 100;
+				// Если отладка включена, выводим индикатор загрузки
+				if((debug > 0) && !env.is("text")){
+					// Очищаем предыдущий прогресс-бар
+					pss.clear();
+					// Устанавливаем заголовки прогресс-бара
+					pss.title("Tokenization", "Tokenization is done");
+					// Выводим индикатор прогресс-бара
+					switch(debug){
+						case 1: pss.update(); break;
+						case 2: pss.status(); break;
+					}
+				}
+				// Если файл текстового корпуса для токенизации получен
+				if(((value = env.get("r-tokens-text")) != nullptr) && fsys_t::isfile(value)){
+					// Получаем адрес текстового файла для чтения
+					const string readfile = realpath(value, nullptr);
+					// Если адрес текстового или json файла для записи, получен
+					if((((value = env.get("w-tokens-text")) != nullptr) ||
+					((value = env.get("w-tokens-json")) != nullptr)) &&
+					(string(value).compare("-yes-") != 0)){
+						// Получаем адрес файла для записи
+						const string writefile = value;
+						// Выполняем считывание всех строк текста
+						fsys_t::rfile(readfile, [&](const string & text, const uintmax_t fileSize){
+							// Если текст получен
+							if(!text.empty()){
+								// Выполняем преобразование текста в json
+								tokenizer.textToJson(text, [&](const string & text){
+									// Если текст получен
+									if(!text.empty()){
+										// Если нужно сохранить json
+										if(env.is("w-tokens-json")) jsonData.push_back(json::parse(text));
+										// Если нужно сохранить в виде текста
+										else if(env.is("w-tokens-text")) {
+											// Пытаемся восстановить текст из json объекта
+											tokenizer.jsonToText(text, [&](const string & text){
+												// Если текст получен
+												if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
+											});
+										}
+									}
+								});
+							}
+							// Если отладка включена
+							if(debug > 0){
+								// Общий полученный размер данных
+								size += text.size();
+								// Подсчитываем статус выполнения
+								status = u_short(size / float(fileSize) * 100.0f);
+								// Если процентное соотношение изменилось
+								if(rate != status){
+									// Запоминаем текущее процентное соотношение
+									rate = status;
+									// Отображаем ход процесса
+									switch(debug){
+										case 1: pss.update(status); break;
+										case 2: pss.status(status); break;
+									}
+								}
+							}
+						});
+						// Если результат получен
+						if(!jsonData.empty() || !textData.empty()){
+							// Открываем файл на запись
+							ofstream file(writefile, ios::binary);
+							// Если файл открыт
+							if(file.is_open()){
+								// Формируем текст результата
+								const string & text = (env.is("w-tokens-json") ? jsonData.dump(4) : textData);
+								// Выполняем запись данных в файл
+								file.write(text.data(), text.size());
+								// Закрываем файл
+								file.close();
+							}
+							// Если отладка включена
+							if(status < 100){
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(100); break;
+									case 2: pss.status(100); break;
+								}
+							}
+						// Сообщаем что контекст пустой
+						} else print("context is empty", env.get("log"));
+					// Выходим из приложения и выводим сообщение
+					} else print("file to write result is not found", env.get("log"));
+				// Если файл json с токенами получен
+				} else if(((value = env.get("r-tokens-json")) != nullptr) && fsys_t::isfile(value)){
+					// Получаем адрес json файла для чтения
+					const string readfile = realpath(value, nullptr);
+					// Если адрес текстового файла для записи, получен
+					if(((value = env.get("w-tokens-text")) != nullptr) && (string(value).compare("-yes-") != 0)){
+						// Получаем адрес файла для записи
+						const string writefile = value;
+						// Выполняем считывание всех строк текста
+						fsys_t::rfile(readfile, [&](const string & text, const uintmax_t fileSize){
+							// Если текст получен
+							if(!text.empty()) textData.append(text);
+							// Если отладка включена
+							if(debug > 0){
+								// Общий полученный размер данных
+								size += text.size();
+								// Подсчитываем статус выполнения
+								status = u_short(size / float(fileSize) * 100.0f);
+								// Если процентное соотношение изменилось
+								if(rate != status){
+									// Запоминаем текущее процентное соотношение
+									rate = status;
+									// Отображаем ход процесса
+									switch(debug){
+										case 1: pss.update(status); break;
+										case 2: pss.status(status); break;
+									}
+								}
+							}
+						});
+						// Если результат получен
+						if(!textData.empty()){
+							// Выполняем парсинг json данных
+							jsonData = json::parse(textData);
+							// Если json данные получены
+							if(!jsonData.empty() && jsonData.is_array()){
+								// Очищаем блок текстовых данных
+								textData.clear();
+								// Переходим по всем json данным
+								for(auto & item : jsonData.items()){
+									// Если данные получены
+									if(item.value().is_array()){
+										// Пытаемся восстановить текст из json объекта
+										tokenizer.jsonToText(item.value().dump(), [&](const string & text){
+											// Если текст получен
+											if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
+										});
+									}
+								}
+								// Если результат получен
+								if(!textData.empty()){
+									// Открываем файл на запись
+									ofstream file(writefile, ios::binary);
+									// Если файл открыт
+									if(file.is_open()){
+										// Выполняем запись данных в файл
+										file.write(textData.data(), textData.size());
+										// Закрываем файл
+										file.close();
+									}
+								// Сообщаем что контекст в json файле пустой
+								} else print("context in json file is empty", env.get("log"));
+							// Сообщаем что json файл испорчен
+							} else print("broken json file", env.get("log"));
+						// Сообщаем что контекст пустой
+						} else print("context is empty", env.get("log"));
+						// Если отладка включена
+						if(status < 100){
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+						}
+					// Выходим из приложения и выводим сообщение
+					} else print("file to write result is not found", env.get("log"));
+				// Если каталог с текстовымы файлами корпуса получен
+				} else if(((value = env.get("r-tokens-path")) != nullptr) && fsys_t::isdir(value)) {
+					// Получаем адрес каталога с текстовыми файлами для чтения
+					const string readpath = realpath(value, nullptr);
+					// Если адрес каталога для записи, получен
+					if((value = env.get("w-tokens-path")) != nullptr){
+						// Получаем адрес каталога для записи
+						const string writepath = value;
+						// Создаём каталог если не существует
+						if(!fsys_t::isdir(writepath)) fsys_t::mkdir(writepath);
+						// Расширение файлов текстового корпуса
+						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
+						// Переходим по всему списку файлов в каталоге
+						fsys_t::rdir(readpath, ext, [&](const string & filename, const uintmax_t dirSize){
+							// Очищаем объект данных json
+							jsonData.clear();
+							// Очищаем текстовый блок данных
+							textData.clear();
+							// Выполняем считывание всех строк текста
+							fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+								// Если текст получен
+								if(!text.empty()){
+									// Если это json
+									if(ext.compare("json") == 0) textData.append(text);
+									// Если это текстовый формат
+									else {
+										// Выполняем преобразование текста в json
+										tokenizer.textToJson(text, [&](const string & text){
+											// Если текст получен
+											if(!text.empty()) jsonData.push_back(json::parse(text));
+										});
+									}
+								}
+								// Если отладка включена
+								if(debug > 0){
+									// Общий полученный размер данных
+									size += text.size();
+									// Подсчитываем статус выполнения
+									status = u_short(size / float(dirSize) * 100.0f);
+									// Если процентное соотношение изменилось
+									if(rate != status){
+										// Запоминаем текущее процентное соотношение
+										rate = status;
+										// Отображаем ход процесса
+										switch(debug){
+											case 1: pss.update(status); break;
+											case 2: pss.status(status); break;
+										}
+									}
+								}
+							});
+							// Если это json
+							if(ext.compare("json") == 0){
+								// Если результат получен
+								if(!textData.empty()){
+									// Выполняем парсинг json данных
+									jsonData = json::parse(textData);
+									// Если json данные получены
+									if(!jsonData.empty() && jsonData.is_array()){
+										// Очищаем блок текстовых данных
+										textData.clear();
+										// Переходим по всем json данным
+										for(auto & item : jsonData.items()){
+											// Если данные получены
+											if(item.value().is_array()){
+												// Пытаемся восстановить текст из json объекта
+												tokenizer.jsonToText(item.value().dump(), [&](const string & text){
+													// Если текст получен
+													if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
+												});
+											}
+										}
+										// Если результат получен
+										if(!textData.empty()){
+											// Получаем параметры файла
+											auto param = fsys_t::file(filename);
+											// Если имя файла получено
+											if(!param.first.empty()){
+												// Формируем имя файла для записи
+												const string & filename = alphabet.format("%s/%s.txt", writepath.c_str(), param.first.c_str());
+												// Открываем файл на запись
+												ofstream file(filename, ios::binary);
+												// Если файл открыт
+												if(file.is_open()){
+													// Выполняем запись данных в файл
+													file.write(textData.data(), textData.size());
+													// Закрываем файл
+													file.close();
+												}
+											}
+										// Сообщаем что контекст в json файле пустой
+										} else print("context in json file is empty", env.get("log"));
+									// Сообщаем что json файл испорчен
+									} else print("broken json file", env.get("log"));
+								// Сообщаем что контекст пустой
+								} else print("context is empty", env.get("log"));
+							// Если это текстовые данные
+							} else if(!jsonData.empty()) {
+								// Получаем параметры файла
+								auto param = fsys_t::file(filename);
+								// Если имя файла получено
+								if(!param.first.empty()){
+									// Формируем имя файла для записи
+									const string & filename = alphabet.format("%s/%s.json", writepath.c_str(), param.first.c_str());
+									// Открываем файл на запись
+									ofstream file(filename, ios::binary);
+									// Если файл открыт
+									if(file.is_open()){
+										// Формируем текст результата
+										const string & text = jsonData.dump(4);
+										// Выполняем запись данных в файл
+										file.write(text.data(), text.size());
+										// Закрываем файл
+										file.close();
+									}
+								}
+							// Сообщаем что контекст пустой
+							} else print("context is empty", env.get("log"));
+							// Если отладка включена
+							if(status < 100){
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(100); break;
+									case 2: pss.status(100); break;
+								}
+							}
+						});
+					// Выходим из приложения и выводим сообщение
+					} else print("path to write result is not found", env.get("log"));
+				// Если текст передан
+				} else if((value = env.get("text")) != nullptr) {
+					// Флаг входящего типа данных
+					bool isJSON = false;
+					// Получаем значение текста
+					const string text = value;
+					// Проверяем является ли текст json-ом
+					if((text.front() == '[') && (text.back() == ']')){
+						// Запоминаем что это json
+						isJSON = true;
+						// Пытаемся восстановить текст из json объекта
+						tokenizer.jsonToText(text, [&](const string & text){
+							// Если текст получен
+							if(!text.empty()) textData = move(text);
+						});
+					// Иначе обрабатываем как обычный текст
+					} else {
+						// Выполняем преобразование текста в json
+						tokenizer.textToJson(text, [&](const string & text){
+							// Если текст получен
+							if(!text.empty()) textData = move(text);
+						});
+					}
+					// Если результат получен
+					if(!textData.empty()){
+						// Получаем адрес файла для записи
+						const string writefile = (
+							(isJSON && env.is("w-tokens-json")) ? env.get("w-tokens-json") :
+							((!isJSON && env.is("w-tokens-text")) ? env.get("w-tokens-text") : "")
+						);
+						// Если данные получены
+						if(!writefile.empty() && (writefile.compare("-yes-") != 0)){
+							// Открываем файл на запись
+							ofstream file(writefile, ios::binary);
+							// Если файл открыт
+							if(file.is_open()){
+								// Выполняем запись данных в файл
+								file.write(textData.data(), textData.size());
+								// Закрываем файл
+								file.close();
+							}
+						// Выводим сообщение в консоль
+						} else cout << textData << endl;
+					// Сообщаем что контекст пустой
+					} else print("context is empty", env.get("log"));
+				// Выходим из приложения и выводим сообщение
+				} else print("text corpus for tokenization is not found", env.get("log"));
+				// Выходим из приложения
+				exit(0);
 			// Иначе выполняем инициализацию алгоритма сглаживания
 			} else if(env.is("smoothing")) {
 				// Если это WittenBell

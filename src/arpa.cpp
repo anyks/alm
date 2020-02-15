@@ -6,7 +6,7 @@
  *  site:     https://anyks.com
  */
 
-#include "arpa.hpp"
+#include <arpa.hpp>
 
 /**
  * use Метод получения текущего размеры n-граммы

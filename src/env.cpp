@@ -6,7 +6,7 @@
  *  site:     https://anyks.com
  */
 
-#include "env.hpp"
+#include <env.hpp>
 
 /**
  * env Метод извлечения переменной окружения
@@ -87,6 +87,14 @@ const bool anyks::Env::is(const string & key, const string & val) const {
 	}
 	// Выводим результат
 	return result;
+}
+/**
+ * autoRead Метод разрешения или запрещения автоматического чтения текстовой переменной
+ * @param flag значение флага
+ */
+void anyks::Env::autoRead(const bool flag){
+	// Устанавливаем флаг автоматического чтения текстовой переменной
+	this->aread = flag;
 }
 /**
  * textEnv Метод установки списка имён которые нужно извлечь
@@ -173,7 +181,7 @@ void anyks::Env::read(const char * args[], const u_short count){
 		// Очищаем значение
 		val.clear();
 		// Считываем строку из буфера stdin
-		if(!isatty(STDIN_FILENO) || this->env(this->text).empty()) std::getline(cin, val);
+		if(!isatty(STDIN_FILENO) || (this->aread && this->env(this->text).empty())) std::getline(cin, val);
 		// Добавляем полученные данные в список переменных
 		if(!val.empty()) this->data.emplace(this->text, move(val));
 	}

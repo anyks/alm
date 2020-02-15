@@ -6,7 +6,7 @@
  *  site:     https://anyks.com
  */
 
-#include "toolkit.hpp"
+#include <toolkit.hpp>
 
 /**
  * getIdws Метод генерирования идентификатора слова
@@ -546,6 +546,17 @@ void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
 	}
 }
 /**
+ * setTokenizer Метод установки токенизатора
+ * @param tokenizer объект токенизатора
+ */
+void anyks::Toolkit::setTokenizer(const tokenizer_t * tokenizer){
+	// Если токенизатор передан
+	if(tokenizer != nullptr){
+		// Устанавливаем переданный токенизатор
+		this->tokenizer = tokenizer;
+	}
+}
+/**
  * setUserTokenScript Метод установки скрипта обработки пользовательских токенов
  * @param script скрипт python обработки пользовательских токенов
  */
@@ -715,7 +726,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 			return true;
 		};
 		// Выполняем разбивку текста на токены
-		this->alphabet->tokens(text, modeFn);
+		this->tokenizer->run(text, modeFn);
 	}
 }
 /**
@@ -2494,11 +2505,30 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const u_sh
 }
 /**
  * Toolkit Конструктор
+ * @param tokenizer объект токенизатора
+ */
+anyks::Toolkit::Toolkit(const tokenizer_t * tokenizer){
+	// Устанавливаем токенизатор
+	this->setTokenizer(tokenizer);
+}
+/**
+ * Toolkit Конструктор
  * @param size размерность n-грамм
  */
 anyks::Toolkit::Toolkit(const u_short size){
 	// Устанавливаем размерность n-грамм
 	this->setSize(size);
+}
+/**
+ * Toolkit Конструктор
+ * @param alphabet  объект алфавита
+ * @param tokenizer объект токенизатора
+ */
+anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer){
+	// Устанавливаем алфавит
+	this->setAlphabet(alphabet);
+	// Устанавливаем токенизатор
+	this->setTokenizer(tokenizer);
 }
 /**
  * Toolkit Конструктор
@@ -2510,6 +2540,31 @@ anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const u_short size){
 	this->setSize(size);
 	// Устанавливаем алфавит
 	this->setAlphabet(alphabet);
+}
+/**
+ * Toolkit Конструктор
+ * @param tokenizer объект токенизатора
+ * @param size      размерность n-грамм
+ */
+anyks::Toolkit::Toolkit(const tokenizer_t * tokenizer, const u_short size){
+	// Устанавливаем размерность n-грамм
+	this->setSize(size);
+	// Устанавливаем токенизатор
+	this->setTokenizer(tokenizer);
+}
+/**
+ * Toolkit Конструктор
+ * @param alphabet  объект алфавита
+ * @param tokenizer объект токенизатора
+ * @param size      размерность n-грамм
+ */
+anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer, const u_short size){
+	// Устанавливаем размерность n-грамм
+	this->setSize(size);
+	// Устанавливаем алфавит
+	this->setAlphabet(alphabet);
+	// Устанавливаем токенизатор
+	this->setTokenizer(tokenizer);
 }
 /**
  * ~Toolkit Деструктор

@@ -87,14 +87,6 @@ namespace anyks {
 			const std::map <wchar_t, wchar_t> & alts() const;
 		public:
 			/**
-			 * readline Метод извлечения строки из текста
-			 * @param  is  файловый поток для чтения данных
-			 * @param  str строка для извлечения текста
-			 * @return     файловый поток с текущий позиции
-			 */
-			istream & readline(istream & is, string & str) const;
-		public:
-			/**
 			 * get Метод получения алфавита языка
 			 * @return алфавит языка
 			 */
@@ -132,6 +124,18 @@ namespace anyks {
 			const string format(const char * format, ...) const;
 		public:
 			/**
+			 * toLower Метод перевода русских букв в нижний регистр
+			 * @param str строка для перевода
+			 * @return    строка в нижнем регистре
+			 */
+			const char toLower(const char letter) const;
+			/**
+			 * toUpper Метод перевода русских букв в верхний регистр
+			 * @param str строка для перевода
+			 * @return    строка в верхнем регистре
+			 */
+			const char toUpper(const char letter) const;
+			/**
 			 * alt Метод получения альтернативной буквы
 			 * @param  lid буква для проверки
 			 * @return     альтернативная буква
@@ -143,6 +147,18 @@ namespace anyks {
 			 * @return     реальная буква
 			 */
 			const wchar_t rel(const wchar_t lid) const;
+			/**
+			 * toLower Метод перевода русских букв в нижний регистр
+			 * @param str строка для перевода
+			 * @return    строка в нижнем регистре
+			 */
+			const wchar_t toLower(const wchar_t letter) const;
+			/**
+			 * toUpper Метод перевода русских букв в верхний регистр
+			 * @param str строка для перевода
+			 * @return    строка в верхнем регистре
+			 */
+			const wchar_t toUpper(const wchar_t letter) const;
 		public:
 			/**
 			 * trim Метод удаления пробелов вначале и конце текста
@@ -204,12 +220,6 @@ namespace anyks {
 			 * @return     слово без дефиса
 			 */
 			const wstring delHyphenInWord(const wstring & word) const;
-			/**
-			 * restore Метод восстановления текста из контекста
-			 * @param context токенизированный контекст
-			 * @return        результирующий текст
-			 */
-			const string restore(const vector <wstring> & context) const;
 			/**
 			 * replace Метод замены в тексте слово на другое слово
 			 * @param  text текст в котором нужно произвести замену
@@ -449,12 +459,6 @@ namespace anyks {
 			 * @param alt альтернативная буква
 			 */
 			void setalt(const wchar_t lid, const wchar_t alt);
-			/**
-			 * tokens Метод разбивки текста на токены
-			 * @param text    входной текст для обработки
-			 * @param функция обратного вызова, на каждой итерации
-			 */
-			void tokens(const string & text, function <const bool (const wstring &, const vector <string> &, const bool, const bool)> callback) const;
 		public:
 			/**
 			 * Alphabet Конструктор

@@ -31,6 +31,7 @@
 #include <python.hpp>
 #include <general.hpp>
 #include <alphabet.hpp>
+#include <tokenizer.hpp>
 
 // Устанавливаем область видимости
 using namespace std;
@@ -154,6 +155,8 @@ namespace anyks {
 			const char * logfile = nullptr;
 			// Объект алфавита
 			const alphabet_t * alphabet = nullptr;
+			// Объект токенизатора
+			const tokenizer_t * tokenizer = nullptr;
 		private:
 			/**
 			 * getIdw Метод генерирования идентификатора слова
@@ -316,6 +319,11 @@ namespace anyks {
 			 * @param alphabet объект алфавита
 			 */
 			void setAlphabet(const alphabet_t * alphabet);
+			/**
+			 * setTokenizer Метод установки токенизатора
+			 * @param tokenizer объект токенизатора
+			 */
+			void setTokenizer(const tokenizer_t * tokenizer);
 			/**
 			 * setUserTokenScript Метод установки скрипта обработки пользовательских токенов
 			 * @param script скрипт python обработки пользовательских токенов
@@ -509,15 +517,39 @@ namespace anyks {
 			Toolkit(){};
 			/**
 			 * Toolkit Конструктор
+			 * @param tokenizer объект токенизатора
+			 */
+			Toolkit(const tokenizer_t * tokenizer);
+			/**
+			 * Toolkit Конструктор
 			 * @param size размерность n-грамм
 			 */
 			Toolkit(const u_short size = DEFNGRAM);
+			/**
+			 * Toolkit Конструктор
+			 * @param alphabet  объект алфавита
+			 * @param tokenizer объект токенизатора
+			 */
+			Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer);
 			/**
 			 * Toolkit Конструктор
 			 * @param alphabet объект алфавита
 			 * @param size     размерность n-грамм
 			 */
 			Toolkit(const alphabet_t * alphabet, const u_short size = DEFNGRAM);
+			/**
+			 * Toolkit Конструктор
+			 * @param tokenizer объект токенизатора
+			 * @param size      размерность n-грамм
+			 */
+			Toolkit(const tokenizer_t * tokenizer, const u_short size = DEFNGRAM);
+			/**
+			 * Toolkit Конструктор
+			 * @param alphabet  объект алфавита
+			 * @param tokenizer объект токенизатора
+			 * @param size      размерность n-грамм
+			 */
+			Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer, const u_short size = DEFNGRAM);
 			/**
 			 * ~Toolkit Деструктор
 			 */

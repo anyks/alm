@@ -57,7 +57,6 @@ list(APPEND LIB_LIST ${OPENSSL_LIBRARIES})
 
 # Устанавливаем каталог заголовков
 include_directories(${PROJECT_BINARY_DIR}/../include)
-include_directories(${PROJECT_BINARY_DIR}/../json/include)
 include_directories(${PROJECT_BINARY_DIR}/../lib/BigInt/include)
 
 # Установка переменной со списком исходников для исполняемого файла
@@ -74,6 +73,7 @@ set(PYTHON_LIB ${PROJECT_BINARY_DIR}/../src/python.cpp)
 set(TOOLKIT_LIB ${PROJECT_BINARY_DIR}/../src/toolkit.cpp)
 set(PROGRESS_LIB ${PROJECT_BINARY_DIR}/../src/progress.cpp)
 set(ALPHABET_LIB ${PROJECT_BINARY_DIR}/../src/alphabet.cpp)
+set(TOKENIZER_LIB ${PROJECT_BINARY_DIR}/../src/tokenizer.cpp)
 set(LEVENSHTEIN_LIB ${PROJECT_BINARY_DIR}/../src/levenshtein.cpp)
 
 # Определяем операционную систему
@@ -106,7 +106,7 @@ elseif(UNIX)
 endif()
 
 # Создаем список модулей
-list(APPEND LIB_LISTS ${WORD_LIB} ${IDW_LIB} ${NWT_LIB} ${ALPHABET_LIB} ${ENV_LIB} ${LEVENSHTEIN_LIB} ${ARPA_LIB} ${PYTHON_LIB} ${ABLM_LIB} ${PROGRESS_LIB} ${TOOLKIT_LIB})
+list(APPEND LIB_LISTS ${WORD_LIB} ${IDW_LIB} ${NWT_LIB} ${ALPHABET_LIB} ${ENV_LIB} ${LEVENSHTEIN_LIB} ${TOKENIZER_LIB} ${ARPA_LIB} ${PYTHON_LIB} ${ABLM_LIB} ${PROGRESS_LIB} ${TOOLKIT_LIB})
 
 # Создание динамической библиотеки с именем alm
 add_library(lm STATIC ${LIB_LISTS})

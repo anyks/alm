@@ -38,6 +38,8 @@ namespace anyks {
 			// Объект алфавита
 			const alphabet_t * alphabet = nullptr;
 		private:
+			// Флаг автоматического чтения текстовой переменной
+			bool aread = false;
 			/**
 			 * Название переменной содержащей текст
 			 * и префикс переменной окружения
@@ -73,6 +75,11 @@ namespace anyks {
 			 */
 			const bool is(const string & key, const string & val = "") const;
 		public:
+			/**
+			 * autoRead Метод разрешения или запрещения автоматического чтения текстовой переменной
+			 * @param flag значение флага
+			 */
+			void autoRead(const bool flag);
 			/**
 			 * textEnv Метод установки списка имён которые нужно извлечь
 			 * @param text название переменной для извлечения текстовой информации из потока (если параметром не передана)
