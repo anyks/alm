@@ -626,12 +626,26 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 		vector <pair_t> seq = {{sid, 0}};
 		/**
 		 * unkFn Функция установки неизвестного слова в последовательность
+		 * @return нужно ли остановить сбор последовательности
 		 */
-		auto unkFn = [&uid, &seq, this]{
+		auto unkFn = [&uid, &seq, &idd, this]{
+			// Результат работы функции
+			bool result = true;
 			// Если неизвестное слово не установлено
 			if((this->unknown == 0) && this->isOption(options_t::allowUnk)) seq.emplace_back(uid, 0);
 			// Если неизвестное слово установлено
 			else if(this->unknown > 0) seq.emplace_back(this->unknown, this->vocab.at(this->unknown).getUppers());
+			// Если неизвестный токен нельзя хранить в arpa
+			else {
+				// Отправляем последовательность для добавления в arpa
+				if(seq.size() > 1) this->arpa->add(seq, idd);
+				// Очищаем список последовательностей
+				seq.clear();
+				// Запоминаем что нужно остановить вывод
+				result = false;
+			}
+			// Выводим результат
+			return result;
 		};
 		/**
 		 * modeFn Функция обработки разбитого текста
@@ -658,17 +672,17 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 					}
 				}
 				// Если слово не разрешено
-				if(tmp.length() >= MAX_WORD_LENGTH) unkFn();
+				if((tmp.length() >= MAX_WORD_LENGTH) && !unkFn()) return true;
 				// Если слово разрешено
 				else {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
 					// Если это плохое слово, заменяем его на неизвестное
-					if((idw == 0) || (idw == noID) || (this->badwords.count(idw) > 0)) unkFn();
+					if(((idw == 0) || (idw == noID) || (this->badwords.count(idw) > 0)) && !unkFn()) return true;
 					// Иначе продолжаем дальше
 					else {
 						// Если это неизвестное слово
-						if(idw == uid) unkFn();
+						if((idw == uid) && !unkFn()) return true;
 						// Иначе добавляем слово
 						else {
 							// Получаем регистры слова
@@ -679,9 +693,9 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 							tmp.setUppers(uppers);
 							// Добавляем слово в последовательность
 							seq.emplace_back(idw, uppers);
+							// Добавляем слово в словарь если разрешено
+							if(this->alphabet->isAllowed(tmp)) this->addWord(tmp.wreal(), idd);
 						}
-						// Добавляем слово в словарь если разрешено
-						if(this->alphabet->isAllowed(tmp)) this->addWord(tmp.wreal(), idd);
 					}
 				}
 			}
