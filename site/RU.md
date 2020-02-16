@@ -633,7 +633,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -unknown-word goga
 ```
 
-> В данном примере, токен **&lt;unk&gt;** в arpa будет заменён на слово указанное в параметре [-unknown-word | --unknown-word=&#60;value&#62;], в нашем случае на слово **goga**.>
+> В данном примере, токен **&lt;unk&gt;** в arpa будет заменён на слово указанное в параметре [-unknown-word | --unknown-word=〈value〉], в нашем случае на слово **goga**.
 
 ### Токенизация текста
 
