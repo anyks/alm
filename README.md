@@ -61,9 +61,9 @@ The are many libraries with language models: ([KenLM](https://github.com/kpu/ken
 
 - **Preprocessing of "dirty" texts**: Unlike all other language models, here we can extract the correct context from files with "dirty" texts.
 
-- **Accounting of &#60;unk&#62; token**: Accounting of &#60;unk&#62; token as full n-gram.
+- **Accounting of 〈unk〉 token**: Accounting of 〈unk〉 token as full n-gram.
 
-- **Redefinition of &#60;unk&#62; token**: Possibility to redefine an attribute of an unknown token.
+- **Redefinition of 〈unk〉 token**: Possibility to redefine an attribute of an unknown token.
 
 - **N-grams preprocessing**: Ability to pre-process n-grams before adding to arpa using custom Python3 scripts.
 
@@ -163,24 +163,24 @@ ngram 3=15
 
 #### Description:
 
- - **&#60;s&#62;** - Sentence beginning token
- - **&#60;/s&#62;** - Sentence end token
- - **&#60;url&#62;** - URL-address token
- - **&#60;num&#62;** - Number (arabic or roman) token
- - **&#60;unk&#62;** - Unknown word token
- - **&#60;date&#62;** - Date token (**18.07.2004** | **07/18/2004**)
- - **&#60;time&#62;** - Time token (**15:44:56**)
- - **&#60;abbr&#62;** - Abbreviation token (**1-й** | **2-е** | **20-я**)
- - **&#60;anum&#62;** - Pseudo-number token (combination of numbers and other symbols) (**T34** | **895-M-86** | **39km**)
- - **&#60;math&#62;** - Mathematical operation token (**+** | **-** | **=** | **/** | ***** | **^**)
- - **&#60;range&#62;** - Range of numbers token (**1-2** | **100-200** | **300-400**)
- - **&#60;aprox&#62;** - Approximate number token (**~93** | **~95.86** | **10~20**)
- - **&#60;score&#62;** - Score count token (**4:3** | **01:04**)
- - **&#60;dimen&#62;** - Dimensions token (**200x300** | **1920x1080**)
- - **&#60;fract&#62;** - Fraction token (**5/20** | **192/864**)
- - **&#60;punct&#62;** - Punctuation token (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
- - **&#60;isolat&#62;** - Isolation/quotation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
- - **&#60;specs&#62;** - Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **&#60;** | **&#62;**)
+ - **〈s〉** - Sentence beginning token
+ - **〈/s〉** - Sentence end token
+ - **〈url〉** - URL-address token
+ - **〈num〉** - Number (arabic or roman) token
+ - **〈unk〉** - Unknown word token
+ - **〈date〉** - Date token (**18.07.2004** | **07/18/2004**)
+ - **〈time〉** - Time token (**15:44:56**)
+ - **〈abbr〉** - Abbreviation token (**1-й** | **2-е** | **20-я**)
+ - **〈anum〉** - Pseudo-number token (combination of numbers and other symbols) (**T34** | **895-M-86** | **39km**)
+ - **〈math〉** - Mathematical operation token (**+** | **-** | **=** | **/** | ***** | **^**)
+ - **〈range〉** - Range of numbers token (**1-2** | **100-200** | **300-400**)
+ - **〈aprox〉** - Approximate number token (**~93** | **~95.86** | **10~20**)
+ - **〈score〉** - Score count token (**4:3** | **01:04**)
+ - **〈dimen〉** - Dimensions token (**200x300** | **1920x1080**)
+ - **〈fract〉** - Fraction token (**5/20** | **192/864**)
+ - **〈punct〉** - Punctuation token (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
+ - **〈isolat〉** - Isolation/quotation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
+ - **〈specs〉** - Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **〈** | **〉**)
 
 ---
 
@@ -625,7 +625,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -badwords ./badwords.txt
 ```
 
-> If you specify a black list during training, all the words indicated in the black list will be equated with the token **&#60;unk&#62;**.
+> If you specify a black list during training, all the words indicated in the black list will be equated with the token **〈unk〉**.
 
 ### Training with an unknown word
 
@@ -633,7 +633,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ./bin/alm.exe -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -unknown-word goga
 ```
 
-> In this example the token **&#60;unk&#62;** in arpa will be replaced by the word specified in the parameter [-unknown-word | --unknown-word=&#60;value&#62;], in our case it's word **goga**.
+> In this example the token **〈unk〉** in arpa will be replaced by the word specified in the parameter [-unknown-word | --unknown-word=〈value〉], in our case it's word **goga**.
 
 ### Text tokenization
 
