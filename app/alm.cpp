@@ -753,7 +753,7 @@ int main(int argc, char * argv[]){
 						// Пытаемся восстановить текст из json объекта
 						tokenizer.jsonToText(text, [&](const string & text){
 							// Если текст получен
-							if(!text.empty()) textData = move(text);
+							if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
 						});
 					// Иначе обрабатываем как обычный текст
 					} else {
