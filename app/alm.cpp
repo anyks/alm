@@ -760,7 +760,7 @@ int main(int argc, char * argv[]){
 						// Выполняем преобразование текста в json
 						tokenizer.textToJson(text, [&](const string & text){
 							// Если текст получен
-							if(!text.empty()) textData = move(text);
+							if(!text.empty()) textData = move(alphabet.format("%s\r\n", text.c_str()));
 						});
 					}
 					// Если результат получен
@@ -782,7 +782,7 @@ int main(int argc, char * argv[]){
 								file.close();
 							}
 						// Выводим сообщение в консоль
-						} else cout << textData << endl;
+						} else cout << textData;
 					// Сообщаем что контекст пустой
 					} else print("context is empty", env.get("log"));
 				// Выходим из приложения и выводим сообщение
