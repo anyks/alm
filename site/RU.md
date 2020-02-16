@@ -35,7 +35,7 @@
   - [Обучение с неизвестным словом](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-обучение-с-неизвестным-словом)
   - [Токенизация текста](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-токенизация-текста)
 - [Лицензия](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-лицензия)
-- [Контакты](https://github.com/anyks/alm/blob/master/site/RU.md/#markdown-header-контакты)
+- [Контакты](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-контакты)
 
 ## Цели проекта
 
