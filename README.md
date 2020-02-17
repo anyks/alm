@@ -505,7 +505,7 @@ def run(token, word):
 
 ### Environment variables
 
-- All parameters can be passed through environment variables. Variables should begin with the prefix ALM_ and must be written in upper case, their names should correspond to the application parameters.
+- All parameters can be passed through environment variables. Variables should begin with the prefix **ALM_** and must be written in upper case, their names should correspond to the application parameters.
 - If both application parameters and environment variables are specified at the same time, application parameters will take precedence.
 
 ```bash
