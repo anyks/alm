@@ -39,7 +39,7 @@
 
 ## Project goals and features
 
-The are many libraries with language models: ([KenLM](https://github.com/kpu/kenlm), [SriLM](https://github.com/BitMindLab/SRILM), [IRSTLM](https://github.com/irstlm-team/irstlm)), and each of these models may have a reason to exist. But our language model has the following goals and features:
+The are many toolkits capable of creating language models: ([KenLM](https://github.com/kpu/kenlm), [SriLM](https://github.com/BitMindLab/SRILM), [IRSTLM](https://github.com/irstlm-team/irstlm)), and each of those toolkits may have a reason to exist. But our language model creation toolkit has the following goals and features:
 
 - **UTF-8 support**: Full UTF-8 support without third-party dependencies.
 
@@ -47,31 +47,31 @@ The are many libraries with language models: ([KenLM](https://github.com/kpu/ken
 
 - **Smoothing algorithms**: Kneser-Nay, Modified Kneser-Nay, Witten-Bell, Additive, Good-Turing, Absolute discounting.
 
-- **Normalisation and preprocessing for corpus**: Transferring corpus to lowercase, smart tokenization, possibility to create black - and white - lists.
+- **Normalisation and preprocessing for corpora**: Transferring corpus to lowercase, smart tokenization, ability to create black - and white - lists for n-grams.
 
-- **Arpa modification**: Frequencies and n-grams replacing, adding of new n-grams with frequencies, removing of n-grams.
+- **Arpa modification**: Frequencies and n-grams replacing, adding new n-grams with frequencies, removing n-grams.
 
-- **Pruning**: Reducing the number of n-grams that do not meet the specified quality criteria.
+- **Pruning**: N-gram removal based on specified criteria.
 
-- **Removing of bad n-grams**: Removing of n-grams that have backoff frequency is higher than usual frequency.
+- **Removal of low-probability n-grams**: Removal of n-grams which backoff probability is higher than standard probability.
 
-- **Arpa recovery**: Recovery of damaged n-grams in arpa with subsequent recalculation of their backoff frequencies.
+- **Arpa recovery**: Recovery of damaged n-grams in arpa with subsequent recalculation of their backoff probabilities.
 
-- **Support of additional word features**: Features extraction: (numbers, roman numbers, ranges of numbers, numeric abbreviations, any other custom attributes) using scripts written in Python3.
+- **Support of additional word features**: Feature extraction: (numbers, roman numbers, ranges of numbers, numeric abbreviations, any other custom attributes) using scripts written in Python3.
 
-- **Preprocessing of "dirty" texts**: Unlike all other language models, here we can extract the correct context from files with "dirty" texts.
+- **Text preprocessing**: Unlike all other language model toolkits, ALM can extract correct context from files with unnormalized texts.
 
-- **Accounting of 〈unk〉 token**: Accounting of 〈unk〉 token as full n-gram.
+- **Unknown word token accounting**: Accounting of 〈unk〉 token as full n-gram.
 
-- **Redefinition of 〈unk〉 token**: Possibility to redefine an attribute of an unknown token.
+- **Redefinition of 〈unk〉 token**: Ability to redefine an attribute of an unknown token.
 
-- **N-grams preprocessing**: Ability to pre-process n-grams before adding to arpa using custom Python3 scripts.
+- **N-grams preprocessing**: Ability to pre-process n-grams before adding them to arpa using custom Python3 scripts.
 
-- **Binary container with Language Model**: The binary container supports compression, encryption and installation of copyrights.
+- **Binary container for Language Models**: The binary container supports compression, encryption and installation of copyrights.
 
-- **Convenient visualization of the process**: ALM implements several types of visualizations: textual, graphic, visualization in the form of a process indicator, and logging to files or console.
+- **Convenient visualization of the Language model assembly process**: ALM implements several types of visualizations: textual, graphic, process indicator, and logging to files or console.
 
-- **Collection of all n-grams**: Unlike other language models, ALM is guaranteed to assemble all n-grams from the text, regardless of their length (except for Modified Kneser-Nay), also it is possible to force all n-grams to be taken into account even if they occur only 1 time.
+- **Collection of all n-grams**: Unlike other language model toolkits, ALM is guaranteed to extract all possible n-grams from the corpus, regardless of their length (except for Modified Kneser-Nay); you can also force all n-grams to be taken into account even if they occured only once.
 
 ## Requirements
 
@@ -115,7 +115,7 @@ $ cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1d -DOPENSSL_LIBRAR
 $ make
 ```
 
-## Files formats
+## File formats
 
 ### Arpa
 ```
@@ -505,7 +505,7 @@ def run(token, word):
 
 ### Environment variables
 
-- All parameters can be passed through environment variables. Variables begin with the prefix **ALM_** and must written in upper case, their names correspond to the application parameters.
+- All parameters can be passed through environment variables. Variables should begin with the prefix ALM_ and must be written in upper case, their names should correspond to the application parameters.
 - If both application parameters and environment variables are specified at the same time, application parameters will take precedence.
 
 ```bash
