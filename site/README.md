@@ -2,40 +2,40 @@
 
 # ANYKS LM (ALM) C++11
 
-- [Цели проекта](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-цели-проекта)
-- [Внешние зависимости](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-внешние-зависимости)
-- [Сборка проекта](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-сборка-проекта)
-  - [Клонирование проекта](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-клонирование-проекта-модификатор---recursive-обязателен)
-  - [Linux и FreeBSD](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-linux-и-freebsd)
-  - [MacOS X](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-macos-x)
-- [Описание форматов файлов](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-описание-форматов-файлов)
-  - [Arpa](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-arpa)
-  - [Ngrams](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-ngrams)
-  - [Vocab](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-vocab)
-  - [Map](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-map)
-  - [Файл добавления n-грамм в существующий файл arpa](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-файл-добавления-n-грамм-в-существующий-файл-arpa)
-  - [Файл изменения частот n-грамм в существующем файле arpa](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-файл-изменения-частот-n-грамм-в-существующем-файле-arpa)
-  - [Файл замены n-грамм в существующем файле arpa](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-файл-замены-n-грамм-в-существующем-файле-arpa)
-  - [Файл удаления n-грамм в существующем файле arpa](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-файл-удаления-n-грамм-в-существующем-файле-arpa)
-  - [Мета-данные бинарного контейнера](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-мета-данные-бинарного-контейнера)
-  - [Формат скрипта python предобработки полученных слов](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-формат-скрипта-python-предобработки-полученных-слов)
-  - [Формат скрипта python определения собственных токенов слов](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-формат-скрипта-python-определения-собственных-токенов-слов)
-- [Переменные окружения](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-переменные-окружения)
-- [Примеры](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-примеры)
-  - [Пример обучения языковой модели](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-пример-обучения-языковой-модели)
-  - [Пример исправления arpa](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-пример-исправления-arpa)
-  - [Пример удаления n-грамм у которых частота ниже backoff](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-пример-удаления-n-грамм-у-которых-частота-ниже-backoff)
-  - [Пример прунинга arpa](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-пример-пруннинга-arpa)
-  - [Информация о бинарном контейнере](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-информация-о-бинарном-контейнере)
-  - [Пример модификации arpa](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-пример-модификации-arpa)
-  - [Обучение с предобработкой полученных слов](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-обучение-с-предобработкой-полученных-слов)
-  - [Обучение с использованием своих токенов](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-обучение-с-использованием-своих-токенов)
-  - [Обучение с белым списком](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-обучение-с-белым-списком)
-  - [Обучение с чёрным списком](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-обучение-с-чёрным-списком)
-  - [Обучение с неизвестным словом](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-обучение-с-неизвестным-словом)
-  - [Токенизация текста](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-токенизация-текста)
-- [Лицензия](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-лицензия)
-- [Контакты](https://github.com/anyks/alm/blob/master/site/RU.md/#user-content-контакты)
+- [Цели проекта](https://github.com/anyks/alm/blob/master/site#%D1%86%D0%B5%D0%BB%D0%B8-%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0)
+- [Внешние зависимости](https://github.com/anyks/alm/blob/master/site#%D0%B2%D0%BD%D0%B5%D1%88%D0%BD%D0%B8%D0%B5-%D0%B7%D0%B0%D0%B2%D0%B8%D1%81%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D0%B8)
+- [Сборка проекта](https://github.com/anyks/alm/blob/master/site#%D1%81%D0%B1%D0%BE%D1%80%D0%BA%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0)
+  - [Клонирование проекта](https://github.com/anyks/alm/blob/master/site#%D0%BA%D0%BB%D0%BE%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0-%D1%84%D0%BB%D0%B0%D0%B3---recursive-%D0%BE%D0%B1%D1%8F%D0%B7%D0%B0%D1%82%D0%B5%D0%BB%D0%B5%D0%BD)
+  - [Linux и FreeBSD](https://github.com/anyks/alm/blob/master/site#linux-%D0%B8-freebsd)
+  - [MacOS X](https://github.com/anyks/alm/blob/master/site#macos-x)
+- [Описание форматов файлов](https://github.com/anyks/alm/blob/master/site#%D0%BE%D0%BF%D0%B8%D1%81%D0%B0%D0%BD%D0%B8%D0%B5-%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%82%D0%BE%D0%B2-%D1%84%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2)
+  - [Arpa](https://github.com/anyks/alm/blob/master/site#arpa)
+  - [Ngrams](https://github.com/anyks/alm/blob/master/site#ngrams)
+  - [Vocab](https://github.com/anyks/alm/blob/master/site#vocab)
+  - [Map](https://github.com/anyks/alm/blob/master/site#map)
+  - [Файл добавления n-грамм в существующий файл arpa](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D0%B4%D0%BE%D0%B1%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B8%D0%B9-%D1%84%D0%B0%D0%B9%D0%BB-arpa)
+  - [Файл изменения частот n-грамм в существующем файле arpa](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F-%D1%87%D0%B0%D1%81%D1%82%D0%BE%D1%82-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B5%D0%BC-%D1%84%D0%B0%D0%B9%D0%BB%D0%B5-arpa)
+  - [Файл замены n-грамм в существующем файле arpa](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D0%B7%D0%B0%D0%BC%D0%B5%D0%BD%D1%8B-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B5%D0%BC-%D1%84%D0%B0%D0%B9%D0%BB%D0%B5-arpa)
+  - [Файл удаления n-грамм в существующем файле arpa](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D1%83%D0%B4%D0%B0%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B5%D0%BC-%D1%84%D0%B0%D0%B9%D0%BB%D0%B5-arpa)
+  - [Мета-данные бинарного контейнера](https://github.com/anyks/alm/blob/master/site#%D0%BC%D0%B5%D1%82%D0%B0-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5-%D0%B1%D0%B8%D0%BD%D0%B0%D1%80%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80%D0%B0)
+  - [Формат скрипта python предобработки полученных слов](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82%D0%B0-python-%D0%BF%D1%80%D0%B5%D0%B4%D0%BE%D0%B1%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BA%D0%B8-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%81%D0%BB%D0%BE%D0%B2)
+  - [Формат скрипта python определения собственных токенов слов](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82%D0%B0-python-%D0%BE%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-%D1%81%D0%BE%D0%B1%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%82%D0%BE%D0%BA%D0%B5%D0%BD%D0%BE%D0%B2-%D1%81%D0%BB%D0%BE%D0%B2)
+- [Переменные окружения](https://github.com/anyks/alm/blob/master/site#%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D0%BE%D0%BA%D1%80%D1%83%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F)
+- [Примеры](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80%D1%8B)
+  - [Пример обучения языковой модели](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D1%8F-%D1%8F%D0%B7%D1%8B%D0%BA%D0%BE%D0%B2%D0%BE%D0%B9-%D0%BC%D0%BE%D0%B4%D0%B5%D0%BB%D0%B8)
+  - [Пример исправления arpa](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%B8%D1%81%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-arpa)
+  - [Пример удаления n-грамм у которых частота ниже backoff](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D1%83%D0%B4%D0%B0%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D1%83-%D0%BA%D0%BE%D1%82%D0%BE%D1%80%D1%8B%D1%85-%D1%87%D0%B0%D1%81%D1%82%D0%BE%D1%82%D0%B0-%D0%BD%D0%B8%D0%B6%D0%B5-backoff)
+  - [Пример прунинга arpa](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%BF%D1%80%D1%83%D0%BD%D0%B8%D0%BD%D0%B3%D0%B0-arpa)
+  - [Информация о бинарном контейнере](https://github.com/anyks/alm/blob/master/site#%D0%B8%D0%BD%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%86%D0%B8%D1%8F-%D0%BE-%D0%B1%D0%B8%D0%BD%D0%B0%D1%80%D0%BD%D0%BE%D0%BC-%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80%D0%B5)
+  - [Пример модификации arpa](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%BC%D0%BE%D0%B4%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%86%D0%B8%D0%B8-arpa)
+  - [Обучение с предобработкой полученных слов](https://github.com/anyks/alm/blob/master/site#%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D1%81-%D0%BF%D1%80%D0%B5%D0%B4%D0%BE%D0%B1%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BA%D0%BE%D0%B9-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%81%D0%BB%D0%BE%D0%B2)
+  - [Обучение с использованием своих токенов](https://github.com/anyks/alm/blob/master/site#%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D1%81-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%D0%BC-%D1%81%D0%B2%D0%BE%D0%B8%D1%85-%D1%82%D0%BE%D0%BA%D0%B5%D0%BD%D0%BE%D0%B2)
+  - [Обучение с белым списком](https://github.com/anyks/alm/blob/master/site#%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D1%81-%D0%B1%D0%B5%D0%BB%D1%8B%D0%BC-%D1%81%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BC)
+  - [Обучение с чёрным списком](https://github.com/anyks/alm/blob/master/site#%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D1%81-%D1%87%D1%91%D1%80%D0%BD%D1%8B%D0%BC-%D1%81%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BC)
+  - [Обучение с неизвестным словом](https://github.com/anyks/alm/blob/master/site#%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D1%81-%D0%BD%D0%B5%D0%B8%D0%B7%D0%B2%D0%B5%D1%81%D1%82%D0%BD%D1%8B%D0%BC-%D1%81%D0%BB%D0%BE%D0%B2%D0%BE%D0%BC)
+  - [Токенизация текста](https://github.com/anyks/alm/blob/master/site#%D1%82%D0%BE%D0%BA%D0%B5%D0%BD%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F-%D1%82%D0%B5%D0%BA%D1%81%D1%82%D0%B0)
+- [Лицензия](https://github.com/anyks/alm/blob/master/site#%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F)
+- [Контакты](https://github.com/anyks/alm/blob/master/site#%D0%BA%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D1%8B)
 
 ## Цели проекта
 
@@ -344,7 +344,7 @@ unq=9390
 ...
 ```
 
-> Содержимое этого файла имеет чисто техническое значение. В сочетании с файлом **vocab** можно объединять несколько языковых моделей, модифицировать, хранить, распространять и извлекать любые форматы (arpa, ngrams, vocab, alm).
+> Содержимое этого файла имеет чисто техническое значение. В сочетании с файлом **[vocab](https://github.com/anyks/alm/blob/master/site#vocab)** можно объединять несколько языковых моделей, модифицировать, хранить, распространять и извлекать любые форматы ([arpa](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D0%B4%D0%BE%D0%B1%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B8%D0%B9-%D1%84%D0%B0%D0%B9%D0%BB-arpa), [ngrams](https://github.com/anyks/alm/blob/master/site#ngrams), [vocab](https://github.com/anyks/alm/blob/master/site#vocab), [alm](https://github.com/anyks/alm/blob/master/site#%D0%BC%D0%B5%D1%82%D0%B0-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5-%D0%B1%D0%B8%D0%BD%D0%B0%D1%80%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80%D0%B0)).
 
 ---
 
@@ -601,7 +601,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -word-script ./wordTest.py
 ```
 
-> Иногда требуется изменить слово прежде чем оно будет добавлено в arpa - это можно сделать с помощью скрипта [**wordTest.py**](#user-content-формат-скрипта-python-предобработки-полученных-слов) в который будет передано слово и его контекст.
+> Иногда требуется изменить слово прежде чем оно будет добавлено в arpa - это можно сделать с помощью скрипта [**wordTest.py**](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82%D0%B0-python-%D0%BF%D1%80%D0%B5%D0%B4%D0%BE%D0%B1%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BA%D0%B8-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%81%D0%BB%D0%BE%D0%B2) в который будет передано слово и его контекст.
 
 ### Обучение с использованием своих токенов
 
@@ -609,7 +609,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -utokens "usa|russia" -utoken-script ./utokenTest.py
 ```
 
-> В примере добавлены свои токены **usa** и **russia**, при обработки текста все слова которые скрипт [**utokenTest.py**](#user-content-формат-скрипта-python-определения-собственных-токенов-слов) подтвердит как указанный токен, будут добавлены в arpa с названием токена.
+> В примере добавлены свои токены **usa** и **russia**, при обработки текста все слова которые скрипт [**utokenTest.py**](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%82-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82%D0%B0-python-%D0%BE%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-%D1%81%D0%BE%D0%B1%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%82%D0%BE%D0%BA%D0%B5%D0%BD%D0%BE%D0%B2-%D1%81%D0%BB%D0%BE%D0%B2) подтвердит как указанный токен, будут добавлены в arpa с названием токена.
 
 ### Обучение с белым списком
 

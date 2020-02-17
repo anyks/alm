@@ -2,40 +2,40 @@
 
 # ANYKS LM (ALM) C++11
 
-- [Project goals and features](https://github.com/anyks/alm/#user-content-project-goals-and-features)
-- [Requirements](https://github.com/anyks/alm/#user-content-requirements)
-- [To build and launch the project](https://github.com/anyks/alm/#user-content-to-build-and-launch-the-project)
-  - [To clone the project](https://github.com/anyks/alm/#user-content-to-clone-the-project)
-  - [Build on Linux and FreeBSD](https://github.com/anyks/alm/#user-content-build-on-linux-and-freebsd)
-  - [Build on MacOS X](https://github.com/anyks/alm/#user-content-build-on-macos-x)
-- [Files formats](https://github.com/anyks/alm/#user-content-files-formats)
-  - [Arpa](https://github.com/anyks/alm/#user-content-arpa)
-  - [Ngrams](https://github.com/anyks/alm/#user-content-ngrams)
-  - [Vocab](https://github.com/anyks/alm/#user-content-vocab)
-  - [Map](https://github.com/anyks/alm/#user-content-map)
-  - [File of adding n-gram into existing arpa file](https://github.com/anyks/alm/#user-content-file-of-adding-n-gram-into-existing-arpa-file)
-  - [File of changing n-gram frequency in existing arpa file](https://github.com/anyks/alm/#user-content-file-of-changing-n-gram-frequency-in-existing-arpa-file)
-  - [File of replacing n-gram in existing arpa file](https://github.com/anyks/alm/#user-content-file-of-replacing-n-gram-in-existing-arpa-file)
-  - [File of removing n-gram from existing arpa file](https://github.com/anyks/alm/#user-content-file-of-removing-n-gram-from-existing-arpa-file)
-  - [Binary container metadata](https://github.com/anyks/alm/#user-content-binary-container-metadata)
-  - [The python script format to preprocess the received words](https://github.com/anyks/alm/#user-content-the-python-script-format-to-preprocess-the-received-words)
-  - [The python script format to define the word features](https://github.com/anyks/alm/#user-content-the-python-script-format-to-define-the-word-features)
-- [Environment variables](https://github.com/anyks/alm/#user-content-environment-variables)
-- [Examples](https://github.com/anyks/alm/#user-content-examples)
-  - [Language Model training example](https://github.com/anyks/alm/#user-content-language-model-training-example)
-  - [Arpa patch example](https://github.com/anyks/alm/#user-content-arpa-patch-example)
-  - [Example of removing n-grams with a frequency lower than backoff](https://github.com/anyks/alm/#user-content-example-of-removing-n-grams-with-a-frequency-lower-than-backoff)
-  - [Arpa pruning example](https://github.com/anyks/alm/#user-content-arpa-pruning-example)
-  - [Binary container information](https://github.com/anyks/alm/#user-content-binary-container-information)
-  - [Arpa modification example](https://github.com/anyks/alm/#user-content-arpa-modification-example)
-  - [Training with preprocessing of received words](https://github.com/anyks/alm/#user-content-training-with-preprocessing-of-received-words)
-  - [Training using your own features](https://github.com/anyks/alm/#user-content-training-using-your-own-features)
-  - [Training using whitelist](https://github.com/anyks/alm/#user-content-training-using-whitelist)
-  - [Training using blacklist](https://github.com/anyks/alm/#user-content-training-using-blacklist)
-  - [Training with an unknown word](https://github.com/anyks/alm/#user-content-training-with-an-unknown-word)
-  - [Text tokenization](https://github.com/anyks/alm/#user-content-text-tokenization)
-- [License](https://github.com/anyks/alm/#user-content-license)
-- [Contact](https://github.com/anyks/alm/#user-content-contact)
+- [Project goals and features](https://github.com/anyks/alm/#project-goals-and-features)
+- [Requirements](https://github.com/anyks/alm/#requirements)
+- [To build and launch the project](https://github.com/anyks/alm/#to-build-and-launch-the-project)
+  - [To clone the project](https://github.com/anyks/alm/#to-clone-the-project)
+  - [Build on Linux and FreeBSD](https://github.com/anyks/alm/#build-on-linux-and-freebsd)
+  - [Build on MacOS X](https://github.com/anyks/alm/#build-on-macos-x)
+- [Files formats](https://github.com/anyks/alm/#file-formats)
+  - [Arpa](https://github.com/anyks/alm/#arpa)
+  - [Ngrams](https://github.com/anyks/alm/#ngrams)
+  - [Vocab](https://github.com/anyks/alm/#vocab)
+  - [Map](https://github.com/anyks/alm/#map)
+  - [File of adding n-gram into existing arpa file](https://github.com/anyks/alm/#file-of-adding-n-gram-into-existing-arpa-file)
+  - [File of changing n-gram frequency in existing arpa file](https://github.com/anyks/alm/#file-of-changing-n-gram-frequency-in-existing-arpa-file)
+  - [File of replacing n-gram in existing arpa file](https://github.com/anyks/alm/#file-of-replacing-n-gram-in-existing-arpa-file)
+  - [File of removing n-gram from existing arpa file](https://github.com/anyks/alm/#file-of-removing-n-gram-from-existing-arpa-file)
+  - [Binary container metadata](https://github.com/anyks/alm/#binary-container-metadata)
+  - [The python script format to preprocess the received words](https://github.com/anyks/alm/#the-python-script-format-to-preprocess-the-received-words)
+  - [The python script format to define the word features](https://github.com/anyks/alm/#the-python-script-format-to-define-the-word-features)
+- [Environment variables](https://github.com/anyks/alm/#environment-variables)
+- [Examples](https://github.com/anyks/alm/#examples)
+  - [Language Model training example](https://github.com/anyks/alm/#language-model-training-example)
+  - [Arpa patch example](https://github.com/anyks/alm/#arpa-patch-example)
+  - [Example of removing n-grams with a frequency lower than backoff](https://github.com/anyks/alm/#example-of-removing-n-grams-with-a-frequency-lower-than-backoff)
+  - [Arpa pruning example](https://github.com/anyks/alm/#arpa-pruning-example)
+  - [Binary container information](https://github.com/anyks/alm/#binary-container-information)
+  - [Arpa modification example](https://github.com/anyks/alm/#arpa-modification-example)
+  - [Training with preprocessing of received words](https://github.com/anyks/alm/#training-with-preprocessing-of-received-words)
+  - [Training using your own features](https://github.com/anyks/alm/#training-using-your-own-features)
+  - [Training using whitelist](https://github.com/anyks/alm/#training-using-whitelist)
+  - [Training using blacklist](https://github.com/anyks/alm/#training-using-blacklist)
+  - [Training with an unknown word](https://github.com/anyks/alm/#training-with-an-unknown-word)
+  - [Text tokenization](https://github.com/anyks/alm/#text-tokenization)
+- [License](https://github.com/anyks/alm/#license)
+- [Contact](https://github.com/anyks/alm/#contact)
 
 ## Project goals and features
 
@@ -344,7 +344,7 @@ unq=9390
 ...
 ```
 
-> This file is for technical use only. In combination with the **[vocab](#vocab)** file, you can combine several language models, modify, store, distribute and extract any formats ([arpa](#arpa), [ngrams](#ngrams), [vocab](#vocab), [alm](#binary-container-metadata)).
+> This file is for technical use only. In combination with the **[vocab](https://github.com/anyks/alm#vocab)** file, you can combine several language models, modify, store, distribute and extract any formats ([arpa](https://github.com/anyks/alm#arpa), [ngrams](https://github.com/anyks/alm#ngrams), [vocab](https://github.com/anyks/alm#vocab), [alm](https://github.com/anyks/alm#binary-container-metadata)).
 
 ---
 
@@ -601,7 +601,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -word-script ./wordTest.py
 ```
 
-> Sometimes it is necessary to change a word before it is added to arpa - this can be done using the script [**wordTest.py**](#the-python-script-format-to-preprocess-the-received-words) the word and its context will be passed into script.
+> Sometimes it is necessary to change a word before it is added to arpa - this can be done using the script [**wordTest.py**](https://github.com/anyks/alm#the-python-script-format-to-preprocess-the-received-words) the word and its context will be passed into script.
 
 ### Training using your own features
 
@@ -609,7 +609,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -utokens "usa|russia" -utoken-script ./utokenTest.py
 ```
 
-> The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](#the-python-script-format-to-define-the-word-features) marks as feature, will be added to arpa with feature name.
+> The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](https://github.com/anyks/alm#the-python-script-format-to-define-the-word-features) marks as feature, will be added to arpa with feature name.
 
 ### Training using whitelist
 
