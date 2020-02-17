@@ -344,7 +344,7 @@ unq=9390
 ...
 ```
 
-> This file is for technical use only. In combination with the **vocab** file, you can combine several language models, modify, store, distribute and extract any formats (arpa, ngrams, vocab, alm).
+> This file is for technical use only. In combination with the **[vocab](#vocab)** file, you can combine several language models, modify, store, distribute and extract any formats ([arpa](#arpa), [ngrams](#ngrams), [vocab](#vocab), [alm](#binary-container-metadata)).
 
 ---
 
@@ -601,7 +601,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -word-script ./wordTest.py
 ```
 
-> Sometimes it is necessary to change a word before it is added to arpa - this can be done using the script [**wordTest.py**](#user-content-the-python-script-format-to-preprocess-the-received-words) the word and its context will be passed into script.
+> Sometimes it is necessary to change a word before it is added to arpa - this can be done using the script [**wordTest.py**](#the-python-script-format-to-preprocess-the-received-words) the word and its context will be passed into script.
 
 ### Training using your own features
 
@@ -609,7 +609,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -utokens "usa|russia" -utoken-script ./utokenTest.py
 ```
 
-> The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](#user-content-the-python-script-format-to-define-the-word-features) marks as feature, will be added to arpa with feature name.
+> The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](#the-python-script-format-to-define-the-word-features) marks as feature, will be added to arpa with feature name.
 
 ### Training using whitelist
 
