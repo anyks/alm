@@ -471,6 +471,8 @@ int main(int argc, char * argv[]){
 					(string(value).compare("-yes-") != 0)){
 						// Получаем адрес файла для записи
 						const string writefile = value;
+						// Устанавливаем название файла
+						if(debug > 0) pss.description(readfile + string(" -> ") + writefile);
 						// Выполняем считывание всех строк текста
 						fsys_t::rfile(readfile, [&](const string & text, const uintmax_t fileSize){
 							// Если текст получен
@@ -543,6 +545,8 @@ int main(int argc, char * argv[]){
 					if(((value = env.get("w-tokens-text")) != nullptr) && (string(value).compare("-yes-") != 0)){
 						// Получаем адрес файла для записи
 						const string writefile = value;
+						// Устанавливаем название файла
+						if(debug > 0) pss.description(readfile + string(" -> ") + writefile);
 						// Выполняем считывание всех строк текста
 						fsys_t::rfile(readfile, [&](const string & text, const uintmax_t fileSize){
 							// Если текст получен
@@ -629,6 +633,8 @@ int main(int argc, char * argv[]){
 							jsonData.clear();
 							// Очищаем текстовый блок данных
 							textData.clear();
+							// Устанавливаем название файла
+							if(debug > 0) pss.description(filename);
 							// Выполняем считывание всех строк текста
 							fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
 								// Если текст получен
@@ -859,6 +865,8 @@ int main(int argc, char * argv[]){
 						}
 						// Переходим по всему списку файлов в каталоге
 						fsys_t::rdir(path, ext, [&idd, &rate, &status, &size, debug, &pss, &toolkit](const string & filename, const uintmax_t dirSize){
+							// Устанавливаем название файла
+							if(debug > 0) pss.description(filename);
 							// Выполняем считывание всех строк текста
 							fsys_t::rfile(filename, [idd, &rate, &status, &size, dirSize, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize){
 								// Если текст получен
@@ -912,6 +920,8 @@ int main(int argc, char * argv[]){
 						u_short status = 0, rate = 100;
 						// Если отладка включена, выводим индикатор загрузки
 						if(debug > 0){
+							// Устанавливаем название файла
+							pss.description(realpath(value, nullptr));
 							// Устанавливаем заголовки прогресс-бара
 							pss.title("Load text corpus", "Load text corpus is done");
 							// Выводим индикатор прогресс-бара
@@ -921,7 +931,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Выполняем считывание всех строк текста
-						fsys_t::rfile(value, [&rate, &status, &size, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize){
+						fsys_t::rfile(realpath(value, nullptr), [&rate, &status, &size, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize){
 							// Если текст получен
 							if(!text.empty()) toolkit.addText(text, 0);
 							// Если отладка включена
@@ -975,6 +985,8 @@ int main(int argc, char * argv[]){
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
+						// Устанавливаем название файла
+						pss.description(realpath(value, nullptr));
 						// Устанавливаем заголовки прогресс-бара
 						pss.title("Read n-gram file", "Read n-gram file is done");
 						// Выводим индикатор прогресс-бара
@@ -997,6 +1009,8 @@ int main(int argc, char * argv[]){
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
+						// Устанавливаем название файла
+						pss.description(realpath(value, nullptr));
 						// Устанавливаем заголовки прогресс-бара
 						pss.title("Read n-grams files", "Read n-grams files is done");
 						// Выводим индикатор прогресс-бара
@@ -1020,6 +1034,8 @@ int main(int argc, char * argv[]){
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
+						// Устанавливаем название файла
+						pss.description(realpath(value, nullptr));
 						// Устанавливаем заголовки прогресс-бара
 						pss.title("Read arpa file", "Read arpa file is done");
 						// Выводим индикатор прогресс-бара
@@ -1042,6 +1058,8 @@ int main(int argc, char * argv[]){
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
+						// Устанавливаем название файла
+						pss.description(realpath(value, nullptr));
 						// Устанавливаем заголовки прогресс-бара
 						pss.title("Read arpa files", "Read arpa files is done");
 						// Выводим индикатор прогресс-бара
@@ -1065,6 +1083,8 @@ int main(int argc, char * argv[]){
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
+						// Устанавливаем название файла
+						pss.description(realpath(value, nullptr));
 						// Устанавливаем заголовки прогресс-бара
 						pss.title("Read vocab file", "Read vocab file is done");
 						// Выводим индикатор прогресс-бара
@@ -1097,6 +1117,8 @@ int main(int argc, char * argv[]){
 					}
 					// Переходим по всему списку словарей в каталоге
 					fsys_t::rdir(realpath(value, nullptr), "vocab", [debug, &pss, &toolkit](const string & filename, const uintmax_t dirSize){
+						// Устанавливаем название файла
+						if(debug > 0) pss.description(filename);
 						// Выполняем загрузку файла словаря vocab
 						toolkit.readVocab(filename, [debug, &pss](const u_short status){
 							// Отображаем ход процесса
@@ -1115,6 +1137,8 @@ int main(int argc, char * argv[]){
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
 							pss.clear();
+							// Устанавливаем название файла
+							pss.description(realpath(value, nullptr));
 							// Устанавливаем заголовки прогресс-бара
 							pss.title("Read map file", "Read map file is done");
 							// Выводим индикатор прогресс-бара
@@ -1137,6 +1161,8 @@ int main(int argc, char * argv[]){
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
 							pss.clear();
+							// Устанавливаем название файла
+							pss.description(realpath(value, nullptr));
 							// Устанавливаем заголовки прогресс-бара
 							pss.title("Read maps files", "Read maps files is done");
 							// Выводим индикатор прогресс-бара
@@ -1279,6 +1305,8 @@ int main(int argc, char * argv[]){
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
 							pss.clear();
+							// Устанавливаем название файла
+							pss.description(realpath(value, nullptr));
 							// Устанавливаем заголовки прогресс-бара
 							pss.title("Modify arpa", "Modify arpa is done");
 							// Выводим индикатор прогресс-бара
@@ -1288,7 +1316,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Выполняем модификацию файла
-						toolkit.modify(value, modify, [debug, &pss](const u_short status){
+						toolkit.modify(realpath(value, nullptr), modify, [debug, &pss](const u_short status){
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1307,6 +1335,8 @@ int main(int argc, char * argv[]){
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар
 					pss.clear();
+					// Устанавливаем название файла
+					pss.description(value);
 					// Устанавливаем заголовки прогресс-бара
 					pss.title("Write map", "Write map is done");
 					// Выводим индикатор прогресс-бара
@@ -1330,6 +1360,8 @@ int main(int argc, char * argv[]){
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар
 					pss.clear();
+					// Устанавливаем название файла
+					pss.description(value);
 					// Устанавливаем заголовки прогресс-бара
 					pss.title("Write arpa", "Write arpa is done");
 					// Выводим индикатор прогресс-бара
@@ -1353,6 +1385,8 @@ int main(int argc, char * argv[]){
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар
 					pss.clear();
+					// Устанавливаем название файла
+					pss.description(value);
 					// Устанавливаем заголовки прогресс-бара
 					pss.title("Write vocab", "Write vocab is done");
 					// Выводим индикатор прогресс-бара
@@ -1377,6 +1411,8 @@ int main(int argc, char * argv[]){
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар
 					pss.clear();
+					// Устанавливаем название файла
+					pss.description(value);
 					// Устанавливаем заголовки прогресс-бара
 					pss.title("Write ngrams", "Write ngrams is done");
 					// Выводим индикатор прогресс-бара

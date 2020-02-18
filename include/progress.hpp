@@ -32,16 +32,14 @@ namespace anyks {
 	 */
 	typedef class Progress {
 		private:
-			// Заголовок при работе прогресса
-			string title1 = "";
-			// Заголовок при завершения прогресса
-			string title2 = "";
 			// Время начала
 			time_t startTime = 0;
 			// Текущее значение прогресса
 			u_short progress = 101;
 			// Текущее значение индикатора
 			const char * litem = "|";
+			// Заголовки и описание при работе прогресса
+			string title1 = "", title2 = "", desc = "";
 		public:
 			/**
 			 * clear Метод сброса данных
@@ -57,6 +55,11 @@ namespace anyks {
 			 * @param status текущий статус
 			 */
 			void update(const u_short status = 0);
+			/**
+			 * description Метод установки описания работы
+			 * @param text текст описания работы
+			 */
+			void description(const string & text);
 			/**
 			 * title Метод установки заголовка
 			 * @param start  заголовок при работе прогресса

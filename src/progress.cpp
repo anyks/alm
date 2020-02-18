@@ -18,6 +18,8 @@ void anyks::Progress::clear(){
 	this->startTime = 0;
 	// Сбрасываем текущее значение процесса
 	this->progress = 101;
+	// Очищаем описание прогресса
+	this->desc.clear();
 	// Очищаем заголовки
 	this->title1.clear();
 	this->title2.clear();
@@ -53,8 +55,12 @@ void anyks::Progress::status(const u_short status){
 						dimension = "h";
 					}
 				}
-				// Выводим заголовок индикатора загрузки
-				printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld%s]\r\n", this->title1.c_str(), status, elapses, dimension);
+				// Если описание передано
+				if(!this->desc.empty()){
+					// Выводим заголовок индикатора загрузки с описанием
+					printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld%s]: %s\r\n", this->title1.c_str(), status, elapses, dimension, this->desc.c_str());
+				// Выводим заголовок индикатора загрузки без описания
+				} else printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld%s]\r\n", this->title1.c_str(), status, elapses, dimension);
 			}
 		}
 		// Запоминаем текущий статус
@@ -129,12 +135,16 @@ void anyks::Progress::update(const u_short status){
 			// Отображаем оставшиеся знаки загрузки
 			for(size_t i = 0; i < ((w.ws_col - pos) - 4); i++) printf("\e[47m \x1B[0m");
 			// Отображаем индикатор процесса
-			printf(" \x1B[33m\x1B[1m%s\x1B[0m\e[0m\r\n\r\n", this->litem);
+			printf(" \x1B[33m\x1B[1m%s\x1B[0m\e[0m\r\n", this->litem);
 			// Меняем значение индикатора
 			if(strcmp(this->litem, "|") == 0) this->litem = "/";
 			else if(strcmp(this->litem, "/") == 0) this->litem = "--";
 			else if(strcmp(this->litem, "--") == 0) this->litem = "\\";
 			else if(strcmp(this->litem, "\\") == 0) this->litem = "|";
+			// Если описание передано
+			if(!this->desc.empty()) printf(" \x1B[34m\x1B[1m%s\x1B[0m\r\n\r\n", this->desc.c_str());
+			// Иначе просто выводим перенос строки
+			else printf("%s", "\r\n");
 		}
 	// Если статус перешёл 100%
 	} else if((status >= 100) && !this->title2.empty()) {
@@ -143,6 +153,14 @@ void anyks::Progress::update(const u_short status){
 		// Сбрасываем параметры прогресс-бара
 		this->clear();
 	}
+}
+/**
+ * description Метод установки описания работы
+ * @param text текст описания работы
+ */
+void anyks::Progress::description(const string & text){
+	// Если текст передан, устанавливаем описание работы
+	if(!text.empty()) this->desc = text;
 }
 /**
  * title Метод установки заголовка
