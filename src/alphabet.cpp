@@ -648,17 +648,19 @@ const u_short anyks::Alphabet::idwToken(const wstring & word) const {
 			const bool frontNum = this->isNumber({first});
 			// Определяем является ли последний символ числом
 			const bool backNum = this->isNumber({second});
-			// Если первый символ не является числом а второй является (-12, -15.64, -18,22, ~25, ~845.53, ~12,46)
+			// Если первый символ не является числом а второй является (+42, +22.84, -12, -15.64, -18,22, ~25, ~845.53, ~12,46)
 			if(!frontNum && backNum){
 				// Проверяем является ли первый символ (- или ~)
-				if((first == L'-') || (first == L'~')){
+				if((first == L'-') || (first == L'~') || (first == L'+')){
 					// Получаем оставшуюся часть слова
 					const wstring & tmp = word.substr(1);
 					// Проверяем оставшуюся часть слова является числом
 					if(this->isNumber(tmp) || this->isDecimal(tmp)){
 						// Определяем тип токена
 						switch(first){
-							// Это обычное число
+							// Это положительное число
+							case L'+':
+							// Это отрицательное число
 							case L'-': result = (u_short) token_t::num;   break;
 							// Это приблизительное число
 							case L'~': result = (u_short) token_t::aprox; break;
@@ -717,7 +719,8 @@ const u_short anyks::Alphabet::idwToken(const wstring & word) const {
 					// Переходим по всем символам слова
 					for(size_t i = 0; i < size; i++){
 						// Если плавающая точка найдена
-						if((word[i] == L'.') || (word[i] == L',') || (word[i] == L':') || (word[i] == L'/') || (word[i] == L'х') || (word[i] == L'~') || (word[i] == L'-')){
+						if((word[i] == L'.') || (word[i] == L',') || (word[i] == L':') ||
+						(word[i] == L'/') || (word[i] == L'х') || (word[i] == L'~') || (word[i] == L'-')){
 							// Проверяем правые и левую части
 							delim = (this->isNumber(word.substr(0, i)) && this->isNumber(word.substr(i + 1)));
 							// Если число собрано
