@@ -100,7 +100,7 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 					// Идентификатор слова
 					size_t idw = 0;
 					// Пытаемся определить идентификатор слова
-					switch(this->alphabet->idwToken(word)){
+					switch(this->tokenizer->idw(word)){
 						// Если токен не определён
 						case 0: if(this->isOption(options_t::onlyGood)) idw = (size_t) token_t::unk; break;
 						// Если это токен числа, запоминаем его

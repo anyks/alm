@@ -30,7 +30,6 @@
  */
 #include <nwt.hpp>
 #include <word.hpp>
-#include <types.hpp>
 #include <general.hpp>
 
 using namespace std;
@@ -235,12 +234,6 @@ namespace anyks {
 			 * @return      результат расчёта
 			 */
 			const u_short errors(const wstring & word) const;
-			/**
-			 * idwToken Метод извлечения идентификатора токена
-			 * @param  word слово для проверки
-			 * @return      результат проверки
-			 */
-			const u_short idwToken(const wstring & word) const;
 			/**
 			 * roman2Arabic Метод перевода римских цифр в арабские
 			 * @param  word римское число

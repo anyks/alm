@@ -30,6 +30,7 @@
 #include <word.hpp>
 #include <general.hpp>
 #include <alphabet.hpp>
+#include <tokenizer.hpp>
 
 // Устанавливаем область видимости
 using namespace std;

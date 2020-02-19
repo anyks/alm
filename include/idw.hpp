@@ -22,6 +22,7 @@
  */
 #include <general.hpp>
 #include <alphabet.hpp>
+#include <tokenizer.hpp>
 #include <BigIntegerLibrary.hh>
 
 // Устанавливаем область видимости

@@ -17,6 +17,192 @@ void anyks::Tokenizer::setAlphabet(const alphabet_t * alphabet){
 	this->alphabet = alphabet;
 }
 /**
+ * idw Метод извлечения идентификатора токена
+ * @param  word слово для проверки
+ * @return      результат проверки
+ */
+const u_short anyks::Tokenizer::idw(const wstring & word) const {
+	// Результат работы функции
+	u_short result = 0;
+	// Если слово передано
+	if(!word.empty()){
+		// Длина переданного слова
+		const size_t size = word.size();
+		// Если это не одна буква
+		if(size > 1){
+			// Получаем первый символ слова
+			const wchar_t first = word.front();
+			// Получаем последний символ слова
+			const wchar_t second = word.back();
+			// Проверяем является ли первый символ числом
+			const bool frontNum = this->alphabet->isNumber({first});
+			// Определяем является ли последний символ числом
+			const bool backNum = this->alphabet->isNumber({second});
+			// Если первый символ не является числом а второй является (+42, +22.84, -12, -15.64, -18,22, ~25, ~845.53, ~12,46)
+			if(!frontNum && backNum){
+				// Проверяем является ли первый символ (- или ~)
+				if((first == L'-') || (first == L'~') || (first == L'+')){
+					// Получаем оставшуюся часть слова
+					const wstring & tmp = word.substr(1);
+					// Проверяем оставшуюся часть слова является числом
+					if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp)){
+						// Определяем тип токена
+						switch(first){
+							// Это положительное число
+							case L'+':
+							// Это отрицательное число
+							case L'-': result = (u_short) token_t::num;   break;
+							// Это приблизительное число
+							case L'~': result = (u_short) token_t::aprox; break;
+						}
+					// Сообщаем что это псевдо-число
+					} else result = (u_short) token_t::anum;
+				// Если это не отрицательное и не приблизительное число (Дом-2)
+				} else {
+					// Ищем дефис в конце слова
+					size_t pos = word.rfind(L'-');
+					// Если дефис не найден и не найдено завершение слова в виде числа
+					if((pos == wstring::npos) || !this->alphabet->isNumber(word.substr(pos + 1))){
+						// Сообщаем что это псевдо-число
+						result = (u_short) token_t::anum;
+					}
+				}
+			// Если первый символ является числом а последний нет (2-й, 13-летний)
+			} else if(frontNum && !backNum) {
+				// Ищем дефис в конце слова
+				size_t pos = word.rfind(L'-');
+				// Проверяем является ли слово сокращением (не 25TM)
+				if(pos != wstring::npos){
+					// Получаем новое слово для проверки
+					const wstring & tmp = word.substr(pos + 1);
+					// Если это не псевдо-число (не 2-15tm)
+					if(!this->alphabet->isANumber(tmp)){
+						// Слово запрещено для использования
+						bool noallow = false;
+						// Длина переданного слова
+						const size_t size = tmp.size();
+						// Переходим по всему списку
+						for(size_t i = 0, j = size - 1; j > (size / 2); i++, j--){
+							// Проверяем является ли слово арабским числом
+							noallow = (i == j ? !this->alphabet->check(tmp[i]) : !this->alphabet->check(tmp[i]) || !this->alphabet->check(tmp[j]));
+							// Если хоть один символ является числом, выходим
+							if(noallow) break;
+						}
+						// Если слово разрешено, значит это аббревиатура
+						if(!noallow) result = (u_short) token_t::abbr;
+						// Иначе запоминаем что это неизвестный символ (2-@tm)
+						else result = (u_short) token_t::anum;
+					// Сообщаем что это псевдо-число
+					} else result = (u_short) token_t::anum;
+				// Сообщаем что это псевдо-число
+				} else result = (u_short) token_t::anum;
+			// Если оба символа являются числом (5353, 5353.243, 3:4, 18:00, 18:00:01, 18.02.2012, 18/02/2012, 2/3, 3х10, 3~4)
+			} else if(frontNum && backNum) {
+				// Если это число
+				if(this->alphabet->isNumber(word)) result = (u_short) token_t::num;
+				// Если это псевдо-число
+				else {
+					// Разделитель слова найден
+					bool delim = false;
+					// Запоминаем что это псевдо-число
+					result = (u_short) token_t::anum;
+					// Переходим по всем символам слова
+					for(size_t i = 0; i < size; i++){
+						// Если плавающая точка найдена
+						if((word[i] == L'.') || (word[i] == L',') || (word[i] == L':') ||
+						(word[i] == L'/') || (word[i] == L'х') || (word[i] == L'~') || (word[i] == L'-')){
+							// Проверяем правые и левую части
+							delim = (this->alphabet->isNumber(word.substr(0, i)) && this->alphabet->isNumber(word.substr(i + 1)));
+							// Если число собрано
+							if(delim){
+								// Определяем тип разделителя
+								switch(word[i]){
+									case L',':
+									case L'.': result = (u_short) token_t::num;   break;
+									case L'~': result = (u_short) token_t::aprox; break;
+									case L'-': result = (u_short) token_t::range; break;
+									case L'/': result = (u_short) token_t::fract; break;
+									case L'х': result = (u_short) token_t::dimen; break;
+									case L':': result = (u_short) token_t::score; break;
+								}
+							// Если число не собрано а являетс временем или датой
+							} else if((word[i] == L':') || (word[i] == L'.') || (word[i] == L'/')) {
+								// Список элементов слова
+								vector <wstring> words;
+								// Выполняем разбивку на составляющие
+								this->alphabet->split(word, {word[i]}, words);
+								// Если список разбит правильно
+								if(words.size() == 3){
+									// Переходим по всему списку слова
+									for(auto & word : words){
+										// Если слово не является числом
+										if(!this->alphabet->isNumber(word)) return 0;
+									}
+									// Определяем тип разделителя
+									switch(word[i]){
+										case L'/':
+										case L'.': result = (u_short) token_t::date; break;
+										case L':': result = (u_short) token_t::time; break;
+									}
+								}
+							}
+							// Выходим из цикла
+							break;
+						}
+					}
+				}
+			// Если это вообще не число, проверяем может это римское число
+			} else if(!frontNum && !backNum && (this->alphabet->roman2Arabic(this->alphabet->toLower(word)) > 0)){
+				// Запоминаем что это число
+				result = (u_short) token_t::num;
+			}
+		// Если это число то выводим токен числа
+		} else if(this->alphabet->isNumber(word)) result = (u_short) token_t::num;
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * readline Метод извлечения строки из текста
+ * @param  is  файловый поток для чтения данных
+ * @param  str строка для извлечения текста
+ * @return     файловый поток с текущий позиции
+ */
+istream & anyks::Tokenizer::readline(istream & is, string & str) const {
+	// Очищаем строку
+	str.clear();
+	// Создаем сторожа файлового потока
+	istream::sentry se(is, true);
+	// Создаем буфер чтения данных
+	streambuf * sb = is.rdbuf();
+	// Выполняем перебор всех входящих данных
+	while(true){
+		// Считываем символ из строки
+		char c = sb->sbumpc();
+		// Определяем тип символа
+		switch(c){
+			// Если это символ переноса строки
+ 			case '\n': return is;
+ 			// Если это символ возврата каретки
+			case '\r': {
+				// Проверяем следующий символ, если это перенос каретки, выходим
+				if(sb->sgetc() == '\n') sb->sbumpc();
+				// Выводим позицию файлового потока
+				return is;
+			}
+			// Если это символ завершения файла
+			case streambuf::traits_type::eof(): {
+				// Если это конец, файла устанавливаем символ конца строки
+				if(str.empty()) is.setstate(ios::eofbit);
+				// Выводим позицию файлового потока
+				return is;
+			}
+			// Если это любой другой символ, собираем строку
+			default: str += c;
+		}
+	}
+}
+/**
  * restore Метод восстановления текста из контекста
  * @param context токенизированный контекст
  * @return        результирующий текст
@@ -385,46 +571,6 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 	}
 	// Выводим результат
 	return result;
-}
-/**
- * readline Метод извлечения строки из текста
- * @param  is  файловый поток для чтения данных
- * @param  str строка для извлечения текста
- * @return     файловый поток с текущий позиции
- */
-istream & anyks::Tokenizer::readline(istream & is, string & str) const {
-	// Очищаем строку
-	str.clear();
-	// Создаем сторожа файлового потока
-	istream::sentry se(is, true);
-	// Создаем буфер чтения данных
-	streambuf * sb = is.rdbuf();
-	// Выполняем перебор всех входящих данных
-	while(true){
-		// Считываем символ из строки
-		char c = sb->sbumpc();
-		// Определяем тип символа
-		switch(c){
-			// Если это символ переноса строки
- 			case '\n': return is;
- 			// Если это символ возврата каретки
-			case '\r': {
-				// Проверяем следующий символ, если это перенос каретки, выходим
-				if(sb->sgetc() == '\n') sb->sbumpc();
-				// Выводим позицию файлового потока
-				return is;
-			}
-			// Если это символ завершения файла
-			case streambuf::traits_type::eof(): {
-				// Если это конец, файла устанавливаем символ конца строки
-				if(str.empty()) is.setstate(ios::eofbit);
-				// Выводим позицию файлового потока
-				return is;
-			}
-			// Если это любой другой символ, собираем строку
-			default: str += c;
-		}
-	}
 }
 /**
  * jsonToText Метод преобразования текста в формате json в текст
