@@ -33,7 +33,7 @@
   - [Training with preprocessing of received words](https://github.com/anyks/alm/#training-with-preprocessing-of-received-words)
   - [Training using your own features](https://github.com/anyks/alm/#training-using-your-own-features)
   - [Example of disabling token identification](https://github.com/anyks/alm/#example-of-disabling-token-identification)
-  - [An example of identifying tokens as 〈unk〉](https://github.com/anyks/alm/#an-example-of-identifying-tokens-as-〈unk〉)
+  - [An example of identifying tokens as 〈unk〉](https://github.com/anyks/alm/#an-example-of-identifying-tokens-as-unk)
   - [Training using whitelist](https://github.com/anyks/alm/#training-using-whitelist)
   - [Training using blacklist](https://github.com/anyks/alm/#training-using-blacklist)
   - [Training with an unknown word](https://github.com/anyks/alm/#training-with-an-unknown-word)
