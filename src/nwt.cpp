@@ -17,9 +17,18 @@ const anyks::Uri::data_t & anyks::Uri::get(){
 	return this->data;
 }
 /**
+ * getZones Метод извлечения списка пользовательских зон интернета
+ */
+const set <wstring> & anyks::Uri::getZones() const {
+	// Выводим список пользовательских зон интернета
+	return this->user;
+}
+/**
  * clear Метод очистки результатов парсинга
  */
 void anyks::Uri::clear(){
+	// Очищаем список пользовательских зон
+	this->user.clear();
 	// Очищаем блок полученных данных
 	this->data.uri.clear();
 	this->data.data.clear();
@@ -127,7 +136,8 @@ void anyks::Uri::parse(const wstring & text){
 					if(result.protocol.empty()){
 						// Если домен верхнего уровня не является таковым, очищаем все
 						if((this->national.count(result.domain) < 1)
-						&& (this->general.count(result.domain) < 1)){
+						&& (this->general.count(result.domain) < 1)
+						&& (this->user.count(result.domain) < 1)){
 							// Очищаем блок полученных данных
 							result.path.clear();
 							result.port.clear();
@@ -231,12 +241,31 @@ void anyks::Uri::parse(const wstring & text){
 	}
 }
 /**
+ * setZone Метод установки пользовательской зоны
+ * @param zone пользовательская зона
+ */
+void anyks::Uri::setZone(const wstring & zone){
+	// Если зона передана и она не существует
+	if(!zone.empty() && (this->national.count(zone) < 1) && (this->general.count(zone) < 1)){
+		// Добавляем зону в список
+		this->user.emplace(zone);
+	}
+}
+/**
  * setLetters Метод добавления букв алфавита
  * @param letters список букв алфавита
  */
 void anyks::Uri::setLetters(const wstring & letters){
 	// Если буквы переданы запоминаем их
 	if(!letters.empty()) this->letters = move(letters);
+}
+/**
+ * setZones Метод установки списка пользовательских зон
+ * @param zones список доменных зон интернета
+ */
+void anyks::Uri::setZones(const set <wstring> & zones){
+	// Если список зон не пустой
+	if(!zones.empty()) this->user = move(zones);
 }
 /**
  * Uri Конструктор

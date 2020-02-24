@@ -42,15 +42,17 @@ namespace anyks {
 	 * Alphabet Класс для работы с алфавитом
 	 */
 	typedef class Alphabet {
-		public:
-			// log_t Флаги логирования
-			enum class log_t : u_short {info, warning, error};
 		private:
 			// Локализация приложения
 			string encoding = "en_US.UTF-8";
 			// Алфавит словаря
 			wstring alphabet = L"abcdefghijklmnopqrstuvwxyz";
+		public:
+			// log_t Флаги логирования
+			enum class log_t : u_short {info, warning, error};
 		private:
+			// Объект парсинга uri адреса
+			mutable uri_t uri;
 			// Латинский алфавит
 			std::set <wchar_t> latian;
 			// Алфавит для проверки
@@ -267,6 +269,12 @@ namespace anyks {
 			 */
 			const bool altemp() const;
 			/**
+			 * isUrl Метод проверки соответствия слова url адресу
+			 * @param word слово для проверки
+			 * @return     результат проверки
+			 */
+			const bool isUrl(const wstring & word) const;
+			/**
 			 * isAlt Метод проверки существования альтернативной буквы
 			 * @param  letter буква для проверки
 			 * @return        результат проверки
@@ -278,6 +286,12 @@ namespace anyks {
 			 * @return       результат проверки
 			 */
 			const bool isMath(const wchar_t letter) const;
+			/**
+			 * isAbbr Метод проверки слова на соответствие аббревиатуры
+			 * @param word слово для проверки
+			 * @return     результат проверки
+			 */
+			const bool isAbbr(const wstring & word) const;
 			/**
 			 * isUpper Метод проверки символ на верхний регистр
 			 * @param letter буква для проверки
@@ -371,6 +385,16 @@ namespace anyks {
 			const bool checkSimilars(const wstring & str) const;
 		public:
 			/**
+			 * getzones Метод извлечения списка пользовательских зон интернета
+			 */
+			const std::set <wstring> & getzones() const;
+			/**
+			 * urls Метод извлечения координат url адресов в строке
+			 * @param text текст для извлечения url адресов
+			 * @return     список координат с url адресами
+			 */
+			const std::map <size_t, size_t> urls(const wstring & text) const;
+			/**
 			 * checkHypLat Метод поиска дефиса и латинского символа
 			 * @param str строка для проверки
 			 * @return    результат проверки
@@ -442,10 +466,30 @@ namespace anyks {
 			 */
 			void rmalt(const wchar_t letter);
 			/**
+			 * setzone Метод установки пользовательской зоны
+			 * @param zone пользовательская зона
+			 */
+			void setzone(const string & zone);
+			/**
+			 * setzone Метод установки пользовательской зоны
+			 * @param zone пользовательская зона
+			 */
+			void setzone(const wstring & zone);
+			/**
 			 * setlocale Метод установки локали
 			 * @param locale локализация приложения
 			 */
 			void setlocale(const string & locale);
+			/**
+			 * setzones Метод установки списка пользовательских зон
+			 * @param zones список доменных зон интернета
+			 */
+			void setzones(const std::set <string> & zones);
+			/**
+			 * setzones Метод установки списка пользовательских зон
+			 * @param zones список доменных зон интернета
+			 */
+			void setzones(const std::set <wstring> & zones);
 			/**
 			 * setalt Метод добавления альтернативной буквы
 			 * @param lid буква у которой есть альтернатива

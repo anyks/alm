@@ -24,7 +24,6 @@
 /**
  * Наши модули
  */
-#include <idw.hpp>
 #include <fsys.hpp>
 #include <arpa.hpp>
 #include <word.hpp>
@@ -55,30 +54,14 @@ namespace anyks {
 				naturalDiscount
 			};
 			// Основные опции
-			enum class options_t : u_int {
-				debug,        // Флаг режима отладки
-				onlyGood,     // Флаг использования только слов из белого списка
-				allowUnk,     // Флаг разрешаюний использовать токен неизвестного слова
-				allGrams,     // Флаг предписывающий использовать все полученные n-граммы
-				lowerCase,    // Флаг предписывающий использовать слова в нижнем регистре
-				interpolate,  // Флаг предписывающий выполнять интерполяцию при расчёте частот
-				notUserToken, // Флаг запрещающий использовать пользовательский токен
-				notUrl,       // Флаг запрещающий детектировать url адреса
-				notAbbr,      // Флаг запрещающий детектировать аббривиатуры чисел
-				notDate,      // Флаг запрещающий детектировать дату
-				notTime,      // Флаг запрещающий детектировать время
-				notMath,      // Флаг запрещающий детектировать математические операции
-				notSpecs,     // Флаг запрещающий детектировать спец-символы
-				notRange,     // Флаг запрещающий детектировать диапазоны арабских чисел
-				notPunct,     // Флаг запрещающий детекстировать знак пунктуации
-				notScore,     // Флаг запрещающий детектировать числовой счёт
-				notDimen,     // Флаг запрещающий детектировать габаритные размеры
-				notFract,     // Флаг запрещающий детектировать числовые дроби
-				notRoman,     // Флаг запрещающий детектировать римские числа
-				notAprox,     // Флаг запрещающий детектировать приблизительные значения чисел
-				notIsolat,    // Флаг запрещающий детектировать символ изоляции
-				notNumber,    // Флаг запрещающий детектировать арабские числа
-				notANumber    // Флаг запрещающий детектировать псевдо-арабские числа
+			enum class options_t : u_short {
+				debug,      // Флаг режима отладки
+				resetUnk,   // Флаг сброса частоты неизвестного слова
+				onlyGood,   // Флаг использования только слов из белого списка
+				allowUnk,   // Флаг разрешаюний использовать токен неизвестного слова
+				allGrams,   // Флаг предписывающий использовать все полученные n-граммы
+				lowerCase,  // Флаг предписывающий использовать слова в нижнем регистре
+				interpolate // Флаг предписывающий выполнять интерполяцию при расчёте частот
 			};
 			// Флаги модификации
 			enum class modify_t : u_short {emplace, remove, change, replace};
@@ -107,7 +90,7 @@ namespace anyks {
 				/**
 				 * Info Конструктор
 				 */
-				Info() : ad(0), cw(0), unq(0), idd(noID) {};
+				Info() : ad(0), cw(0), unq(0), idd(idw_t::NIDW) {};
 			} __attribute__((packed)) info_t;
 			/**
 			 * UserToken Структура пользовательского токена
@@ -119,7 +102,7 @@ namespace anyks {
 				/**
 				 * UserToken Конструктор
 				 */
-				UserToken() : idw(noID), name("") {}
+				UserToken() : idw(idw_t::NIDW), name("") {}
 			} utoken_t;
 		private:
 			// Замена неизвестному слову
@@ -127,18 +110,20 @@ namespace anyks {
 			// Размер n-грамм
 			u_short size = DEFNGRAM;
 		private:
-			// Объект идентификатора
-			idw_t idw;
 			// Общая статистика
 			info_t info;
 			// Параметры алгоритма сглаживания
 			params_t params;
 			// Флаги параметров
-			bitset <23> options;
+			bitset <7> options;
 			// Список плохих слов
 			set <size_t> badwords;
 			// Список хороших слов
 			set <size_t> goodwords;
+			// Список токенов приводимых к <unk>
+			set <token_t> tokenUnknown;
+			// Список запрещённых токенов
+			set <token_t> tokenDisable;
 			// Список пользовательских токенов
 			map <size_t, utoken_t> utokens;
 			// Словарь всех слов в системе
@@ -253,6 +238,15 @@ namespace anyks {
 			void clearUserTokens();
 		public:
 			/**
+			 * setAllTokenUnknown Метод установки всех токенов идентифицируемых как <unk>
+			 */
+			void setAllTokenUnknown();
+			/**
+			 * setAllTokenDisable Метод установки всех токенов как не идентифицируемых
+			 */
+			void setAllTokenDisable();
+		public:
+			/**
 			 * addBadword Метод добавления идентификатора похого слова в список
 			 * @param idw идентификатор слова
 			 */
@@ -309,6 +303,16 @@ namespace anyks {
 			 */
 			void setWordScript(const string & script);
 			/**
+			 * setTokenUnknown Метод установки списка токенов которых нужно идентифицировать как <unk>
+			 * @param options список токенов которых нужно идентифицировать как <unk>
+			 */
+			void setTokenUnknown(const string & options);
+			/**
+			 * setTokenDisable Метод установки списка не идентифицируемых токенов
+			 * @param options список не идентифицируемых токенов
+			 */
+			void setTokenDisable(const string & options);
+			/**
 			 * setSize Метод установки размера n-граммы
 			 * @param size размер n-граммы
 			 */
@@ -357,9 +361,10 @@ namespace anyks {
 			/**
 			 * addWord Метод добавления слова в словарь
 			 * @param word слово для добавления
+			 * @param idw  идентификатор слова, если нужно
 			 * @param idd  идентификатор документа
 			 */
-			void addWord(const wstring & word, const size_t idd = 0);
+			void addWord(const wstring & word, const size_t idw = 0, const size_t idd = 0);
 			/**
 			 * setUserTokenMethod Метод добавления функции обработки пользовательского токена
 			 * @param name слово - обозначение токена

@@ -15,7 +15,7 @@
  */
 const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 	// Результат работы функции
-	size_t result = noID;
+	size_t result = idw_t::NIDW;
 	// Если слово передано
 	if(!word.empty()){
 		// Проверяем является ли слово, началом предложения
@@ -39,7 +39,7 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 		// Проверяем является ли слово математической операцией
 		else if(word.compare(L"<math>") == 0) result = (size_t) token_t::math;
 		// Проверяем является ли слово спец-символом
-		else if(word.compare(L"<specs>") == 0) result = (size_t) token_t::specs;
+		else if(word.compare(L"<specl>") == 0) result = (size_t) token_t::specl;
 		// Проверяем является ли слово диапазоном чисел
 		else if(word.compare(L"<range>") == 0) result = (size_t) token_t::range;
 		// Проверяем является ли слово знаком пунктуации
@@ -57,37 +57,50 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 		// Если это другое слово
 		else {
 			// Формируем идентификатор слова
-			result = this->idw.get(word);
+			result = this->tokenizer->idw(word);
 			// Проверяем является ли слово хорошим
 			if(this->goodwords.count(result) < 1){
 				// Подсчитываем количество дефисов
 				u_short hyphenCounts = 0;
 				// Если нужно проверить пользовательские токены
-				if(!this->isOption(options_t::notUserToken) && !this->utokens.empty()){
+				if(!this->utokens.empty()){
 					// Переходим по всему списку пользовательских токенов
 					for(auto & token : this->utokens){
 						// Если сработал пользовательский токен
-						if(token.second.test(token.second.name.real(), this->alphabet->convert(word))) return token.first;
+						if(token.second.test(
+							token.second.name.real(),
+							this->alphabet->convert(word)
+						)) return token.first;
 					}
 				}
 				// Проверяем является ли слово знаком пунктуации
 				if(word.length() == 1){
+					// Получаем букву для проверки
+					const wchar_t letter = word.front();
 					// Если это знак пунктуации
-					if(!this->isOption(options_t::notPunct) && this->alphabet->isPunct(word.front())){
-						// Запоминаем что это знак пунктуации
-						result = (size_t) token_t::punct;
+					if(this->alphabet->isPunct(letter)){
+						// Если идентифицирование токена не отключено
+						if(!this->tokenDisable.count(token_t::punct)) result = (size_t) token_t::punct;
+						// Устанавливаем токен неизвестного слова
+						if(this->tokenUnknown.count(token_t::punct)) result = (size_t) token_t::unk;
 					// Если это символ математической операции
-					} else if(!this->isOption(options_t::notMath) && this->alphabet->isMath(word.front())){
-						// Запоминаем что это символ математической операции
-						result = (size_t) token_t::math;
+					} else if(this->alphabet->isMath(letter)) {
+						// Если идентифицирование токена не отключено
+						if(!this->tokenDisable.count(token_t::math)) result = (size_t) token_t::math;
+						// Устанавливаем токен неизвестного слова
+						if(this->tokenUnknown.count(token_t::math)) result = (size_t) token_t::unk;
 					// Если это спец-символ
-					} else if(!this->isOption(options_t::notSpecs) && this->alphabet->isSpecial(word.front())){
-						// Запоминаем что это знак изоляции
-						result = (size_t) token_t::specs;
+					} else if(this->alphabet->isSpecial(letter)) {
+						// Если идентифицирование токена не отключено
+						if(!this->tokenDisable.count(token_t::specl)) result = (size_t) token_t::specl;
+						// Устанавливаем токен неизвестного слова
+						if(this->tokenUnknown.count(token_t::specl)) result = (size_t) token_t::unk;
 					// Если это знак изоляции
-					} else if(!this->isOption(options_t::notIsolat) && this->alphabet->isIsolation(word.front())){
-						// Запоминаем что это знак изоляции
-						result = (size_t) token_t::isolat;
+					} else if(this->alphabet->isIsolation(letter)) {
+						// Если идентифицирование токена не отключено
+						if(!this->tokenDisable.count(token_t::isolat)) result = (size_t) token_t::isolat;
+						// Устанавливаем токен неизвестного слова
+						if(this->tokenUnknown.count(token_t::isolat)) result = (size_t) token_t::unk;
 					}
 				// Проверяем есть ли изоляционный знак и количество дефисов в слове больше 2-х
 				} else if(
@@ -97,55 +110,102 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 				) result = (size_t) token_t::unk;
 				// Если идентификатор определить не удалось
 				else {
-					// Идентификатор слова
-					size_t idw = 0;
+					// Идентификатор токена слова
+					token_t idt = token_t::null;
+					// Получаем идентификатор токена слова
+					const token_t token = this->tokenizer->idt(word);
 					// Пытаемся определить идентификатор слова
-					switch(this->tokenizer->idw(word)){
-						// Если токен не определён
-						case 0: if(this->isOption(options_t::onlyGood)) idw = (size_t) token_t::unk; break;
+					switch((u_short) token){
+						// Если это токен неизвестного слова
+						case (u_short) token_t::unk: idt = token; break;
+						// Если это токен url-адреса
+						case (u_short) token_t::url: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
 						// Если это токен числа, запоминаем его
-						case (u_short) token_t::num: if(!this->isOption(options_t::notNumber)) idw = (size_t) token_t::num; break;
-						// Если это токен аббривиатуры
-						case (u_short) token_t::abbr: if(!this->isOption(options_t::notAbbr)) idw = (size_t) token_t::abbr; break;
+						case (u_short) token_t::num: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
+						// Если это токен аббревиатуры
+						case (u_short) token_t::abbr: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
 						// Если это токен даты
-						case (u_short) token_t::date: if(!this->isOption(options_t::notDate)) idw = (size_t) token_t::date; break;
+						case (u_short) token_t::date: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
 						// Если это токен времени
-						case (u_short) token_t::time: if(!this->isOption(options_t::notTime)) idw = (size_t) token_t::time; break;
+						case (u_short) token_t::time: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
 						// Если это токен приблизительного числа
-						case (u_short) token_t::aprox: if(!this->isOption(options_t::notAprox)) idw = (size_t) token_t::aprox; break;
+						case (u_short) token_t::aprox: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
 						// Если это токен псевдо-числа
-						case (u_short) token_t::anum: if(!this->isOption(options_t::notANumber)) idw = (size_t) token_t::anum; break;
+						case (u_short) token_t::anum: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
 						// Если это токен диапазона чисел
-						case (u_short) token_t::range: if(!this->isOption(options_t::notRange)) idw = (size_t) token_t::range; break;
+						case (u_short) token_t::range: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
 						// Если это токен числового счёта
-						case (u_short) token_t::score: if(!this->isOption(options_t::notScore)) idw = (size_t) token_t::score; break;
+						case (u_short) token_t::score: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
 						// Если это токен габаритных размеров
-						case (u_short) token_t::dimen: if(!this->isOption(options_t::notDimen)) idw = (size_t) token_t::dimen; break;
+						case (u_short) token_t::dimen: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
 						// Если это токен числовой дроби
-						case (u_short) token_t::fract: if(!this->isOption(options_t::notFract)) idw = (size_t) token_t::fract; break;
+						case (u_short) token_t::fract: {
+							// Если идентифицирование токена не отключено
+							if(!this->tokenDisable.count(token)) idt = token;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token)) idt = token_t::unk;
+						} break;
+						// Если токен определён как слово
+						case (u_short) token_t::null: if(this->isOption(options_t::onlyGood)) idt = token_t::unk; break;
 					}
 					// Если слово определено как число но это не число, значит это римское число
-					if((idw == (size_t) token_t::num) && !this->alphabet->isNumber({word.back()})){
-						// Если не запрещено выводить римские числа, выводим его
-						if(!this->isOption(options_t::notRoman)) result = idw;
+					if((idt == token_t::num) && !this->alphabet->isNumber({word.back()})){
+						// Если идентифицирование токена не отключено
+						if(!this->tokenDisable.count(token_t::rnum)) result = (size_t) token_t::num;
+						// Устанавливаем токен неизвестного слова
+						if(this->tokenUnknown.count(token_t::rnum)) result = (size_t) token_t::unk;
 					// Иначе запоминаем идентификатор так-как он передан
-					} else if(idw > 0) result = idw;
-					// Если это другое слово
-					else {
-						// Объект работы с uri адресами
-						uri_t uri(this->alphabet->convert(this->alphabet->get()));
-						// Выполняем парсинг uri адреса
-						uri.parse(word);
-						// Извлекаем данные uri адреса
-						auto resUri = uri.get();
-						// Если ссылка найдена
-						if((resUri.type != uri_t::types_t::null)
-						&& (resUri.type != uri_t::types_t::wrong)){
-							// Запоминаем что это токен url адреса
-							result = (size_t) token_t::url;
-						// Если слово не разрешено, устанавливаем неизвестное слово
-						} else if(!this->alphabet->isAllowed(word)) result = (size_t) token_t::unk;
-					}
+					} else if(idt != token_t::null) result = (size_t) idt;
 				}
 			}
 		}
@@ -303,7 +363,7 @@ const string anyks::Toolkit::getUserTokenWord(const size_t idw) const {
 	// Результат работы функции
 	string result = "";
 	// Если идентификатор передан
-	if((idw > 0) && (idw < noID)){
+	if((idw > 0) && (idw < idw_t::NIDW)){
 		// Ищем идентификатор токена
 		auto it = this->utokens.find(idw);
 		// Если такой идентификатор существует
@@ -324,7 +384,7 @@ const string anyks::Toolkit::getUserTokenWord(const size_t idw) const {
  */
 const size_t anyks::Toolkit::getUserTokenId(const string & name) const {
 	// Результат работы функции
-	size_t result = noID;
+	size_t result = idw_t::NIDW;
 	// Если слово передано
 	if(!name.empty()){
 		// Выполняем удаление экранирования
@@ -336,7 +396,7 @@ const size_t anyks::Toolkit::getUserTokenId(const string & name) const {
 			// Добавляем экранирование
 			word.append(">");
 			// Получаем идентификатор слова
-			const size_t idw = this->idw.get(this->alphabet->convert(word));
+			const size_t idw = this->tokenizer->idw(this->alphabet->convert(word));
 			// Если такой идентификатор существует, выводим его
 			result = (this->utokens.count(idw) > 0 ? idw : result);
 		}
@@ -360,6 +420,10 @@ void anyks::Toolkit::clear(){
 	this->badwords.clear();
 	// Очищаем список хороших слов
 	this->goodwords.clear();
+	// Очищаем список токенов приводимых к <unk>
+	this->tokenUnknown.clear();
+	// Очищаем список запрещённых токенов
+	this->tokenDisable.clear();
 	// Очищаем объект статистики
 	this->info = info_t();
 }
@@ -385,12 +449,60 @@ void anyks::Toolkit::clearUserTokens(){
 	this->utokens.clear();
 }
 /**
+ * setAllTokenUnknown Метод установки всех токенов идентифицируемых как <unk>
+ */
+void anyks::Toolkit::setAllTokenUnknown(){
+	// Устанавливаем все токены для идентифицировоания как <unk>
+	this->tokenUnknown = {
+		token_t::num,
+		token_t::url,
+		token_t::abbr,
+		token_t::date,
+		token_t::time,
+		token_t::anum,
+		token_t::math,
+		token_t::rnum,
+		token_t::specl,
+		token_t::aprox,
+		token_t::range,
+		token_t::score,
+		token_t::dimen,
+		token_t::fract,
+		token_t::punct,
+		token_t::isolat
+	};
+}
+/**
+ * setAllTokenDisable Метод установки всех токенов как не идентифицируемых
+ */
+void anyks::Toolkit::setAllTokenDisable(){
+	// Устанавливаем все токены для отключения
+	this->tokenDisable = {
+		token_t::num,
+		token_t::url,
+		token_t::abbr,
+		token_t::date,
+		token_t::time,
+		token_t::anum,
+		token_t::math,
+		token_t::rnum,
+		token_t::specl,
+		token_t::aprox,
+		token_t::range,
+		token_t::score,
+		token_t::dimen,
+		token_t::fract,
+		token_t::punct,
+		token_t::isolat
+	};
+}
+/**
  * addBadword Метод добавления идентификатора похого слова в список
  * @param idw идентификатор слова
  */
 void anyks::Toolkit::addBadword(const size_t idw){
 	// Если идентификатор передан
-	if((idw > 0) && (idw < noID)) this->badwords.emplace(idw);
+	if((idw > 0) && (idw < idw_t::NIDW)) this->badwords.emplace(idw);
 }
 /**
  * addGoodword Метод добавления идентификатора хорошего слова в список
@@ -398,7 +510,7 @@ void anyks::Toolkit::addBadword(const size_t idw){
  */
 void anyks::Toolkit::addGoodword(const size_t idw){
 	// Если идентификатор передан
-	if((idw > 0) && (idw < noID)) this->goodwords.emplace(idw);
+	if((idw > 0) && (idw < idw_t::NIDW)) this->goodwords.emplace(idw);
 }
 /**
  * addBadword Метод добавления похого слова в список
@@ -408,7 +520,7 @@ void anyks::Toolkit::addBadword(const string & word){
 	// Если слово передано
 	if(!word.empty()){
 		// Получаем идентификатор слова
-		const size_t idw = this->idw.get(this->alphabet->convert(word));
+		const size_t idw = this->tokenizer->idw(this->alphabet->convert(word));
 		// Добавляем слово в список плохих слов
 		this->addBadword(idw);
 	}
@@ -421,7 +533,7 @@ void anyks::Toolkit::addGoodword(const string & word){
 	// Если слово передано
 	if(!word.empty()){
 		// Получаем идентификатор слова
-		const size_t idw = this->idw.get(this->alphabet->convert(word));
+		const size_t idw = this->tokenizer->idw(this->alphabet->convert(word));
 		// Добавляем слово в список хороших слов
 		this->addGoodword(idw);
 	}
@@ -434,7 +546,7 @@ void anyks::Toolkit::setUnknown(const string & word){
 	// Если слово передано
 	if(!word.empty()){
 		// Формируем идентификатор слова
-		this->unknown = this->idw.get(this->alphabet->convert(word));
+		this->unknown = this->tokenizer->idw(this->alphabet->convert(word));
 		// Если идентификатор получен
 		if(this->unknown > 0){
 			// Если слова нет в словаре, добавляем его
@@ -489,7 +601,7 @@ void anyks::Toolkit::setUserToken(const string & name){
 			// Добавляем экранирование
 			word.append(">");
 			// Получаем идентификатор слова
-			userToken.idw = this->idw.get(this->alphabet->convert(word));
+			userToken.idw = this->tokenizer->idw(this->alphabet->convert(word));
 			// Если такого идентификатора нет в списке
 			if((userToken.idw > 0) && (this->utokens.count(userToken.idw) < 1)){
 				// Добавляем в пользовательский токен наши параметры
@@ -525,6 +637,78 @@ void anyks::Toolkit::setWordScript(const string & script){
 	this->scripts.emplace(1, make_pair(script, 0));
 }
 /**
+ * setTokenUnknown Метод установки списка токенов которых нужно идентифицировать как <unk>
+ * @param options список токенов которых нужно идентифицировать как <unk>
+ */
+void anyks::Toolkit::setTokenUnknown(const string & options){
+	// Если опции переданы
+	if(!options.empty()){
+		// Список токенов для работы
+		vector <wstring> tokens;
+		// Выполняем разбиение строки на составляющие
+		this->alphabet->split(options, "|", tokens);
+		// Если токены получены
+		if(!tokens.empty()){
+			// Переходим по всему списку токенов
+			for(auto & token : tokens){
+				// Определяем тип токена
+				if(token.compare(L"num") == 0)         this->tokenUnknown.emplace(token_t::num);
+				else if(token.compare(L"url") == 0)    this->tokenUnknown.emplace(token_t::url);
+				else if(token.compare(L"abbr") == 0)   this->tokenUnknown.emplace(token_t::abbr);
+				else if(token.compare(L"date") == 0)   this->tokenUnknown.emplace(token_t::date);
+				else if(token.compare(L"time") == 0)   this->tokenUnknown.emplace(token_t::time);
+				else if(token.compare(L"anum") == 0)   this->tokenUnknown.emplace(token_t::anum);
+				else if(token.compare(L"math") == 0)   this->tokenUnknown.emplace(token_t::math);
+				else if(token.compare(L"rnum") == 0)   this->tokenUnknown.emplace(token_t::rnum);
+				else if(token.compare(L"specl") == 0)  this->tokenUnknown.emplace(token_t::specl);
+				else if(token.compare(L"aprox") == 0)  this->tokenUnknown.emplace(token_t::aprox);
+				else if(token.compare(L"range") == 0)  this->tokenUnknown.emplace(token_t::range);
+				else if(token.compare(L"score") == 0)  this->tokenUnknown.emplace(token_t::score);
+				else if(token.compare(L"dimen") == 0)  this->tokenUnknown.emplace(token_t::dimen);
+				else if(token.compare(L"fract") == 0)  this->tokenUnknown.emplace(token_t::fract);
+				else if(token.compare(L"punct") == 0)  this->tokenUnknown.emplace(token_t::punct);
+				else if(token.compare(L"isolat") == 0) this->tokenUnknown.emplace(token_t::isolat);
+			}
+		}
+	}
+}
+/**
+ * setTokenDisable Метод установки списка не идентифицируемых токенов
+ * @param options список не идентифицируемых токенов
+ */
+void anyks::Toolkit::setTokenDisable(const string & options){
+	// Если опции переданы
+	if(!options.empty()){
+		// Список токенов для работы
+		vector <wstring> tokens;
+		// Выполняем разбиение строки на составляющие
+		this->alphabet->split(options, "|", tokens);
+		// Если токены получены
+		if(!tokens.empty()){
+			// Переходим по всему списку токенов
+			for(auto & token : tokens){
+				// Определяем тип токена
+				if(token.compare(L"num") == 0)         this->tokenDisable.emplace(token_t::num);
+				else if(token.compare(L"url") == 0)    this->tokenDisable.emplace(token_t::url);
+				else if(token.compare(L"abbr") == 0)   this->tokenDisable.emplace(token_t::abbr);
+				else if(token.compare(L"date") == 0)   this->tokenDisable.emplace(token_t::date);
+				else if(token.compare(L"time") == 0)   this->tokenDisable.emplace(token_t::time);
+				else if(token.compare(L"anum") == 0)   this->tokenDisable.emplace(token_t::anum);
+				else if(token.compare(L"math") == 0)   this->tokenDisable.emplace(token_t::math);
+				else if(token.compare(L"rnum") == 0)   this->tokenDisable.emplace(token_t::rnum);
+				else if(token.compare(L"specl") == 0)  this->tokenDisable.emplace(token_t::specl);
+				else if(token.compare(L"aprox") == 0)  this->tokenDisable.emplace(token_t::aprox);
+				else if(token.compare(L"range") == 0)  this->tokenDisable.emplace(token_t::range);
+				else if(token.compare(L"score") == 0)  this->tokenDisable.emplace(token_t::score);
+				else if(token.compare(L"dimen") == 0)  this->tokenDisable.emplace(token_t::dimen);
+				else if(token.compare(L"fract") == 0)  this->tokenDisable.emplace(token_t::fract);
+				else if(token.compare(L"punct") == 0)  this->tokenDisable.emplace(token_t::punct);
+				else if(token.compare(L"isolat") == 0) this->tokenDisable.emplace(token_t::isolat);
+			}
+		}
+	}
+}
+/**
  * setSize Метод установки размера n-граммы
  * @param size размер n-граммы
  */
@@ -538,12 +722,7 @@ void anyks::Toolkit::setSize(const u_short size){
  */
 void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
 	// Если алфавит передан
-	if(alphabet != nullptr){
-		// Устанавливаем переданный алфавит
-		this->alphabet = alphabet;
-		// Устанавливаем алфавит и смещение в 18 позиций (количество системных токенов arpa)
-		this->idw.set(this->alphabet, 18);
-	}
+	if(alphabet != nullptr) this->alphabet = alphabet;
 }
 /**
  * setTokenizer Метод установки токенизатора
@@ -551,10 +730,7 @@ void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
  */
 void anyks::Toolkit::setTokenizer(const tokenizer_t * tokenizer){
 	// Если токенизатор передан
-	if(tokenizer != nullptr){
-		// Устанавливаем переданный токенизатор
-		this->tokenizer = tokenizer;
-	}
+	if(tokenizer != nullptr) this->tokenizer = tokenizer;
 }
 /**
  * setUserTokenScript Метод установки скрипта обработки пользовательских токенов
@@ -678,7 +854,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
 					// Если это плохое слово, заменяем его на неизвестное
-					if(((idw == 0) || (idw == noID) || (this->badwords.count(idw) > 0)) && !unkFn()) return true;
+					if(((idw == 0) || (idw == idw_t::NIDW) || (this->badwords.count(idw) > 0)) && !unkFn()) return true;
 					// Иначе продолжаем дальше
 					else {
 						// Если это неизвестное слово
@@ -694,7 +870,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 							// Добавляем слово в последовательность
 							seq.emplace_back(idw, uppers);
 							// Добавляем слово в словарь если разрешено
-							if(this->alphabet->isAllowed(tmp)) this->addWord(tmp.wreal(), idd);
+							if(this->alphabet->isAllowed(tmp)) this->addWord(tmp.wreal(), idw, idd);
 						}
 					}
 				}
@@ -702,7 +878,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 			// Если предложение завершено
 			if(stop || reset){
 				// Идентификатор предыдущего слова
-				size_t idw = noID;
+				size_t idw = idw_t::NIDW;
 				// Удаляем следующие друг за другом неизвестные слова
 				for(auto it = seq.begin(); it != seq.end();){
 					/**
@@ -746,17 +922,18 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 /**
  * addWord Метод добавления слова в словарь
  * @param word слово для добавления
+ * @param idw  идентификатор слова, если нужноы
  * @param idd  идентификатор документа
  */
-void anyks::Toolkit::addWord(const wstring & word, const size_t idd){
+void anyks::Toolkit::addWord(const wstring & word, const size_t idw, const size_t idd){
 	// Если слово передано
 	if(!word.empty()){
 		// Получаем идентификатор слова
-		const size_t idw = this->getIdw(word);
+		const size_t id = (idw > 0 ? idw : this->getIdw(word));
 		// Если идентификатор нормальный
-		if((idw > 0) && (idw < noID) && this->arpa->event(idw) && (this->utokens.count(idw) < 1)){
+		if((id > 0) && (id < idw_t::NIDW) && this->arpa->event(id) && (this->utokens.count(id) < 1)){
 			// Ищем слово в словаре
-			auto it = this->vocab.find(idw);
+			auto it = this->vocab.find(id);
 			// Если слово найдено
 			if(it != this->vocab.end()){
 				// Получаем метаданные
@@ -770,7 +947,7 @@ void anyks::Toolkit::addWord(const wstring & word, const size_t idd){
 			// Иначе устанавливаем слово
 			} else {
 				// Добавляем слово в словарь
-				this->vocab.emplace(idw, word);
+				this->vocab.emplace(id, word);
 				// Запоминаем количество уникальных слов
 				this->info.unq = this->vocab.size();
 			}
@@ -894,7 +1071,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 					// Получаем идентификатор слова
 					idw = this->getIdw(word);
 					// Проверяем отсутствует ли слово в списке запрещённых слов
-					if((idw > 0) && (idw < noID) && (this->badwords.count(idw) < 1)){
+					if((idw > 0) && (idw < idw_t::NIDW) && (this->badwords.count(idw) < 1)){
 						// Если это неизвестное слово
 						if(idw == uid){
 							// Если неизвестное слово не установлено
@@ -918,7 +1095,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 								// Иначе увеличиваем количество слов
 								else added.at(idw)++;
 								// Добавляем слово в словарь
-								this->addWord(word.wreal());
+								this->addWord(word.wreal(), idw);
 							}
 						}
 					// Если слово найдено в всписке запрещённых
@@ -992,7 +1169,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 								// Определяем идентификатор слова
 								idw = this->getIdw(words[i]);
 								// Если идентификатор получен
-								if((idw > 0) && (idw < noID)) seq[i] = idw;
+								if((idw > 0) && (idw < idw_t::NIDW)) seq[i] = idw;
 								// Если слово не получено, выходим
 								else {
 									// Очищаем список слов
@@ -1030,7 +1207,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 										// Определяем идентификатор слова
 										idw = this->getIdw(words[i]);
 										// Если идентификатор получен
-										if((idw > 0) && (idw < noID)){
+										if((idw > 0) && (idw < idw_t::NIDW)){
 											// Устанавливаем идентификатор слова
 											seq2[i] = idw;
 											// Если слова нет в словаре и это не токен, добавляем в словарь
@@ -1042,7 +1219,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 												// Иначе увеличиваем количество слов
 												else added.at(idw)++;
 												// Добавляем слово в словарь
-												this->addWord(words[i]);
+												this->addWord(words.at(i), idw);
 											}
 										// Если слово не получено, выходим
 										} else {
@@ -1123,7 +1300,7 @@ void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, cons
 				// Результат работы функции
 				const word_t * result = nullptr;
 				// Если нужно проверить пользовательские токены
-				if(!this->isOption(options_t::notUserToken) && (this->utokens.count(idw) > 0)){
+				if(!this->utokens.empty() && (this->utokens.count(idw) > 0)){
 					// Получаем слово обозначения пользовательского токена
 					result = &this->utokens.at(idw).name;
 				// Если это не пользовательский токен
@@ -1168,7 +1345,7 @@ void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, cons
 			// Если скрипт получен
 			if(((this->scripts.count(2) > 0) && !this->utokens.empty()) || (this->scripts.count(1) > 0)){
 				// Создаём объект для работы с python
-				this->python = new python_t(&this->idw);
+				this->python = new python_t(this->tokenizer);
 				// Если нужно активировать режим отладки
 				if(this->isOption(options_t::debug)) this->python->setDebug();
 				// Ищем скрипт обработки слов
@@ -1209,6 +1386,8 @@ void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, cons
 			&& (algorithm != algorithm_t::addSmooth)) this->arpa->setOption(arpa_t::options_t::interpolate);
 			// Активируем флаг отладки если необходимо
 			if(this->isOption(options_t::debug)) this->arpa->setOption(arpa_t::options_t::debug);
+			// Активируем сброс веса токена неизвестного слова
+			if(this->isOption(options_t::resetUnk)) this->arpa->setOption(arpa_t::options_t::resetUnk);
 			// Активируем расчёт всех возможных грамм
 			if(this->isOption(options_t::allGrams)) this->arpa->setOption(arpa_t::options_t::allGrams);
 			// Активируем перевод слов в arpa к нижнему регистру
@@ -1232,7 +1411,7 @@ void anyks::Toolkit::loadInfoVocab(const vector <char> & buffer){
 		// Загружаем информационные данные словаря
 		memcpy(&this->info, buffer.data(), sizeof(this->info));
 		// Сбрасываем идентификатор последнего документа
-		this->info.idd = noID;
+		this->info.idd = idw_t::NIDW;
 	}
 }
 /**
@@ -1252,7 +1431,7 @@ void anyks::Toolkit::loadVocab(const vector <char> & buffer) const {
 		// Увеличиваем смещение
 		offset += sizeof(idw);
 		// Если идентификатор слова получен
-		if((idw > 0) && (idw < noID)){
+		if((idw > 0) && (idw < idw_t::NIDW)){
 			// Слово для добавления в словарь
 			word_t word = L"";
 			// Добавляем бинарные данные слова
@@ -1676,7 +1855,7 @@ void anyks::Toolkit::readArpas(const string & path, function <void (const u_shor
 											if(this->badwords.count(idw) < 1){
 												// Если это юниграмма и её еще нет в словаре
 												if((idw != (size_t) token_t::start) &&
-												((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal(), idd);
+												((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal(), idw, idd);
 											}
 										}
 										// Переходим по всему списку слов
@@ -1982,7 +2161,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 										if(this->badwords.count(idw) < 1){
 											// Если это юниграмма и её еще нет в словаре
 											if((idw != (size_t) token_t::start) &&
-											((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal());
+											((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal(), idw);
 										}
 									}
 									// Переходим по всему списку слов

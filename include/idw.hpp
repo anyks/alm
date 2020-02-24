@@ -22,7 +22,6 @@
  */
 #include <general.hpp>
 #include <alphabet.hpp>
-#include <tokenizer.hpp>
 #include <BigIntegerLibrary.hh>
 
 // Устанавливаем область видимости
@@ -48,6 +47,9 @@ namespace anyks {
 			wstring letters = L"¶";
 			// Объект основного алфавита
 			const alphabet_t * alphabet = nullptr;
+		public:
+			// Получаем максимальное значение идентификатора
+			static constexpr size_t NIDW = numeric_limits <size_t>::max();
 		public:
 			/**
 			 * setOffset Метод установки смещения в алфавите

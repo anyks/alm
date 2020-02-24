@@ -17,6 +17,8 @@
   - [File of changing n-gram frequency in existing arpa file](https://github.com/anyks/alm/#file-of-changing-n-gram-frequency-in-existing-arpa-file)
   - [File of replacing n-gram in existing arpa file](https://github.com/anyks/alm/#file-of-replacing-n-gram-in-existing-arpa-file)
   - [File of removing n-gram from existing arpa file](https://github.com/anyks/alm/#file-of-removing-n-gram-from-existing-arpa-file)
+  - [File of abbreviations list words](https://github.com/anyks/alm/#file-of-abbreviations-list-words)
+  - [File of domain zones list](https://github.com/anyks/alm/#file-of-domain-zones-list)
   - [Binary container metadata](https://github.com/anyks/alm/#binary-container-metadata)
   - [The python script format to preprocess the received words](https://github.com/anyks/alm/#the-python-script-format-to-preprocess-the-received-words)
   - [The python script format to define the word features](https://github.com/anyks/alm/#the-python-script-format-to-define-the-word-features)
@@ -30,6 +32,8 @@
   - [Arpa modification example](https://github.com/anyks/alm/#arpa-modification-example)
   - [Training with preprocessing of received words](https://github.com/anyks/alm/#training-with-preprocessing-of-received-words)
   - [Training using your own features](https://github.com/anyks/alm/#training-using-your-own-features)
+  - [Example of disabling token identification](https://github.com/anyks/alm/#example-of-disabling-token-identification)
+  - [An example of identifying tokens as 〈unk〉](https://github.com/anyks/alm/#an-example-of-identifying-tokens-as-〈unk〉)
   - [Training using whitelist](https://github.com/anyks/alm/#training-using-whitelist)
   - [Training using blacklist](https://github.com/anyks/alm/#training-using-blacklist)
   - [Training with an unknown word](https://github.com/anyks/alm/#training-with-an-unknown-word)
@@ -180,7 +184,7 @@ ngram 3=15
  - **〈fract〉** - Fraction token (**5/20** | **192/864**)
  - **〈punct〉** - Punctuation token (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
  - **〈isolat〉** - Isolation/quotation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
- - **〈specs〉** - Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **〈** | **〉**)
+ - **〈specl〉** - Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **〈** | **〉**)
 
 ---
 
@@ -432,6 +436,38 @@ unq=9390
 
 ---
 
+### File of abbreviations list words
+```
+г
+р
+США
+ул
+руб
+рус
+чел
+...
+```
+
+> All words from this list will be identificate as an unknown word **〈unk〉**.
+
+---
+
+### File of domain zones list
+```
+ru
+su
+cc
+net
+com
+org
+info
+...
+```
+
+> For more accurate identification of the **〈url〉** token, you should add your own domain zones (all domain zones in the example are already pre-installed).
+
+---
+
 ### Binary container metadata
 ```json
 {
@@ -610,6 +646,38 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ```
 
 > The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](https://github.com/anyks/alm#the-python-script-format-to-define-the-word-features) marks as feature, will be added to arpa with feature name.
+
+### Example of disabling token identification
+
+**Smoothing algorithm: Witten-Bell, assembly with disabled tokens**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -reset-unk -interpolate -tokens-disable "num|url|abbr|date|time|anum|math|rnum|specl|range|aprox|score|dimen|fract|punct|isolat" -corpus ./text.txt
+```
+
+> Here is the **rnum** token, which is a Roman number, but is not used as an independent token.
+
+**Smoothing algorithm: Witten-Bell, assembly with all disabled tokens**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -reset-unk -interpolate -tokens-all-disable -corpus ./text.txt
+```
+
+> In the example, the identification of all tokens is disabled, disabled tokens will be added to arpa as separate words.
+
+### An example of identifying tokens as 〈unk〉
+
+**Smoothing algorithm: Witten-Bell, assembly with identification of tokens as 〈unk〉**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -reset-unk -interpolate -tokens-unknown "num|url|abbr|date|time|anum|math|rnum|specl|range|aprox|score|dimen|fract|punct|isolat" -corpus ./text.txt
+```
+
+> Here is the **rnum** token, which is a Roman number, but is not used as an independent token.
+
+**Smoothing algorithm: Witten-Bell, assembly with identification of all tokens as 〈unk〉**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -reset-unk -interpolate -tokens-all-unknown -corpus ./text.txt
+```
+
+> The example identifies all tokens as как 〈unk〉.
 
 ### Training using whitelist
 

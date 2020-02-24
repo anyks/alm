@@ -9,27 +9,72 @@
 #include <tokenizer.hpp>
 
 /**
+ * setAbbr Метод добавления аббревиатуры
+ * @param word слово для добавления
+ */
+void anyks::Tokenizer::setAbbr(const string & word){
+	// Если слово передано, добавляем его в список аббревиатур
+	if(!word.empty()) this->abbrs.emplace(this->idw(this->alphabet->convert(word)));
+}
+/**
+ * setAbbr Метод добавления аббревиатуры
+ * @param word слово для добавления
+ */
+void anyks::Tokenizer::setAbbr(const wstring & word){
+	// Если слово передано, добавляем его в список аббревиатур
+	if(!word.empty()) this->abbrs.emplace(this->idw(word));
+}
+/**
+ * setAbbrs Метод установки списка аббревиатур
+ * @param abbrs список аббревиатур
+ */
+void anyks::Tokenizer::setAbbrs(const set <size_t> & abbrs){
+	// Если список аббревиатур передан
+	if(!abbrs.empty()) this->abbrs = move(abbrs);
+}
+/**
  * setAlphabet Метод установки алфавита
  * @param alphabet объект алфавита
  */
 void anyks::Tokenizer::setAlphabet(const alphabet_t * alphabet){
 	// Устанавливаем алфавит
 	this->alphabet = alphabet;
+	// Выполняем обновление параметров
+	this->update();
 }
 /**
- * idw Метод извлечения идентификатора токена
- * @param  word слово для проверки
- * @return      результат проверки
+ * getAbbrs Метод извлечения списка аббревиатур
+ * @return список аббревиатур
  */
-const u_short anyks::Tokenizer::idw(const wstring & word) const {
+const set <size_t> & anyks::Tokenizer::getAbbrs() const {
+	// Выводим список аббревиатур
+	return this->abbrs;
+}
+/**
+ * idw Метод извлечения идентификатора слова
+ * @param  word слово для получения идентификатора
+ * @return      идентификатор слова
+ */
+const size_t anyks::Tokenizer::idw(const wstring & word) const {
+	// Формируем идентификатор слова
+	return this->idWord.get(word);
+}
+/**
+ * idt Метод извлечения идентификатора токена
+ * @param  word слово для получения идентификатора
+ * @return      идентификатор токена
+ */
+const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const {
 	// Результат работы функции
-	u_short result = 0;
+	token_t result = token_t::null;
 	// Если слово передано
 	if(!word.empty()){
 		// Длина переданного слова
 		const size_t size = word.size();
 		// Если это не одна буква
 		if(size > 1){
+			// Значение текущей буквы
+			wchar_t letter = 0;
 			// Получаем первый символ слова
 			const wchar_t first = word.front();
 			// Получаем последний символ слова
@@ -40,7 +85,7 @@ const u_short anyks::Tokenizer::idw(const wstring & word) const {
 			const bool backNum = this->alphabet->isNumber({second});
 			// Если первый символ не является числом а второй является (+42, +22.84, -12, -15.64, -18,22, ~25, ~845.53, ~12,46)
 			if(!frontNum && backNum){
-				// Проверяем является ли первый символ (- или ~)
+				// Проверяем является ли первый символ (-/+ или ~)
 				if((first == L'-') || (first == L'~') || (first == L'+')){
 					// Получаем оставшуюся часть слова
 					const wstring & tmp = word.substr(1);
@@ -51,12 +96,12 @@ const u_short anyks::Tokenizer::idw(const wstring & word) const {
 							// Это положительное число
 							case L'+':
 							// Это отрицательное число
-							case L'-': result = (u_short) token_t::num;   break;
+							case L'-': result = token_t::num;   break;
 							// Это приблизительное число
-							case L'~': result = (u_short) token_t::aprox; break;
+							case L'~': result = token_t::aprox; break;
 						}
 					// Сообщаем что это псевдо-число
-					} else result = (u_short) token_t::anum;
+					} else result = token_t::anum;
 				// Если это не отрицательное и не приблизительное число (Дом-2)
 				} else {
 					// Ищем дефис в конце слова
@@ -64,7 +109,7 @@ const u_short anyks::Tokenizer::idw(const wstring & word) const {
 					// Если дефис не найден и не найдено завершение слова в виде числа
 					if((pos == wstring::npos) || !this->alphabet->isNumber(word.substr(pos + 1))){
 						// Сообщаем что это псевдо-число
-						result = (u_short) token_t::anum;
+						result = token_t::anum;
 					}
 				}
 			// Если первый символ является числом а последний нет (2-й, 13-летний)
@@ -84,80 +129,129 @@ const u_short anyks::Tokenizer::idw(const wstring & word) const {
 						// Переходим по всему списку
 						for(size_t i = 0, j = size - 1; j > (size / 2); i++, j--){
 							// Проверяем является ли слово арабским числом
-							noallow = (i == j ? !this->alphabet->check(tmp[i]) : !this->alphabet->check(tmp[i]) || !this->alphabet->check(tmp[j]));
+							noallow = (i == j ? !this->alphabet->check(tmp.at(i)) : !this->alphabet->check(tmp.at(i)) || !this->alphabet->check(tmp.at(j)));
 							// Если хоть один символ является числом, выходим
 							if(noallow) break;
 						}
 						// Если слово разрешено, значит это аббревиатура
-						if(!noallow) result = (u_short) token_t::abbr;
+						if(!noallow && this->alphabet->isNumber(word.substr(0, pos))){
+							// Запоминаем что это аббревиатура
+							result = token_t::abbr;
 						// Иначе запоминаем что это неизвестный символ (2-@tm)
-						else result = (u_short) token_t::anum;
+						} else result = token_t::anum;
 					// Сообщаем что это псевдо-число
-					} else result = (u_short) token_t::anum;
+					} else result = token_t::anum;
 				// Сообщаем что это псевдо-число
-				} else result = (u_short) token_t::anum;
+				} else result = token_t::anum;
 			// Если оба символа являются числом (5353, 5353.243, 3:4, 18:00, 18:00:01, 18.02.2012, 18/02/2012, 2/3, 3х10, 3~4)
 			} else if(frontNum && backNum) {
 				// Если это число
-				if(this->alphabet->isNumber(word)) result = (u_short) token_t::num;
+				if(this->alphabet->isNumber(word)) result = token_t::num;
 				// Если это псевдо-число
 				else {
 					// Разделитель слова найден
 					bool delim = false;
 					// Запоминаем что это псевдо-число
-					result = (u_short) token_t::anum;
+					result = token_t::anum;
 					// Переходим по всем символам слова
 					for(size_t i = 0; i < size; i++){
+						// Получаем значение текущей буквы
+						letter = word.at(i);
 						// Если плавающая точка найдена
-						if((word[i] == L'.') || (word[i] == L',') || (word[i] == L':') ||
-						(word[i] == L'/') || (word[i] == L'х') || (word[i] == L'~') || (word[i] == L'-')){
+						if((letter == L'.') || (letter == L',') || (letter == L':') || (letter == L'/') || (letter == L'х') || (letter == L'~') || (letter == L'-')){
 							// Проверяем правые и левую части
 							delim = (this->alphabet->isNumber(word.substr(0, i)) && this->alphabet->isNumber(word.substr(i + 1)));
 							// Если число собрано
 							if(delim){
 								// Определяем тип разделителя
-								switch(word[i]){
+								switch(letter){
 									case L',':
-									case L'.': result = (u_short) token_t::num;   break;
-									case L'~': result = (u_short) token_t::aprox; break;
-									case L'-': result = (u_short) token_t::range; break;
-									case L'/': result = (u_short) token_t::fract; break;
-									case L'х': result = (u_short) token_t::dimen; break;
-									case L':': result = (u_short) token_t::score; break;
+									case L'.': result = token_t::num;   break;
+									case L'~': result = token_t::aprox; break;
+									case L'-': result = token_t::range; break;
+									case L'/': result = token_t::fract; break;
+									case L'х': result = token_t::dimen; break;
+									case L':': result = token_t::score; break;
 								}
 							// Если число не собрано а являетс временем или датой
-							} else if((word[i] == L':') || (word[i] == L'.') || (word[i] == L'/')) {
+							} else if((letter == L':') || (letter == L'.') || (letter == L'/')) {
 								// Список элементов слова
 								vector <wstring> words;
 								// Выполняем разбивку на составляющие
-								this->alphabet->split(word, {word[i]}, words);
+								this->alphabet->split(word, {letter}, words);
 								// Если список разбит правильно
 								if(words.size() == 3){
 									// Переходим по всему списку слова
 									for(auto & word : words){
 										// Если слово не является числом
-										if(!this->alphabet->isNumber(word)) return 0;
+										if(!this->alphabet->isNumber(word)) return token_t::null;
 									}
 									// Определяем тип разделителя
-									switch(word[i]){
+									switch(letter){
 										case L'/':
-										case L'.': result = (u_short) token_t::date; break;
-										case L':': result = (u_short) token_t::time; break;
+										case L'.': result = token_t::date; break;
+										case L':': result = token_t::time; break;
 									}
-								}
+								// Если это точка, количество элементов в списке 4, предполагаем что это ip адрес
+								} else if((letter == L'.') && (words.size() == 4)) result = token_t::null;
 							}
 							// Выходим из цикла
 							break;
 						}
 					}
+					// Если слово не идентифицируемо, проверяем является ли оно url-адресом
+					if((result == token_t::null) && this->alphabet->isUrl(word)) result = token_t::url;
 				}
 			// Если это вообще не число, проверяем может это римское число
-			} else if(!frontNum && !backNum && (this->alphabet->roman2Arabic(this->alphabet->toLower(word)) > 0)){
+			} else if(!frontNum && !backNum){
+				// Переводим слово в нижний регистр
+				const wstring & tmp = this->alphabet->toLower(word);
 				// Запоминаем что это число
-				result = (u_short) token_t::num;
+				if(this->alphabet->roman2Arabic(tmp) > 0) result = token_t::num;
+				// Если это аббревиатура
+				else if(this->alphabet->isAbbr(tmp)) result = token_t::abbr;
+				// Проверяем, является ли слово url-адресом
+				else if(this->alphabet->isUrl(tmp)) result = token_t::url;
+				// Определяем является ли слово, псевдо-числом
+				else if(this->alphabet->isANumber(tmp)) result = token_t::anum;
+				// Проверяем является ли слово аббревиатурой
+				else if(this->isAbbr(tmp)) result = token_t::abbr;
 			}
 		// Если это число то выводим токен числа
-		} else if(this->alphabet->isNumber(word)) result = (u_short) token_t::num;
+		} else if(this->alphabet->isNumber(word)) result = token_t::num;
+		// Если слово не идентифицируемо и не разрешено, устанавливаем неизвестное слово
+		if((result == token_t::null) && !this->alphabet->isAllowed(word)) result = token_t::unk;
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * isAbbr Метод проверки слова на соответствие аббревиатуры
+ * @param  word слово для проверки
+ * @return      результат проверки
+ */
+const bool anyks::Tokenizer::isAbbr(const wstring & word) const {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(!word.empty() && !this->abbrs.empty()){
+		// Позиция точки в слове
+		size_t pos = 0;
+		// Слово для проверки
+		wstring tmp = L"";
+		// Выполняем поиск точки
+		if((pos = word.find(L'.')) != wstring::npos){
+			// Обрезаем слово до точки
+			tmp = move(word.substr(0, pos));
+		// Иначе запоминаем слово как оно есть
+		} else tmp = move(word);
+		// Если слово не пустое
+		if(!tmp.empty()){
+			// Получаем идентификатор слова
+			const size_t idw = this->idw(tmp);
+			// Выполняем проверку сущестования аббревиатуры
+			result = (this->abbrs.count(idw) > 0);
+		}
 	}
 	// Выводим результат
 	return result;
@@ -573,6 +667,20 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 	return result;
 }
 /**
+ * clear Метод очистки собранных данных
+ */
+void anyks::Tokenizer::clear(){
+	// Очищаем список аббревиатур
+	this->abbrs.clear();
+}
+/**
+ * update Метод обновления параметров
+ */
+void anyks::Tokenizer::update(){
+	// Устанавливаем алфавит и смещение в 19 позиций (количество системных токенов arpa)
+	this->idWord.set(this->alphabet, 19);
+}
+/**
  * jsonToText Метод преобразования текста в формате json в текст
  * @param text     текст для преобразования в формате json
  * @param callback функция обратного вызова, на каждой итерации
@@ -707,50 +815,6 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
 			return result;
 		};
 		/**
-		 * coordinatesFn Функция поиска координат запрещенных к обработке
-		 * @param text текст для парсинга
-		 * @return     список координат
-		 */
-		auto coordinatesFn = [&letters, this](const wstring & text){
-			// Результат работы функции
-			map <size_t, size_t> result = {{wstring::npos, wstring::npos}};
-			// Если текст передан
-			if(!text.empty()){
-				// Позиция найденного uri адреса
-				size_t pos = 0;
-				// Объект работы с uri адресами
-				uri_t uri(letters);
-				// Выполням поиск ссылок в тексте
-				while(pos < text.length()){
-					// Выполняем парсинг uri адреса
-					uri.parse(text.substr(pos));
-					// Извлекаем данные uri адреса
-					auto resUri = uri.get();
-					// Если ссылка найдена
-					if(resUri.type != uri_t::types_t::null){
-						// Получаем данные слова
-						const wstring & word = resUri.uri;
-						// Если это не предупреждение
-						if(resUri.type != uri_t::types_t::wrong){
-							// Если позиция найдена
-							if((pos = text.find(word, pos)) != wstring::npos){
-								// Если в списке результатов найдены пустные значения, очищаем список
-								if(result.count(wstring::npos) > 0) result.clear();
-								// Добавляем в список нашу ссылку
-								result.insert({pos, pos + word.length()});
-							// Если ссылка не найдена в тексте, выходим
-							} else break;
-						}
-						// Сдвигаем значение позиции
-						pos += word.length();
-					// Если uri адрес больше не найден то выходим
-					} else break;
-				}
-			}
-			// Выводим результат
-			return result;
-		};
-		/**
 		 * erangeFn Функция проверяющая вхождения позиции в диапазон координат
 		 * @param pos         значение позиции
 		 * @param coordinates список координат в тексте
@@ -775,11 +839,11 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
 		// Получаем сконвертированный текст
 		const wstring & tmp = this->alphabet->convert(text);
 		// Выполняем поиск координат в тексте
-		const auto coordinates = coordinatesFn(tmp);
+		const auto coordinates = this->alphabet->urls(tmp);
 		// Переходим по всему тексту
 		for(size_t i = 0; i < tmp.length(); i++){
 			// Получаем значение текущей буквы
-			letter = tmp[i];
+			letter = tmp.at(i);
 			// Переводим букву в нижний регистр
 			lletter = this->alphabet->toLower(letter);
 			// Определяем является ли это концом предложения
@@ -793,7 +857,7 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
 			// Выполняем обычную обработку
 			} else {
 				// Получаем значение следующего символа
-				next = this->alphabet->toLower(tmp[i + 1]);
+				next = (!end ? this->alphabet->toLower(tmp.at(i + 1)) : 0);
 				// Если следующий символ является концом строки
 				if((i + 1) == (tmp.length() - 1)) nend = true;
 				// Если следующий символ является знаком препинания
@@ -868,8 +932,8 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
 					(lletter == L':') || (lletter == L';') || (lletter == L'/')) {
 						// Получаем символ для проверки
 						wchar_t sumbol = (
-							(lletter == L'.') ? ((type == type_t::space) ? tmp[i + 2] :
-							((type == type_t::allow) ? tmp[i + 1] : 0)) : 0
+							(lletter == L'.') ? ((type == type_t::space) ? tmp.at(i + 2) :
+							((type == type_t::allow) ? tmp.at(i + 1) : 0)) : 0
 						);
 						// Проверяем является ли слово аббревиатурой
 						bool abbr = (
@@ -1099,4 +1163,11 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
 anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet){
 	// Устанавливаем лафавит
 	if(alphabet != nullptr) this->setAlphabet(alphabet);
+}
+/**
+ * ~Tokenizer Деструктор
+ */
+anyks::Tokenizer::~Tokenizer(){
+	// Выполняем очистку собранных данных
+	this->clear();
 }

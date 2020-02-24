@@ -38,14 +38,6 @@ void anyks::Python::unsetDebug(){
 	this->debug = false;
 }
 /**
- * setIdw Метод установки генератора идентификаторов
- * @param idw модуль генератора идентификаторов
- */
-void anyks::Python::setIdw(const idw_t * idw){
-	// Устанавливаем модуль генератора
-	this->idw = idw;
-}
-/**
  * remove Метод удаления добавленного скрипта по его имени
  * @param sid идентификатор скрипта
  */
@@ -65,6 +57,14 @@ void anyks::Python::remove(const size_t sid){
 			this->scripts.erase(it);
 		}
 	}
+}
+/**
+ * setTokenizer Метод установки токенизатора
+ * @param tokenizer указатель на токенизатор
+ */
+void anyks::Python::setTokenizer(const tokenizer_t * tokenizer){
+	// Устанавливаем модуль генератора
+	this->tokenizer = tokenizer;
 }
 /**
  * empty Проверка на пустое количество скриптов
@@ -118,7 +118,7 @@ const size_t anyks::Python::add(const string & script, const u_short args){
 					// Иначе запоминаем скрипт как он есть
 					else name = move(file);
 					// Получаем идентификатор скрипта
-					result = this->idw->get(alphabet_t().convert(name));
+					result = this->tokenizer->idw(alphabet_t().convert(name));
 					// Если название скрипта получено
 					if(!name.empty() && (this->scripts.count(result) < 1)){
 						// Создаем объект скрипта
@@ -300,19 +300,19 @@ const wstring anyks::Python::run(const size_t sid, const vector <string> & args,
 /**
  * Python Конструктор
  */
-anyks::Python::Python() : idw(nullptr), debug(false) {
+anyks::Python::Python(){
 	// Выполняем инициализацию питона
 	Py_Initialize();
 }
 /**
  * Python Конструктор
- * @param idw указатель на генератор идентификаторов
+ * @param tokenizer указатель на токенизатор
  */
-anyks::Python::Python(const idw_t * idw) : debug(false) {
+anyks::Python::Python(const tokenizer_t * tokenizer){
 	// Выполняем инициализацию питона
 	Py_Initialize();
-	// Метод установки генератора идентификаторов
-	this->setIdw(idw);
+	// Выполняем установку токенизатора
+	this->setTokenizer(tokenizer);
 }
 /**
  * ~Python Деструктор

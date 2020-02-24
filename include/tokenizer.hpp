@@ -23,6 +23,7 @@
 /**
  * Наши модули
  */
+#include <idw.hpp>
 #include <alphabet.hpp>
 #include <nlohmann/json.hpp>
 
@@ -36,38 +37,58 @@ using json = nlohmann::json;
  */
 namespace anyks {
 	// Токены n-грамм
-	enum class token_t : u_int {
+	enum class token_t : u_short {
 		num = 2,     // токен арабского или римского числа <num>
 		unk = 3,     // токен неизвестного слова <unk>
 		url = 4,     // токен url адреса <url>
+		null = 0,    // токен неопределённого значения
 		abbr = 5,    // токен аббревиатуры <abbr>
 		date = 6,    // токен даты <date>
 		time = 7,    // токен времени <time>
 		anum = 8,    // токен псевдо-числа <anum>
 		math = 9,    // токен математической операции <math>
-		specs = 10,  // токен спец-символа <specs>
 		start = 1,   // токен начала предложения <s>
-		aprox = 11,  // токен приблизительного числа <aprox>
-		range = 12,  // токен диапазона чисел <range>
-		score = 13,  // токен числового счёта <score>
-		dimen = 14,  // токен габаритных размеров <dimen>
-		fract = 15,  // токен числовой дроби <fract>
-		punct = 16,  // токен знака пунктуации <punct>
-		isolat = 17, // токен знака изоляции <isolat>
-		finish = 18  // токен конеца предложения </s>
+		rnum = 10,   // токен римского числа (не используется в чистом виде)
+		specl = 11,  // токен спец-символа <specl>
+		aprox = 12,  // токен приблизительного числа <aprox>
+		range = 13,  // токен диапазона чисел <range>
+		score = 14,  // токен числового счёта <score>
+		dimen = 15,  // токен габаритных размеров <dimen>
+		fract = 16,  // токен числовой дроби <fract>
+		punct = 17,  // токен знака пунктуации <punct>
+		isolat = 18, // токен знака изоляции <isolat>
+		finish = 19  // токен конеца предложения </s>
 	};
 	// Тип данных пары целых значений
 	typedef pair <size_t, size_t> pair_t;
-	// Получаем максимальное значение идентификатора
-	constexpr size_t noID = numeric_limits <size_t>::max();
 	/**
 	 * Tokenizer Класс работы с токенизацией
 	 */
 	typedef struct Tokenizer {
 		private:
+			// Объект идентификатора
+			idw_t idWord;
+			// Список аббревиатур
+			set <size_t> abbrs;
+		private:
 			// Объект алфавита
 			const alphabet_t * alphabet = nullptr;
 		public:
+			/**
+			 * setAbbr Метод добавления аббревиатуры
+			 * @param word слово для добавления
+			 */
+			void setAbbr(const string & word);
+			/**
+			 * setAbbr Метод добавления аббревиатуры
+			 * @param word слово для добавления
+			 */
+			void setAbbr(const wstring & word);
+			/**
+			 * setAbbrs Метод установки списка аббревиатур
+			 * @param abbrs список аббревиатур
+			 */
+			void setAbbrs(const set <size_t> & abbrs);
 			/**
 			 * setAlphabet Метод установки алфавита
 			 * @param alphabet объект алфавита
@@ -75,11 +96,29 @@ namespace anyks {
 			void setAlphabet(const alphabet_t * alphabet);
 		public:
 			/**
-			 * idw Метод извлечения идентификатора токена
+			 * getAbbrs Метод извлечения списка аббревиатур
+			 * @return список аббревиатур
+			 */
+			const set <size_t> & getAbbrs() const;
+		public:
+			/**
+			 * idw Метод извлечения идентификатора слова
+			 * @param  word слово для получения идентификатора
+			 * @return      идентификатор слова
+			 */
+			const size_t idw(const wstring & word) const;
+			/**
+			 * idt Метод извлечения идентификатора токена
+			 * @param  word слово для получения идентификатора
+			 * @return      идентификатор токена
+			 */
+			const token_t idt(const wstring & word) const;
+			/**
+			 * isAbbr Метод проверки слова на соответствие аббревиатуры
 			 * @param  word слово для проверки
 			 * @return      результат проверки
 			 */
-			const u_short idw(const wstring & word) const;
+			const bool isAbbr(const wstring & word) const;
 		public:
 			/**
 			 * readline Метод извлечения строки из текста
@@ -101,6 +140,14 @@ namespace anyks {
 			 */
 			const wstring restore(const vector <wstring> & context) const;
 		public:
+			/**
+			 * clear Метод очистки собранных данных
+			 */
+			void clear();
+			/**
+			 * update Метод обновления параметров
+			 */
+			void update();
 			/**
 			 * jsonToText Метод преобразования текста в формате json в текст
 			 * @param text     текст для преобразования в формате json
@@ -125,6 +172,10 @@ namespace anyks {
 			 * @param alphabet объект алфавита
 			 */
 			Tokenizer(const alphabet_t * alphabet = nullptr);
+			/**
+			 * ~Tokenizer Деструктор
+			 */
+			~Tokenizer();
 	} tokenizer_t;
 };
 

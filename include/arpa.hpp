@@ -48,6 +48,7 @@ namespace anyks {
 			enum class options_t : u_short {
 				debug,      // Флаг режима отладки
 				allGrams,   // Флаг обработки всех n-грамм
+				resetUnk,   // Флаг сброса частоты неизвестного слова
 				lowerCase,  // Флаг работы только с нижним регистром
 				interpolate // Флаг активации режима интерполирования
 			};
@@ -95,7 +96,7 @@ namespace anyks {
 				/**
 				 * Seq Конструктор
 				 */
-				Seq() : idw(noID), oc(0), dc(0), ups(0), weight(0.0f), backoff(0.0f) {}
+				Seq() : idw(idw_t::NIDW), oc(0), dc(0), ups(0), weight(0.0f), backoff(0.0f) {}
 			} __attribute__((packed)) seq_t;
 		private:
 			/**
@@ -148,7 +149,7 @@ namespace anyks {
 				/**
 				 * Vocab Конструктор
 				 */
-				Vocab() : oc(0), dc(0), idw(noID), idd(noID), weight(0.0f), backoff(0.0f), father(nullptr) {}
+				Vocab() : oc(0), dc(0), idw(idw_t::NIDW), idd(idw_t::NIDW), weight(0.0f), backoff(0.0f), father(nullptr) {}
 			} vocab_t;
 		private:
 			// Максимальный размер n-граммы
@@ -159,7 +160,7 @@ namespace anyks {
 			const char * logfile = nullptr;
 		private:
 			// Флаги параметров
-			bitset <4> options;
+			bitset <5> options;
 			// Параметры расчёта
 			mutable param_t param;
 			// Словарь языковой модели

@@ -775,6 +775,26 @@ const bool anyks::Alphabet::altemp() const {
 	return this->alters.empty();
 }
 /**
+ * isUrl Метод проверки соответствия слова url адресу
+ * @param word слово для проверки
+ * @return     результат проверки
+ */
+const bool anyks::Alphabet::isUrl(const wstring & word) const {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(!word.empty()){
+		// Выполняем парсинг uri адреса
+		this->uri.parse(word);
+		// Извлекаем данные uri адреса
+		auto resUri = this->uri.get();
+		// Если ссылка найдена
+		result = ((resUri.type != uri_t::types_t::null) && (resUri.type != uri_t::types_t::wrong));
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * isAlt Метод проверки существования альтернативной буквы
  * @param  letter буква для проверки
  * @return        результат проверки
@@ -806,6 +826,47 @@ const bool anyks::Alphabet::isMath(const wchar_t letter) const {
 			|| (letter == L'=') || (letter == L'/')
 			|| (letter == L'*') || (letter == L'^')
 		);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * isAbbr Метод проверки слова на соответствие аббревиатуры
+ * @param word слово для проверки
+ * @return     результат проверки
+ */
+const bool anyks::Alphabet::isAbbr(const wstring & word) const {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(!word.empty() && (word.length() > 1) && this->check(word.front())){
+		// Флаг найденой точки
+		bool point = false;
+		// Длина слова до точки
+		u_short length = 1;
+		// Текущая буква в слове
+		wchar_t letter = 0;
+		// Выполняем переход по всему слову
+		for(size_t i = 1; i < word.length(); i++){
+			// Получаем текущую букву слова
+			letter = word.at(i);
+			// Если это не точка
+			if((result = (letter == L'.'))){
+				// Сбрасываем длину слова
+				length = 0;
+				// Запоминаем что точка найдена
+				point = true;
+			// Если слово не прошло проверку
+			} else if((length > 3) || !this->check(letter)) {
+				// Запоминаем, что результат не получен
+				result = false;
+				// Выходим из цикла
+				break;
+			// Увеличиваем количество обработанных букв
+			} else if((result = true)) length++;
+		}
+		// Если точка не найдена, сбрасываем результат
+		if(!point) result = false;
 	}
 	// Выводим результат
 	return result;
@@ -1256,6 +1317,55 @@ const bool anyks::Alphabet::checkSimilars(const wstring & str) const {
 	return result;
 }
 /**
+ * getzones Метод извлечения списка пользовательских зон интернета
+ */
+const std::set <wstring> & anyks::Alphabet::getzones() const {
+	// Выводим список доменных зон интернета
+	return this->uri.getZones();
+}
+/**
+ * urls Метод извлечения координат url адресов в строке
+ * @param text текст для извлечения url адресов
+ * @return     список координат с url адресами
+ */
+const std::map <size_t, size_t> anyks::Alphabet::urls(const wstring & text) const {
+	// Результат работы функции
+	map <size_t, size_t> result;
+	// Если текст передан
+	if(!text.empty()){
+		// Позиция найденного uri адреса
+		size_t pos = 0;
+		// Выполням поиск ссылок в тексте
+		while(pos < text.length()){
+			// Выполняем парсинг uri адреса
+			this->uri.parse(text.substr(pos));
+			// Извлекаем данные uri адреса
+			auto resUri = this->uri.get();
+			// Если ссылка найдена
+			if(resUri.type != uri_t::types_t::null){
+				// Получаем данные слова
+				const wstring & word = resUri.uri;
+				// Если это не предупреждение
+				if(resUri.type != uri_t::types_t::wrong){
+					// Если позиция найдена
+					if((pos = text.find(word, pos)) != wstring::npos){
+						// Если в списке результатов найдены пустные значения, очищаем список
+						if(result.count(wstring::npos) > 0) result.clear();
+						// Добавляем в список нашу ссылку
+						result.insert({pos, pos + word.length()});
+					// Если ссылка не найдена в тексте, выходим
+					} else break;
+				}
+				// Сдвигаем значение позиции
+				pos += word.length();
+			// Если uri адрес больше не найден то выходим
+			} else break;
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * checkHypLat Метод поиска дефиса и латинского символа
  * @param str строка для проверки
  * @return    результат проверки
@@ -1464,13 +1574,15 @@ void anyks::Alphabet::set(const string & alphabet){
 	this->add(L'^');
 	// Устанавливаем знак косой черты
 	this->add(L'\\');
-	// Запоминаем алфавит
+	// Запоминаем список букв
 	if(!alphabet.empty()) this->alphabet = move(this->convert(alphabet));
 	// Переходим по всем буквам алфавита
-	for(size_t i = 0; i < this->alphabet.length(); i++){
+	for(auto & letter : this->alphabet){
 		// Добавляем буквы алфавита в список
-		this->add(this->alphabet[i]);
+		this->add(letter);
 	}
+	// Если список букв получен
+	if(!this->alphabet.empty()) this->uri.setLetters(this->alphabet);
 }
 /**
  * rmalt Метод удаления альтернативной буквы
@@ -1497,6 +1609,41 @@ void anyks::Alphabet::setlocale(const string & locale){
 		::setlocale(LC_CTYPE, this->encoding.c_str());
 		::setlocale(LC_COLLATE, this->encoding.c_str());
 	}
+}
+/**
+ * setzone Метод установки пользовательской зоны
+ * @param zone пользовательская зона
+ */
+void anyks::Alphabet::setzone(const string & zone){
+	// Если зона передана, устанавливаем её
+	if(!zone.empty()) this->uri.setZone(this->convert(zone));
+}
+/**
+ * setzone Метод установки пользовательской зоны
+ * @param zone пользовательская зона
+ */
+void anyks::Alphabet::setzone(const wstring & zone){
+	// Если зона передана, устанавливаем её
+	if(!zone.empty()) this->uri.setZone(zone);
+}
+/**
+ * setzones Метод установки списка пользовательских зон
+ * @param zones список доменных зон интернета
+ */
+void anyks::Alphabet::setzones(const std::set <string> & zones){
+	// Устанавливаем список доменных зон
+	if(!zones.empty()){
+		// Переходим по всему списку доменных зон
+		for(auto & zone : zones) this->setzone(zone);
+	}
+}
+/**
+ * setzones Метод установки списка пользовательских зон
+ * @param zones список доменных зон интернета
+ */
+void anyks::Alphabet::setzones(const std::set <wstring> & zones){
+	// Устанавливаем список доменных зон
+	if(!zones.empty()) this->uri.setZones(zones);
 }
 /**
  * setalt Метод добавления альтернативной буквы

@@ -51,11 +51,11 @@ namespace anyks {
 			} script_t;
 		private:
 			// Флаг режима отладки
-			bool debug;
-			// Генератор идентификаторов
-			const idw_t * idw;
+			bool debug = false;
 			// Список скриптов
 			map <size_t, script_t> scripts;
+			// Генератор идентификаторов
+			const tokenizer_t * tokenizer = nullptr;
 		public:
 			/**
 			 * clear Метод очистки списка скриптов
@@ -70,15 +70,15 @@ namespace anyks {
 			 */
 			void unsetDebug();
 			/**
-			 * setIdw Метод установки генератора идентификаторов
-			 * @param idw модуль генератора идентификаторов
-			 */
-			void setIdw(const idw_t * idw);
-			/**
 			 * remove Метод удаления добавленного скрипта по его имени
 			 * @param sid идентификатор скрипта
 			 */
 			void remove(const size_t sid);
+			/**
+			 * setTokenizer Метод установки токенизатора
+			 * @param tokenizer указатель на токенизатор
+			 */
+			void setTokenizer(const tokenizer_t * tokenizer);
 		public:
 			/**
 			 * empty Проверка на пустое количество скриптов
@@ -112,9 +112,9 @@ namespace anyks {
 			Python();
 			/**
 			 * Python Конструктор
-			 * @param idw указатель на генератор идентификаторов
+			 * @param tokenizer указатель на токенизатор
 			 */
-			Python(const idw_t * idw);
+			Python(const tokenizer_t * tokenizer);
 			/**
 			 * ~Python Деструктор
 			 */

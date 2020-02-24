@@ -14,9 +14,8 @@
  */
 #include <set>
 #include <regex>
-#include <sys/types.h>
-
 #include <iostream>
+#include <sys/types.h>
 /**
  * Наши модули
  */
@@ -71,14 +70,19 @@ namespace anyks {
 		private:
 			// Распарсенные данные
 			data_t data;
-			// Список доменов
-			set <wstring> general, national;
+			// Списки доменных зон интернета
+			set <wstring> general, national, user;
 		public:
 			/**
 			 * get Метод получения распарсенных данных
 			 * @return параметры полученные в результате парсинга
 			 */
 			const data_t & get();
+			/**
+			 * getZones Метод извлечения списка пользовательских зон интернета
+			 */
+			const set <wstring> & getZones() const;
+		public:
 			/**
 			 * clear Метод очистки результатов парсинга
 			 */
@@ -89,10 +93,20 @@ namespace anyks {
 			 */
 			void parse(const wstring & text);
 			/**
+			 * setZone Метод установки пользовательской зоны
+			 * @param zone пользовательская зона
+			 */
+			void setZone(const wstring & zone);
+			/**
 			 * setLetters Метод добавления букв алфавита
 			 * @param letters список букв алфавита
 			 */
 			void setLetters(const wstring & letters);
+			/**
+			 * setZones Метод установки списка пользовательских зон
+			 * @param zones список доменных зон интернета
+			 */
+			void setZones(const set <wstring> & zones);
 			/**
 			 * Uri Конструктор
 			 * @param letters список букв алфавита

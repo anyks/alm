@@ -67,40 +67,30 @@ void help(){
 	const string msg = "\r\n\x1B[32m\x1B[1musage:\x1B[0m alm [-V | --version] [-h | --help] "
 	"[-alphabet <value> | --alphabet=<value>] [<args>]\r\n\r\n\r\n"
 	"\x1B[34m\x1B[1mmethods:\x1B[0m\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m tokens: text tokenization method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m prune:  language model pruning method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m train:  language model training method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m sweep:  high backoff n-gram removal method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m info:   binary dictionary information method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m repair: broken language model recovery method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m tokens: text tokenization method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m modify: method for modifying a language model\r\n"
 	"  \x1B[1m-\x1B[0m (emplace | remove | change | replace)\r\n\r\n\r\n"
 	"\x1B[34m\x1B[1mflags:\x1B[0m\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m case-insensitive flag:                                                        [-lower-case | --lower-case]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m unknown word permission flag:                                                 [-allow-unk | --allow-unk]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag to disable all tokens:                                                   [-tokens-all-disable | --tokens-all-disable]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag identifying all tokens as <unk>:                                         [-tokens-all-unknown | --tokens-all-unknown]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to consider words from the white list only:                     [-only-good | --only-good]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to use interpolation in estimating:                             [-interpolate | --interpolate]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing accounting of all collected n-grams:                            [-all-grams | --all-grams]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an date token:                                  [-no-token-date | --no-token-date]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an time token:                                  [-no-token-time | --no-token-time]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an math token:                                  [-no-token-math | --no-token-math]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an score token:                                 [-no-token-score | --no-token-score]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an fraction token:                              [-no-token-fract | --no-token-fract]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an dimension token:                             [-no-token-dimen | --no-token-dimen]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of custom attributes:                              [-no-token-user | --no-token-user]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of Roman numerals:                             [-no-token-roman | --no-token-roman]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an special token:                               [-no-token-special | --no-token-special]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an isolation token:                             [-no-token-isolat | --no-token-isolat]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an punctuation token:                           [-no-token-punct | --no-token-punct]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an approximate token:                           [-no-token-aprox | --no-token-aprox]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an url address token:                           [-no-token-url | --no-token-url]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of an abbreviation token:                          [-no-token-abbr | --no-token-abbr]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of a token of numbers:                         [-no-token-number | --no-token-number]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting the detection of a pseudo-number token:                      [-no-a-token-number | --no-a-token-number]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag prohibiting detection of a token of a range of numbers:                  [-no-token-range | --no-token-range]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag to reset the frequency of an unknown word:                               [-reset-unk | --reset-unk]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of all data:                                 [-w-bin-all | --w-bin-all]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of users tokens:                             [-w-bin-utokens | --w-bin-utokens]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of domain zones:                             [-w-bin-domzones | --w-bin-domzones]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of toolkit options:                          [-w-bin-options | --w-bin-options]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of blacklisted words:                        [-w-bin-badwords | --w-bin-badwords]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of whitelisted words:                        [-w-bin-goodwords | --w-bin-goodwords]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of abbreviations words:                      [-w-bin-abbreviations | --w-bin-abbreviations]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of script python - word preprocessing:       [-w-bin-preword | --w-bin-preword]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of only arpa data without n-gram statistics: [-w-bin-arpa | --w-bin-arpa]\r\n\r\n\r\n"
 	"\x1B[34m\x1B[1margs:\x1B[0m\r\n"
@@ -115,34 +105,40 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m text file training corpus:                          [-corpus <value> | --corpus=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m extension files corpus:                             [-ext <value> | --ext=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with text corpus:                    [-path <value> | --path=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.txt text file for tokens export:          [-w-tokens-text <value> | --w-tokens-text=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.json text file for tokens export:         [-w-tokens-json <value> | --w-tokens-json=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.txt text file for tokens import:          [-r-tokens-text <value> | --r-tokens-text=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.json text file for tokens import:         [-r-tokens-json <value> | --r-tokens-json=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt text for tokens export:          [-w-tokens-text <value> | --w-tokens-text=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.json text for tokens export:         [-w-tokens-json <value> | --w-tokens-json=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt text for tokens import:          [-r-tokens-text <value> | --r-tokens-text=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.json text for tokens import:         [-r-tokens-json <value> | --r-tokens-json=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with tokens files for read:          [-r-tokens-path <value> | --r-tokens-path=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with tokens files for write:         [-w-tokens-path <value> | --w-tokens-path=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.alm binary file for export:               [-w-bin <value> | --w-bin=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.json meta file for export:                [-w-bin-meta <value> | --w-bin-meta=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.map file for export:                      [-w-map <value> | --w-map=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.arpa file for export:                     [-w-arpa <value> | --w-arpa=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.vocab file for export:                    [-w-vocab <value> | --w-vocab=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.ngrams file for export:                   [-w-ngram <value> | --w-ngram=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.alm binary file for import:               [-r-bin <value> | --r-bin=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.json meta file for import:                [-r-bin-meta <value> | --r-bin-meta=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.map file for import:                      [-r-map <value> | --r-map=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m binary file address *.alm for export:               [-w-bin <value> | --w-bin=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.json meta for export:                [-w-bin-meta <value> | --w-bin-meta=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.map for export:                      [-w-map <value> | --w-map=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa for export:                     [-w-arpa <value> | --w-arpa=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.vocab for export:                    [-w-vocab <value> | --w-vocab=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams for export:                   [-w-ngram <value> | --w-ngram=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m binary file address *.alm for import:               [-r-bin <value> | --r-bin=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.json meta for import:                [-r-bin-meta <value> | --r-bin-meta=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.map for import:                      [-r-map <value> | --r-map=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.map files:                    [-r-maps <value> | --r-maps=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.vocab file for import:                    [-r-vocab <value> | --r-vocab=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.vocab for import:                    [-r-vocab <value> | --r-vocab=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.vocab files:                  [-r-vocabs <value> | --r-vocabs=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.ngrams file for import:                   [-r-ngram <value> | --r-ngram=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams for import:                   [-r-ngram <value> | --r-ngram=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.ngrams files:                 [-r-ngrams <value> | --r-ngrams=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m address *.arpa file for import:                     [-r-arpa <value> | --r-arpa=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa for import:                     [-r-arpa <value> | --r-arpa=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.arpa files:                   [-r-arpas <value> | --r-arpas=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address abbreviations for import:              [-r-abbrs <value> | --r-abbrs=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address domain zones for import:               [-r-domain-zones <value> | --r-domain-zones=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m pruning frequency threshold:                        [-prune-threshold <value> | --prune-threshold=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m the maximum size of n-grams of pruning:             [-prune-max-gram <value> | --prune-max-gram=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m list of custom attributes:                          [-utokens <value> | --utokens=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m modification flag for modify method:                [-modify <value> | --modify=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m delta size for smoothing by addsmooth algorithm:    [-delta <value> | --delta=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m discount size for smoothing by cdiscount algorithm: [-discount <value> | --discount=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m list of tokens to disable:                          [-tokens-disable <value1|value2|...> | --tokens-disable=<value1|value2|...>]\r\n"
+	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m list of tokens for identification as <unk>:         [-tokens-unknown <value1|value2|...> | --tokens-unknown=<value1|value2|...>]\r\n"
+	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m debug mode:                                         [-debug <value> | --debug=<value>]\r\n"
 	"  \x1B[1m-\x1B[0m (0 - off | 1 - progress | 2 - console)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m method application:                                 [-method <value> | --method=<value>]\r\n"
@@ -307,48 +303,24 @@ int main(int argc, char * argv[]){
 			if(debug == 2) toolkit.setOption(toolkit_t::options_t::debug);
 			// Разрешаем использовать токен неизвестного слова
 			if(env.is("allow-unk")) toolkit.setOption(toolkit_t::options_t::allowUnk);
+			// Разрешаем сбрасывать частоту токена неизвестного слова
+			if(env.is("reset-unk")) toolkit.setOption(toolkit_t::options_t::resetUnk);
 			// Разрешаем использовать абсолютно все полученные n-граммы
 			if(env.is("all-grams")) toolkit.setOption(toolkit_t::options_t::allGrams);
+			// Устанавливаем запрет на все слова кроме тех, что находятся в белом списке
+			if(env.is("only-good")) toolkit.setOption(toolkit_t::options_t::onlyGood);
 			// Разрешаем переводить слова в нижний регистр
 			if(env.is("lower-case")) toolkit.setOption(toolkit_t::options_t::lowerCase);
 			// Разрешаем выполнять интерполяцию при расчёте arpa
 			if(env.is("interpolate")) toolkit.setOption(toolkit_t::options_t::interpolate);
-			// Устанавливаем запрет на все слова кроме тех, что находятся в белом списке
-			if(env.is("only-good")) toolkit.setOption(toolkit_t::options_t::onlyGood);
-			// Отключаем системный токен url адресов
-			if(env.is("no-token-url")) toolkit.setOption(toolkit_t::options_t::notUrl);
-			// Отключаем системный токен детектирования даты
-			if(env.is("no-token-date")) toolkit.setOption(toolkit_t::options_t::notDate);
-			// Отключаем системный токен детектирования времени
-			if(env.is("no-token-time")) toolkit.setOption(toolkit_t::options_t::notTime);
-			// Отключаем системный токен детектирования математических операций
-			if(env.is("no-token-math")) toolkit.setOption(toolkit_t::options_t::notMath);
-			// Отключаем системный токен детектирования аббревиатур
-			if(env.is("no-token-abbr")) toolkit.setOption(toolkit_t::options_t::notAbbr);
-			// Отключаем системный токен детектирования диапазонов чисел
-			if(env.is("no-token-range")) toolkit.setOption(toolkit_t::options_t::notRange);
-			// Отключаем системный токен детектирования римских чисел
-			if(env.is("no-token-roman")) toolkit.setOption(toolkit_t::options_t::notRoman);
-			// Отключаем системный токен детектирования знаков пунктуации
-			if(env.is("no-token-punct")) toolkit.setOption(toolkit_t::options_t::notPunct);
-			// Отключаем системный токен детектирования числового счёта
-			if(env.is("no-token-score")) toolkit.setOption(toolkit_t::options_t::notScore);
-			// Отключаем системный токен детектирования габаритных размеров
-			if(env.is("no-token-dimen")) toolkit.setOption(toolkit_t::options_t::notDimen);
-			// Отключаем системный токен детектирования числовой дроби
-			if(env.is("no-token-fract")) toolkit.setOption(toolkit_t::options_t::notFract);
-			// Отключаем системный токен детектирования приблизительного числа
-			if(env.is("no-token-aprox")) toolkit.setOption(toolkit_t::options_t::notAprox);
-			// Отключаем системный призанк детектирования спец-символов
-			if(env.is("no-token-special")) toolkit.setOption(toolkit_t::options_t::notSpecs);
-			// Отключаем системный токен детектирования знака изоляции
-			if(env.is("no-token-isolat")) toolkit.setOption(toolkit_t::options_t::notIsolat);
-			// Отключаем системный токен детектирования чисел
-			if(env.is("no-token-number")) toolkit.setOption(toolkit_t::options_t::notNumber);
-			// Отключаем применение пользовательского токена детектирования
-			if(env.is("no-token-user")) toolkit.setOption(toolkit_t::options_t::notUserToken);
-			// Отключаем системный токен детектирования псевдо-чисел
-			if(env.is("no-a-token-number")) toolkit.setOption(toolkit_t::options_t::notANumber);
+			// Если нужно установить все токены для идентифицирования как <unk>
+			if(env.is("tokens-all-unknown")) toolkit.setAllTokenUnknown();
+			// Если нужно установить все токены как не идентифицируемые
+			if(env.is("tokens-all-disable")) toolkit.setAllTokenDisable();
+			// Если нужно установить список токенов которые нужно идентифицировать как <unk>
+			if((value = env.get("tokens-unknown")) != nullptr) toolkit.setTokenUnknown(value);
+			// Если нужно установить список не идентифицируемых токенов
+			if((value = env.get("tokens-disable")) != nullptr) toolkit.setTokenDisable(value);
 			// Если адрес файла чёрного списка получен
 			if((value = env.get("badwords")) != nullptr){
 				// Чёрный список слов
@@ -397,7 +369,7 @@ int main(int argc, char * argv[]){
 			// Если нужно использовать бинарный контейнер
 			if(!binDictFile.empty()){
 				// Создаём бинарный контейнер
-				ablm_t ablm(binDictFile, &toolkit, &alphabet, env.get("log"));
+				ablm_t ablm(binDictFile, &toolkit, &alphabet, &tokenizer, env.get("log"));
 				// Если метаданные переданы
 				if(((value = env.get("r-bin-meta")) != nullptr) && fsys_t::isfile(value)){
 					// Данные в формате json
@@ -817,6 +789,82 @@ int main(int argc, char * argv[]){
 			} else print("smoothing is bad", env.get("log"));
 			// Замеряем время начала работы
 			auto timeShifting = chrono::system_clock::now();
+			// Если передан метод обучения, загрузка карт последовательностей или списка n-грамм
+			if((env.is("r-abbrs") || env.is("r-domain-zones")) && (env.is("method", "train") ||
+			env.is("r-map") || env.is("r-maps") || env.is("r-ngram") || env.is("r-ngrams"))){
+				// Тип считываемого файла
+				u_short type = 0;
+				// Устанавливаем режим считывания файла аббревиатур
+				if(((value = env.get("r-abbrs")) != nullptr) && fsys_t::isfile(value)) type = 2;
+				// Устанавливаем режим считывания файла доменных зон
+				else if(((value = env.get("r-domain-zones")) != nullptr) && fsys_t::isfile(value)) type = 1;
+				// Выводим сообщение, что файл не найден
+				else print(alphabet.format("filename %s is not found", value), env.get("log"), alphabet_t::log_t::warning, false);
+				// Если тип файла определён
+				if(type > 0){
+					// Идентификатор документа
+					size_t size = 0;
+					// Статус и процентное соотношение
+					u_short status = 0, rate = 100;
+					// Запоминаем адрес файла
+					const string filename = realpath(value, nullptr);
+					// Если отладка включена, выводим индикатор загрузки
+					if(debug > 0){
+						// Устанавливаем название файла
+						pss.description(filename);
+						// Устанавливаем заголовки прогресс-бара
+						switch(type){
+							// Если это загрузка доменных зон
+							case 1: pss.title("Load domain zones", "Load domain zones is done"); break;
+							// Если это загрузка аббревиатур
+							case 2: pss.title("Load abbreviations", "Load abbreviations is done"); break;
+						}
+						// Выводим индикатор прогресс-бара
+						switch(debug){
+							case 1: pss.update(); break;
+							case 2: pss.status(); break;
+						}
+					}
+					// Выполняем считывание всех строк текста
+					fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+						// Если текст получен
+						if(!text.empty()){
+							// Устанавливаем собранные текстовые данные
+							switch(type){
+								// Добавляем доменную зону
+								case 1: alphabet.setzone(text); break;
+								// Добавляем абреввиатуру
+								case 2: tokenizer.setAbbr(text); break;
+							}
+						}
+						// Если отладка включена
+						if(debug > 0){
+							// Общий полученный размер данных
+							size += text.size();
+							// Подсчитываем статус выполнения
+							status = u_short(size / float(fileSize) * 100.0f);
+							// Если процентное соотношение изменилось
+							if(rate != status){
+								// Запоминаем текущее процентное соотношение
+								rate = status;
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(status); break;
+									case 2: pss.status(status); break;
+								}
+							}
+						}
+					});
+					// Если отладка включена
+					if(status < 100){
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
+						}
+					}
+				}
+			}
 			// Если передан метод обучения
 			if(env.is("method", "train")){
 				// Если нужно использовать бинарный контейнер
@@ -918,10 +966,12 @@ int main(int argc, char * argv[]){
 						size_t size = 0;
 						// Статус и процентное соотношение
 						u_short status = 0, rate = 100;
+						// Запоминаем адрес файла
+						const string filename = realpath(value, nullptr);
 						// Если отладка включена, выводим индикатор загрузки
 						if(debug > 0){
 							// Устанавливаем название файла
-							pss.description(realpath(value, nullptr));
+							pss.description(filename);
 							// Устанавливаем заголовки прогресс-бара
 							pss.title("Load text corpus", "Load text corpus is done");
 							// Выводим индикатор прогресс-бара
@@ -931,7 +981,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Выполняем считывание всех строк текста
-						fsys_t::rfile(realpath(value, nullptr), [&rate, &status, &size, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize){
+						fsys_t::rfile(filename, [&rate, &status, &size, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize){
 							// Если текст получен
 							if(!text.empty()) toolkit.addText(text, 0);
 							// Если отладка включена
@@ -981,12 +1031,14 @@ int main(int argc, char * argv[]){
 			env.is("r-ngrams")) || (env.is("r-arpa") || env.is("r-arpas")) || !binDictFile.empty()) {
 				// Если требуется загрузить файл n-грамм
 				if(((value = env.get("r-ngram")) != nullptr) && fsys_t::isfile(value)){
+					// Запоминаем адрес файла
+					const string filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем название файла
-						pss.description(realpath(value, nullptr));
+						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
 						pss.title("Read n-gram file", "Read n-gram file is done");
 						// Выводим индикатор прогресс-бара
@@ -996,7 +1048,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем загрузку файла n-грамм
-					toolkit.readNgram(realpath(value, nullptr), [debug, &pss](const u_short status){
+					toolkit.readNgram(filename, [debug, &pss](const u_short status){
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1005,12 +1057,14 @@ int main(int argc, char * argv[]){
 					});
 				// Если требуется загрузить список файлов n-грамм
 				} else if(((value = env.get("r-ngrams")) != nullptr) && fsys_t::isdir(value)) {
+					// Запоминаем каталог для загрузки
+					const string path = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем название файла
-						pss.description(realpath(value, nullptr));
+						pss.description(path);
 						// Устанавливаем заголовки прогресс-бара
 						pss.title("Read n-grams files", "Read n-grams files is done");
 						// Выводим индикатор прогресс-бара
@@ -1020,7 +1074,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем загрузку файлов n-грамм
-					toolkit.readNgrams(realpath(value, nullptr), [debug, &pss](const u_short status){
+					toolkit.readNgrams(path, [debug, &pss](const u_short status){
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1030,12 +1084,14 @@ int main(int argc, char * argv[]){
 				}
 				// Если требуется загрузить arpa
 				if(((value = env.get("r-arpa")) != nullptr) && fsys_t::isfile(value)){
+					// Запоминаем адрес файла
+					const string filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем название файла
-						pss.description(realpath(value, nullptr));
+						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
 						pss.title("Read arpa file", "Read arpa file is done");
 						// Выводим индикатор прогресс-бара
@@ -1045,7 +1101,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем загрузку файла arpa
-					toolkit.readArpa(realpath(value, nullptr), [debug, &pss](const u_short status){
+					toolkit.readArpa(filename, [debug, &pss](const u_short status){
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1054,12 +1110,14 @@ int main(int argc, char * argv[]){
 					});
 				// Если нужно загрузить список файлов arpa
 				} else if(((value = env.get("r-arpas")) != nullptr) && fsys_t::isdir(value)) {
+					// Запоминаем каталог для загрузки
+					const string path = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем название файла
-						pss.description(realpath(value, nullptr));
+						pss.description(path);
 						// Устанавливаем заголовки прогресс-бара
 						pss.title("Read arpa files", "Read arpa files is done");
 						// Выводим индикатор прогресс-бара
@@ -1069,7 +1127,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем загрузку файла arpa
-					toolkit.readArpas(realpath(value, nullptr), [debug, &pss](const u_short status){
+					toolkit.readArpas(path, [debug, &pss](const u_short status){
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1079,12 +1137,14 @@ int main(int argc, char * argv[]){
 				}
 				// Если требуется загрузить файл словаря vocab
 				if(((value = env.get("r-vocab")) != nullptr) && fsys_t::isfile(value)){
+					// Запоминаем адрес файла
+					const string filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем название файла
-						pss.description(realpath(value, nullptr));
+						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
 						pss.title("Read vocab file", "Read vocab file is done");
 						// Выводим индикатор прогресс-бара
@@ -1094,7 +1154,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем загрузку файла словаря vocab
-					toolkit.readVocab(realpath(value, nullptr), [debug, &pss](const u_short status){
+					toolkit.readVocab(filename, [debug, &pss](const u_short status){
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1133,12 +1193,14 @@ int main(int argc, char * argv[]){
 				if((env.is("r-map") || env.is("r-maps")) && (env.is("r-vocab") || env.is("r-vocabs"))){
 					// Если нужно загрузить карту последовательности
 					if(((value = env.get("r-map")) != nullptr) && fsys_t::isfile(value)){
+						// Запоминаем адрес файла
+						const string filename = realpath(value, nullptr);
 						// Если отладка включена, выводим индикатор загрузки
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
 							pss.clear();
 							// Устанавливаем название файла
-							pss.description(realpath(value, nullptr));
+							pss.description(filename);
 							// Устанавливаем заголовки прогресс-бара
 							pss.title("Read map file", "Read map file is done");
 							// Выводим индикатор прогресс-бара
@@ -1148,7 +1210,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Считываем карту последовательности
-						toolkit.readMap(realpath(value, nullptr), [debug, &pss](const u_short status){
+						toolkit.readMap(filename, [debug, &pss](const u_short status){
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1157,12 +1219,14 @@ int main(int argc, char * argv[]){
 						});
 					// Если нужно загрузить список карт последовательностей
 					} else if(((value = env.get("r-maps")) != nullptr) && fsys_t::isdir(value)){
+						// Запоминаем каталог для загрузки
+						const string path = realpath(value, nullptr);
 						// Если отладка включена, выводим индикатор загрузки
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
 							pss.clear();
 							// Устанавливаем название файла
-							pss.description(realpath(value, nullptr));
+							pss.description(path);
 							// Устанавливаем заголовки прогресс-бара
 							pss.title("Read maps files", "Read maps files is done");
 							// Выводим индикатор прогресс-бара
@@ -1172,7 +1236,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Считываем список карт последовательностей
-						toolkit.readMaps(realpath(value, nullptr), [debug, &pss](const u_short status){
+						toolkit.readMaps(path, [debug, &pss](const u_short status){
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1300,13 +1364,15 @@ int main(int argc, char * argv[]){
 					// Сообщаем что флаг не установлен
 					} else print("modify flag is not set", env.get("log"));
 					// Если файл передан
-					if((value = env.get("modify-file")) != nullptr){
+					if(((value = env.get("modify-file")) != nullptr) && fsys_t::isfile(value)){
+						// Запоминаем адрес файла
+						const string filename = realpath(value, nullptr);
 						// Если отладка включена, выводим индикатор загрузки
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
 							pss.clear();
 							// Устанавливаем название файла
-							pss.description(realpath(value, nullptr));
+							pss.description(filename);
 							// Устанавливаем заголовки прогресс-бара
 							pss.title("Modify arpa", "Modify arpa is done");
 							// Выводим индикатор прогресс-бара
@@ -1316,7 +1382,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Выполняем модификацию файла
-						toolkit.modify(realpath(value, nullptr), modify, [debug, &pss](const u_short status){
+						toolkit.modify(filename, modify, [debug, &pss](const u_short status){
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1433,7 +1499,7 @@ int main(int argc, char * argv[]){
 			// Если нужно использовать бинарный контейнер
 			if((value = env.get("w-bin")) != nullptr){
 				// Создаём бинарный контейнер
-				ablm_t ablm(value, &toolkit, &alphabet, env.get("log"));
+				ablm_t ablm(value, &toolkit, &alphabet, &tokenizer, env.get("log"));
 				// Если метаданные переданы
 				if(((value = env.get("w-bin-meta")) != nullptr) && fsys_t::isfile(value)){
 					// Данные в формате json
@@ -1450,16 +1516,22 @@ int main(int argc, char * argv[]){
 				if(debug == 1) ablm.setFlag(ablm_t::flag_t::debug);
 				// Устанавливаем флаг сохранения только arpa данных
 				if(env.is("w-bin-arpa")) ablm.setFlag(ablm_t::flag_t::onlyArpa);
+				// Устанавливаем флаг сохранения всех данных
+				if(env.is("w-bin-all")) ablm.setFlag(ablm_t::flag_t::expAllData);
 				// Устанавливаем флаг экспорта опций тулкита
 				if(env.is("w-bin-options")) ablm.setFlag(ablm_t::flag_t::expOptions);
 				// Устанавливаем флаг экспорта скрипта предобработки текста
 				if(env.is("w-bin-preword")) ablm.setFlag(ablm_t::flag_t::expPreword);
 				// Устанавливаем флаг экспорта чёрного списка слов
 				if(env.is("w-bin-badwords")) ablm.setFlag(ablm_t::flag_t::expBadwords);
+				// Устанавливаем флаг экспорта доменных зон
+				if(env.is("w-bin-domzones")) ablm.setFlag(ablm_t::flag_t::expDomZones);
 				// Устанавливаем флаг экспорта пользовательских токенов
 				if(env.is("w-bin-utokens")) ablm.setFlag(ablm_t::flag_t::expUserTokens);
 				// Устанавливаем флаг экспорта белого списка слов
 				if(env.is("w-bin-goodwords")) ablm.setFlag(ablm_t::flag_t::expGoodwords);
+				// Устанавливаем флаг экспорта списка аббревиатур
+				if(env.is("w-bin-abbreviations")) ablm.setFlag(ablm_t::flag_t::expAbbrevs);
 				// Выполняем инициализацию словаря
 				ablm.init();
 				// Если отладка включена, выводим индикатор загрузки
