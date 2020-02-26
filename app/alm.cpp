@@ -868,7 +868,7 @@ int main(int argc, char * argv[]){
 			// Если передан метод обучения
 			if(env.is("method", "train")){
 				// Если нужно использовать бинарный контейнер
-				if(!binDictFile.empty()){
+				if(!binDictFile.empty() && env.is("w-arpa")){
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -940,26 +940,29 @@ int main(int argc, char * argv[]){
 							// Увеличиваем идентификатор документа
 							idd++;
 						});
-						// Если отладка включена, выводим индикатор загрузки
-						if(debug > 0){
-							// Очищаем предыдущий прогресс-бар
-							pss.clear();
-							// Устанавливаем заголовки прогресс-бара
-							pss.title("Train arpa", "Train arpa is done");
-							// Выводим индикатор прогресс-бара
-							switch(debug){
-								case 1: pss.update(); break;
-								case 2: pss.status(); break;
+						// Если файл arpa для записи указан
+						if(env.is("w-arpa")){
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Train arpa", "Train arpa is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
 							}
+							// Выполняем обучение
+							toolkit.train([debug, &pss](const u_short status){
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(status); break;
+									case 2: pss.status(status); break;
+								}
+							});
 						}
-						// Выполняем обучение
-						toolkit.train([debug, &pss](const u_short status){
-							// Отображаем ход процесса
-							switch(debug){
-								case 1: pss.update(status); break;
-								case 2: pss.status(status); break;
-							}
-						});
 					// Если файл корпуса получен
 					} else if(((value = env.get("corpus")) != nullptr) && fsys_t::isfile(value)){
 						// Идентификатор документа
@@ -1002,26 +1005,29 @@ int main(int argc, char * argv[]){
 								}
 							}
 						});
-						// Если отладка включена, выводим индикатор загрузки
-						if(debug > 0){
-							// Очищаем предыдущий прогресс-бар
-							pss.clear();
-							// Устанавливаем заголовки прогресс-бара
-							pss.title("Train arpa", "Train arpa is done");
-							// Выводим индикатор прогресс-бара
-							switch(debug){
-								case 1: pss.update(); break;
-								case 2: pss.status(); break;
+						// Если файл arpa для записи указан
+						if(env.is("w-arpa")){
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Train arpa", "Train arpa is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
 							}
+							// Выполняем обучение
+							toolkit.train([debug, &pss](const u_short status){
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(status); break;
+									case 2: pss.status(status); break;
+								}
+							});
 						}
-						// Выполняем обучение
-						toolkit.train([debug, &pss](const u_short status){
-							// Отображаем ход процесса
-							switch(debug){
-								case 1: pss.update(status); break;
-								case 2: pss.status(status); break;
-							}
-						});
 					// Если путь не указан
 					} else print("path or file with corpus texts is not specified", env.get("log"));
 				}
@@ -1246,7 +1252,7 @@ int main(int argc, char * argv[]){
 					}
 				}
 				// Если конфигурация файлов верная и требуется обучение
-				if(env.is("r-map") || env.is("r-maps") || env.is("r-ngram") || env.is("r-ngrams")){
+				if(env.is("w-arpa") && (env.is("r-map") || env.is("r-maps") || env.is("r-ngram") || env.is("r-ngrams"))){
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
