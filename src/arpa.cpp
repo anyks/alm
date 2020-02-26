@@ -2387,11 +2387,13 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 					}
 				}
 				// Если дисконтирование не удалось расчитать
-				if(discount == 0.0)
+				if(discount == 0.0){
+					// Устанавливаем вес n-граммы
+					ngram->weight = 0.0f;
 					// Увеличиваем количество n-грамм которые не удалось расчитать
 					this->param.discounted++;
 				// Запоминаем результат
-				else ngram->weight = lprob;
+				} else ngram->weight = lprob;
 			}
 		};
 		/**
