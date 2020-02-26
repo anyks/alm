@@ -97,7 +97,7 @@ namespace anyks {
 				/**
 				 * Seq Конструктор
 				 */
-				Seq() : idw(idw_t::NIDW), oc(0), dc(0), ups(0), weight(log(0)), backoff(0.0f) {}
+				Seq() : idw(idw_t::NIDW), oc(0), dc(0), ups(0), weight(0), backoff(0.0f) {}
 			} __attribute__((packed)) seq_t;
 		private:
 			/**
@@ -150,7 +150,7 @@ namespace anyks {
 				/**
 				 * Vocab Конструктор
 				 */
-				Vocab() : oc(0), dc(0), idw(idw_t::NIDW), idd(idw_t::NIDW), weight(log(0)), backoff(0.0f), father(nullptr) {}
+				Vocab() : oc(0), dc(0), idw(idw_t::NIDW), idd(idw_t::NIDW), weight(0), backoff(0.0f), father(nullptr) {}
 			} vocab_t;
 		private:
 			// Максимальный размер n-граммы
