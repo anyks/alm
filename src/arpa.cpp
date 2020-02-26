@@ -2282,7 +2282,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 	// Проверяем включён ли режим отладки
 	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
 	// Если словарь не пустой
-	if(!this->vocab.empty()){
+	if(!this->vocab.empty() && !this->isOption(options_t::notTrain)){
 		// Сбрасываем текущую позицию n-граммы
 		this->gram = 1;
 		// Список n-грамм для работы
