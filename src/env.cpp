@@ -140,7 +140,7 @@ void anyks::Env::read(const char * args[], const u_short count){
 		// Получаем значение аргумента
 		arg = args[i];
 		// Если это прямое значение переменной
-		if(arg.find("--") != string::npos){
+		if(arg.substr(0, 2).compare("--") == 0){
 			// Убираем ожидание значения
 			isValue = false;
 			// Ищем знак равенства
@@ -161,7 +161,7 @@ void anyks::Env::read(const char * args[], const u_short count){
 			// Добавляем полученные данные в список переменных
 			if(!key.empty()) this->data.emplace(key, val);
 		// Если это относительное значение переменной
-		} else if(arg.find("-") != string::npos) {
+		} else if(arg.front() == '-') {
 			// Получаем ключ
 			key = move(arg.substr(1, arg.length() - 1));
 			// Устанавливаем полученное значение

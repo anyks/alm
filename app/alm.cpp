@@ -1394,6 +1394,31 @@ int main(int argc, char * argv[]){
 				}
 			// Выводим сообщение что файлы не переданы
 			} else print("arpa file is not loaded", env.get("log"));
+			// Если файл для сохранения vocab передан
+			if((value = env.get("w-vocab")) != nullptr){
+				// Если отладка включена, выводим индикатор загрузки
+				if(debug > 0){
+					// Очищаем предыдущий прогресс-бар
+					pss.clear();
+					// Устанавливаем название файла
+					pss.description(value);
+					// Устанавливаем заголовки прогресс-бара
+					pss.title("Write vocab", "Write vocab is done");
+					// Выводим индикатор прогресс-бара
+					switch(debug){
+						case 1: pss.update(); break;
+						case 2: pss.status(); break;
+					}
+				}
+				// Выполняем извлечение словаря в файл
+				toolkit.writeVocab(value, [debug, &pss](const u_short status){
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(status); break;
+						case 2: pss.status(status); break;
+					}
+				});
+			}
 			// Если файл для извлечения карты последовательности передан
 			if((env.is("method", "train") || env.is("r-map") || env.is("r-maps") || env.is("r-ngram") ||
 			env.is("r-ngrams") || !binDictFile.empty()) && ((value = env.get("w-map")) != nullptr)){
@@ -1438,31 +1463,6 @@ int main(int argc, char * argv[]){
 				}
 				// Выполняем сохранение arpa файла
 				toolkit.writeArpa(value, [debug, &pss](const u_short status){
-					// Отображаем ход процесса
-					switch(debug){
-						case 1: pss.update(status); break;
-						case 2: pss.status(status); break;
-					}
-				});
-			}
-			// Если файл для сохранения vocab передан
-			if((value = env.get("w-vocab")) != nullptr){
-				// Если отладка включена, выводим индикатор загрузки
-				if(debug > 0){
-					// Очищаем предыдущий прогресс-бар
-					pss.clear();
-					// Устанавливаем название файла
-					pss.description(value);
-					// Устанавливаем заголовки прогресс-бара
-					pss.title("Write vocab", "Write vocab is done");
-					// Выводим индикатор прогресс-бара
-					switch(debug){
-						case 1: pss.update(); break;
-						case 2: pss.status(); break;
-					}
-				}
-				// Выполняем извлечение словаря в файл
-				toolkit.writeVocab(value, [debug, &pss](const u_short status){
 					// Отображаем ход процесса
 					switch(debug){
 						case 1: pss.update(status); break;

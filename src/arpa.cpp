@@ -476,7 +476,8 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
 					result = move(tmp.real());
 				// Иначе выводим слово без учёта регистра
 				} else result = move(word->str());
-			}
+			// Устанавливаем как неизвестное слово
+			} else result = "<unk>";
 		}
 	}
 	// Выводим результат
