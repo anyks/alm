@@ -14,6 +14,7 @@
  */
 #include <set>
 #include <map>
+// #include <mutex>
 #include <limits>
 #include <bitset>
 #include <vector>
@@ -60,6 +61,7 @@ namespace anyks {
 				onlyGood,   // Флаг использования только слов из белого списка
 				allowUnk,   // Флаг разрешаюний использовать токен неизвестного слова
 				allGrams,   // Флаг предписывающий использовать все полученные n-граммы
+				mixdicts,   // Флаг разрешающий детектировать слова из смешанных словарей
 				lowerCase,  // Флаг предписывающий использовать слова в нижнем регистре
 				interpolate // Флаг предписывающий выполнять интерполяцию при расчёте частот
 			};
@@ -112,10 +114,12 @@ namespace anyks {
 		private:
 			// Общая статистика
 			info_t info;
+			// Мютекс для блокировки потока
+			// mutex locker;
 			// Параметры алгоритма сглаживания
 			params_t params;
 			// Флаги параметров
-			bitset <7> options;
+			bitset <8> options;
 			// Список плохих слов
 			set <size_t> badwords;
 			// Список хороших слов
@@ -268,20 +272,25 @@ namespace anyks {
 			void addGoodword(const string & word);
 		public:
 			/**
+			 * setSize Метод установки размера n-граммы
+			 * @param size размер n-граммы
+			 */
+			void setSize(const u_short size);
+			/**
 			 * setUnknown Метод установки неизвестного слова
 			 * @param word слово для добавления
 			 */
 			void setUnknown(const string & word);
 			/**
-			 * setLogfile Метод установка файла для вывода логов
-			 * @param logifle адрес файла для вывода отладочной информации
-			 */
-			void setLogfile(const char * logfile);
-			/**
 			 * setOptions Метод установки опций
 			 * @param options опции для установки
 			 */
 			void setOptions(const u_int options);
+			/**
+			 * setLogfile Метод установка файла для вывода логов
+			 * @param logifle адрес файла для вывода отладочной информации
+			 */
+			void setLogfile(const char * logfile);
 			/**
 			 * setUserToken Метод добавления токена пользователя
 			 * @param name слово - обозначение токена
@@ -313,10 +322,10 @@ namespace anyks {
 			 */
 			void setTokenDisable(const string & options);
 			/**
-			 * setSize Метод установки размера n-граммы
-			 * @param size размер n-граммы
+			 * setUserTokenScript Метод установки скрипта обработки пользовательских токенов
+			 * @param script скрипт python обработки пользовательских токенов
 			 */
-			void setSize(const u_short size = DEFNGRAM);
+			void setUserTokenScript(const string & script);
 			/**
 			 * setAlphabet Метод установки алфавита
 			 * @param alphabet объект алфавита
@@ -327,11 +336,6 @@ namespace anyks {
 			 * @param tokenizer объект токенизатора
 			 */
 			void setTokenizer(const tokenizer_t * tokenizer);
-			/**
-			 * setUserTokenScript Метод установки скрипта обработки пользовательских токенов
-			 * @param script скрипт python обработки пользовательских токенов
-			 */
-			void setUserTokenScript(const string & script);
 			/**
 			 * addBadwords Метод добавления списка идентификаторов плохих слов в список
 			 * @param badwords список идентификаторов плохих слов
@@ -387,6 +391,12 @@ namespace anyks {
 			 * @param status статус расёта
 			 */
 			void repair(function <void (const u_short)> status = nullptr);
+			/**
+			 * pruneVocab Метод прунинга словаря
+			 * @param wltf   пороговый вес слова для прунинга
+			 * @param status статус прунинга словаря
+			 */
+			void pruneVocab(const float wltf, function <void (const u_short)> status = nullptr);
 			/**
 			 * modify Метод модификации arpa
 			 * @param filename адрес файла для чтения

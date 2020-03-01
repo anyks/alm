@@ -456,14 +456,25 @@ const wstring anyks::Alphabet::delAltInWord(const wstring & word) const {
 	wstring result = L"";
 	// Если слово передано
 	if(!word.empty()){
+		// Полученная буква в слове
+		wchar_t letter = 0;
 		// Копируем слово
-		result = word;
-		// Переходим по каждой букве
-		for(size_t i = 0; i < result.length(); i++){
+		result = move(word);
+		// Получаем длину слова
+		const size_t length = word.length();
+		// Переходим по всем буквам слова
+		for(size_t i = 0, j = length - 1; j > ((length / 2) - 1); i++, j--){
 			// Получаем реальную букву
-			wchar_t rel = this->rel(result[i]);
+			letter = this->rel(result.at(i));
 			// Если реальная буква получена то заменяем её на альтернативную
-			if(rel > 0) result.replace(i, 1, wstring({rel}));
+			if(letter > 0) result.replace(i, 1, wstring({letter}));
+			// Если это разные буквы
+			if(i != j){
+				// Получаем вторую реальную букву
+				letter = this->rel(result.at(j));
+				// Если вторая реальная буква получена то заменяем её на альтернативную
+				if(letter > 0) result.replace(j, 1, wstring({letter}));
+			}
 		}
 	}
 	// Выводим результат
@@ -631,91 +642,95 @@ const u_short anyks::Alphabet::errors(const wstring & word) const {
  * @param  word римское число
  * @return      арабское число
  */
-const u_int anyks::Alphabet::roman2Arabic(const wstring & word) const {
+const u_short anyks::Alphabet::roman2Arabic(const wstring & word) const {
 	// Результат работы функции
-	u_int result = 0;
+	u_short result = 0;
 	// Если слово передано
 	if(!word.empty()){
-		// Флаг проверки соответствия слова
-		bool isRoman = false;
+		// Символ поиска
+		wchar_t c, o;
+		// Вспомогательные переменные
+		u_int i = 0, v = 0, n = 0;
+		// Получаем длину слова
+		const size_t length = word.length();
 		// Список римских цифр
 		std::set <wchar_t> numbers = {L'm', L'd', L'c', L'l', L'x', L'i', L'v'};
 		// Переходим по всем буквам слова
-		for(size_t i = 0; i < word.length(); i++){
+		for(size_t i = 0, j = length - 1; j > ((length / 2) - 1); i++, j--){
 			// Проверяем является ли слово римским числом
-			isRoman = (numbers.count(word[i]) > 0);
-			// Если слово не соответствует тогда выходим
-			if(!isRoman) break;
+			if(!(i == j ? (numbers.count(word.at(i)) > 0) :
+				(numbers.count(word.at(i)) > 0) &&
+				(numbers.count(word.at(j)) > 0)
+			)) return result;
 		}
-		// Если слово соответствует римским цифрам
-		if(isRoman){
-			// Символ поиска
-			wchar_t c;
-			// Вспомогательные переменные
-			u_int i = 0, v = 0, n = 0;
-			// Преобразовываем цифру M
-			if(word[i] == L'm'){
-				for(n = 0; word[i] == L'm'; n++) i++;
+		// Преобразовываем цифру M
+		if(word.front() == L'm'){
+			for(n = 0; word[i] == L'm'; n++) i++;
+			if(n > 4) return 0;
+			v += n * 1000;
+		}
+		o = word[i];
+		// Преобразовываем букву D и C
+		if((o == L'd') || (o == L'c')){
+			if((c = o) == L'd'){
+				i++;
+				v += 500;
+			}
+			o = word[i + 1];
+			if((c == L'c') && (o == L'm')){
+				i += 2;
+				v += 900;
+			} else if((c == L'c') && (o == L'd')) {
+				i += 2;
+				v += 400;
+			} else {
+				for(n = 0; word[i] == L'c'; n++) i++;
 				if(n > 4) return 0;
-				v += n * 1000;
+				v += n * 100;
 			}
-			// Преобразовываем букву D и C
-			if(word[i] == L'd' || word[i] == L'c'){
-				if((c = word[i]) == L'd'){
-					i++;
-					v += 500;
-				}
-				if(c == L'c' && word[i + 1] == L'm'){
-					i += 2;
-					v += 900;
-				} else if(c == L'c' && word[i + 1] == L'd') {
-					i += 2;
-					v += 400;
-				} else {
-					for(n = 0; word[i] == L'c'; n++) i++;
-					if(n > 4) return 0;
-					v += n * 100;
-				}
-			}
-			// Преобразовываем букву L и X
-			if(word[i] == L'l' || word[i] == L'x'){
-				if((c = word[i]) == L'l'){
-					i++;
-					v += 50;
-				}
-				if(c == L'x' && word[i + 1] == L'c'){
-					i += 2;
-					v += 90;
-				} else if(c == L'x' && word[i + 1] == L'l') {
-					i += 2;
-					v += 40;
-				} else {
-					for(n = 0; word[i] == L'x'; n++) i++;
-					if(n > 4) return 0;
-					v += n * 10;
-				}
-			}
-			// Преобразовываем букву V и I
-			if(word[i] == L'v' || word[i] == L'i'){
-				if((c = word[i]) == L'v'){
-					i++;
-					v += 5;
-				}
-				if(c == L'i' && word[i + 1] == L'x'){
-					i += 2;
-					v += 9;
-				} else if(c == L'i' && word[i + 1] == L'v'){
-					i += 2;
-					v += 4;
-				} else {
-					for(n = 0; word[i] == L'i'; n++) i++;
-					if(n > 4) return 0;
-					v += n;
-				}
-			}
-			// Формируем реузльтат
-			result = (((word.length() == i) && (v >= 1) && (v <= 4999)) ? v : 0);
 		}
+		o = word[i];
+		// Преобразовываем букву L и X
+		if((o == L'l') || (o == L'x')){
+			if((c = o) == L'l'){
+				i++;
+				v += 50;
+			}
+			o = word[i + 1];
+			if((c == L'x') && (o == L'c')){
+				i += 2;
+				v += 90;
+			} else if((c == L'x') && (o == L'l')) {
+				i += 2;
+				v += 40;
+			} else {
+				for(n = 0; word[i] == L'x'; n++) i++;
+				if(n > 4) return 0;
+				v += n * 10;
+			}
+		}
+		o = word[i];
+		// Преобразовываем букву V и I
+		if((o == L'v') || (o == L'i')){
+			if((c = o) == L'v'){
+				i++;
+				v += 5;
+			}
+			o = word[i + 1];
+			if((c == L'i') && (o == L'x')){
+				i += 2;
+				v += 9;
+			} else if((c == L'i') && (o == L'v')){
+				i += 2;
+				v += 4;
+			} else {
+				for(n = 0; word[i] == L'i'; n++) i++;
+				if(n > 4) return 0;
+				v += n;
+			}
+		}
+		// Формируем реузльтат
+		result = (((word.length() == i) && (v >= 1) && (v <= 4999)) ? v : 0);
 	}
 	// Выводим результат
 	return result;
@@ -907,15 +922,15 @@ const bool anyks::Alphabet::isLatian(const wstring & str) const {
 			for(size_t i = 0, j = length - 1; j > ((length / 2) - 1); i++, j--){
 				// Проверяем является ли слово латинским
 				result = (
-					i == j ? (this->latian.count(str[i]) > 0) :
-					(this->latian.count(str[i]) > 0)
-					&& (this->latian.count(str[j]) > 0)
+					i == j ? (this->latian.count(str.at(i)) > 0) :
+					(this->latian.count(str.at(i)) > 0) &&
+					(this->latian.count(str.at(j)) > 0)
 				);
 				// Если слово не соответствует тогда выходим
 				if(!result) break;
 			}
 		// Если символ всего один, проверяем его так
-		} else result = (this->latian.count(str[0]) > 0);
+		} else result = (this->latian.count(str.front()) > 0);
 	}
 	// Выводим результат
 	return result;
@@ -966,12 +981,16 @@ const bool anyks::Alphabet::isNumber(const wstring & word) const {
 			// Переходим по всем буквам слова
 			for(size_t i = 0, j = length - 1; j > ((length / 2) - 1); i++, j--){
 				// Проверяем является ли слово арабским числом
-				result = !(i == j ? (numbers.count(word[i]) < 1) : (numbers.count(word[i]) < 1) || (numbers.count(word[j]) < 1));
+				result = !(
+					i == j ? (numbers.count(word.at(i)) < 1) :
+					(numbers.count(word.at(i)) < 1) ||
+					(numbers.count(word.at(j)) < 1)
+				);
 				// Если слово не соответствует тогда выходим
 				if(!result) break;
 			}
 		// Если символ всего один, проверяем его так
-		} else result = (numbers.count(word[0]) > 0);
+		} else result = (numbers.count(word.front()) > 0);
 	}
 	// Выводим результат
 	return result;
@@ -990,12 +1009,18 @@ const bool anyks::Alphabet::isDecimal(const wstring & word) const {
 		const size_t length = word.length();
 		// Если длина слова больше 1-го символа
 		if(length > 1){
+			// Текущая буква
+			wchar_t letter = 0;
+			// Начальная позиция поиска
+			const u_short pos = ((word.front() == L'-') || (word.front() == L'+') ? 1 : 0);
 			// Переходим по всем символам слова
-			for(size_t i = 0; i < length; i++){
+			for(size_t i = pos; i < length; i++){
+				// Получаем текущую букву
+				letter = word.at(i);
 				// Если плавающая точка найдена
-				if((word[i] == L'.') || (word[i] == L',')){
+				if((letter == L'.') || (letter == L',')){
 					// Проверяем правые и левую части
-					result = (this->isNumber(word.substr(0, i)) && this->isNumber(word.substr(i + 1)));
+					result = (this->isNumber(word.substr(pos, i - 1)) && this->isNumber(word.substr(i + 1)));
 					// Выходим из цикла
 					break;
 				}
@@ -1034,7 +1059,7 @@ const bool anyks::Alphabet::isANumber(const wstring & word) const {
 				// Переходим по всему списку
 				for(size_t i = 1, j = length - 2; j > ((length / 2) - 1); i++, j--){
 					// Получаем первое слово
-					first.assign(1, word[i]);
+					first.assign(1, word.at(i));
 					// Проверяем является ли слово арабским числом
 					result = (i == j ? this->isNumber(first) : this->isNumber(first) || this->isNumber({word[j]}));
 					// Если хоть один символ является числом, выходим
@@ -1079,15 +1104,15 @@ const bool anyks::Alphabet::isAllowed(const wstring & word) const {
 				// Выполняем проверку соответствия словарю каждой буквы
 				result = (
 					i == j ?
-					(isHyphen(word[i]) || this->check(word[i])) :
-					(isHyphen(word[i]) || this->check(word[i])) &&
-					(isHyphen(word[j]) || this->check(word[j]))
+					(isHyphen(word.at(i)) || this->check(word.at(i))) :
+					(isHyphen(word.at(i)) || this->check(word.at(i))) &&
+					(isHyphen(word.at(j)) || this->check(word.at(j)))
 				);
 				// Если буква не соответствует, выходим
 				if(!result) break;
 			}
 		// Если строка всего из одного символа
-		} else result = (isHyphen(word[0]) || this->check(word[0]));
+		} else result = (isHyphen(word.front()) || this->check(word.front()));
 	}
 	// Выводим результат
 	return result;
@@ -1141,6 +1166,87 @@ const bool anyks::Alphabet::isIsolation(const wchar_t letter) const {
 	return result;
 }
 /**
+ * rest Метод исправления и детектирования слов со смешенными алфавитами
+ * @param  word слово для проверки и исправления
+ * @return      результат проверки
+ */
+const bool anyks::Alphabet::rest(wstring & word) const {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(!word.empty()){
+		// Список остальных символов
+		multimap <wchar_t, u_short> other;
+		// Список латинских букв
+		multimap <wchar_t, u_short> latian;
+		// Список нормального алфавита
+		multimap <wchar_t, u_short> normal;
+		/**
+		 * setFn Метод установки полученной буквы
+		 * @param letter буква для установки
+		 * @param pos    позиция буквы в слове
+		 */
+		auto setFn = [&other, &latian, &normal, this](const wchar_t letter, const u_short pos){
+			// Если это латинский алфавит
+			if(this->checkLatian({letter})) latian.emplace(letter, pos);
+			// Если это нормальная буква
+			else if(!this->typeLatian && this->check(letter)) normal.emplace(letter, pos);
+			// Иначе это другие символы
+			else other.emplace(letter, pos);
+		};
+		// Получаем длину слова
+		const size_t length = word.length();
+		// Выполняем переход по всем буквам слова
+		for(size_t i = 0, j = length - 1; j > ((length / 2) - 1); i++, j--){
+			// Если это центр слова
+			if(i == j) setFn(word.at(i), i);
+			// Если это разные стороны слова
+			else {
+				// Добавляем первое слово
+				setFn(word.at(i), i);
+				// Добавляем второе слово
+				setFn(word.at(j), j);
+			}
+		}
+		// Проверяем соответствует ли слово одному алфавиту
+		result = (((normal.size() + other.size()) != length) && ((latian.size() + other.size()) != length));
+		// Если слово не соответствует алфавиту
+		if(result && !this->substitutes.empty()){
+			// Если это предположительно это сломанное слово нормального алфавита
+			if(!latian.empty() && (normal.size() >= latian.size())){
+				// Переходим по всему списку собранных латинских букв
+				for(auto & item : latian){
+					// Выполняем поиск буквы в списке репласеров
+					auto it = this->substitutes.find(item.first);
+					// Если буква найдена
+					if(it != this->substitutes.end()){
+						// Выполняем замену буквы в слове
+						word.replace(item.second, 1, 1, it->second);
+					}
+				}
+				// Если слово больше не латинское
+				result = this->checkLatian(word);
+			// Если это англоязычное слово
+			} else if(!other.empty()) {
+				// Переходим по всему списку собранных латинских букв
+				for(auto & item : other){
+					// Выполняем поиск буквы в списке репласеров
+					auto it = this->substitutes.find(item.first);
+					// Если буква найдена
+					if(it != this->substitutes.end()){
+						// Выполняем замену буквы в слове
+						word.replace(item.second, 1, 1, it->second);
+					}
+				}
+				// Если слово больше не латинское
+				result = this->isLatian(word);
+			}
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * check Метод проверки соответствии буквы
  * @param  letter буква для проверки
  * @return        результат проверки
@@ -1155,7 +1261,7 @@ const bool anyks::Alphabet::check(const wchar_t letter) const {
 			// Переводим букву в нижний регистр
 			const wstring & str = this->toLower(wstring(1, letter));
 			// Выполняем проверку буквы
-			result = (this->letters.count(str[0]) > 0);
+			result = (this->letters.count(str.front()) > 0);
 		}
 	}
 	// Выводим результат
@@ -1202,15 +1308,15 @@ const bool anyks::Alphabet::checkLatian(const wstring & str) const {
 			for(size_t i = 0, j = length - 1; j > ((length / 2) - 1); i++, j--){
 				// Проверяем является ли слово латинским
 				result = (
-					i == j ? (this->latian.count(str[i]) > 0) :
-					(this->latian.count(str[i]) > 0)
-					|| (this->latian.count(str[j]) > 0)
+					i == j ? (this->latian.count(str.at(i)) > 0) :
+					(this->latian.count(str.at(i)) > 0) ||
+					(this->latian.count(str.at(j)) > 0)
 				);
 				// Если найдена хотя бы одна латинская буква тогда выходим
 				if(result) break;
 			}
 		// Если символ всего один, проверяем его так
-		} else result = (this->latian.count(str[0]) > 0);
+		} else result = (this->latian.count(str.front()) > 0);
 	}
 	// Выводим результат
 	return result;
@@ -1232,12 +1338,12 @@ const bool anyks::Alphabet::checkHyphen(const wstring & str) const {
 			// Переходим по всем буквам слова
 			for(size_t i = 0, j = length - 1; j > ((length / 2) - 1); i++, j--){
 				// Проверяем является ли слово латинским
-				result = (i == j ? (str[i] == L'-') : (str[i] == L'-') || (str[j] == L'-'));
+				result = (i == j ? (str.at(i) == L'-') : (str.at(i) == L'-') || (str.at(j) == L'-'));
 				// Если найдена хотя бы одна латинская буква тогда выходим
 				if(result) break;
 			}
 		// Если символ всего один, проверяем его так
-		} else result = (str[0] == L'-');
+		} else result = (str.front() == L'-');
 	}
 	// Выводим результат
 	return result;
@@ -1300,11 +1406,11 @@ const bool anyks::Alphabet::checkSimilars(const wstring & str) const {
 			// Переходим по всему слову
 			for(size_t i = 0; i < length; i++){
 				// Если буква совпала
-				if(letters.count(str[i]) > 0){
+				if(letters.count(str.at(i)) > 0){
 					// Проверяем первую букву
-					first = (i > 0 ? existFn(str[i - 1]) : false);
+					first = (i > 0 ? existFn(str.at(i - 1)) : false);
 					// Проверяем следующую букву
-					second = (i < (length - 1) ? existFn(str[i + 1]) : false);
+					second = (i < (length - 1) ? existFn(str.at(i + 1)) : false);
 					// Если первая или вторая буква сработали, выходим
 					result = (((i == (length - 1)) && first) || ((i == 0) && second) || (first && second));
 					// Выходим из цикла
@@ -1322,6 +1428,27 @@ const bool anyks::Alphabet::checkSimilars(const wstring & str) const {
 const std::set <wstring> & anyks::Alphabet::getzones() const {
 	// Выводим список доменных зон интернета
 	return this->uri.getZones();
+}
+/**
+ * getSubstitutes Метод извлечения букв для исправления слов из смешанных алфавитов
+ * @param return список букв разных алфавитов соответствующих друг-другу
+ */
+const std::map <string, string> & anyks::Alphabet::getSubstitutes() const {
+	// Выводим результат
+	const static std::map <string, string> result;
+	// Если список букв передан
+	if(!this->substitutes.empty()){
+		// Переходим по всем буквам
+		for(auto & item : this->substitutes){
+			// Добавляем букву в список
+			const_cast <std::map <string, string> *> (&result)->emplace(
+				this->convert(wstring{item.first}),
+				this->convert(wstring{item.second})
+			);
+		}
+	}
+	// Выводим результат
+	return result;
 }
 /**
  * urls Метод извлечения координат url адресов в строке
@@ -1384,12 +1511,12 @@ const pair <bool, bool> anyks::Alphabet::checkHypLat(const wstring & str) const 
 			// Переходим по всем буквам слова
 			for(size_t i = 0, j = length - 1; j > ((length / 2) - 1); i++, j--){
 				// Проверяем является ли слово латинским
-				hyphen = (i == j ? (str[i] == L'-') : (str[i] == L'-') || (str[j] == L'-'));
+				hyphen = (i == j ? (str.at(i) == L'-') : (str.at(i) == L'-') || (str.at(j) == L'-'));
 				// Проверяем является ли слово латинским
 				if(!hyphen || (i != j)) latian = (
-					i == j ? (this->latian.count(str[i]) > 0) :
-					(this->latian.count(str[i]) > 0)
-					|| (this->latian.count(str[j]) > 0)
+					i == j ? (this->latian.count(str.at(i)) > 0) :
+					(this->latian.count(str.at(i)) > 0) ||
+					(this->latian.count(str.at(j)) > 0)
 				);
 				// Если найден дефис
 				if(!result.first && hyphen) result.first = hyphen;
@@ -1401,13 +1528,31 @@ const pair <bool, bool> anyks::Alphabet::checkHypLat(const wstring & str) const 
 		// Если символ всего один, проверяем его так
 		} else {
 			// Запоминаем найден ли дефис
-			result.first = (str[0] == L'-');
+			result.first = (str.front() == L'-');
 			// Если дефис не найден, проверяем на латинский символ
-			if(!result.first) result.second = (this->latian.count(str[0]) > 0);
+			if(!result.first) result.second = (this->latian.count(str.front()) > 0);
 		}
 	}
 	// Выводим результат
 	return result;
+}
+/**
+ * clear Метод очистки собранных данных
+ */
+void anyks::Alphabet::clear(){
+	// Алфавит латинских символов
+	wstring alphabet = L"";
+	// Переходим по всем буквам латинских символов
+	for(auto & letter : this->latian){
+		// Формируем алфавит латинских символов
+		alphabet.append(1, letter);
+	}
+	// Очищаем список альтернативных букв
+	this->alters.clear();
+	// Очищаем список похожих букв в разных алфавитах
+	this->substitutes.clear();
+	// Формируем алфавит
+	this->set(this->convert(alphabet));
 }
 /**
  * log Метод вывода текстовой информации в консоль или файл
@@ -1581,6 +1726,11 @@ void anyks::Alphabet::set(const string & alphabet){
 		// Добавляем буквы алфавита в список
 		this->add(letter);
 	}
+	// Переходим по всем буквам алфавита
+	for(auto & letter : this->alphabet){
+		// Если буква не является латинской - запоминаем, что это не латинский алфавит
+		if(!(this->typeLatian = this->checkLatian({letter}))) break;
+	}
 	// Если список букв получен
 	if(!this->alphabet.empty()) this->uri.setLetters(this->alphabet);
 }
@@ -1655,6 +1805,25 @@ void anyks::Alphabet::setalt(const wchar_t lid, const wchar_t alt){
 	if((lid > 0) && (alt > 0)){
 		// Если альтернативная буква не найдена в списке
 		this->alters.emplace(lid, alt);
+	}
+}
+/**
+ * setSubstitutes Метод установки букв для исправления слов из смешанных алфавитов
+ * @param letters список букв разных алфавитов соответствующих друг-другу
+ */
+void anyks::Alphabet::setSubstitutes(const std::map <string, string> & letters){
+	// Если список букв передан
+	if(!letters.empty()){
+		// Очищаем текущий список букв
+		this->substitutes.clear();
+		// Переходим по всем буквам
+		for(auto & item : letters){
+			// Добавляем букву в список
+			this->substitutes.emplace(
+				this->convert(item.first).front(),
+				this->convert(item.second).front()
+			);
+		}
 	}
 }
 /**

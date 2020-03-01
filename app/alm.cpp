@@ -10,6 +10,7 @@
 #include <ablm.hpp>
 #include <toolkit.hpp>
 #include <progress.hpp>
+#include <collector.hpp>
 
 // Устанавливаем область видимости
 using namespace std;
@@ -68,7 +69,8 @@ void help(){
 	"[-alphabet <value> | --alphabet=<value>] [<args>]\r\n\r\n\r\n"
 	"\x1B[34m\x1B[1mmethods:\x1B[0m\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m tokens: text tokenization method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m prune:  language model pruning method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m vprune: vocabulary pruning method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m aprune: language model pruning method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m train:  language model training method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m sweep:  high backoff n-gram removal method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m info:   binary dictionary information method\r\n\r\n"
@@ -83,6 +85,7 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to consider words from the white list only:                     [-only-good | --only-good]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to use interpolation in estimating:                             [-interpolate | --interpolate]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing accounting of all collected n-grams:                            [-all-grams | --all-grams]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag allowing the use of words consisting of mixed dictionaries:              [-mixed-dicts | --mixed-dicts]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag to reset the frequency of an unknown word:                               [-reset-unk | --reset-unk]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of all data:                                 [-w-bin-all | --w-bin-all]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of users tokens:                             [-w-bin-utokens | --w-bin-utokens]\r\n\r\n"
@@ -129,8 +132,10 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.arpa files:                   [-r-arpas <value> | --r-arpas=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address abbreviations for import:              [-r-abbrs <value> | --r-abbrs=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address domain zones for import:               [-r-domain-zones <value> | --r-domain-zones=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m pruning frequency threshold:                        [-prune-threshold <value> | --prune-threshold=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m the maximum size of n-grams of pruning:             [-prune-max-gram <value> | --prune-max-gram=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address for restore mixed words for import:    [-r-mix-restwords <value> | --r-mix-restwords=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m pruning vocabulary wltf threshold:                  [-vprune-threshold <value> | --vprune-threshold=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m pruning language model frequency threshold:         [-aprune-threshold <value> | --aprune-threshold=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m the maximum size of n-grams of pruning:             [-aprune-max-gram <value> | --aprune-max-gram=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m list of custom attributes:                          [-utokens <value> | --utokens=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m modification flag for modify method:                [-modify <value> | --modify=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m delta size for smoothing by addsmooth algorithm:    [-delta <value> | --delta=<value>]\r\n\r\n"
@@ -142,7 +147,7 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m debug mode:                                         [-debug <value> | --debug=<value>]\r\n"
 	"  \x1B[1m-\x1B[0m (0 - off | 1 - progress | 2 - console)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m method application:                                 [-method <value> | --method=<value>]\r\n"
-	"  \x1B[1m-\x1B[0m (train | repair | modify | sweep | prune | tokens | info)\r\n\r\n"
+	"  \x1B[1m-\x1B[0m (train | repair | modify | sweep | vprune | aprune | tokens | info)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m smoothing algorithm:                                [-smoothing <value> | --smoothing=<value>]\r\n"
 	"  \x1B[1m-\x1B[0m (goodturing | cdiscount | ndiscount | addsmooth | wittenbell | kneserney | mkneserney)\r\n\r\n";
 	// Выводим сообщение справки
@@ -267,12 +272,13 @@ int main(int argc, char * argv[]){
 			if(env.is("method") && (string(env.get("method")).compare("-yes-") != 0)){
 				// Проверяем правильность введённого основного метода работы
 				if(!env.is("method", "info") &&
-				!env.is("method", "prune") &&
 				!env.is("method", "sweep") &&
 				!env.is("method", "train") &&
 				!env.is("method", "tokens") &&
 				!env.is("method", "repair") &&
-				!env.is("method", "modify"))
+				!env.is("method", "modify") &&
+				!env.is("method", "aprune") &&
+				!env.is("method", "vprune"))
 					// Выводим сообщение в консоль
 					print(alphabet.format("the method name \"%s\" is bad", env.get("method")), env.get("log"));
 			// Сообщаем что метод не указан
@@ -311,6 +317,8 @@ int main(int argc, char * argv[]){
 			if(env.is("only-good")) toolkit.setOption(toolkit_t::options_t::onlyGood);
 			// Разрешаем переводить слова в нижний регистр
 			if(env.is("lower-case")) toolkit.setOption(toolkit_t::options_t::lowerCase);
+			// Разрешаем детектировать слова состоящее из смешанных словарей
+			if(env.is("mixed-dicts")) toolkit.setOption(toolkit_t::options_t::mixdicts);
 			// Разрешаем выполнять интерполяцию при расчёте arpa
 			if(env.is("interpolate")) toolkit.setOption(toolkit_t::options_t::interpolate);
 			// Если нужно установить все токены для идентифицирования как <unk>
@@ -789,6 +797,73 @@ int main(int argc, char * argv[]){
 			} else print("smoothing is bad", env.get("log"));
 			// Замеряем время начала работы
 			auto timeShifting = chrono::system_clock::now();
+			// Если файл с буквами для восстановления слов, передан
+			if(((value = env.get("r-mix-restwords")) != nullptr) && fsys_t::isfile(value)){
+				// Идентификатор документа
+				size_t size = 0;
+				// Статус и процентное соотношение
+				u_short status = 0, rate = 100;
+				// Запоминаем адрес файла
+				const string filename = realpath(value, nullptr);
+				// Если отладка включена, выводим индикатор загрузки
+				if(debug > 0){
+					// Очищаем предыдущий прогресс-бар
+					pss.clear();
+					// Устанавливаем название файла
+					pss.description(filename);
+					// Устанавливаем заголовки прогресс-бара
+					pss.title("Load mixed letters", "Load mixed letters is done");
+					// Выводим индикатор прогресс-бара
+					switch(debug){
+						case 1: pss.update(); break;
+						case 2: pss.status(); break;
+					}
+				}
+				// Список полученных букв
+				map <string, string> letters;
+				// Выполняем считывание всех строк текста
+				fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+					// Если текст получен
+					if(!text.empty()){
+						// Список пар букв
+						vector <wstring> result;
+						// Выполняем сплит текста
+						alphabet.split(text, "\t", result);
+						// Если результат получен
+						if(!result.empty() && (result.size() == 2)){
+							// Формируем список букв
+							letters.emplace(alphabet.convert(result.at(0)), alphabet.convert(result.at(1)));
+						}
+					}
+					// Если отладка включена
+					if(debug > 0){
+						// Общий полученный размер данных
+						size += text.size();
+						// Подсчитываем статус выполнения
+						status = u_short(size / float(fileSize) * 100.0f);
+						// Если процентное соотношение изменилось
+						if(rate != status){
+							// Запоминаем текущее процентное соотношение
+							rate = status;
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(status); break;
+								case 2: pss.status(status); break;
+							}
+						}
+					}
+				});
+				// Устанавливаем собранные буквы
+				if(!letters.empty()) alphabet.setSubstitutes(letters);
+				// Если отладка включена
+				if(status < 100){
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
+				}
+			}
 			// Если передан метод обучения, загрузка карт последовательностей или списка n-грамм
 			if((env.is("r-abbrs") || env.is("r-domain-zones")) && (env.is("method", "train") ||
 			env.is("r-map") || env.is("r-maps") || env.is("r-ngram") || env.is("r-ngrams"))){
@@ -868,7 +943,7 @@ int main(int argc, char * argv[]){
 			// Если передан метод обучения
 			if(env.is("method", "train")){
 				// Если нужно использовать бинарный контейнер
-				if(!binDictFile.empty()){
+				if(!binDictFile.empty() && env.is("w-arpa")){
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -889,6 +964,11 @@ int main(int argc, char * argv[]){
 							case 2: pss.status(status); break;
 						}
 					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
 				// Иначе продолжаем стандартное обучение
 				} else {
 					// Если путь получен
@@ -940,28 +1020,67 @@ int main(int argc, char * argv[]){
 							// Увеличиваем идентификатор документа
 							idd++;
 						});
+						// Если файл arpa для записи указан
+						if(env.is("w-arpa")){
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Train arpa", "Train arpa is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
+							}
+							// Выполняем обучение
+							toolkit.train([debug, &pss](const u_short status){
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(status); break;
+									case 2: pss.status(status); break;
+								}
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+						}
+					// Если файл корпуса получен
+					} else if(((value = env.get("corpus")) != nullptr) && fsys_t::isfile(value)){
+						/*
+						// Объявляем объект коллектора
+						collector_t collector(1, &toolkit);
+						// Запоминаем адрес файла
+						const string filename = realpath(value, nullptr);
 						// Если отладка включена, выводим индикатор загрузки
 						if(debug > 0){
-							// Очищаем предыдущий прогресс-бар
-							pss.clear();
+							// Устанавливаем название файла
+							pss.description(filename);
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Train arpa", "Train arpa is done");
+							pss.title("Load text corpus", "Load text corpus is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
 								case 2: pss.status(); break;
 							}
 						}
-						// Выполняем обучение
-						toolkit.train([debug, &pss](const u_short status){
+						// Выполняем чтение данных файла
+						collector.readFile(filename, [&](const u_short status){
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
 								case 2: pss.status(status); break;
 							}
 						});
-					// Если файл корпуса получен
-					} else if(((value = env.get("corpus")) != nullptr) && fsys_t::isfile(value)){
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
+						}
+						*/
 						// Идентификатор документа
 						size_t size = 0;
 						// Статус и процентное соотношение
@@ -1002,26 +1121,35 @@ int main(int argc, char * argv[]){
 								}
 							}
 						});
-						// Если отладка включена, выводим индикатор загрузки
-						if(debug > 0){
-							// Очищаем предыдущий прогресс-бар
-							pss.clear();
-							// Устанавливаем заголовки прогресс-бара
-							pss.title("Train arpa", "Train arpa is done");
-							// Выводим индикатор прогресс-бара
-							switch(debug){
-								case 1: pss.update(); break;
-								case 2: pss.status(); break;
+
+						// Если файл arpa для записи указан
+						if(env.is("w-arpa")){
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Train arpa", "Train arpa is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
 							}
-						}
-						// Выполняем обучение
-						toolkit.train([debug, &pss](const u_short status){
+							// Выполняем обучение
+							toolkit.train([debug, &pss](const u_short status){
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(status); break;
+									case 2: pss.status(status); break;
+								}
+							});
 							// Отображаем ход процесса
 							switch(debug){
-								case 1: pss.update(status); break;
-								case 2: pss.status(status); break;
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
 							}
-						});
+						}
 					// Если путь не указан
 					} else print("path or file with corpus texts is not specified", env.get("log"));
 				}
@@ -1055,6 +1183,11 @@ int main(int argc, char * argv[]){
 							case 2: pss.status(status); break;
 						}
 					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
 				// Если требуется загрузить список файлов n-грамм
 				} else if(((value = env.get("r-ngrams")) != nullptr) && fsys_t::isdir(value)) {
 					// Запоминаем каталог для загрузки
@@ -1081,6 +1214,11 @@ int main(int argc, char * argv[]){
 							case 2: pss.status(status); break;
 						}
 					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
 				}
 				// Если требуется загрузить arpa
 				if(((value = env.get("r-arpa")) != nullptr) && fsys_t::isfile(value)){
@@ -1108,6 +1246,11 @@ int main(int argc, char * argv[]){
 							case 2: pss.status(status); break;
 						}
 					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
 				// Если нужно загрузить список файлов arpa
 				} else if(((value = env.get("r-arpas")) != nullptr) && fsys_t::isdir(value)) {
 					// Запоминаем каталог для загрузки
@@ -1134,6 +1277,11 @@ int main(int argc, char * argv[]){
 							case 2: pss.status(status); break;
 						}
 					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
 				}
 				// Если требуется загрузить файл словаря vocab
 				if(((value = env.get("r-vocab")) != nullptr) && fsys_t::isfile(value)){
@@ -1161,6 +1309,11 @@ int main(int argc, char * argv[]){
 							case 2: pss.status(status); break;
 						}
 					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
 				// Если требуется загрузить список словарей
 				} else if(((value = env.get("r-vocabs")) != nullptr) && fsys_t::isdir(value)) {
 					// Если отладка включена, выводим индикатор загрузки
@@ -1217,6 +1370,11 @@ int main(int argc, char * argv[]){
 								case 2: pss.status(status); break;
 							}
 						});
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
+						}
 					// Если нужно загрузить список карт последовательностей
 					} else if(((value = env.get("r-maps")) != nullptr) && fsys_t::isdir(value)){
 						// Запоминаем каталог для загрузки
@@ -1243,10 +1401,15 @@ int main(int argc, char * argv[]){
 								case 2: pss.status(status); break;
 							}
 						});
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
+						}
 					}
 				}
 				// Если конфигурация файлов верная и требуется обучение
-				if(env.is("r-map") || env.is("r-maps") || env.is("r-ngram") || env.is("r-ngrams")){
+				if(env.is("w-arpa") && (env.is("r-map") || env.is("r-maps") || env.is("r-ngram") || env.is("r-ngrams"))){
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -1267,6 +1430,11 @@ int main(int argc, char * argv[]){
 							case 2: pss.status(status); break;
 						}
 					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
 				}
 				// Если передан метод исправления arpa
 				if(env.is("method", "repair")){
@@ -1290,6 +1458,11 @@ int main(int argc, char * argv[]){
 							case 2: pss.status(status); break;
 						}
 					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
 				// Если это метод удаление редких n-грамм
 				} else if(env.is("method", "sweep")) {
 					// Если отладка включена, выводим индикатор загрузки
@@ -1312,16 +1485,52 @@ int main(int argc, char * argv[]){
 							case 2: pss.status(status); break;
 						}
 					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
+				// Если нужно выполнить прунинг словаря
+				} else if(env.is("method", "vprune") && ((value = env.get("vprune-threshold")) != nullptr)) {
+					// Выполняем является ли переданная строка числом
+					if(alphabet.isDecimal(alphabet.convert(value))){
+						// Если отладка включена, выводим индикатор прунинга
+						if(debug > 0){
+							// Очищаем предыдущий прогресс-бар
+							pss.clear();
+							// Устанавливаем заголовки прогресс-бара
+							pss.title("Prune vocab", "Prune vocab is done");
+							// Выводим индикатор прогресс-бара
+							switch(debug){
+								case 1: pss.update(); break;
+								case 2: pss.status(); break;
+							}
+						}
+						// Выполняем прунинг словаря
+						toolkit.pruneVocab(stof(value), [debug, &pss](const u_short status){
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(status); break;
+								case 2: pss.status(status); break;
+							}
+						});
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
+						}
+					// Сообщаем что порог передан неверный
+					} else print("vprune-threshold is broken", env.get("log"));
 				// Если нужно выполнить прунинг arpa
-				} else if(env.is("method", "prune")) {
+				} else if(env.is("method", "aprune")) {
 					// Максимальный размер n-граммы
 					u_short size = 0;
 					// Коэффициент прунинга
 					float prune = 0.0f;
 					// Если параметр прунинга получен
-					if((value = env.get("prune-threshold")) != nullptr) prune = stof(value);
+					if((value = env.get("aprune-threshold")) != nullptr) prune = stof(value);
 					// Если параметр максимального размера n-граммы для прунинга получен
-					if((value = env.get("prune-max-gram")) != nullptr) size = stoi(value);
+					if((value = env.get("aprune-max-gram")) != nullptr) size = stoi(value);
 					// Если параметры получены
 					if((size > 0) && (prune != 0.0f)){
 						// Если отладка включена, выводим индикатор загрузки
@@ -1344,6 +1553,11 @@ int main(int argc, char * argv[]){
 								case 2: pss.status(status); break;
 							}
 						});
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
+						}
 					}
 				// Если нужно модифицировать arpa
 				} else if(env.is("method", "modify")) {
@@ -1389,11 +1603,46 @@ int main(int argc, char * argv[]){
 								case 2: pss.status(status); break;
 							}
 						});
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
+						}
 					// Сообщаем что файл модификации не передан
 					} else print("file modify not found", env.get("log"));
 				}
 			// Выводим сообщение что файлы не переданы
 			} else print("arpa file is not loaded", env.get("log"));
+			// Если файл для сохранения vocab передан
+			if((value = env.get("w-vocab")) != nullptr){
+				// Если отладка включена, выводим индикатор загрузки
+				if(debug > 0){
+					// Очищаем предыдущий прогресс-бар
+					pss.clear();
+					// Устанавливаем название файла
+					pss.description(value);
+					// Устанавливаем заголовки прогресс-бара
+					pss.title("Write vocab", "Write vocab is done");
+					// Выводим индикатор прогресс-бара
+					switch(debug){
+						case 1: pss.update(); break;
+						case 2: pss.status(); break;
+					}
+				}
+				// Выполняем извлечение словаря в файл
+				toolkit.writeVocab(value, [debug, &pss](const u_short status){
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(status); break;
+						case 2: pss.status(status); break;
+					}
+				});
+				// Отображаем ход процесса
+				switch(debug){
+					case 1: pss.update(100); break;
+					case 2: pss.status(100); break;
+				}
+			}
 			// Если файл для извлечения карты последовательности передан
 			if((env.is("method", "train") || env.is("r-map") || env.is("r-maps") || env.is("r-ngram") ||
 			env.is("r-ngrams") || !binDictFile.empty()) && ((value = env.get("w-map")) != nullptr)){
@@ -1419,6 +1668,11 @@ int main(int argc, char * argv[]){
 						case 2: pss.status(status); break;
 					}
 				});
+				// Отображаем ход процесса
+				switch(debug){
+					case 1: pss.update(100); break;
+					case 2: pss.status(100); break;
+				}
 			}
 			// Если файл для сохранения arpa передан
 			if((value = env.get("w-arpa")) != nullptr){
@@ -1444,31 +1698,11 @@ int main(int argc, char * argv[]){
 						case 2: pss.status(status); break;
 					}
 				});
-			}
-			// Если файл для сохранения vocab передан
-			if((value = env.get("w-vocab")) != nullptr){
-				// Если отладка включена, выводим индикатор загрузки
-				if(debug > 0){
-					// Очищаем предыдущий прогресс-бар
-					pss.clear();
-					// Устанавливаем название файла
-					pss.description(value);
-					// Устанавливаем заголовки прогресс-бара
-					pss.title("Write vocab", "Write vocab is done");
-					// Выводим индикатор прогресс-бара
-					switch(debug){
-						case 1: pss.update(); break;
-						case 2: pss.status(); break;
-					}
+				// Отображаем ход процесса
+				switch(debug){
+					case 1: pss.update(100); break;
+					case 2: pss.status(100); break;
 				}
-				// Выполняем извлечение словаря в файл
-				toolkit.writeVocab(value, [debug, &pss](const u_short status){
-					// Отображаем ход процесса
-					switch(debug){
-						case 1: pss.update(status); break;
-						case 2: pss.status(status); break;
-					}
-				});
 			}
 			// Если файл для сохранения n-грамм передан
 			if((env.is("method", "train") || env.is("r-map") || env.is("r-maps") || env.is("r-ngram") ||
@@ -1495,6 +1729,11 @@ int main(int argc, char * argv[]){
 						case 2: pss.status(status); break;
 					}
 				});
+				// Отображаем ход процесса
+				switch(debug){
+					case 1: pss.update(100); break;
+					case 2: pss.status(100); break;
+				}
 			}
 			// Если нужно использовать бинарный контейнер
 			if((value = env.get("w-bin")) != nullptr){
@@ -1552,6 +1791,11 @@ int main(int argc, char * argv[]){
 						case 2: pss.status(status); break;
 					}
 				});
+				// Отображаем ход процесса
+				switch(debug){
+					case 1: pss.update(100); break;
+					case 2: pss.status(100); break;
+				}
 			}
 			// Если режим отладки включён
 			if(debug > 0){

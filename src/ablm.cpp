@@ -88,6 +88,27 @@ const bool anyks::AbLM::write(function <void (const u_short)> status){
 		this->aspl->setStrings("utokens", this->toolkit->getUserTokens());
 	}
 	/**
+	 * Блок извлечения списка букв для восстановления слов состоящих из смешанных словарей
+	 */
+	{
+		// Получаем список букв
+		auto substitutes = this->alphabet->getSubstitutes();
+		// Если список получен
+		if(!substitutes.empty()){
+			// Список букв для восстановления
+			vector <string> letters;
+			// Переходим по всему списку
+			for(auto & item : substitutes){
+				// Сохраняем первую букву
+				letters.push_back(item.first);
+				// Сохраняем вторую букву
+				letters.push_back(item.second);
+			}
+			// Устанавливаем полученный список букв
+			this->aspl->setStrings("substitutes", letters);
+		}
+	}
+	/**
 	 * Блок добавления скриптов python
 	 */
 	{
@@ -379,6 +400,37 @@ const bool anyks::AbLM::read(function <void (const u_short)> status, const bool 
 				this->aspl->getStrings("dzones", zones);
 				// Если список доменных зон получен, устанавливаем его
 				if(!zones.empty()) this->alphabet->setzones(zones);
+			}
+			/**
+			 * Блок извлечения списка букв для восстановления слов состоящих из смешанных словарей
+			 */
+			{
+				// Список букв для восстановления
+				vector <string> letters;
+				// Устанавливаем полученный список букв
+				this->aspl->getStrings("substitutes", letters);
+				// Если список букв получен
+				if(!letters.empty()){
+					// Первое и второе слово
+					string first = "", second = "";
+					// Список букв для восстановления слов
+					map <string, string> substitutes;
+					// Переходим по всему списку
+					for(size_t i = 0; i < letters.size(); i++){
+						// Получаем первое слово
+						if((i % 2) == 0){
+							// Очищаем второе слово
+							second.clear();
+							// Запоминаем первое слово
+							first = move(letters.at(i));
+						// Если это второе слово
+						} else second = move(letters.at(i));
+						// Если второе слово получено
+						if(!first.empty() && !second.empty()) substitutes.emplace(first, second);
+					}
+					// Если список букв получен
+					if(!substitutes.empty()) this->alphabet->setSubstitutes(substitutes);
+				}
 			}
 			/**
 			 * Блок извлечения неизвестного слова и пользовательских токенов

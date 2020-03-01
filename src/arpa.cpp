@@ -389,26 +389,28 @@ const string anyks::Arpa::context(const vocab_t * context) const {
 	string result = "";
 	// Если контекстпередан
 	if(context != nullptr){
-		// Список последовательности
-		list <string> words;
+		// Слово для добавления в строку
+		string word = "";
 		// Извлекаем предшествующую n-грамму
 		while(context->father != nullptr){
-			// Добавляем идентификатор
-			words.push_back(this->word(context->idw, this->uppers(context).first));
-			// Выполняем смещение
-			context = context->father;
+			// Получаем слово для добавления в строку
+			word = (context->weight != 0.0f ? move(this->word(context->idw, this->uppers(context).first)) : "");
+			// Если слово получено
+			if(!word.empty()){
+				// Если строка не пустая, добавляем пробел
+				if(!result.empty()) result.insert(result.begin(), 1, ' ');
+				// Добавляем слово в строку
+				result.insert(result.begin(), word.begin(), word.end());
+				// Выполняем смещение
+				context = context->father;
+			// Если слово не получено
+			} else {
+				// Очищаем собранную строку
+				result.clear();
+				// Выходим из цикла
+				break;
+			}
 		}
-		// Выполняем реверс списка
-		words.reverse();
-		// Формируем результирующую строку
-		for(auto & word : words){
-			// Добавляем слово в список
-			result.append(word);
-			// Добавляем разделитель
-			result.append(" ");
-		}
-		// Удаляем лишние пробелы
-		result = this->alphabet->trim(result);
 	}
 	// Выводим результат
 	return result;
@@ -476,7 +478,8 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
 					result = move(tmp.real());
 				// Иначе выводим слово без учёта регистра
 				} else result = move(word->str());
-			}
+			// Устанавливаем как неизвестное слово
+			} else result = "<unk>";
 		}
 	}
 	// Выводим результат
@@ -1437,6 +1440,62 @@ void anyks::Arpa::clear(){
 	this->param = param_t();
 }
 /**
+ * removeWord Метод удаления слова и всех дочерних n-грамм
+ * @param idw идентификатор слова
+ */
+void anyks::Arpa::removeWord(const size_t idw){
+	// Если слово найдено
+	if((idw > 0) && (this->vocab.count(idw) > 0)){
+		/**
+		 * removeFn Прототип функции зануления всех дочерних n-грамм
+		 * @param позиция текущего контекста
+		 */
+		function <void (vocab_t *)> removeFn;
+		/**
+		 * removeFn Функция зануления всех дочерних n-грамм
+		 * @param context позиция текущего контекста
+		 */
+		removeFn = [&removeFn](vocab_t * context){
+			// Если список не пустой
+			if(!context->empty()){
+				// Переходим по всем n-граммам
+				for(auto & item : * context){
+					// Зануляем ненужную нам n-грамму
+					item.second.weight = 0.0f;
+					// Если есть дочерние n-граммы зануляем и их
+					if(!item.second.empty()) removeFn(&item.second);
+				}
+			}
+		};
+		// Список n-грамм для работы
+		list <vocab_t *> ngrams;
+		// Переходим по всем n-граммам
+		for(u_short i = 1; i <= this->size; i++){
+			// Выполняем извлечение n-грамм
+			this->get(i, &ngrams);
+			// Если список n-грамм получен
+			if(!ngrams.empty()){
+				// Переходим по всему списку полученных n-грамм
+				for(auto & item : ngrams){
+					// Если в n-грамме есть дочерные граммы
+					if(!item->empty()){
+						// Переходим по всему списку грамм
+						for(auto & value : * item){
+							// Если идентификатор соответствует слову, удаляем его
+							if(value.second.idw == idw){
+								// Выполняем зануление текущего слова
+								value.second.weight = 0.0f;
+								// Выполняем зануление дочерних n-грамм
+								removeFn(&value.second);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+/**
  * setWordMethod Метод установки функции получения слова
  * @param word функция получения слова
  */
@@ -1578,7 +1637,7 @@ void anyks::Arpa::inc(const vector <pair_t> & seq, const float value) const {
 					context.append(" ");
 				}
 				// Удаляем лишние пробелы
-				context = this->alphabet->trim(context);
+				context = move(this->alphabet->trim(context));
 				// Если контекст получен
 				if(!context.empty()){
 					// Выводим сообщение
@@ -2281,7 +2340,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 	// Проверяем включён ли режим отладки
 	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
 	// Если словарь не пустой
-	if(!this->vocab.empty()){
+	if(!this->vocab.empty() && !this->isOption(options_t::notTrain)){
 		// Сбрасываем текущую позицию n-граммы
 		this->gram = 1;
 		// Список n-грамм для работы
@@ -2386,11 +2445,13 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 					}
 				}
 				// Если дисконтирование не удалось расчитать
-				if(discount == 0.0)
+				if(discount == 0.0){
+					// Устанавливаем вес n-граммы
+					ngram->weight = 0.0f;
 					// Увеличиваем количество n-грамм которые не удалось расчитать
 					this->param.discounted++;
 				// Запоминаем результат
-				else ngram->weight = lprob;
+				} else ngram->weight = lprob;
 			}
 		};
 		/**
@@ -2701,6 +2762,8 @@ void anyks::Arpa::data(const u_short gram, function <void (const string &)> call
 		string result = "", weight = "", backoff = "";
 		// Если это юниграмма
 		if(gram == 1){
+			// Слово для извлечения
+			string word = "";
 			// Список регистров слова
 			std::set <size_t> uppers;
 			// Переходим по всему списку юниграмм
@@ -2730,30 +2793,40 @@ void anyks::Arpa::data(const u_short gram, function <void (const string &)> call
 					if(!uppers.empty()){
 						// Переходим по всему списку регистров
 						for(auto & ups : uppers){
-							// Формируем слово с учётом регистра
-							result = move(this->alphabet->format("%s\t%s", weight.c_str(), this->word(value.second.idw, ups).c_str()));
-							// Если обратная частота документа присутствует
-							if(!backoff.empty()){
-								// Добавляем разделитель
-								result.append("\t");
-								// Добавляем частоту отката
-								result.append(backoff);
+							// Получаем слово
+							word = move(this->word(value.second.idw, ups));
+							// Если слово получено
+							if(!word.empty()){
+								// Формируем слово с учётом регистра
+								result = move(this->alphabet->format("%s\t%s", weight.c_str(), word.c_str()));
+								// Если обратная частота документа присутствует
+								if(!backoff.empty()){
+									// Добавляем разделитель
+									result.append("\t");
+									// Добавляем частоту отката
+									result.append(backoff);
+								}
+								// Выводим результат
+								callback(result);
 							}
-							// Выводим результат
-							callback(result);
 						}
 					}
-					// Формируем слово без учёта регистра
-					result = move(this->alphabet->format("%s\t%s", weight.c_str(), this->word(value.second.idw).c_str()));
-					// Если обратная частота документа присутствует
-					if(!backoff.empty()){
-						// Добавляем разделитель
-						result.append("\t");
-						// Добавляем частоту отката
-						result.append(backoff);
+					// Получаем слово
+					word = move(this->word(value.second.idw));
+					// Если слово получено
+					if(!word.empty()){
+						// Формируем слово без учёта регистра
+						result = move(this->alphabet->format("%s\t%s", weight.c_str(), word.c_str()));
+						// Если обратная частота документа присутствует
+						if(!backoff.empty()){
+							// Добавляем разделитель
+							result.append("\t");
+							// Добавляем частоту отката
+							result.append(backoff);
+						}
+						// Выводим результат
+						callback(result);
 					}
-					// Выводим результат
-					callback(result);
 				}
 			}
 		// Если это n-грамма
@@ -2766,6 +2839,8 @@ void anyks::Arpa::data(const u_short gram, function <void (const string &)> call
 			if(!ngrams.empty()){
 				// Значение регистров слова
 				size_t uppers = 0;
+				// Полученный контекст
+				string context = "";
 				// Переходим по всему списку полученных n-грамм
 				for(auto & item : ngrams){
 					// Переходим по всему списку слов
@@ -2778,19 +2853,27 @@ void anyks::Arpa::data(const u_short gram, function <void (const string &)> call
 								weight = move(to_string(this->pseudoZero));
 							// Если это нормальный вес
 							else weight = move(to_string(value.second.weight));
-							// Формируем результат с учётом регистра
-							result = move(this->alphabet->format("%s\t%s", weight.c_str(), this->context(&value.second).c_str()));
-							// Если слово имеет частоту отката
-							if((gram < this->size) && ((value.second.backoff != this->zero) && (this->weights(&value.second) != 0.0f))){
-								// Добавляем разделитель
-								result.append("\t");
-								// Получаем обратную частоту модели
-								backoff = (value.second.backoff != 0.0f ? move(to_string(value.second.backoff)) : "0");
-								// Добавляем частоту отката
-								result.append(move(backoff));
+							// Получаем данные контекста
+							context = move(this->context(&value.second));
+							// Если контекст получен
+							if(!context.empty()){
+								// Формируем результат с учётом регистра
+								result = move(this->alphabet->format("%s\t%s", weight.c_str(), context.c_str()));
+								// Если контекст существует
+								if(!result.empty()){
+									// Если слово имеет частоту отката
+									if((gram < this->size) && ((value.second.backoff != this->zero) && (this->weights(&value.second) != 0.0f))){
+										// Добавляем разделитель
+										result.append("\t");
+										// Получаем обратную частоту модели
+										backoff = (value.second.backoff != 0.0f ? move(to_string(value.second.backoff)) : "0");
+										// Добавляем частоту отката
+										result.append(move(backoff));
+									}
+									// Если слово существует, выводим его
+									callback(result);
+								}
 							}
-							// Если слово существует, выводим его
-							if(!result.empty()) callback(result);
 						}
 					}
 				}
@@ -2809,6 +2892,8 @@ void anyks::Arpa::grams(const u_short gram, function <void (const string &)> cal
 	if(!this->vocab.empty()){
 		// Если это юниграмма
 		if(gram == 1){
+			// Слово для извлечения
+			string word = "";
 			// Список регистров слова
 			std::set <size_t> uppers;
 			// Переходим по всему списку юниграмм
@@ -2824,12 +2909,16 @@ void anyks::Arpa::grams(const u_short gram, function <void (const string &)> cal
 					if(!uppers.empty()){
 						// Переходим по всему списку регистров
 						for(auto & ups : uppers){
+							// Получаем слово
+							word = move(this->word(value.second.idw, ups));
 							// Выводим слово с учётом регистра
-							callback(this->alphabet->format("%s\t%lld | %lld", this->word(value.second.idw, ups).c_str(), value.second.oc, value.second.dc));
+							if(!word.empty()) callback(this->alphabet->format("%s\t%lld | %lld", word.c_str(), value.second.oc, value.second.dc));
 						}
 					}
+					// Получаем слово
+					word = move(this->word(value.second.idw));
 					// Выводим слово без учёта регистра
-					callback(this->alphabet->format("%s\t%lld | %lld", this->word(value.second.idw).c_str(), value.second.oc, value.second.dc));
+					if(!word.empty()) callback(this->alphabet->format("%s\t%lld | %lld", word.c_str(), value.second.oc, value.second.dc));
 				}
 			}
 		// Если это n-грамма
@@ -2842,14 +2931,18 @@ void anyks::Arpa::grams(const u_short gram, function <void (const string &)> cal
 			if(!ngrams.empty()){
 				// Значение регистров слова
 				size_t uppers = 0;
+				// Полученный контекст
+				string context = "";
 				// Переходим по всему списку полученных n-грамм
 				for(auto & item : ngrams){
 					// Переходим по всему списку слов
 					for(auto & value : * item){
 						// Если это верная n-грамма
 						if(value.second.weight != 0.0f){
+							// Получаем данные контекста
+							context = move(this->context(&value.second));
 							// Формируем результат с учётом регистра
-							callback(this->alphabet->format("%s\t%lld | %lld", this->context(&value.second).c_str(), value.second.oc, value.second.dc));
+							if(!context.empty()) callback(this->alphabet->format("%s\t%lld | %lld", context.c_str(), value.second.oc, value.second.dc));
 						}
 					}
 				}

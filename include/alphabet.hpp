@@ -43,6 +43,8 @@ namespace anyks {
 	 */
 	typedef class Alphabet {
 		private:
+			// Латинский тип алфавита
+			bool typeLatian = true;
 			// Локализация приложения
 			string encoding = "en_US.UTF-8";
 			// Алфавит словаря
@@ -59,6 +61,8 @@ namespace anyks {
 			std::set <wchar_t> letters;
 			// Список альтернативных букв
 			std::map <wchar_t, wchar_t> alters;
+			// Список похожих букв в разных алфавитах
+			std::map <wchar_t, wchar_t> substitutes;
 		public:
 			/**
 			 * cbegin Метод итератор начала списка
@@ -241,7 +245,7 @@ namespace anyks {
 			 * @param  word римское число
 			 * @return      арабское число
 			 */
-			const u_int roman2Arabic(const wstring & word) const;
+			const u_short roman2Arabic(const wstring & word) const;
 		public:
 			/**
 			 * count Метод получения количества букв в словаре
@@ -354,6 +358,12 @@ namespace anyks {
 			const bool isIsolation(const wchar_t letter) const;
 		public:
 			/**
+			 * rest Метод исправления и детектирования слов со смешенными алфавитами
+			 * @param  word слово для проверки и исправления
+			 * @return      результат проверки
+			 */
+			const bool rest(wstring & word) const;
+			/**
 			 * check Метод проверки соответствии буквы
 			 * @param  letter буква для проверки
 			 * @return        результат проверки
@@ -389,6 +399,11 @@ namespace anyks {
 			 */
 			const std::set <wstring> & getzones() const;
 			/**
+			 * getSubstitutes Метод извлечения букв для исправления слов из смешанных алфавитов
+			 * @param return список букв разных алфавитов соответствующих друг-другу
+			 */
+			const std::map <string, string> & getSubstitutes() const;
+			/**
 			 * urls Метод извлечения координат url адресов в строке
 			 * @param text текст для извлечения url адресов
 			 * @return     список координат с url адресами
@@ -401,6 +416,10 @@ namespace anyks {
 			 */
 			const pair <bool, bool> checkHypLat(const wstring & str) const;
 		public:
+			/**
+			 * clear Метод очистки собранных данных
+			 */
+			void clear();
 			/**
 			 * log Метод вывода текстовой информации в консоль или файл
 			 * @param format   формат строки вывода
@@ -496,6 +515,11 @@ namespace anyks {
 			 * @param alt альтернативная буква
 			 */
 			void setalt(const wchar_t lid, const wchar_t alt);
+			/**
+			 * setSubstitutes Метод установки букв для исправления слов из смешанных алфавитов
+			 * @param letters список букв разных алфавитов соответствующих друг-другу
+			 */
+			void setSubstitutes(const std::map <string, string> & letters);
 		public:
 			/**
 			 * Alphabet Конструктор

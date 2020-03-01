@@ -16,6 +16,7 @@
   - [Файл добавления n-грамм в существующий файл arpa](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D0%B4%D0%BE%D0%B1%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B8%D0%B9-%D1%84%D0%B0%D0%B9%D0%BB-arpa)
   - [Файл изменения частот n-грамм в существующем файле arpa](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F-%D1%87%D0%B0%D1%81%D1%82%D0%BE%D1%82-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B5%D0%BC-%D1%84%D0%B0%D0%B9%D0%BB%D0%B5-arpa)
   - [Файл замены n-грамм в существующем файле arpa](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D0%B7%D0%B0%D0%BC%D0%B5%D0%BD%D1%8B-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B5%D0%BC-%D1%84%D0%B0%D0%B9%D0%BB%D0%B5-arpa)
+  - [Файл похожих букв в разных словарях](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D0%B7%D0%B0%D0%BC%D0%B5%D0%BD%D1%8B-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B5%D0%BC-%D1%84%D0%B0%D0%B9%D0%BB%D0%B5-arpa)
   - [Файл удаления n-грамм в существующем файле arpa](https://github.com/anyks/alm/blob/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D1%83%D0%B4%D0%B0%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%81%D1%83%D1%89%D0%B5%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B5%D0%BC-%D1%84%D0%B0%D0%B9%D0%BB%D0%B5-arpa)
   - [Файл списка аббревиатур](https://github.com/anyks/alm/tree/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D1%81%D0%BF%D0%B8%D1%81%D0%BA%D0%B0-%D0%B0%D0%B1%D0%B1%D1%80%D0%B5%D0%B2%D0%B8%D0%B0%D1%82%D1%83%D1%80)
   - [Файл списка доменных зон](https://github.com/anyks/alm/tree/master/site#%D1%84%D0%B0%D0%B9%D0%BB-%D1%81%D0%BF%D0%B8%D1%81%D0%BA%D0%B0-%D0%B4%D0%BE%D0%BC%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D0%B7%D0%BE%D0%BD)
@@ -28,6 +29,8 @@
   - [Пример исправления arpa](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%B8%D1%81%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-arpa)
   - [Пример удаления n-грамм у которых частота ниже backoff](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D1%83%D0%B4%D0%B0%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D1%83-%D0%BA%D0%BE%D1%82%D0%BE%D1%80%D1%8B%D1%85-%D1%87%D0%B0%D1%81%D1%82%D0%BE%D1%82%D0%B0-%D0%BD%D0%B8%D0%B6%D0%B5-backoff)
   - [Пример прунинга arpa](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%BF%D1%80%D1%83%D0%BD%D0%B8%D0%BD%D0%B3%D0%B0-arpa)
+  - [Пример прунинга словаря](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%BF%D1%80%D1%83%D0%BD%D0%B8%D0%BD%D0%B3%D0%B0-arpa)
+  - [Пример детектирования и исправления слов состоящих из смешанных словарей](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%BF%D1%80%D1%83%D0%BD%D0%B8%D0%BD%D0%B3%D0%B0-arpa)
   - [Информация о бинарном контейнере](https://github.com/anyks/alm/blob/master/site#%D0%B8%D0%BD%D1%84%D0%BE%D1%80%D0%BC%D0%B0%D1%86%D0%B8%D1%8F-%D0%BE-%D0%B1%D0%B8%D0%BD%D0%B0%D1%80%D0%BD%D0%BE%D0%BC-%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%B9%D0%BD%D0%B5%D1%80%D0%B5)
   - [Пример модификации arpa](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%BC%D0%BE%D0%B4%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%86%D0%B8%D0%B8-arpa)
   - [Обучение с предобработкой полученных слов](https://github.com/anyks/alm/blob/master/site#%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D1%81-%D0%BF%D1%80%D0%B5%D0%B4%D0%BE%D0%B1%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BA%D0%BE%D0%B9-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B5%D0%BD%D0%BD%D1%8B%D1%85-%D1%81%D0%BB%D0%BE%D0%B2)
@@ -408,6 +411,28 @@ unq=9390
 
 ---
 
+### Файл похожих букв в разных словарях
+```
+p  р
+c  с
+o  о
+t  т
+k  к
+e  е
+a  а
+h  н
+x  х
+b  в
+m  м
+...
+```
+
+| Искомая буква | Разделитель | Буква на замену   |
+|---------------|-------------|-------------------|
+| t             | \t          | т                 |
+
+---
+
 ### Файл удаления n-грамм в существующем файле arpa
 ```
 ну то есть
@@ -601,8 +626,24 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 
 ### Пример прунинга arpa
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method prune -debug 1 -w-arpa ./lm2.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab -prune-threshold 0.003 -prune-max-gram 2
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method aprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -r-map ./lm.map -r-vocab ./lm.vocab -prune-threshold 0.003 -prune-max-gram 2
 ```
+
+### Пример прунинга словаря
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-threshold -9.11
+```
+
+> **Прунинг словаря** - позволяет удалить низкочастотные слова которые предположительно содержат **ошибки/опечатки**. Прунинг производится по порогу параметра **wltf**.
+
+### Пример детектирования и исправления слов состоящих из смешанных словарей
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -reset-unk -interpolate -mixed-dicts -corpus ./text.txt -r-mix-restwords ./restwords.txt
+```
+
+> Слова в тексте, которые содержат опечатки в виде похожих букв алфавита другого языка, будут исправлены, если в файле [restwords.txt](#) существуют буквы для замены.
 
 ### Информация о бинарном контейнере
 ```bash

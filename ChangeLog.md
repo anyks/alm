@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.0.2 New methods and bug fixes
+- vprune - vocabulary pruning method
+- flag allowing the use of words consisting of mixed dictionaries
+- file address for restore mixed words for import
+
 ## 1.0.1 Performance improvements, bug fixes
 - flag to reset the frequency of an unknown word
 - flag export in binary dictionary of all data
