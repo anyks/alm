@@ -12,7 +12,7 @@
  * use Метод получения текущего размеры n-граммы
  * @return текущий размер n-граммы
  */
-const u_short anyks::Arpa::use() const {
+const u_short anyks::Arpa::use() const noexcept {
 	// Получаем позицию в списке минимальной встречаемости n-граммы
 	return ((this->gram > MAXSIZE) || this->isOption(options_t::allGrams) ? 0 : this->gram);
 }
@@ -20,7 +20,7 @@ const u_short anyks::Arpa::use() const {
  * unigrams Метод получения количества частотных юниграмм
  * @return количество юниграмм
  */
-const size_t anyks::Arpa::unigrams() const {
+const size_t anyks::Arpa::unigrams() const noexcept {
 	// Выводим количество юниграмм
 	return (this->vocab.size() - 1);
 }
@@ -29,7 +29,7 @@ const size_t anyks::Arpa::unigrams() const {
  * @param context контекст которому принадлежит слово
  * @return        идентификатор первого слова в n-грамме
  */
-const size_t anyks::Arpa::midw(const vocab_t * context) const {
+const size_t anyks::Arpa::midw(const vocab_t * context) const noexcept {
 	// Результат работы функции
 	size_t result = 0;
 	// Если контекст передан
@@ -50,7 +50,7 @@ const size_t anyks::Arpa::midw(const vocab_t * context) const {
  * @param context контекст n-граммы
  * @return        регистр слова
  */
-const anyks::pair_t anyks::Arpa::uppers(const vocab_t * context) const {
+const anyks::pair_t anyks::Arpa::uppers(const vocab_t * context) const noexcept {
 	// Результат работы функции
 	pair_t result = make_pair(0, 0);
 	// Если контекст передан
@@ -64,7 +64,7 @@ const anyks::pair_t anyks::Arpa::uppers(const vocab_t * context) const {
  * @param  oc  встречаемость граммы
  * @return     регистр слова
  */
-const anyks::pair_t anyks::Arpa::uppers(const std::map <size_t, size_t> & ups, const size_t oc) const {
+const anyks::pair_t anyks::Arpa::uppers(const std::map <size_t, size_t> & ups, const size_t oc) const noexcept {
 	// Результат работы функции
 	pair_t result = make_pair(0, 0);
 	// Если результат не пустой
@@ -94,7 +94,7 @@ const anyks::pair_t anyks::Arpa::uppers(const std::map <size_t, size_t> & ups, c
  * @param ngram контекст для расчёта
  * @return      сумма всех весов дочерних грамм
  */
-const float anyks::Arpa::weights(const vocab_t * ngram) const {
+const float anyks::Arpa::weights(const vocab_t * ngram) const noexcept {
 	// Результат работы функции
 	float result = 0.0f;
 	// Если список n-грамм получен
@@ -112,7 +112,7 @@ const float anyks::Arpa::weights(const vocab_t * ngram) const {
  * @param gram    размер n-граммы для отката
  * @return        результат расчёта обратной частоты
  */
-const float anyks::Arpa::backoff(const size_t idw, const vocab_t * context, const u_short gram) const {
+const float anyks::Arpa::backoff(const size_t idw, const vocab_t * context, const u_short gram) const noexcept {
 	// Результат работы функции
 	float result = 0.0f;
 	// Если это нулевая грамма
@@ -176,7 +176,7 @@ const float anyks::Arpa::backoff(const size_t idw, const vocab_t * context, cons
  * @param option опция для проверки
  * @return       результат проверки
  */
-const bool anyks::Arpa::isOption(const options_t option) const {
+const bool anyks::Arpa::isOption(const options_t option) const noexcept {
 	// Выполняем проверку наличия опции
 	return this->options.test((u_short) option);
 }
@@ -185,7 +185,7 @@ const bool anyks::Arpa::isOption(const options_t option) const {
  * @param  seq последовательность для проверки
  * @return     результат проверки
  */
-const bool anyks::Arpa::isContext(const vector <size_t> & seq) const {
+const bool anyks::Arpa::isContext(const vector <size_t> & seq) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если последовательность передана
@@ -213,7 +213,7 @@ const bool anyks::Arpa::isContext(const vector <size_t> & seq) const {
  * @param ngram контекст для расчёта
  * @return      результат расчёта
  */
-const bool anyks::Arpa::backoffs(const u_short gram, vocab_t * ngram) const {
+const bool anyks::Arpa::backoffs(const u_short gram, vocab_t * ngram) const noexcept {
 	// Результат работы функции
 	bool result = true;
 	// Если данные граммы переданы
@@ -272,7 +272,7 @@ const bool anyks::Arpa::backoffs(const u_short gram, vocab_t * ngram) const {
  * @param gram размер n-граммы для работы
  * @return     результат проверки
  */
-const bool anyks::Arpa::checkIdw(const size_t idw, const u_short gram) const {
+const bool anyks::Arpa::checkIdw(const size_t idw, const u_short gram) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если идентификатор и граммность переданы верно
@@ -309,7 +309,7 @@ const bool anyks::Arpa::checkIdw(const size_t idw, const u_short gram) const {
  * @param numerator   разность частот n-грамм
  * @param denominator разность частот отката n-грамм
  */
-const bool anyks::Arpa::compute(vocab_t * ngram, const u_short gram, double & numerator, double & denominator) const {
+const bool anyks::Arpa::compute(vocab_t * ngram, const u_short gram, double & numerator, double & denominator) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Проверяем включён ли режим отладки
@@ -384,7 +384,7 @@ const bool anyks::Arpa::compute(vocab_t * ngram, const u_short gram, double & nu
  * @param context контекст n-граммы
  * @return        текст контекста n-граммы
  */
-const string anyks::Arpa::context(const vocab_t * context) const {
+const string anyks::Arpa::context(const vocab_t * context) const noexcept {
 	// Результат работы функции
 	string result = "";
 	// Если контекстпередан
@@ -421,7 +421,7 @@ const string anyks::Arpa::context(const vocab_t * context) const {
  * @param ups регистры слова
  * @return    слово соответствующее идентификатору
  */
-const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
+const string anyks::Arpa::word(const size_t idw, const size_t ups) const noexcept {
 	// Результат работы функции
 	string result = "";
 	// Определяем тип записи
@@ -489,7 +489,7 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const {
  * distribute Метод перерасчёта частоты
  * @param mass разность частот n-грамм
  */
-void anyks::Arpa::distribute(const double mass) const {
+void anyks::Arpa::distribute(const double mass) const noexcept {
 	// Если контекст существует
 	if(!this->vocab.empty()){
 		// Количество слов
@@ -564,7 +564,7 @@ void anyks::Arpa::distribute(const double mass) const {
  * и устанавливаем такую же вероятность,
  * как и алгоритм отката (чтобы не изменять распределение).
  */
-void anyks::Arpa::fixupProbs(const u_short gram) const {
+void anyks::Arpa::fixupProbs(const u_short gram) const noexcept {
 	// Если n-грамма передана
 	if(gram <= this->size){
 		// Количество фейковых частот
@@ -676,7 +676,7 @@ void anyks::Arpa::fixupProbs(const u_short gram) const {
  * @param idw    идентификатор слова для которого требуется получить регистры
  * @param uppers список регистров слова
  */
-void anyks::Arpa::uniUppers(const size_t idw, std::set <size_t> & uppers) const {
+void anyks::Arpa::uniUppers(const size_t idw, std::set <size_t> & uppers) const noexcept {
 	// Очищаем список регистров слов
 	if(!uppers.empty()) uppers.clear();
 	// Если идентификатор передан
@@ -713,7 +713,7 @@ void anyks::Arpa::uniUppers(const size_t idw, std::set <size_t> & uppers) const 
  * @param gram   размер n-граммы список грамм которой нужно извлечь
  * @param ngrams указатель на список запрашиваемых n-грамм
  */
-void anyks::Arpa::get(const u_short gram, list <vocab_t *> * ngrams) const {
+void anyks::Arpa::get(const u_short gram, list <vocab_t *> * ngrams) const noexcept {
 	/**
 	 * runFn Прототип функции перехода по граммам
 	 * @param размер текущей n-граммы
@@ -723,7 +723,7 @@ void anyks::Arpa::get(const u_short gram, list <vocab_t *> * ngrams) const {
 	 * runFn Функция перехода по граммам
 	 * @param gram размер текущей n-граммы
 	 */
-	runFn = [&](const u_short gram){
+	runFn = [&](const u_short gram) noexcept {
 		// Параметры следующего шага
 		list <vocab_t *> tmp;
 		// Если это нулевая n-грамма
@@ -784,7 +784,7 @@ void anyks::Arpa::get(const u_short gram, list <vocab_t *> * ngrams) const {
  * nodiscount Метод проверки на необходимость расчёта скидки
  * @return результат проверки
  */
-const bool anyks::Arpa::nodiscount() const {
+const bool anyks::Arpa::nodiscount() const noexcept {
 	// Выводим результат
 	return false;
 }
@@ -792,7 +792,7 @@ const bool anyks::Arpa::nodiscount() const {
  * prepare Метод разбора встречаемостей
  * @param gram максимальный размер n-граммы
  */
-void anyks::Arpa::prepare(const u_short gram) const {
+void anyks::Arpa::prepare(const u_short gram) const noexcept {
 	// Выходим
 	return;
 }
@@ -801,7 +801,7 @@ void anyks::Arpa::prepare(const u_short gram) const {
  * @param  gram максимальный размер n-граммы
  * @return      результат оценки
  */
-const bool anyks::Arpa::estimate(const u_short gram) const {
+const bool anyks::Arpa::estimate(const u_short gram) const noexcept {
 	// Выполняем извлечение списков n-грамм в память
 	this->get(gram);
 	// Выводим результат
@@ -814,7 +814,7 @@ const bool anyks::Arpa::estimate(const u_short gram) const {
  * @param  observed количество существующих n-грамм
  * @return          результат расчёта
  */
-const double anyks::Arpa::discount(const size_t count, const size_t total, const size_t observed) const {
+const double anyks::Arpa::discount(const size_t count, const size_t total, const size_t observed) const noexcept {
 	// Выводим результат
 	return 1.0;
 }
@@ -826,7 +826,7 @@ const double anyks::Arpa::discount(const size_t count, const size_t total, const
  * @param  min3Vocab встречаемость больше 3-х раз
  * @return           результат расчёта интерполяции
  */
-const double anyks::Arpa::lowerWeight(const size_t total, const size_t observed, const size_t min2Vocab, const size_t min3Vocab) const {
+const double anyks::Arpa::lowerWeight(const size_t total, const size_t observed, const size_t min2Vocab, const size_t min3Vocab) const noexcept {
 	// Выводим результат
 	return 0.0;
 }
@@ -834,7 +834,7 @@ const double anyks::Arpa::lowerWeight(const size_t total, const size_t observed,
  * stamp Метод вывода штампа файла
  * @return строка с данными штампа
  */
-const string anyks::Arpa::stamp() const {
+const string anyks::Arpa::stamp() const noexcept {
 	// Создаем буфер для хранения даты
 	char date[80];
 	// Заполняем его нулями
@@ -870,7 +870,7 @@ const string anyks::Arpa::stamp() const {
  * @param idw идентификатор слова для проверки
  * @return    результат проверки
  */
-const bool anyks::Arpa::event(const size_t idw) const {
+const bool anyks::Arpa::event(const size_t idw) const noexcept {
 	// Если это не спец-слова, формируем слово
 	return (
 		(idw != size_t(token_t::num)) &&
@@ -898,7 +898,7 @@ const bool anyks::Arpa::event(const size_t idw) const {
  * @param seq    список идентификаторов слов которые нужно добавить
  * @param weight вес n-граммы из файла arpa
  */
-const bool anyks::Arpa::emplace(const vector <pair_t> & seq, const float weight) const {
+const bool anyks::Arpa::emplace(const vector <pair_t> & seq, const float weight) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если список последовательностей передан
@@ -908,7 +908,7 @@ const bool anyks::Arpa::emplace(const vector <pair_t> & seq, const float weight)
 		 * @param seq последовательность для проверки
 		 * @return    результат проверки
 		 */
-		auto checkFn = [this](const vector <pair_t> & seq){
+		auto checkFn = [this](const vector <pair_t> & seq) noexcept {
 			// Результат работф функции
 			bool result = false;
 			// Если последовательность передана
@@ -936,7 +936,7 @@ const bool anyks::Arpa::emplace(const vector <pair_t> & seq, const float weight)
 		 * @param ups регистры слова
 		 * @param obj карта последовательности
 		 */
-		auto addFn = [weight, this](const size_t idw, const size_t ups, vocab_t * obj){
+		auto addFn = [weight, this](const size_t idw, const size_t ups, vocab_t * obj) noexcept {
 			// Запоминаем текущий объект
 			const vocab_t * father = obj;
 			// Добавляем юниграмму в словарь
@@ -1022,7 +1022,7 @@ const bool anyks::Arpa::emplace(const vector <pair_t> & seq, const float weight)
  * @param seq1 последовательность которую нужно заменить
  * @param seq2 последовательность на которую нужно зменить
  */
-const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair_t> & seq2) const {
+const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair_t> & seq2) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Проверяем включён ли режим отладки
@@ -1041,7 +1041,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 			 * variantsFn Функция подборки вариантов для проверки
 			 * @param seq список последовательности
 			 */
-			auto variantsFn = [&variants, noid, this](const vector <size_t> & seq){
+			auto variantsFn = [&variants, noid, this](const vector <size_t> & seq) noexcept {
 				// Если последовательность передана
 				if(!seq.empty()){
 					// Длина последовательности
@@ -1069,7 +1069,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 			 * @param idw идентификатор родительской граммы
 			 * @param seq последовательность для удаления
 			 */
-			auto checkFn = [&ngrams, noid, this](const size_t idw, const vector <size_t> & seq){
+			auto checkFn = [&ngrams, noid, this](const size_t idw, const vector <size_t> & seq) noexcept {
 				// Результат работы функции
 				bool result = false;
 				// Если список n-грамм получен
@@ -1137,7 +1137,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 			 * @param context объект n-граммы для работы
 			 * @param mode    необходимо продолжить работу в следующих граммах
 			 */
-			replaceFn = [&replaceFn, this](const vector <size_t> & seq1, const vector <pair_t> & seq2, const bool mode, vocab_t * context){
+			replaceFn = [&replaceFn, this](const vector <size_t> & seq1, const vector <pair_t> & seq2, const bool mode, vocab_t * context) noexcept {
 				// Запоминаем контекст
 				vocab_t * obj = context;
 				// Переходим по всей последовательности
@@ -1175,7 +1175,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 			/**
 			 * replaceStart Функция заменны n-грамм в начале предложения
 			 */
-			auto replaceStart = [&replaceFn, this](const vector <size_t> & seq1, const vector <pair_t> & seq2){
+			auto replaceStart = [&replaceFn, this](const vector <size_t> & seq1, const vector <pair_t> & seq2) noexcept {
 				// Если последовательности переданы
 				if(!seq1.empty() && !seq2.empty()){
 					// Извлекаем n-грамму начала слова
@@ -1198,7 +1198,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 			 * @param seq1 последовательность которую нужно заменить
 			 * @param seq2 последовательность на которую нужно зменить
 			 */
-			setChildren = [&setChildren, this](const vector <size_t> & seq1, const vector <pair_t> & seq2){
+			setChildren = [&setChildren, this](const vector <size_t> & seq1, const vector <pair_t> & seq2) noexcept {
 				// Если последовательности переданы
 				if(!seq1.empty() && !seq2.empty() && (seq1.size() > 1)){
 					// Смещаем первую последовательность
@@ -1229,7 +1229,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 			 * @param seq1 последовательность которую нужно заменить
 			 * @param seq2 последовательность на которую нужно зменить
 			 */
-			auto repFakeFn = [&setChildren, this](const vector <size_t> & seq1, const vector <pair_t> & seq2){
+			auto repFakeFn = [&setChildren, this](const vector <size_t> & seq1, const vector <pair_t> & seq2) noexcept {
 				// Если последовательности переданы
 				if(!seq1.empty() && !seq2.empty()){
 					// Временная последовательность
@@ -1383,7 +1383,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
  * @param  real выводить реальное количество грамм
  * @return      количество грамм для указанного размера n-граммы
  */
-const size_t anyks::Arpa::count(const u_short gram, const bool real) const {
+const size_t anyks::Arpa::count(const u_short gram, const bool real) const noexcept {
 	// Результат работы функции
 	size_t result = 0;
 	// Если это юниграмма
@@ -1429,7 +1429,7 @@ const size_t anyks::Arpa::count(const u_short gram, const bool real) const {
 /**
  * clear Метод очистки словаря
  */
-void anyks::Arpa::clear(){
+void anyks::Arpa::clear() noexcept {
 	// Сбрасываем обработанные граммы
 	this->gram = 1;
 	// Очищаем словарь n-грамм
@@ -1443,7 +1443,7 @@ void anyks::Arpa::clear(){
  * removeWord Метод удаления слова и всех дочерних n-грамм
  * @param idw идентификатор слова
  */
-void anyks::Arpa::removeWord(const size_t idw){
+void anyks::Arpa::removeWord(const size_t idw) noexcept {
 	// Если слово найдено
 	if((idw > 0) && (this->vocab.count(idw) > 0)){
 		/**
@@ -1455,7 +1455,7 @@ void anyks::Arpa::removeWord(const size_t idw){
 		 * removeFn Функция зануления всех дочерних n-грамм
 		 * @param context позиция текущего контекста
 		 */
-		removeFn = [&removeFn](vocab_t * context){
+		removeFn = [&removeFn](vocab_t * context) noexcept {
 			// Если список не пустой
 			if(!context->empty()){
 				// Переходим по всем n-граммам
@@ -1499,7 +1499,7 @@ void anyks::Arpa::removeWord(const size_t idw){
  * setWordMethod Метод установки функции получения слова
  * @param word функция получения слова
  */
-void anyks::Arpa::setWordMethod(words_t word){
+void anyks::Arpa::setWordMethod(words_t word) noexcept {
 	// Устанавливаем функцию получения слова
 	this->getWord = word;
 }
@@ -1507,7 +1507,7 @@ void anyks::Arpa::setWordMethod(words_t word){
  * setSize Метод установки максимального размера n-граммы
  * @param size максимальный размер n-граммы
  */
-void anyks::Arpa::setSize(const u_short size){
+void anyks::Arpa::setSize(const u_short size) noexcept {
 	// Устанавливаем максимальный размер n-граммы
 	if((size >= 1) && (size <= MAXSIZE)) this->size = size;
 }
@@ -1515,7 +1515,7 @@ void anyks::Arpa::setSize(const u_short size){
  * setLogfile Метод установка файла для вывода логов
  * @param logifle адрес файла для вывода отладочной информации
  */
-void anyks::Arpa::setLogfile(const char * logfile){
+void anyks::Arpa::setLogfile(const char * logfile) noexcept {
 	// Устанавливаем адрес log файла
 	this->logfile = logfile;
 }
@@ -1523,7 +1523,7 @@ void anyks::Arpa::setLogfile(const char * logfile){
  * setOption Метод установки опций модуля
  * @param option опция для установки
  */
-void anyks::Arpa::setOption(const options_t option){
+void anyks::Arpa::setOption(const options_t option) noexcept {
 	// Устанавливаем опции
 	this->options.set((u_short) option);
 }
@@ -1531,7 +1531,7 @@ void anyks::Arpa::setOption(const options_t option){
  * setAlphabet Метод установки алфавита
  * @param alphabet объект алфавита
  */
-void anyks::Arpa::setAlphabet(const alphabet_t * alphabet){
+void anyks::Arpa::setAlphabet(const alphabet_t * alphabet) noexcept {
 	// Устанавливаем алфавит
 	this->alphabet = alphabet;
 }
@@ -1539,7 +1539,7 @@ void anyks::Arpa::setAlphabet(const alphabet_t * alphabet){
  * del Метод удаления последовательности
  * @param seq последовательность слов для удаления
  */
-void anyks::Arpa::del(const vector <size_t> & seq) const {
+void anyks::Arpa::del(const vector <size_t> & seq) const noexcept {
 	// Если список последовательностей передан
 	if(!seq.empty() && (this->size > 0)){
 		// Индекс смещения
@@ -1595,7 +1595,7 @@ void anyks::Arpa::del(const vector <size_t> & seq) const {
  * @param seq   список идентификаторов слов которые нужно увеличить
  * @param value значение на которое нужно увеличить вес n-граммы
  */
-void anyks::Arpa::inc(const vector <pair_t> & seq, const float value) const {
+void anyks::Arpa::inc(const vector <pair_t> & seq, const float value) const noexcept {
 	// Если список последовательностей передан
 	if(!seq.empty() && (this->size > 0)){
 		// Индекс смещения
@@ -1654,7 +1654,7 @@ void anyks::Arpa::inc(const vector <pair_t> & seq, const float value) const {
  * @param buffer буфер с бинарными данными
  * @param arpa   нужно добавить только данные arpa
  */
-void anyks::Arpa::load(const vector <char> & buffer, const bool arpa) const {
+void anyks::Arpa::load(const vector <char> & buffer, const bool arpa) const noexcept {
 	// Если буфер передан
 	if(!buffer.empty()){
 		// Количество слов в последовательности
@@ -1707,7 +1707,7 @@ void anyks::Arpa::load(const vector <char> & buffer, const bool arpa) const {
  * set Метод установки последовательности в словарь
  * @param seq последовательность слов для установки
  */
-void anyks::Arpa::set(const vector <seq_t> & seq) const {
+void anyks::Arpa::set(const vector <seq_t> & seq) const noexcept {
 	// Если список последовательностей передан
 	if(!seq.empty() && (this->size > 0)){
 		// Итератор для подсчета длины n-граммы
@@ -1752,7 +1752,7 @@ void anyks::Arpa::set(const vector <seq_t> & seq) const {
  * @param oc  встречаемость последовательности
  * @param dc  количество документов где встретилась последовательность
  */
-void anyks::Arpa::set(const vector <pair_t> & seq, const size_t oc, const size_t dc) const {
+void anyks::Arpa::set(const vector <pair_t> & seq, const size_t oc, const size_t dc) const noexcept {
 	// Если список последовательностей передан
 	if(!seq.empty() && (this->size > 0)){
 		// Итератор для подсчета длины n-граммы
@@ -1803,7 +1803,7 @@ void anyks::Arpa::set(const vector <pair_t> & seq, const size_t oc, const size_t
  * @param weight  вес n-граммы из файла arpa
  * @param backoff обратная частота документа из файла arpa
  */
-void anyks::Arpa::set(const vector <pair_t> & seq, const float weight, const float backoff) const {
+void anyks::Arpa::set(const vector <pair_t> & seq, const float weight, const float backoff) const noexcept {
 	// Если список последовательностей передан
 	if(!seq.empty() && (this->size > 0)){
 		// Итератор для подсчета длины n-граммы
@@ -1854,7 +1854,7 @@ void anyks::Arpa::set(const vector <pair_t> & seq, const float weight, const flo
  * @param seq список идентификаторов слов которые нужно добавить
  * @param idd идентификатор документа в котором получена n-грамма
  */
-void anyks::Arpa::add(const vector <pair_t> & seq, const size_t idd) const {
+void anyks::Arpa::add(const vector <pair_t> & seq, const size_t idd) const noexcept {
 	// Если список последовательностей передан
 	if(!seq.empty() && (this->size > 0)){
 		// Итератор для подсчета длины n-граммы
@@ -1910,7 +1910,7 @@ void anyks::Arpa::add(const vector <pair_t> & seq, const size_t idd) const {
  * @param weight  вес n-граммы из файла arpa
  * @param backoff обратная частота документа из файла arpa
  */
-void anyks::Arpa::add(const vector <pair_t> & seq, const float weight, const float backoff) const {
+void anyks::Arpa::add(const vector <pair_t> & seq, const float weight, const float backoff) const noexcept {
 	// Если список последовательностей передан
 	if(!seq.empty() && (this->size > 0)){
 		// Итератор для подсчета длины n-граммы
@@ -1972,7 +1972,7 @@ void anyks::Arpa::add(const vector <pair_t> & seq, const float weight, const flo
  * @param idd  идентификатор документа в котором получена n-грамма
  * @param rest необходимо сделать переоценку встречаемости (необходимо если объединяются две карты с разными размерами n-грамм)
  */
-void anyks::Arpa::add(const vector <seq_t> & seq, const size_t idd, const bool rest) const {
+void anyks::Arpa::add(const vector <seq_t> & seq, const size_t idd, const bool rest) const noexcept {
 	// Если список последовательностей передан
 	if(!seq.empty() && (this->size > 0)){
 		// Итератор для подсчета длины n-граммы
@@ -2030,7 +2030,7 @@ void anyks::Arpa::add(const vector <seq_t> & seq, const size_t idd, const bool r
  * @param mingram   значение минимальной n-граммы за которую нельзя прунить
  * @param status    функция вывода статуса обучения
  */
-void anyks::Arpa::prune(const double threshold, const u_short mingram, function <void (const u_short)> status) const {
+void anyks::Arpa::prune(const double threshold, const u_short mingram, function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
 	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
 	// Если словарь не пустой
@@ -2041,7 +2041,7 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
 		 * @param context контекст которому принадлежит слово
 		 * @return        подсчитанная сумма весов
 		 */
-		auto sumFn = [this](const u_short gram, const vocab_t * context){
+		auto sumFn = [this](const u_short gram, const vocab_t * context) noexcept {
 			// Результат работы функции
 			float result = 0.0f;
 			// Если контекст передан
@@ -2235,7 +2235,7 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
  * sweep Метод удаления низкочастотных n-грамм arpa
  * @param status статус расёта
  */
-void anyks::Arpa::sweep(function <void (const u_short)> status) const {
+void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
 	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
 	// Если словарь не пустой
@@ -2262,7 +2262,7 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const {
 			 * removeFn Функция зануления всех дочерних n-грамм
 			 * @param context позиция текущего контекста
 			 */
-			removeFn = [&removeFn](vocab_t * context){
+			removeFn = [&removeFn](vocab_t * context) noexcept {
 				// Если список не пустой
 				if(!context->empty()){
 					// Переходим по всем n-граммам
@@ -2336,7 +2336,7 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const {
  * trian Метод расёта частот n-грамм
  * @param status статус расёта
  */
-void anyks::Arpa::train(function <void (const u_short)> status) const {
+void anyks::Arpa::train(function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
 	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
 	// Если словарь не пустой
@@ -2355,7 +2355,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 		 * estimate1Fn Функция первоначального подсчёта грамм
 		 * @param oc встречаемость n-граммы
 		 */
-		auto estimate1Fn = [this](const size_t oc){
+		auto estimate1Fn = [this](const size_t oc) noexcept {
 			// Считаем существующее слова
 			this->param.observed++;
 			// Считаем общее количество встречаемости
@@ -2369,7 +2369,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
 		 * @param idw   идентификатор слова
 		 * @param ngram параметры граммы
 		 */
-		auto estimate2Fn = [debug, &interpolate, this](const size_t idw, vocab_t * ngram){
+		auto estimate2Fn = [debug, &interpolate, this](const size_t idw, vocab_t * ngram) noexcept {
 			// Результат расчёта
 			float lprob = 0.0f;
 			// Вероятность n-граммы
@@ -2644,7 +2644,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const {
  * repair Метод ремонта уже расчитанной ранее arpa
  * @param status статус расёта
  */
-void anyks::Arpa::repair(function <void (const u_short)> status) const {
+void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
 	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
 	// Если словарь не пустой
@@ -2755,7 +2755,7 @@ void anyks::Arpa::repair(function <void (const u_short)> status) const {
  * @param gram     размер n-граммы для извлечения
  * @param callback функция обратного вызова
  */
-void anyks::Arpa::data(const u_short gram, function <void (const string &)> callback) const {
+void anyks::Arpa::data(const u_short gram, function <void (const string &)> callback) const noexcept {
 	// Если n-граммы существуют
 	if(!this->vocab.empty()){
 		// Строка результата и вес n-граммы
@@ -2887,7 +2887,7 @@ void anyks::Arpa::data(const u_short gram, function <void (const string &)> call
  * @param gram     размер n-граммы для извлечения
  * @param callback функция обратного вызова
  */
-void anyks::Arpa::grams(const u_short gram, function <void (const string &)> callback) const {
+void anyks::Arpa::grams(const u_short gram, function <void (const string &)> callback) const noexcept {
 	// Если n-граммы существуют
 	if(!this->vocab.empty()){
 		// Если это юниграмма
@@ -2956,7 +2956,7 @@ void anyks::Arpa::grams(const u_short gram, function <void (const string &)> cal
  * @param arpa     флаг извлечения только arpa
  * @param callback функция обратного вызова
  */
-void anyks::Arpa::save(const bool arpa, function <void (const vector <char> &, const u_short)> callback) const {
+void anyks::Arpa::save(const bool arpa, function <void (const vector <char> &, const u_short)> callback) const noexcept {
 	// Если данные загружены
 	if(!this->vocab.empty()){
 		// Данные последовательности
@@ -2970,7 +2970,7 @@ void anyks::Arpa::save(const bool arpa, function <void (const vector <char> &, c
 		/**
 		 * resultFn Метод формирования результата
 		 */
-		auto resultFn = [&buffer, &seq, &index, &callback, this]{
+		auto resultFn = [&buffer, &seq, &index, &callback, this]() noexcept {
 			// Получаем количество n-грамм в списке
 			u_short count = seq.size();
 			// Получаем бинарные данные количества слов
@@ -2998,7 +2998,7 @@ void anyks::Arpa::save(const bool arpa, function <void (const vector <char> &, c
 		 * runFn Функция запуска формирования map карты последовательностей
 		 * @param vocab словарь для извлечения слова с его параметрами
 		 */
-		runFn = [&](const vocab_t * vocab){
+		runFn = [&](const vocab_t * vocab) noexcept {
 			// Регистры слова
 			pair_t uppers;
 			// Идентификатор полученного и добавленного слова
@@ -3056,7 +3056,7 @@ void anyks::Arpa::save(const bool arpa, function <void (const vector <char> &, c
  * @param callback функция обратного вызова
  * @param delim    разделитель последовательностей
  */
-void anyks::Arpa::map(function <void (const string &, const u_short)> callback, const string & delim) const {
+void anyks::Arpa::map(function <void (const string &, const u_short)> callback, const string & delim) const noexcept {
 	// Если данные загружены
 	if(!this->vocab.empty()){
 		// Регистры слова
@@ -3074,7 +3074,7 @@ void anyks::Arpa::map(function <void (const string &, const u_short)> callback, 
 		 * @param vocab словарь для извлечения слова с его параметрами
 		 * @param str   сформированная строка последовательности
 		 */
-		runFn = [&](const vocab_t * vocab, const string & str){
+		runFn = [&](const vocab_t * vocab, const string & str) noexcept {
 			// Строка для извлечения данных
 			string data = "";
 			// Получаем объект данных
@@ -3127,7 +3127,7 @@ void anyks::Arpa::map(function <void (const string &, const u_short)> callback, 
  * Arpa Конструктор
  * @param word функция получения слова
  */
-anyks::Arpa::Arpa(words_t word){
+anyks::Arpa::Arpa(words_t word) noexcept {
 	// Устанавливаем функцию получения слова
 	this->setWordMethod(word);
 }
@@ -3135,7 +3135,7 @@ anyks::Arpa::Arpa(words_t word){
  * Arpa Конструктор
  * @param alphabet объект алфавита
  */
-anyks::Arpa::Arpa(const alphabet_t * alphabet){
+anyks::Arpa::Arpa(const alphabet_t * alphabet) noexcept {
 	// Устанавливаем алфавит
 	this->setAlphabet(alphabet);
 }
@@ -3144,7 +3144,7 @@ anyks::Arpa::Arpa(const alphabet_t * alphabet){
  * @param alphabet объект алфавита
  * @param word     функция получения слова
  */
-anyks::Arpa::Arpa(const alphabet_t * alphabet, words_t word){
+anyks::Arpa::Arpa(const alphabet_t * alphabet, words_t word) noexcept {
 	// Устанавливаем функцию получения слова
 	this->setWordMethod(word);
 	// Устанавливаем алфавит
@@ -3153,14 +3153,14 @@ anyks::Arpa::Arpa(const alphabet_t * alphabet, words_t word){
 /**
  * ~Arpa Деструктор
  */
-anyks::Arpa::~Arpa(){
+anyks::Arpa::~Arpa() noexcept {
 	// Очищаем выделенную ранее память
 	this->clear();
 }
 /**
  * init Метод инициализации первоначальных данных
  */
-void anyks::GoodTuring::init() const {
+void anyks::GoodTuring::init() const noexcept {
 	// Выделяем память под объект
 	this->minCountTuring.reserve(this->size);
 	this->maxCountTuring.reserve(this->size);
@@ -3178,7 +3178,7 @@ void anyks::GoodTuring::init() const {
  * nodiscount Метод проверки на необходимость расчёта скидки
  * @return результат проверки
  */
-const bool anyks::GoodTuring::nodiscount() const {
+const bool anyks::GoodTuring::nodiscount() const noexcept {
 	// Выполняем проверки, нужно ли отключить дисконтирование
 	return ((this->minCountTuring[this->gram] <= 1) && (this->maxCountTuring[this->gram] <= 0));
 }
@@ -3187,7 +3187,7 @@ const bool anyks::GoodTuring::nodiscount() const {
  * @param  gram максимальный размер n-граммы
  * @return      результат оценки
  */
-const bool anyks::GoodTuring::estimate(const u_short gram) const {
+const bool anyks::GoodTuring::estimate(const u_short gram) const noexcept {
 	// Получаем максимальное значение встречаемости граммы
 	const size_t maxCount = this->maxCountTuring[gram];
 	// Встречаемость каждой граммы
@@ -3293,7 +3293,7 @@ const bool anyks::GoodTuring::estimate(const u_short gram) const {
  * @param  observed количество существующих n-грамм
  * @return          результат расчёта
  */
-const double anyks::GoodTuring::discount(const size_t count, const size_t total, const size_t observed) const {
+const double anyks::GoodTuring::discount(const size_t count, const size_t total, const size_t observed) const noexcept {
 	// Выполняем дисконтирование
 	if(count <= 0) return 1.0;
 	else if(count < this->minCount[this->gram]) return 0.0;
@@ -3304,7 +3304,7 @@ const double anyks::GoodTuring::discount(const size_t count, const size_t total,
  * GoodTuring Конструктор
  * @param word функция получения слова
  */
-anyks::GoodTuring::GoodTuring(words_t word) : Arpa(word) {
+anyks::GoodTuring::GoodTuring(words_t word) noexcept : Arpa(word) {
 	// Выполняем инициализацию данных
 	this->init();
 }
@@ -3312,7 +3312,7 @@ anyks::GoodTuring::GoodTuring(words_t word) : Arpa(word) {
  * GoodTuring Конструктор
  * @param alphabet объект алфавита
  */
-anyks::GoodTuring::GoodTuring(const alphabet_t * alphabet) : Arpa(alphabet) {
+anyks::GoodTuring::GoodTuring(const alphabet_t * alphabet) noexcept : Arpa(alphabet) {
 	// Выполняем инициализацию данных
 	this->init();
 }
@@ -3321,7 +3321,7 @@ anyks::GoodTuring::GoodTuring(const alphabet_t * alphabet) : Arpa(alphabet) {
  * @param alphabet объект алфавита
  * @param word     функция получения слова
  */
-anyks::GoodTuring::GoodTuring(const alphabet_t * alphabet, words_t word) : Arpa(alphabet, word) {
+anyks::GoodTuring::GoodTuring(const alphabet_t * alphabet, words_t word) noexcept : Arpa(alphabet, word) {
 	// Выполняем инициализацию данных
 	this->init();
 }
@@ -3329,7 +3329,7 @@ anyks::GoodTuring::GoodTuring(const alphabet_t * alphabet, words_t word) : Arpa(
  * nodiscount Метод проверки на необходимость расчёта скидки
  * @return результат проверки
  */
-const bool anyks::ConstDiscount::nodiscount() const {
+const bool anyks::ConstDiscount::nodiscount() const noexcept {
 	// Выполняем проверки, нужно ли отключить дисконтирование
 	return ((this->minCount[this->use()] <= 1) && (this->cdiscount[this->gram] == 0.0));
 }
@@ -3337,7 +3337,7 @@ const bool anyks::ConstDiscount::nodiscount() const {
  * init Метод инициализации первоначальных данных
  * @param discount значение дискаунта для расчёта
  */
-void anyks::ConstDiscount::init(const double discount) const {
+void anyks::ConstDiscount::init(const double discount) const noexcept {
 	// Выделяем память под объект
 	this->cdiscount.reserve(this->size);
 	// Формируем данные по умолчанию
@@ -3350,7 +3350,7 @@ void anyks::ConstDiscount::init(const double discount) const {
  * @param  observed количество существующих n-грамм
  * @return          результат расчёта
  */
-const double anyks::ConstDiscount::discount(const size_t count, const size_t total, const size_t observed) const {
+const double anyks::ConstDiscount::discount(const size_t count, const size_t total, const size_t observed) const noexcept {
 	// Выполняем дисконтирование
 	return ((count <= 0) ? 1.0 : (count < size_t(this->minCount[this->use()])) ? 0.0 : ((double(count) - this->cdiscount[this->gram]) / double(count)));
 }
@@ -3362,7 +3362,7 @@ const double anyks::ConstDiscount::discount(const size_t count, const size_t tot
  * @param  min3Vocab встречаемость больше 3-х раз
  * @return           результат расчёта интерполяции
  */
-const double anyks::ConstDiscount::lowerWeight(const size_t total, const size_t observed, const size_t min2Vocab, const size_t min3Vocab) const {
+const double anyks::ConstDiscount::lowerWeight(const size_t total, const size_t observed, const size_t min2Vocab, const size_t min3Vocab) const noexcept {
 	// Выполняем расчёт интерполяции
 	return (this->cdiscount[this->gram] * double(observed) / double(total));
 }
@@ -3370,7 +3370,7 @@ const double anyks::ConstDiscount::lowerWeight(const size_t total, const size_t 
  * ConstDiscount Конструктор
  * @param discount значение дисконтирования
  */
-anyks::ConstDiscount::ConstDiscount(const double discount){
+anyks::ConstDiscount::ConstDiscount(const double discount) noexcept {
 	// Выполняем инициализацию данных
 	this->init(discount);
 }
@@ -3379,7 +3379,7 @@ anyks::ConstDiscount::ConstDiscount(const double discount){
  * @param word     функция получения слова
  * @param discount значение дисконтирования
  */
-anyks::ConstDiscount::ConstDiscount(words_t word, const double discount) : Arpa(word) {
+anyks::ConstDiscount::ConstDiscount(words_t word, const double discount) noexcept : Arpa(word) {
 	// Выполняем инициализацию данных
 	this->init(discount);
 }
@@ -3388,7 +3388,7 @@ anyks::ConstDiscount::ConstDiscount(words_t word, const double discount) : Arpa(
  * @param alphabet объект алфавита
  * @param discount значение дисконтирования
  */
-anyks::ConstDiscount::ConstDiscount(const alphabet_t * alphabet, const double discount) : Arpa(alphabet) {
+anyks::ConstDiscount::ConstDiscount(const alphabet_t * alphabet, const double discount) noexcept : Arpa(alphabet) {
 	// Выполняем инициализацию данных
 	this->init(discount);
 }
@@ -3398,7 +3398,7 @@ anyks::ConstDiscount::ConstDiscount(const alphabet_t * alphabet, const double di
  * @param word     функция получения слова
  * @param discount значение дисконтирования
  */
-anyks::ConstDiscount::ConstDiscount(const alphabet_t * alphabet, words_t word, const double discount) : Arpa(alphabet, word) {
+anyks::ConstDiscount::ConstDiscount(const alphabet_t * alphabet, words_t word, const double discount) noexcept : Arpa(alphabet, word) {
 	// Выполняем инициализацию данных
 	this->init(discount);
 }
@@ -3409,7 +3409,7 @@ anyks::ConstDiscount::ConstDiscount(const alphabet_t * alphabet, words_t word, c
  * @param  observed количество существующих n-грамм
  * @return          результат расчёта
  */
-const double anyks::NaturalDiscount::discount(const size_t count, const size_t total, const size_t observed) const {
+const double anyks::NaturalDiscount::discount(const size_t count, const size_t total, const size_t observed) const noexcept {
 	// Преобразуем в дробную часть
 	double counts      = total;
 	double countsVocab = observed;
@@ -3424,7 +3424,7 @@ const double anyks::NaturalDiscount::discount(const size_t count, const size_t t
  * nodiscount Метод проверки на необходимость расчёта скидки
  * @return результат проверки
  */
-const bool anyks::AddSmooth::nodiscount() const {
+const bool anyks::AddSmooth::nodiscount() const noexcept {
 	// Выполняем проверки, нужно ли отключить дисконтирование
 	return ((this->minCount[this->use()] <= 1) && (this->delta[this->gram] == 0.0));
 }
@@ -3432,7 +3432,7 @@ const bool anyks::AddSmooth::nodiscount() const {
  * init Метод инициализации первоначальных данных
  * @param delta значение дельты для расчёта
  */
-void anyks::AddSmooth::init(const double delta) const {
+void anyks::AddSmooth::init(const double delta) const noexcept {
 	// Выделяем память под объект
 	this->delta.reserve(this->size);
 	// Формируем данные по умолчанию
@@ -3445,7 +3445,7 @@ void anyks::AddSmooth::init(const double delta) const {
  * @param  observed количество существующих n-грамм
  * @return          результат расчёта
  */
-const double anyks::AddSmooth::discount(const size_t count, const size_t total, const size_t observed) const {
+const double anyks::AddSmooth::discount(const size_t count, const size_t total, const size_t observed) const noexcept {
 	// Получаем размер словаря
 	const double size = this->unigrams();
 	// Получаем текущее значение дельты
@@ -3457,7 +3457,7 @@ const double anyks::AddSmooth::discount(const size_t count, const size_t total, 
  * AddSmooth Конструктор
  * @param delta значение дельты для расчёта
  */
-anyks::AddSmooth::AddSmooth(const double delta){
+anyks::AddSmooth::AddSmooth(const double delta) noexcept {
 	// Выполняем инициализацию данных
 	this->init(delta);
 }
@@ -3466,7 +3466,7 @@ anyks::AddSmooth::AddSmooth(const double delta){
  * @param word  функция получения слова
  * @param delta значение дельты для расчёта
  */
-anyks::AddSmooth::AddSmooth(words_t word, const double delta) : Arpa(word) {
+anyks::AddSmooth::AddSmooth(words_t word, const double delta) noexcept : Arpa(word) {
 	// Выполняем инициализацию данных
 	this->init(delta);
 }
@@ -3475,7 +3475,7 @@ anyks::AddSmooth::AddSmooth(words_t word, const double delta) : Arpa(word) {
  * @param alphabet объект алфавита
  * @param delta    значение дельты для расчёта
  */
-anyks::AddSmooth::AddSmooth(const alphabet_t * alphabet, const double delta) : Arpa(alphabet) {
+anyks::AddSmooth::AddSmooth(const alphabet_t * alphabet, const double delta) noexcept : Arpa(alphabet) {
 	// Выполняем инициализацию данных
 	this->init(delta);
 }
@@ -3485,7 +3485,7 @@ anyks::AddSmooth::AddSmooth(const alphabet_t * alphabet, const double delta) : A
  * @param word     функция получения слова
  * @param delta    значение дельты для расчёта
  */
-anyks::AddSmooth::AddSmooth(const alphabet_t * alphabet, words_t word, const double delta) : Arpa(alphabet, word) {
+anyks::AddSmooth::AddSmooth(const alphabet_t * alphabet, words_t word, const double delta) noexcept : Arpa(alphabet, word) {
 	// Выполняем инициализацию данных
 	this->init(delta);
 }
@@ -3496,7 +3496,7 @@ anyks::AddSmooth::AddSmooth(const alphabet_t * alphabet, words_t word, const dou
  * @param  observed количество существующих n-грамм
  * @return          результат расчёта
  */
-const double anyks::WittenBell::discount(const size_t count, const size_t total, const size_t observed) const {
+const double anyks::WittenBell::discount(const size_t count, const size_t total, const size_t observed) const noexcept {
 	// Выполняем дисконтирование
 	return ((count <= 0) ? 1.0 : (count < size_t(this->minCount[this->use()])) ? 0.0 : (double(total) / double(total + observed)));
 }
@@ -3508,7 +3508,7 @@ const double anyks::WittenBell::discount(const size_t count, const size_t total,
  * @param  min3Vocab встречаемость больше 3-х раз
  * @return           результат расчёта интерполяции
  */
-const double anyks::WittenBell::lowerWeight(const size_t total, const size_t observed, const size_t min2Vocab, const size_t min3Vocab) const {
+const double anyks::WittenBell::lowerWeight(const size_t total, const size_t observed, const size_t min2Vocab, const size_t min3Vocab) const noexcept {
 	// Выполняем расчёт интерполяции
 	return (double(observed) / double(total + observed));
 }
@@ -3516,7 +3516,7 @@ const double anyks::WittenBell::lowerWeight(const size_t total, const size_t obs
  * prepare Метод разбора встречаемостей
  * @param gram максимальный размер n-граммы
  */
-void anyks::KneserNey::prepare(const u_short gram) const {
+void anyks::KneserNey::prepare(const u_short gram) const noexcept {
 	// Если все n-граммы обработаны или не нужно модифицировать встречаемости, выходим
 	if(this->modified[gram] || (gram >= this->size)) return;
 	// Проверяем включён ли режим отладки
@@ -3574,7 +3574,7 @@ void anyks::KneserNey::prepare(const u_short gram) const {
  * @param  gram максимальный размер n-граммы
  * @return      результат оценки
  */
-const bool anyks::KneserNey::estimate(const u_short gram) const {
+const bool anyks::KneserNey::estimate(const u_short gram) const noexcept {
 	// Если данные не расчитаны, расчитываем их
 	if(!this->prepares[gram]) this->prepare(gram);
 	// Список n-грамм для работы
@@ -3634,7 +3634,7 @@ const bool anyks::KneserNey::estimate(const u_short gram) const {
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-void anyks::KneserNey::init(const bool modified, const bool prepares) const {
+void anyks::KneserNey::init(const bool modified, const bool prepares) const noexcept {
 	// Выделяем память под объекты
 	this->modified.reserve(this->size);
 	this->prepares.reserve(this->size);
@@ -3653,7 +3653,7 @@ void anyks::KneserNey::init(const bool modified, const bool prepares) const {
  * @param  observed количество существующих n-грамм
  * @return          результат расчёта
  */
-const double anyks::KneserNey::discount(const size_t count, const size_t total, const size_t observed) const {
+const double anyks::KneserNey::discount(const size_t count, const size_t total, const size_t observed) const noexcept {
 	// Если встречаемость не существует
 	if(count <= 0) return 1.0;
 	// Если встречаемость меньше минимального значения
@@ -3669,7 +3669,7 @@ const double anyks::KneserNey::discount(const size_t count, const size_t total, 
  * @param  min3Vocab встречаемость больше 3-х раз
  * @return           результат расчёта интерполяции
  */
-const double anyks::KneserNey::lowerWeight(const size_t total, const size_t observed, const size_t min2Vocab, const size_t min3Vocab) const {
+const double anyks::KneserNey::lowerWeight(const size_t total, const size_t observed, const size_t min2Vocab, const size_t min3Vocab) const noexcept {
 	// Выполняем расчёт интерполяции
 	return (double(this->discounting[this->gram] * observed) / double(total));
 }
@@ -3678,7 +3678,7 @@ const double anyks::KneserNey::lowerWeight(const size_t total, const size_t obse
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::KneserNey::KneserNey(const bool modified, const bool prepares){
+anyks::KneserNey::KneserNey(const bool modified, const bool prepares) noexcept {
 	// Выполняем инициализацию
 	this->init(modified, prepares);
 }
@@ -3688,7 +3688,7 @@ anyks::KneserNey::KneserNey(const bool modified, const bool prepares){
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::KneserNey::KneserNey(words_t word, const bool modified, const bool prepares) : Arpa(word) {
+anyks::KneserNey::KneserNey(words_t word, const bool modified, const bool prepares) noexcept : Arpa(word) {
 	// Выполняем инициализацию
 	this->init(modified, prepares);
 }
@@ -3698,7 +3698,7 @@ anyks::KneserNey::KneserNey(words_t word, const bool modified, const bool prepar
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::KneserNey::KneserNey(const alphabet_t * alphabet, const bool modified, const bool prepares) : Arpa(alphabet) {
+anyks::KneserNey::KneserNey(const alphabet_t * alphabet, const bool modified, const bool prepares) noexcept : Arpa(alphabet) {
 	// Выполняем инициализацию
 	this->init(modified, prepares);
 }
@@ -3709,14 +3709,14 @@ anyks::KneserNey::KneserNey(const alphabet_t * alphabet, const bool modified, co
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::KneserNey::KneserNey(const alphabet_t * alphabet, words_t word, const bool modified, const bool prepares) : Arpa(alphabet, word) {
+anyks::KneserNey::KneserNey(const alphabet_t * alphabet, words_t word, const bool modified, const bool prepares) noexcept : Arpa(alphabet, word) {
 	// Выполняем инициализацию
 	this->init(modified, prepares);
 }
 /**
  * init Метод инициализации первоначальных данных
  */
-void anyks::ModKneserNey::init() const {
+void anyks::ModKneserNey::init() const noexcept {
 	// Выделяем память под объекты
 	this->discountplus.reserve(this->size);
 	this->modDiscounting.reserve(this->size);
@@ -3731,7 +3731,7 @@ void anyks::ModKneserNey::init() const {
  * @param  gram максимальный размер n-граммы
  * @return      результат оценки
  */
-const bool anyks::ModKneserNey::estimate(const u_short gram) const {
+const bool anyks::ModKneserNey::estimate(const u_short gram) const noexcept {
 	// Если данные не расчитаны, расчитываем их
 	if(!this->prepares[gram]) this->prepare(gram);
 	// Список n-грамм для работы
@@ -3797,7 +3797,7 @@ const bool anyks::ModKneserNey::estimate(const u_short gram) const {
  * @param  observed количество существующих n-грамм
  * @return          результат расчёта
  */
-const double anyks::ModKneserNey::discount(const size_t count, const size_t total, const size_t observed) const {
+const double anyks::ModKneserNey::discount(const size_t count, const size_t total, const size_t observed) const noexcept {
 	// Выполняем дисконтирование
 	if(count <= 0) return 1.0;
 	else if(count < size_t(this->minCount[this->use()])) return 0.0;
@@ -3813,7 +3813,7 @@ const double anyks::ModKneserNey::discount(const size_t count, const size_t tota
  * @param  min3Vocab встречаемость больше 3-х раз
  * @return           результат расчёта интерполяции
  */
-const double anyks::ModKneserNey::lowerWeight(const size_t total, const size_t observed, const size_t min2Vocab, const size_t min3Vocab) const {
+const double anyks::ModKneserNey::lowerWeight(const size_t total, const size_t observed, const size_t min2Vocab, const size_t min3Vocab) const noexcept {
 	// Выполняем расчёт интерполяции
 	return (
 		(this->discounting[this->gram] *
@@ -3829,7 +3829,7 @@ const double anyks::ModKneserNey::lowerWeight(const size_t total, const size_t o
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::ModKneserNey::ModKneserNey(const bool modified, const bool prepares) : KneserNey(modified, prepares) {
+anyks::ModKneserNey::ModKneserNey(const bool modified, const bool prepares) noexcept : KneserNey(modified, prepares) {
 	// Выполняем инициализацию
 	this->init();
 }
@@ -3839,7 +3839,7 @@ anyks::ModKneserNey::ModKneserNey(const bool modified, const bool prepares) : Kn
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::ModKneserNey::ModKneserNey(words_t word, const bool modified, const bool prepares) : KneserNey(word, modified, prepares) {
+anyks::ModKneserNey::ModKneserNey(words_t word, const bool modified, const bool prepares) noexcept : KneserNey(word, modified, prepares) {
 	// Выполняем инициализацию
 	this->init();
 }
@@ -3849,7 +3849,7 @@ anyks::ModKneserNey::ModKneserNey(words_t word, const bool modified, const bool 
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::ModKneserNey::ModKneserNey(const alphabet_t * alphabet, const bool modified, const bool prepares) : KneserNey(alphabet, modified, prepares) {
+anyks::ModKneserNey::ModKneserNey(const alphabet_t * alphabet, const bool modified, const bool prepares) noexcept : KneserNey(alphabet, modified, prepares) {
 	// Выполняем инициализацию
 	this->init();
 }
@@ -3860,7 +3860,7 @@ anyks::ModKneserNey::ModKneserNey(const alphabet_t * alphabet, const bool modifi
  * @param modified количество уже изменённых младших заказов
  * @param prepares необходимость изменения счёта, после вычисления
  */
-anyks::ModKneserNey::ModKneserNey(const alphabet_t * alphabet, words_t word, const bool modified, const bool prepares) : KneserNey(alphabet, word, modified, prepares) {
+anyks::ModKneserNey::ModKneserNey(const alphabet_t * alphabet, words_t word, const bool modified, const bool prepares) noexcept : KneserNey(alphabet, word, modified, prepares) {
 	// Выполняем инициализацию
 	this->init();
 }

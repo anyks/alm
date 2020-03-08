@@ -55,40 +55,40 @@ namespace anyks {
 			 * setOffset Метод установки смещения в алфавите
 			 * @param offset смещение в алфавите
 			 */
-			void setOffset(const u_short offset);
+			void setOffset(const u_short offset) noexcept;
 			/**
 			 * get Метод генерирования идентификатора слова
 			 * @param  word слово для генерации
 			 * @return      идентификатор слова
 			 */
-			const size_t get(const wstring & word) const;
+			const size_t get(const wstring & word) const noexcept;
 			/**
 			 * set Метод установки алфавита
 			 * @param alphabet объект алфавита
 			 * @param offset   смещение в алфавите
 			 */
-			void set(const alphabet_t * alphabet, const u_short offset = 0);
+			void set(const alphabet_t * alphabet, const u_short offset = 0) noexcept;
 		public:
 			/**
 			 * Idw Конструктор
 			 */
-			Idw(){};
+			Idw() noexcept {};
 			/**
 			 * Idw Конструктор
 			 * @param offset смещение в алфавите
 			 */
-			Idw(const u_short offset);
+			Idw(const u_short offset) noexcept;
 			/**
 			 * Idw Конструктор
 			 * @param alphabet объект алфавита
 			 */
-			Idw(const alphabet_t * alphabet);
+			Idw(const alphabet_t * alphabet) noexcept;
 			/**
 			 * Idw Конструктор
 			 * @param alphabet объект алфавита
 			 * @param offset   смещение в алфавите
 			 */
-			Idw(const alphabet_t * alphabet, const u_short offset);
+			Idw(const alphabet_t * alphabet, const u_short offset) noexcept;
 	} idw_t;
 };
 

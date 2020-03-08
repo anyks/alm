@@ -13,7 +13,7 @@
  * @param  key переменная окружения
  * @return     значение переменной
  */
-const string anyks::Env::env(const string & key) const {
+const string anyks::Env::env(const string & key) const noexcept {
 	// Результат работы функции
 	string result = "";
 	// Если значение переменной передано
@@ -32,7 +32,7 @@ const string anyks::Env::env(const string & key) const {
  * count Метод извлечения количества аргументов
  * @return количество полученных аргументов
  */
-const u_short anyks::Env::count() const {
+const u_short anyks::Env::count() const noexcept {
 	// Выводим количество собранных аргументов
 	return this->data.size();
 }
@@ -41,7 +41,7 @@ const u_short anyks::Env::count() const {
  * @param  name название переменной окружения
  * @return      значение переменной окружения
  */
-const char * anyks::Env::get(const string & name) const {
+const char * anyks::Env::get(const string & name) const noexcept {
 	// Результат работы функции
 	const char * result = nullptr;
 	// Если название переменной передано
@@ -68,7 +68,7 @@ const char * anyks::Env::get(const string & name) const {
  * @param key ключ - название переменной для проверки
  * @param val значение переменной для проверки (если требуется)
  */
-const bool anyks::Env::is(const string & key, const string & val) const {
+const bool anyks::Env::is(const string & key, const string & val) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если ключ передан
@@ -92,7 +92,7 @@ const bool anyks::Env::is(const string & key, const string & val) const {
  * autoRead Метод разрешения или запрещения автоматического чтения текстовой переменной
  * @param flag значение флага
  */
-void anyks::Env::autoRead(const bool flag){
+void anyks::Env::autoRead(const bool flag) noexcept {
 	// Устанавливаем флаг автоматического чтения текстовой переменной
 	this->aread = flag;
 }
@@ -100,7 +100,7 @@ void anyks::Env::autoRead(const bool flag){
  * textEnv Метод установки списка имён которые нужно извлечь
  * @param text название переменной для извлечения текстовой информации из потока (если параметром не передана)
  */
-void anyks::Env::textEnv(const string & text){
+void anyks::Env::textEnv(const string & text) noexcept {
 	// Если название текстовой переменной передано
 	if(!text.empty()) this->text = move(text);
 }
@@ -108,7 +108,7 @@ void anyks::Env::textEnv(const string & text){
  * prefixEnv Метод установки префикса переменной окружения
  * @param prefix префикс переменной окружения
  */
-void anyks::Env::prefixEnv(const string & prefix){
+void anyks::Env::prefixEnv(const string & prefix) noexcept {
 	// Если префикс передан, устанавливаем его
 	if(!prefix.empty() && (this->alphabet != nullptr)){
 		// Устанавливаем префикс переменной
@@ -119,7 +119,7 @@ void anyks::Env::prefixEnv(const string & prefix){
  * setAlphabet Метод установки алфавита
  * @param alphabet объект алфавита
  */
-void anyks::Env::setAlphabet(const alphabet_t * alphabet){
+void anyks::Env::setAlphabet(const alphabet_t * alphabet) noexcept {
 	// Если алфавит передан
 	if(alphabet != nullptr) this->alphabet = alphabet;
 }
@@ -128,7 +128,7 @@ void anyks::Env::setAlphabet(const alphabet_t * alphabet){
  * @param args  список переменных окружения
  * @param count количество переменных окружения
  */
-void anyks::Env::read(const char * args[], const u_short count){
+void anyks::Env::read(const char * args[], const u_short count) noexcept {
 	// Требуется прочитать значение
 	bool isValue = false;
 	// Позиция найденного значения
@@ -190,7 +190,7 @@ void anyks::Env::read(const char * args[], const u_short count){
  * Env Конструктор
  * @param prefix префикс переменной окружения
  */
-anyks::Env::Env(const string & prefix){
+anyks::Env::Env(const string & prefix) noexcept {
 	// Если префикс передан, устанавливаем его
 	if(!prefix.empty()) this->prefixEnv(prefix);
 }
@@ -198,7 +198,7 @@ anyks::Env::Env(const string & prefix){
  * Env Конструктор
  * @param alphabet объект алфавита
  */
-anyks::Env::Env(const alphabet_t * alphabet){
+anyks::Env::Env(const alphabet_t * alphabet) noexcept {
 	// Устанавливаем переданный алфавит
 	this->setAlphabet(alphabet);
 }
@@ -207,7 +207,7 @@ anyks::Env::Env(const alphabet_t * alphabet){
  * @param prefix префикс переменной окружения
  * @param text   название переменной для извлечения текстовой информации из потока (если параметром не передана)
  */
-anyks::Env::Env(const string & prefix, const string & text){
+anyks::Env::Env(const string & prefix, const string & text) noexcept {
 	// Если текст передан, устанавливаем его
 	if(!text.empty()) this->textEnv(text);
 	// Если префикс передан, устанавливаем его
@@ -218,7 +218,7 @@ anyks::Env::Env(const string & prefix, const string & text){
  * @param prefix   префикс переменной окружения
  * @param alphabet объект алфавита
  */
-anyks::Env::Env(const string & prefix, const alphabet_t * alphabet){
+anyks::Env::Env(const string & prefix, const alphabet_t * alphabet) noexcept {
 	// Устанавливаем переданный алфавит
 	this->setAlphabet(alphabet);
 	// Если префикс передан, устанавливаем его
@@ -230,7 +230,7 @@ anyks::Env::Env(const string & prefix, const alphabet_t * alphabet){
  * @param text     название переменной для извлечения текстовой информации из потока (если параметром не передана)
  * @param alphabet объект алфавита
  */
-anyks::Env::Env(const string & prefix, const string & text, const alphabet_t * alphabet){
+anyks::Env::Env(const string & prefix, const string & text, const alphabet_t * alphabet) noexcept {
 	// Устанавливаем переданный алфавит
 	this->setAlphabet(alphabet);
 	// Если текст передан, устанавливаем его

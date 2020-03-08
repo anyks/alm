@@ -60,43 +60,43 @@ namespace anyks {
 			/**
 			 * clear Метод очистки списка скриптов
 			 */
-			void clear();
+			void clear() noexcept;
 			/**
 			 * setDebug Метод установки режима отладки
 			 */
-			void setDebug();
+			void setDebug() noexcept;
 			/**
 			 * unsetDebug Метод отключения режима отладки
 			 */
-			void unsetDebug();
+			void unsetDebug() noexcept;
 			/**
 			 * remove Метод удаления добавленного скрипта по его имени
 			 * @param sid идентификатор скрипта
 			 */
-			void remove(const size_t sid);
+			void remove(const size_t sid) noexcept;
 			/**
 			 * setTokenizer Метод установки токенизатора
 			 * @param tokenizer указатель на токенизатор
 			 */
-			void setTokenizer(const tokenizer_t * tokenizer);
+			void setTokenizer(const tokenizer_t * tokenizer) noexcept;
 		public:
 			/**
 			 * empty Проверка на пустое количество скриптов
 			 * @return результат проверки
 			 */
-			const bool empty() const;
+			const bool empty() const noexcept;
 			/**
 			 * count Метод определения количества добавленных скриптов
 			 * @return количество добавленных скриптов
 			 */
-			const size_t count() const;
+			const size_t count() const noexcept;
 			/**
 			 * add Метод добавления скрипта
 			 * @param script адрес скрипта
 			 * @param args   количество аргументов передаваемых в функцию запуска
 			 * @return       идентификатор добавленного скрипта
 			 */
-			const size_t add(const string & script, const u_short args = 0);
+			const size_t add(const string & script, const u_short args = 0) noexcept;
 			/**
 			 * run Метод запуска скрипта
 			 * @param  sid  идентификатор скрипта
@@ -104,21 +104,21 @@ namespace anyks {
 			 * @param  arr  массив аргументов для передачи в скрипт
 			 * @return      результат выполнения скрипта
 			 */
-			const wstring run(const size_t sid, const vector <string> & args = {}, const vector <string> & arr = {}) const;
+			const wstring run(const size_t sid, const vector <string> & args = {}, const vector <string> & arr = {}) const noexcept;
 		public:
 			/**
 			 * Python Конструктор
 			 */
-			Python();
+			Python() noexcept;
 			/**
 			 * Python Конструктор
 			 * @param tokenizer указатель на токенизатор
 			 */
-			Python(const tokenizer_t * tokenizer);
+			Python(const tokenizer_t * tokenizer) noexcept;
 			/**
 			 * ~Python Деструктор
 			 */
-			~Python();
+			~Python() noexcept;
 	} python_t;
 };
 

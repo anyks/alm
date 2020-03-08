@@ -12,7 +12,7 @@
  * setOffset Метод установки смещения в алфавите
  * @param offset смещение в алфавите
  */
-void anyks::Idw::setOffset(const u_short offset){
+void anyks::Idw::setOffset(const u_short offset) noexcept {
 	// Запоминаем смещение в словаре
 	this->offset = offset;
 }
@@ -21,7 +21,7 @@ void anyks::Idw::setOffset(const u_short offset){
  * @param  word слово для генерации
  * @return      идентификатор слова
  */
-const size_t anyks::Idw::get(const wstring & word) const {
+const size_t anyks::Idw::get(const wstring & word) const noexcept {
 	// Результат работы функции
 	size_t result = NIDW;
 	// Если слово передано
@@ -48,7 +48,7 @@ const size_t anyks::Idw::get(const wstring & word) const {
  * @param alphabet объект алфавита
  * @param offset   смещение в алфавите
  */
-void anyks::Idw::set(const alphabet_t * alphabet, const u_short offset){
+void anyks::Idw::set(const alphabet_t * alphabet, const u_short offset) noexcept {
 	// Если объект алфавита передан, запоминаем его
 	if(alphabet != nullptr){
 		// Очищаем список модулей
@@ -75,7 +75,7 @@ void anyks::Idw::set(const alphabet_t * alphabet, const u_short offset){
  * Idw Конструктор
  * @param offset смещение в алфавите
  */
-anyks::Idw::Idw(const u_short offset){
+anyks::Idw::Idw(const u_short offset) noexcept {
 	// Устанавливаем смещение в алфавите
 	this->setOffset(offset);
 }
@@ -83,7 +83,7 @@ anyks::Idw::Idw(const u_short offset){
  * Idw Конструктор
  * @param alphabet объект алфавита
  */
-anyks::Idw::Idw(const alphabet_t * alphabet){
+anyks::Idw::Idw(const alphabet_t * alphabet) noexcept {
 	// Выполняем установку алфавита
 	this->set(alphabet);
 }
@@ -92,7 +92,7 @@ anyks::Idw::Idw(const alphabet_t * alphabet){
  * @param alphabet объект алфавита
  * @param offset   смещение в алфавите
  */
-anyks::Idw::Idw(const alphabet_t * alphabet, const u_short offset){
+anyks::Idw::Idw(const alphabet_t * alphabet, const u_short offset) noexcept {
 	// Выполняем установку алфавита
 	this->set(alphabet, offset);
 }

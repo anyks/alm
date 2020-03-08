@@ -13,7 +13,7 @@
  * @param  word слово для генерации
  * @return      идентификатор слова
  */
-const size_t anyks::Toolkit::getIdw(const wstring & word) const {
+const size_t anyks::Toolkit::getIdw(const wstring & word) const noexcept {
 	// Результат работы функции
 	size_t result = idw_t::NIDW;
 	// Если слово передано
@@ -225,6 +225,8 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
 			}
 		}
 	}
+	// Если результат не определён, возвращаем неизвестное слово
+	result = (result > 0 ? result : (size_t) token_t::unk);
 	// Выводим результат
 	return result;
 }
@@ -233,7 +235,7 @@ const size_t anyks::Toolkit::getIdw(const wstring & word) const {
  * @param option опция для проверки
  * @return       результат проверки
  */
-const bool anyks::Toolkit::isOption(const options_t option) const {
+const bool anyks::Toolkit::isOption(const options_t option) const noexcept {
 	// Выполняем проверку наличия опции
 	return this->options.test((u_short) option);
 }
@@ -243,7 +245,7 @@ const bool anyks::Toolkit::isOption(const options_t option) const {
  * @param front первый символ экранирования
  * @param back  последний символ экранирования
  */
-void anyks::Toolkit::clearShielding(const string & word, const string & front, const string & back) const {
+void anyks::Toolkit::clearShielding(const string & word, const string & front, const string & back) const noexcept {
 	// Если слово передано
 	if(!word.empty() && (!front.empty() || !back.empty())){
 		// Избавляемся от модификатора const
@@ -264,7 +266,7 @@ void anyks::Toolkit::clearShielding(const string & word, const string & front, c
  * getSize Метод получения размера n-грамы
  * @return длина n-граммы в языковой моделе
  */
-const u_short anyks::Toolkit::getSize() const {
+const u_short anyks::Toolkit::getSize() const noexcept {
 	// Выводим размер n-грамм в словаре
 	return this->size;
 }
@@ -272,7 +274,7 @@ const u_short anyks::Toolkit::getSize() const {
  * getOptions Метод извлечения установленных опций
  * @return установленные опции
  */
-const u_int anyks::Toolkit::getOptions() const {
+const u_int anyks::Toolkit::getOptions() const noexcept {
 	// Выводим установленные опции
 	return this->options.to_ulong();
 }
@@ -280,7 +282,7 @@ const u_int anyks::Toolkit::getOptions() const {
  * getParams Метод извлечения параметров алгоритма сжатия
  * @return параметры алгоритма сжатия
  */
-const anyks::Toolkit::params_t & anyks::Toolkit::getParams() const {
+const anyks::Toolkit::params_t & anyks::Toolkit::getParams() const noexcept {
 	// Выводим параметры алгоритма сжатия
 	return this->params;
 }
@@ -288,15 +290,15 @@ const anyks::Toolkit::params_t & anyks::Toolkit::getParams() const {
  * getUnknown Метод извлечения неизвестного слова
  * @return установленное неизвестное слово
  */
-const string anyks::Toolkit::getUnknown() const {
+const string & anyks::Toolkit::getUnknown() const noexcept {
 	// Результат работы функции
-	string result = "";
+	static const string result = "";
 	// Если неизвестное слово установлено
 	if(this->unknown > 0){
 		// Выполняем поиск в словаре
 		auto it = this->vocab.find(this->unknown);
 		// Если слово найдено
-		if(it != this->vocab.end()) result = it->second.real();
+		if(it != this->vocab.end()) const_cast <string *> (&result)->assign(it->second.real());
 	}
 	// Выводим результат
 	return result;
@@ -305,15 +307,15 @@ const string anyks::Toolkit::getUnknown() const {
  * getWordScript Метод извлечения скрипта обработки слов
  * @return адрес скрипта python обработки слов
  */
-const string anyks::Toolkit::getWordScript() const {
+const string & anyks::Toolkit::getWordScript() const noexcept {
 	// Результат работы функции
-	string result = "";
+	static const string result = "";
 	// Если скрипты установлены
 	if(!this->scripts.empty()){
 		// Ищем скрипт обработки слов
 		auto it = this->scripts.find(1);
 		// Если скрипт обработки слов установлен
-		if(it != this->scripts.end()) result = it->second.first;
+		if(it != this->scripts.end()) const_cast <string *> (&result)->assign(it->second.first);
 	}
 	// Выводим результат
 	return result;
@@ -322,15 +324,15 @@ const string anyks::Toolkit::getWordScript() const {
  * getUserTokenScript Метод извлечения скрипта обработки пользовательских токенов
  * @return адрес скрипта python обработки пользовательских токенов
  */
-const string anyks::Toolkit::getUserTokenScript() const {
+const string & anyks::Toolkit::getUserTokenScript() const noexcept {
 	// Результат работы функции
-	string result = "";
+	static const string result = "";
 	// Если скрипты установлены
 	if(!this->scripts.empty()){
 		// Ищем скрипт обработки слов
 		auto it = this->scripts.find(2);
 		// Если скрипт обработки слов установлен
-		if(it != this->scripts.end()) result = it->second.first;
+		if(it != this->scripts.end()) const_cast <string *> (&result)->assign(it->second.first);
 	}
 	// Выводим результат
 	return result;
@@ -339,7 +341,7 @@ const string anyks::Toolkit::getUserTokenScript() const {
  * getBadwords Метод извлечения чёрного списка
  * @return чёрный список слов
  */
-const set <size_t> & anyks::Toolkit::getBadwords() const {
+const set <size_t> & anyks::Toolkit::getBadwords() const noexcept {
 	// Выводим результат
 	return this->badwords;
 }
@@ -347,23 +349,39 @@ const set <size_t> & anyks::Toolkit::getBadwords() const {
  * getGoodwords Метод извлечения белого списка
  * @return белый список слов
  */
-const set <size_t> & anyks::Toolkit::getGoodwords() const {
+const set <size_t> & anyks::Toolkit::getGoodwords() const noexcept {
 	// Выводим результат
 	return this->goodwords;
+}
+/**
+ * getTokensUnknown Метод извлечения списка токенов приводимых к <unk>
+ * @return список токенов
+ */
+const set <anyks::token_t> & anyks::Toolkit::getTokensUnknown() const noexcept {
+	// Выводим список токенов
+	return this->tokenUnknown;
+}
+/**
+ * getTokensDisable Метод извлечения списка запрещённых токенов
+ * @return список токенов
+ */
+const set <anyks::token_t> & anyks::Toolkit::getTokensDisable() const noexcept {
+	// Выводим список токенов
+	return this->tokenDisable;
 }
 /**
  * getUserTokens Метод извлечения списка пользовательских токенов
  * @return список пользовательских токенов
  */
-const vector <string> anyks::Toolkit::getUserTokens() const {
+const vector <string> & anyks::Toolkit::getUserTokens() const noexcept {
 	// Результат работы функции
-	vector <string> result;
+	static const vector <string> result;
 	// Если пользовательские токены есть
 	if(!this->utokens.empty()){
 		// Переходим по всем пользовательским токенам
 		for(auto & token : this->utokens){
 			// Добавляем в список токен слова
-			result.push_back(this->getUserTokenWord(token.first));
+			const_cast <vector <string> *> (&result)->push_back(this->getUserTokenWord(token.first));
 		}
 	}
 	// Выводим результат
@@ -374,7 +392,7 @@ const vector <string> anyks::Toolkit::getUserTokens() const {
  * @param idw идентификатор пользовательского токена
  * @return    пользовательский токен соответствующий идентификатору
  */
-const string anyks::Toolkit::getUserTokenWord(const size_t idw) const {
+const string anyks::Toolkit::getUserTokenWord(const size_t idw) const noexcept {
 	// Результат работы функции
 	string result = "";
 	// Если идентификатор передан
@@ -397,7 +415,7 @@ const string anyks::Toolkit::getUserTokenWord(const size_t idw) const {
  * @param name слово для которого нужно получить идентификатор
  * @return     идентификатор пользовательского токена соответствующий слову
  */
-const size_t anyks::Toolkit::getUserTokenId(const string & name) const {
+const size_t anyks::Toolkit::getUserTokenId(const string & name) const noexcept {
 	// Результат работы функции
 	size_t result = idw_t::NIDW;
 	// Если слово передано
@@ -422,7 +440,7 @@ const size_t anyks::Toolkit::getUserTokenId(const string & name) const {
 /**
  * clear Метод очистки
  */
-void anyks::Toolkit::clear(){
+void anyks::Toolkit::clear() noexcept {
 	// Очищаем неизвестное слово
 	this->unknown = 0;
 	// Очищаем словарь arpa
@@ -441,32 +459,39 @@ void anyks::Toolkit::clear(){
 	this->tokenDisable.clear();
 	// Очищаем объект статистики
 	this->info = info_t();
+	// Если объект питона установлен внешний
+	if(this->notCleanPython){
+		// Зануляем объект питона
+		this->python = nullptr;
+		// Разрешаем очистку объекта
+		this->notCleanPython = false;
+	}
 }
 /**
  * clearBadwords Метод очистки списка плохих слов
  */
-void anyks::Toolkit::clearBadwords(){
+void anyks::Toolkit::clearBadwords() noexcept {
 	// Очищаем список плохих слов
 	this->badwords.clear();
 }
 /**
  * clearGoodwords Метод очистки списка хороших слов
  */
-void anyks::Toolkit::clearGoodwords(){
+void anyks::Toolkit::clearGoodwords() noexcept {
 	// Очищаем список хороших слов
 	this->goodwords.clear();
 }
 /**
  * clearUserTokens Метод очистки пользовательских токенов
  */
-void anyks::Toolkit::clearUserTokens(){
+void anyks::Toolkit::clearUserTokens() noexcept {
 	// Очищаем список пользовательских токенов
 	this->utokens.clear();
 }
 /**
  * setAllTokenUnknown Метод установки всех токенов идентифицируемых как <unk>
  */
-void anyks::Toolkit::setAllTokenUnknown(){
+void anyks::Toolkit::setAllTokenUnknown() noexcept {
 	// Устанавливаем все токены для идентифицировоания как <unk>
 	this->tokenUnknown = {
 		token_t::num,
@@ -490,7 +515,7 @@ void anyks::Toolkit::setAllTokenUnknown(){
 /**
  * setAllTokenDisable Метод установки всех токенов как не идентифицируемых
  */
-void anyks::Toolkit::setAllTokenDisable(){
+void anyks::Toolkit::setAllTokenDisable() noexcept {
 	// Устанавливаем все токены для отключения
 	this->tokenDisable = {
 		token_t::num,
@@ -515,7 +540,7 @@ void anyks::Toolkit::setAllTokenDisable(){
  * addBadword Метод добавления идентификатора похого слова в список
  * @param idw идентификатор слова
  */
-void anyks::Toolkit::addBadword(const size_t idw){
+void anyks::Toolkit::addBadword(const size_t idw) noexcept {
 	// Если идентификатор передан
 	if((idw > 0) && (idw < idw_t::NIDW)) this->badwords.emplace(idw);
 }
@@ -523,7 +548,7 @@ void anyks::Toolkit::addBadword(const size_t idw){
  * addGoodword Метод добавления идентификатора хорошего слова в список
  * @param idw идентификатор слова
  */
-void anyks::Toolkit::addGoodword(const size_t idw){
+void anyks::Toolkit::addGoodword(const size_t idw) noexcept {
 	// Если идентификатор передан
 	if((idw > 0) && (idw < idw_t::NIDW)) this->goodwords.emplace(idw);
 }
@@ -531,7 +556,7 @@ void anyks::Toolkit::addGoodword(const size_t idw){
  * addBadword Метод добавления похого слова в список
  * @param word слово для добавления
  */
-void anyks::Toolkit::addBadword(const string & word){
+void anyks::Toolkit::addBadword(const string & word) noexcept {
 	// Если слово передано
 	if(!word.empty()){
 		// Получаем идентификатор слова
@@ -544,7 +569,7 @@ void anyks::Toolkit::addBadword(const string & word){
  * addGoodword Метод добавления хорошего слова в список
  * @param word слово для добавления
  */
-void anyks::Toolkit::addGoodword(const string & word){
+void anyks::Toolkit::addGoodword(const string & word) noexcept {
 	// Если слово передано
 	if(!word.empty()){
 		// Получаем идентификатор слова
@@ -557,7 +582,7 @@ void anyks::Toolkit::addGoodword(const string & word){
  * setSize Метод установки размера n-граммы
  * @param size размер n-граммы
  */
-void anyks::Toolkit::setSize(const u_short size){
+void anyks::Toolkit::setSize(const u_short size) noexcept {
 	// Устанавливаем размерность n-граммы
 	this->size = (size > 0 ? size : DEFNGRAM);
 }
@@ -565,7 +590,7 @@ void anyks::Toolkit::setSize(const u_short size){
  * setUnknown Метод установки неизвестного слова
  * @param word слово для добавления
  */
-void anyks::Toolkit::setUnknown(const string & word){
+void anyks::Toolkit::setUnknown(const string & word) noexcept {
 	// Если слово передано
 	if(!word.empty()){
 		// Формируем идентификатор слова
@@ -594,15 +619,28 @@ void anyks::Toolkit::setUnknown(const string & word){
  * setOptions Метод установки опций
  * @param options опции для установки
  */
-void anyks::Toolkit::setOptions(const u_int options){
+void anyks::Toolkit::setOptions(const u_int options) noexcept {
 	// Устанавливаем опции модуля
 	this->options = options;
+}
+/**
+ * setPythonObj Метод установки внешнего объекта питона
+ * @param python внешний объект питона
+ */
+void anyks::Toolkit::setPythonObj(python_t * python) noexcept {
+	// Если объект передан
+	if(python != nullptr){
+		// Устанавливаем объект питона
+		this->python = python;
+		// Запрещаем очистку объекта
+		this->notCleanPython = true;
+	}
 }
 /**
  * setLogfile Метод установка файла для вывода логов
  * @param logifle адрес файла для вывода отладочной информации
  */
-void anyks::Toolkit::setLogfile(const char * logfile){
+void anyks::Toolkit::setLogfile(const char * logfile) noexcept {
 	// Устанавливаем адрес log файла
 	this->logfile = logfile;
 }
@@ -610,7 +648,7 @@ void anyks::Toolkit::setLogfile(const char * logfile){
  * setUserToken Метод добавления токена пользователя
  * @param name слово - обозначение токена
  */
-void anyks::Toolkit::setUserToken(const string & name){
+void anyks::Toolkit::setUserToken(const string & name) noexcept {
 	// Если слово передано
 	if(!name.empty()){
 		// Создаём новый пользовательский токен
@@ -639,7 +677,7 @@ void anyks::Toolkit::setUserToken(const string & name){
  * setOption Метод подключения опции модуля
  * @param option опция для подключения
  */
-void anyks::Toolkit::setOption(const options_t option){
+void anyks::Toolkit::setOption(const options_t option) noexcept {
 	// Устанавливаем опции
 	this->options.set((u_short) option);
 }
@@ -647,7 +685,7 @@ void anyks::Toolkit::setOption(const options_t option){
  * unsetOption Метод отключения опции модуля
  * @param option опция для отключения
  */
-void anyks::Toolkit::unsetOption(const options_t option){
+void anyks::Toolkit::unsetOption(const options_t option) noexcept {
 	// Устанавливаем опции
 	this->options.reset((u_short) option);
 }
@@ -655,7 +693,7 @@ void anyks::Toolkit::unsetOption(const options_t option){
  * setWordScript Метод установки скрипта обработки слов
  * @param script скрипт python обработки слов
  */
-void anyks::Toolkit::setWordScript(const string & script){
+void anyks::Toolkit::setWordScript(const string & script) noexcept {
 	// Выполняем добавление скрипта
 	this->scripts.emplace(1, make_pair(script, 0));
 }
@@ -663,7 +701,7 @@ void anyks::Toolkit::setWordScript(const string & script){
  * setTokenUnknown Метод установки списка токенов которых нужно идентифицировать как <unk>
  * @param options список токенов которых нужно идентифицировать как <unk>
  */
-void anyks::Toolkit::setTokenUnknown(const string & options){
+void anyks::Toolkit::setTokenUnknown(const string & options) noexcept {
 	// Если опции переданы
 	if(!options.empty()){
 		// Список токенов для работы
@@ -699,7 +737,7 @@ void anyks::Toolkit::setTokenUnknown(const string & options){
  * setTokenDisable Метод установки списка не идентифицируемых токенов
  * @param options список не идентифицируемых токенов
  */
-void anyks::Toolkit::setTokenDisable(const string & options){
+void anyks::Toolkit::setTokenDisable(const string & options) noexcept {
 	// Если опции переданы
 	if(!options.empty()){
 		// Список токенов для работы
@@ -735,7 +773,7 @@ void anyks::Toolkit::setTokenDisable(const string & options){
  * setUserTokenScript Метод установки скрипта обработки пользовательских токенов
  * @param script скрипт python обработки пользовательских токенов
  */
-void anyks::Toolkit::setUserTokenScript(const string & script){
+void anyks::Toolkit::setUserTokenScript(const string & script) noexcept {
 	// Выполняем добавление скрипта
 	this->scripts.emplace(2, make_pair(script, 0));
 }
@@ -743,7 +781,7 @@ void anyks::Toolkit::setUserTokenScript(const string & script){
  * setAlphabet Метод установки алфавита
  * @param alphabet объект алфавита
  */
-void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
+void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet) noexcept {
 	// Если алфавит передан
 	if(alphabet != nullptr) this->alphabet = alphabet;
 }
@@ -751,50 +789,64 @@ void anyks::Toolkit::setAlphabet(const alphabet_t * alphabet){
  * setTokenizer Метод установки токенизатора
  * @param tokenizer объект токенизатора
  */
-void anyks::Toolkit::setTokenizer(const tokenizer_t * tokenizer){
+void anyks::Toolkit::setTokenizer(const tokenizer_t * tokenizer) noexcept {
 	// Если токенизатор передан
 	if(tokenizer != nullptr) this->tokenizer = tokenizer;
 }
 /**
- * addBadwords Метод добавления списка идентификаторов плохих слов в список
- * @param badwords список идентификаторов плохих слов
+ * setTokensUnknown Метод установки списка токенов приводимых к <unk>
+ * @param tokens список токенов для установки
  */
-void anyks::Toolkit::addBadwords(const vector <size_t> & badwords){
-	// Если список не пустой
-	if(!badwords.empty()){
-		// Переходим по всему списку слов
-		for(auto & idw : badwords) this->addBadword(idw);
-	}
+void anyks::Toolkit::setTokensUnknown(const set <token_t> & tokens) noexcept {
+	// Если список получен, устанавливаем его
+	if(!tokens.empty()) this->tokenUnknown = move(tokens);
 }
 /**
- * addBadwords Метод добавления списка плохих слов в список
+ * setTokensDisable Метод установки списка запрещённых токенов
+ * @param tokens список токенов для установки
+ */
+void anyks::Toolkit::setTokensDisable(const set <token_t> & tokens) noexcept {
+	// Если список получен, устанавливаем его
+	if(!tokens.empty()) this->tokenDisable = move(tokens);
+}
+/**
+ * setBadwords Метод установки списка идентификаторов плохих слов в список
+ * @param badwords список идентификаторов плохих слов
+ */
+void anyks::Toolkit::setBadwords(const set <size_t> & badwords) noexcept {
+	// Если список не пустой, устанавливаем список
+	if(!badwords.empty()) this->badwords = move(badwords);
+}
+/**
+ * setBadwords Метод установки списка плохих слов в список
  * @param badwords список плохих слов
  */
-void anyks::Toolkit::addBadwords(const vector <string> & badwords){
+void anyks::Toolkit::setBadwords(const vector <string> & badwords) noexcept {
 	// Если список не пустой
 	if(!badwords.empty()){
+		// Очищаем список плохих слов
+		this->badwords.clear();
 		// Переходим по всему списку слов
 		for(auto & word : badwords) this->addBadword(word);
 	}
 }
 /**
- * addGoodwords Метод добавления списка идентификаторов хороших слов в список
+ * setGoodwords Метод установки списка идентификаторов хороших слов в список
  * @param goodwords список идентификаторов хороших слов
  */
-void anyks::Toolkit::addGoodwords(const vector <size_t> & goodwords){
-	// Если список не пустой
-	if(!goodwords.empty()){
-		// Переходим по всему списку слов
-		for(auto & idw : goodwords) this->addGoodword(idw);
-	}
+void anyks::Toolkit::setGoodwords(const set <size_t> & goodwords) noexcept {
+	// Если список не пустой, устанавливаем список
+	if(!goodwords.empty()) this->goodwords = move(goodwords);
 }
 /**
- * addGoodwords Метод добавления списка хороших слов в список
+ * setGoodwords Метод установки списка хороших слов в список
  * @param goodwords список хороших слов
  */
-void anyks::Toolkit::addGoodwords(const vector <string> & goodwords){
+void anyks::Toolkit::setGoodwords(const vector <string> & goodwords) noexcept {
 	// Если список не пустой
 	if(!goodwords.empty()){
+		// Очищаем список хороших слов
+		this->goodwords.clear();
 		// Переходим по всему списку слов
 		for(auto & word : goodwords) this->addGoodword(word);
 	}
@@ -804,7 +856,7 @@ void anyks::Toolkit::addGoodwords(const vector <string> & goodwords){
  * @param text текст который нужно добавить
  * @param idd  идентификатор документа
  */
-void anyks::Toolkit::addText(const string & text, const size_t idd){
+void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 	// Если текст передан
 	if(!text.empty()){
 		// Идентификатор неизвестного слова
@@ -819,7 +871,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 		 * unkFn Функция установки неизвестного слова в последовательность
 		 * @return нужно ли остановить сбор последовательности
 		 */
-		auto unkFn = [&uid, &seq, &idd, this]{
+		auto unkFn = [&uid, &seq, &idd, this]() noexcept {
 			// Результат работы функции
 			bool result = true;
 			// Если неизвестное слово не установлено
@@ -841,7 +893,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 		/**
 		 * resFn Функция вывода результата
 		 */
-		auto resFn = [&seq, &fid, &sid, &uid, &idd, this]{
+		auto resFn = [&seq, &fid, &sid, &uid, &idd, this]() noexcept {
 			// Идентификатор предыдущего слова
 			size_t idw = idw_t::NIDW;
 			// Удаляем следующие друг за другом неизвестные слова
@@ -867,15 +919,11 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 			if(seq.back().first == uid) seq.pop_back();
 			// Добавляем в список конец предложения
 			seq.emplace_back(fid, 0);
-			// Блокируем поток
-			// this->locker.lock();
 			/**
 			 * Если слова всего два, значит это начало и конец предложения
 			 * Нам же нужны только нормальные n-граммы
 			 */
 			if(seq.size() > 2) this->arpa->add(seq, idd);
-			// Разблокируем поток
-			// this->locker.unlock();
 			// Очищаем список последовательностей
 			seq.clear();
 			// Добавляем в список начало предложения
@@ -888,7 +936,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 		 * @param reset флаг сброса контекста
 		 * @param stop  флаг завершения обработки
 		 */
-		auto modeFn = [&](const wstring & word, const vector <string> & ctx, const bool reset, const bool stop){
+		auto modeFn = [&](const wstring & word, const vector <string> & ctx, const bool reset, const bool stop) noexcept {
 			// Если это сброс контекста, отправляем результат
 			if(reset) resFn();
 			// Если слово передано
@@ -901,10 +949,14 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
 					if(it != this->scripts.end()){
+						// Блокируем поток
+						this->locker.lock();
 						// Выполняем внешний python скрипт
 						tmp = move(this->python->run(it->second.second, {tmp.real()}, ctx));
 						// Если результат не получен, возвращаем слово
 						if(tmp.empty()) tmp = move(word);
+						// Разблокируем поток
+						this->locker.unlock();
 					}
 				}
 				// Если слово не разрешено
@@ -929,12 +981,8 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
 							tmp.setUppers(uppers);
 							// Добавляем слово в последовательность
 							seq.emplace_back(idw, uppers);
-							// Блокируем поток
-							// this->locker.lock();
 							// Добавляем слово в словарь если разрешено
 							if(this->alphabet->isAllowed(tmp)) this->addWord(tmp.wreal(), idw, idd);
-							// Разблокируем поток
-							// this->locker.unlock();
 						}
 					}
 				}
@@ -954,7 +1002,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd){
  * @param idw  идентификатор слова, если нужноы
  * @param idd  идентификатор документа
  */
-void anyks::Toolkit::addWord(const wstring & word, const size_t idw, const size_t idd){
+void anyks::Toolkit::addWord(const wstring & word, const size_t idw, const size_t idd) noexcept {
 	// Если слово передано
 	if(!word.empty()){
 		// Получаем идентификатор слова
@@ -997,7 +1045,7 @@ void anyks::Toolkit::addWord(const wstring & word, const size_t idw, const size_
  * @param name слово - обозначение токена
  * @param fn   внешняя функция обрабатывающая пользовательский токен
  */
-void anyks::Toolkit::setUserTokenMethod(const string & name, function <bool (const string &, const string &)> fn){
+void anyks::Toolkit::setUserTokenMethod(const string & name, function <bool (const string &, const string &)> fn) noexcept {
 	// Если название токена передано
 	if(!name.empty()){
 		// Получаем идентификатор токена
@@ -1012,7 +1060,7 @@ void anyks::Toolkit::setUserTokenMethod(const string & name, function <bool (con
  * sweep Метод удаления низкочастотных n-грамм arpa
  * @param status статус расёта
  */
-void anyks::Toolkit::sweep(function <void (const u_short)> status){
+void anyks::Toolkit::sweep(function <void (const u_short)> status) noexcept {
 	// Выполняем удаление низкочастотных n-грамм
 	this->arpa->sweep(status);
 }
@@ -1020,7 +1068,7 @@ void anyks::Toolkit::sweep(function <void (const u_short)> status){
  * train Метод запуска обучения языковой модели
  * @param status функция вывода статуса обучения
  */
-void anyks::Toolkit::train(function <void (const u_short)> status){
+void anyks::Toolkit::train(function <void (const u_short)> status) noexcept {
 	// Выполняем обучение arpa
 	this->arpa->train(status);
 }
@@ -1028,7 +1076,7 @@ void anyks::Toolkit::train(function <void (const u_short)> status){
  * repair Метод ремонта уже расчитанной ранее arpa
  * @param status статус расёта
  */
-void anyks::Toolkit::repair(function <void (const u_short)> status){
+void anyks::Toolkit::repair(function <void (const u_short)> status) noexcept {
 	// Выполняем исправление arpa
 	this->arpa->repair(status);
 }
@@ -1037,7 +1085,7 @@ void anyks::Toolkit::repair(function <void (const u_short)> status){
  * @param wltf   пороговый вес слова для прунинга
  * @param status статус прунинга словаря
  */
-void anyks::Toolkit::pruneVocab(const float wltf, function <void (const u_short)> status){
+void anyks::Toolkit::pruneVocab(const float wltf, function <void (const u_short)> status) noexcept {
 	// Если словарь не пустой
 	if(!this->vocab.empty()){
 		// Количество извлечённых слов
@@ -1081,7 +1129,7 @@ void anyks::Toolkit::pruneVocab(const float wltf, function <void (const u_short)
  * @param flag     флаг модификации arpa
  * @param status   функция вывода статуса модификации
  */
-void anyks::Toolkit::modify(const string & filename, modify_t flag, function <void (const u_short)> status){
+void anyks::Toolkit::modify(const string & filename, modify_t flag, function <void (const u_short)> status) noexcept {
 	// Если адрес файла передан
 	if(!filename.empty() && fsys_t::isfile(filename)){
 		// Последовательность для добавления
@@ -1099,7 +1147,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 		/**
 		 * cleanAddedFn Функция очистки добавленных слов
 		 */
-		auto cleanAddedFn = [&added, this]{
+		auto cleanAddedFn = [&added, this]() noexcept {
 			// Если список добавленных слов существует
 			if(!added.empty()){
 				// Переходим по списку добавленных слов
@@ -1129,7 +1177,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 		 * organizationSeqFn Функция организации последовательности
 		 * @param words список слов из которых нужно сделать последовательность
 		 */
-		auto organizationSeqFn = [&added, &seq, this](const vector <wstring> & words){
+		auto organizationSeqFn = [&added, &seq, this](const vector <wstring> & words) noexcept {
 			// Если список слов получен
 			if(!words.empty()){
 				// Идентификатор слова
@@ -1181,7 +1229,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 			}
 		};
 		// Выполняем считывание всех строк текста
-		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 			// Если слово получено
 			if(!text.empty()){
 				// Определяем тип модификации
@@ -1347,7 +1395,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
  * @param mingram   значение минимальной n-граммы за которую нельзя прунить
  * @param status    функция вывода статуса обучения
  */
-void anyks::Toolkit::prune(const double threshold, const u_short mingram, function <void (const u_short)> status) const {
+void anyks::Toolkit::prune(const double threshold, const u_short mingram, function <void (const u_short)> status) const noexcept {
 	// Выполняем прунинг arpa
 	this->arpa->prune(threshold, mingram, status);
 }
@@ -1360,7 +1408,7 @@ void anyks::Toolkit::prune(const double threshold, const u_short mingram, functi
  */
 void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, const bool prepares, const double mod){
 	// Если память под arpa еще не выделена
-	if((this->arpa == nullptr) && (this->python == nullptr)){
+	if(this->arpa == nullptr){
 		// Экранируем возможность ошибки памяти
 		try {
 			/**
@@ -1368,7 +1416,7 @@ void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, cons
 			 * @param idw идентификатор слова
 			 * @return    искомое слово
 			 */
-			auto getWordFn = [this](const size_t idw){
+			auto getWordFn = [this](const size_t idw) noexcept {
 				// Результат работы функции
 				const word_t * result = nullptr;
 				// Если нужно проверить пользовательские токены
@@ -1417,22 +1465,34 @@ void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, cons
 			// Если скрипт получен
 			if(((this->scripts.count(2) > 0) && !this->utokens.empty()) || (this->scripts.count(1) > 0)){
 				// Создаём объект для работы с python
-				this->python = new python_t(this->tokenizer);
+				if(this->python == nullptr) this->python = new python_t(this->tokenizer);
+				// Блокируем поток
+				this->locker.lock();
 				// Если нужно активировать режим отладки
 				if(this->isOption(options_t::debug)) this->python->setDebug();
+				// Разблокируем поток
+				this->locker.unlock();
 				// Ищем скрипт обработки слов
 				auto it = this->scripts.find(1);
 				// Если скрипт обработки слов установлен
 				if(it != this->scripts.end()){
+					// Блокируем поток
+					this->locker.lock();
 					// Запоминаем идентификатор скрипта
 					it->second.second = this->python->add(it->second.first, 2);
+					// Разблокируем поток
+					this->locker.unlock();
 				}
 				// Ищем скрипт обработки пользовательских токенов
 				it = this->scripts.find(2);
 				// Если скрипт обработки пользовательских токенов установлен
 				if((it != this->scripts.end()) && !this->utokens.empty()){
+					// Блокируем поток
+					this->locker.lock();
 					// Выполняем добавление скрипта
 					const size_t sid = this->python->add(it->second.first, 2);
+					// Разблокируем поток
+					this->locker.unlock();
 					// Переходим по всему списку пользовательских токенов
 					for(auto & token : this->utokens){
 						// Добавляем в пользовательский токен функцию проверки
@@ -1441,10 +1501,14 @@ void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, cons
 							bool result = false;
 							// Если слово и токен переданы
 							if(!token.empty() && !word.empty()){
+								// Блокируем поток
+								this->locker.lock();
 								// Выполняем скрипт
 								const wstring & res = this->python->run(sid, {token, word});
 								// Проверяем результат
 								result = (this->alphabet->toLower(res).compare(L"ok") == 0);
+								// Разблокируем поток
+								this->locker.unlock();
 							}
 							// Выводим результат
 							return result;
@@ -1477,7 +1541,7 @@ void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, cons
  * loadInfoVocab Метод загрузки бинарных информационных данных словаря
  * @param buffer буфер бинарных информационных данных словаря
  */
-void anyks::Toolkit::loadInfoVocab(const vector <char> & buffer){
+void anyks::Toolkit::loadInfoVocab(const vector <char> & buffer) noexcept {
 	// Если буфер слова передан
 	if(!buffer.empty()){
 		// Загружаем информационные данные словаря
@@ -1491,7 +1555,7 @@ void anyks::Toolkit::loadInfoVocab(const vector <char> & buffer){
  * @param buffer буфер с бинарными данными
  * @param arpa   нужно добавить только данные arpa
  */
-void anyks::Toolkit::loadVocab(const vector <char> & buffer) const {
+void anyks::Toolkit::loadVocab(const vector <char> & buffer) const noexcept {
 	// Если буфер слова передан
 	if(!buffer.empty()){
 		// Идентификатор слова и смещение в буфере
@@ -1518,7 +1582,7 @@ void anyks::Toolkit::loadVocab(const vector <char> & buffer) const {
  * @param buffer буфер с бинарными данными
  * @param arpa   нужно добавить только данные arpa
  */
-void anyks::Toolkit::loadArpa(const vector <char> & buffer, const bool arpa) const {
+void anyks::Toolkit::loadArpa(const vector <char> & buffer, const bool arpa) const noexcept {
 	// Выполняем загрузку бинарных данных
 	this->arpa->load(buffer, arpa);
 }
@@ -1526,7 +1590,7 @@ void anyks::Toolkit::loadArpa(const vector <char> & buffer, const bool arpa) con
  * saveInfoVocab Метод сохранения бинарных информационных данных словаря
  * @param buffer буфер бинарных информационных данных словаря
  */
-void anyks::Toolkit::saveInfoVocab(vector <char> & buffer) const {
+void anyks::Toolkit::saveInfoVocab(vector <char> & buffer) const noexcept {
 	// Очищаем переданный буфер данных
 	buffer.clear();
 	// Получаем бинарные информационные данные словаря
@@ -1538,7 +1602,7 @@ void anyks::Toolkit::saveInfoVocab(vector <char> & buffer) const {
  * saveVocab Метод извлечения данных словаря в бинарном виде
  * @param callback функция обратного вызова
  */
-void anyks::Toolkit::saveVocab(function <void (const vector <char> &, const u_short)> callback) const {
+void anyks::Toolkit::saveVocab(function <void (const vector <char> &, const u_short)> callback) const noexcept {
 	// Если словарь не пустой
 	if(!this->vocab.empty()){
 		// Индекс текущего слова
@@ -1569,7 +1633,7 @@ void anyks::Toolkit::saveVocab(function <void (const vector <char> &, const u_sh
  * @param filename адрес файла для записи
  * @param status   функция вывода статуса записи
  */
-void anyks::Toolkit::writeArpa(const string & filename, function <void (const u_short)> status) const {
+void anyks::Toolkit::writeArpa(const string & filename, function <void (const u_short)> status) const noexcept {
 	// Если адрес файла передан
 	if(!filename.empty()){
 		// Открываем файл на запись
@@ -1651,7 +1715,7 @@ void anyks::Toolkit::writeArpa(const string & filename, function <void (const u_
  * @param filename адрес файла для записи
  * @param status   функция вывода статуса записи
  */
-void anyks::Toolkit::writeVocab(const string & filename, function <void (const u_short)> status) const {
+void anyks::Toolkit::writeVocab(const string & filename, function <void (const u_short)> status) const noexcept {
 	// Если адрес файла передан
 	if(!filename.empty()){
 		// Открываем файл на запись
@@ -1721,7 +1785,7 @@ void anyks::Toolkit::writeVocab(const string & filename, function <void (const u
  * @param filename адрес файла для записи
  * @param status   функция вывода статуса записи
  */
-void anyks::Toolkit::writeNgrams(const string & filename, function <void (const u_short)> status) const {
+void anyks::Toolkit::writeNgrams(const string & filename, function <void (const u_short)> status) const noexcept {
 	// Если адрес файла передан
 	if(!filename.empty()){
 		// Открываем файл на запись
@@ -1808,7 +1872,7 @@ void anyks::Toolkit::writeNgrams(const string & filename, function <void (const 
  * @param callback функция обратного вызова
  * @param arpa     нужно добавить только данные arpa
  */
-void anyks::Toolkit::saveArpa(function <void (const vector <char> &, const u_short)> callback, const bool arpa) const {
+void anyks::Toolkit::saveArpa(function <void (const vector <char> &, const u_short)> callback, const bool arpa) const noexcept {
 	// Выполняем извлечение данных arpa в бинарном виде
 	this->arpa->save(arpa, callback);
 }
@@ -1818,7 +1882,7 @@ void anyks::Toolkit::saveArpa(function <void (const vector <char> &, const u_sho
  * @param status   функция вывода статуса записи
  * @param delim    разделитель последовательностей
  */
-void anyks::Toolkit::writeMap(const string & filename, function <void (const u_short)> status, const string & delim) const {
+void anyks::Toolkit::writeMap(const string & filename, function <void (const u_short)> status, const string & delim) const noexcept {
 	// Если адрес файла передан
 	if(!filename.empty()){
 		// Открываем файл на запись
@@ -1856,7 +1920,7 @@ void anyks::Toolkit::writeMap(const string & filename, function <void (const u_s
  * @param path   адрес где лежат arpa файлы
  * @param status функция вывода статуса чтения
  */
-void anyks::Toolkit::readArpas(const string & path, function <void (const u_short)> status){
+void anyks::Toolkit::readArpas(const string & path, function <void (const u_short)> status) noexcept {
 	// Получаем путь до скрипта
 	const char * fullpath = realpath((!path.empty() ? path.c_str() : "./"), nullptr);
 	// Если полный путь получен
@@ -1874,9 +1938,9 @@ void anyks::Toolkit::readArpas(const string & path, function <void (const u_shor
 		// Идентификатор неизвестного слова
 		const size_t uid = (size_t) token_t::unk;
 		// Переходим по всему списку файлов в каталоге
-		fsys_t::rdir(fullpath, "arpa", [&](const string & filename, const uintmax_t dirSize){
+		fsys_t::rdir(fullpath, "arpa", [&](const string & filename, const uintmax_t dirSize) noexcept {
 			// Выполняем считывание всех строк текста
-			fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+			fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 				// Если слово получено
 				if(!text.empty()){
 					// Определяем тип считываемых данных
@@ -1992,7 +2056,7 @@ void anyks::Toolkit::readArpas(const string & path, function <void (const u_shor
  * @param path   адрес где лежат ngrams файлы
  * @param status функция вывода статуса чтения
  */
-void anyks::Toolkit::readNgrams(const string & path, function <void (const u_short)> status){
+void anyks::Toolkit::readNgrams(const string & path, function <void (const u_short)> status) noexcept {
 	// Получаем путь до скрипта
 	const char * fullpath = realpath((!path.empty() ? path.c_str() : "./"), nullptr);
 	// Если полный путь получен
@@ -2010,9 +2074,9 @@ void anyks::Toolkit::readNgrams(const string & path, function <void (const u_sho
 		// Идентификатор неизвестного слова
 		const size_t uid = (size_t) token_t::unk;
 		// Переходим по всему списку файлов в каталоге
-		fsys_t::rdir(fullpath, "ngrams", [&](const string & filename, const uintmax_t dirSize){
+		fsys_t::rdir(fullpath, "ngrams", [&](const string & filename, const uintmax_t dirSize) noexcept {
 			// Выполняем считывание всех строк текста
-			fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+			fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 				// Если слово получено
 				if(!text.empty()){
 					// Определяем тип считываемых данных
@@ -2164,7 +2228,7 @@ void anyks::Toolkit::readNgrams(const string & path, function <void (const u_sho
  * @param filename адрес файла для чтения
  * @param status   функция вывода статуса чтения
  */
-void anyks::Toolkit::readArpa(const string & filename, function <void (const u_short)> status){
+void anyks::Toolkit::readArpa(const string & filename, function <void (const u_short)> status) noexcept {
 	// Если адрес файла передан
 	if(!filename.empty() && fsys_t::isfile(filename)){
 		// Тип извлечения данных
@@ -2180,7 +2244,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 		// Идентификатор неизвестного слова
 		const size_t uid = (size_t) token_t::unk;
 		// Выполняем считывание всех строк текста
-		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 			// Если слово получено
 			if(!text.empty()){
 				// Определяем тип считываемых данных
@@ -2291,7 +2355,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
  * @param filename файл для чтения словаря
  * @param status   функция вывода статуса чтения
  */
-void anyks::Toolkit::readVocab(const string & filename, function <void (const u_short)> status){
+void anyks::Toolkit::readVocab(const string & filename, function <void (const u_short)> status) noexcept {
 	// Если адрес файла передан
 	if(!filename.empty() && fsys_t::isfile(filename)){
 		// Тип извлечения данных
@@ -2301,7 +2365,7 @@ void anyks::Toolkit::readVocab(const string & filename, function <void (const u_
 		// Количество обработанных данных
 		size_t index = 0, pos = 0, loc = 0;
 		// Выполняем считывание всех строк текста
-		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 			// Если слово получено
 			if(!text.empty()){
 				// Определяем тип считываемых данных
@@ -2403,7 +2467,7 @@ void anyks::Toolkit::readVocab(const string & filename, function <void (const u_
  * @param filename адрес файла для чтения
  * @param status   функция вывода статуса чтения
  */
-void anyks::Toolkit::readNgram(const string & filename, function <void (const u_short)> status){
+void anyks::Toolkit::readNgram(const string & filename, function <void (const u_short)> status) noexcept {
 	// Если адрес файла передан
 	if(!filename.empty() && fsys_t::isfile(filename)){
 		// Последовательность для добавления
@@ -2417,7 +2481,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100, type = 0;
 		// Выполняем считывание всех строк текста
-		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 			// Если слово получено
 			if(!text.empty()){
 				// Определяем тип считываемых данных
@@ -2562,7 +2626,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
  * @param status функция вывода статуса чтения
  * @param delim  разделитель последовательностей
  */
-void anyks::Toolkit::readMaps(const string & path, function <void (const u_short)> status, const string & delim){
+void anyks::Toolkit::readMaps(const string & path, function <void (const u_short)> status, const string & delim) noexcept {
 	// Получаем путь до скрипта
 	const char * fullpath = realpath((!path.empty() ? path.c_str() : "./"), nullptr);
 	// Если полный путь получен
@@ -2580,9 +2644,9 @@ void anyks::Toolkit::readMaps(const string & path, function <void (const u_short
 		// Определяем разрешены ли неизвестные слова
 		const bool allowUnk = this->isOption(options_t::allowUnk);
 		// Переходим по всему списку файлов в каталоге
-		fsys_t::rdir(fullpath, "map", [&](const string & filename, const uintmax_t dirSize){
+		fsys_t::rdir(fullpath, "map", [&](const string & filename, const uintmax_t dirSize) noexcept {
 			// Выполняем считывание всех строк текста
-			fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+			fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 				// Если слово получено
 				if(!text.empty()){
 					// Извлекаем данные n-граммы
@@ -2672,7 +2736,7 @@ void anyks::Toolkit::readMaps(const string & path, function <void (const u_short
  * @param status   функция вывода статуса чтения
  * @param delim    разделитель последовательностей
  */
-void anyks::Toolkit::readMap(const string & filename, function <void (const u_short)> status, const string & delim){
+void anyks::Toolkit::readMap(const string & filename, function <void (const u_short)> status, const string & delim) noexcept {
 	// Если адрес файла передан
 	if(!filename.empty() && fsys_t::isfile(filename)){
 		// Количество обработанных данных
@@ -2688,7 +2752,7 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const u_sh
 		// Определяем разрешены ли неизвестные слова
 		const bool allowUnk = this->isOption(options_t::allowUnk);
 		// Выполняем считывание всех строк текста
-		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+		fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 			// Если слово получено
 			if(!text.empty()){
 				// Извлекаем данные n-граммы
@@ -2770,7 +2834,7 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const u_sh
  * Toolkit Конструктор
  * @param tokenizer объект токенизатора
  */
-anyks::Toolkit::Toolkit(const tokenizer_t * tokenizer){
+anyks::Toolkit::Toolkit(const tokenizer_t * tokenizer) noexcept {
 	// Устанавливаем токенизатор
 	this->setTokenizer(tokenizer);
 }
@@ -2778,7 +2842,7 @@ anyks::Toolkit::Toolkit(const tokenizer_t * tokenizer){
  * Toolkit Конструктор
  * @param size размерность n-грамм
  */
-anyks::Toolkit::Toolkit(const u_short size){
+anyks::Toolkit::Toolkit(const u_short size) noexcept {
 	// Устанавливаем размерность n-грамм
 	this->setSize(size);
 }
@@ -2787,7 +2851,7 @@ anyks::Toolkit::Toolkit(const u_short size){
  * @param alphabet  объект алфавита
  * @param tokenizer объект токенизатора
  */
-anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer){
+anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer) noexcept {
 	// Устанавливаем алфавит
 	this->setAlphabet(alphabet);
 	// Устанавливаем токенизатор
@@ -2798,7 +2862,7 @@ anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokeniz
  * @param alphabet объект алфавита
  * @param size     размерность n-грамм
  */
-anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const u_short size){
+anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const u_short size) noexcept {
 	// Устанавливаем размерность n-грамм
 	this->setSize(size);
 	// Устанавливаем алфавит
@@ -2809,7 +2873,7 @@ anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const u_short size){
  * @param tokenizer объект токенизатора
  * @param size      размерность n-грамм
  */
-anyks::Toolkit::Toolkit(const tokenizer_t * tokenizer, const u_short size){
+anyks::Toolkit::Toolkit(const tokenizer_t * tokenizer, const u_short size) noexcept {
 	// Устанавливаем размерность n-грамм
 	this->setSize(size);
 	// Устанавливаем токенизатор
@@ -2821,7 +2885,7 @@ anyks::Toolkit::Toolkit(const tokenizer_t * tokenizer, const u_short size){
  * @param tokenizer объект токенизатора
  * @param size      размерность n-грамм
  */
-anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer, const u_short size){
+anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer, const u_short size) noexcept {
 	// Устанавливаем размерность n-грамм
 	this->setSize(size);
 	// Устанавливаем алфавит
@@ -2832,11 +2896,11 @@ anyks::Toolkit::Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokeniz
 /**
  * ~Toolkit Деструктор
  */
-anyks::Toolkit::~Toolkit(){
+anyks::Toolkit::~Toolkit() noexcept {
 	// Очищаем языковую модель
 	this->clear();
 	// Очищаем выделенную память под arpa
 	if(this->arpa != nullptr) delete this->arpa;
 	// Очищаем выделенную память под python
-	if(this->python != nullptr) delete this->python;
+	if(!notCleanPython && (this->python != nullptr)) delete this->python;
 }

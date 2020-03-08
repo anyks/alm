@@ -13,6 +13,8 @@
  * Стандартная библиотека
  */
 #include <cmath>
+#include <ctime>
+#include <regex>
 #include <atomic>
 /**
  * Наши модули
@@ -32,58 +34,150 @@ namespace anyks {
 	 */
 	typedef class Collector {
 		private:
-			// Создаем тредпул
-			tpool_t tpool;
-			// Объект тулкита
-			toolkit_t * toolkit = nullptr;
+			// Прогресс бар
+			progress_t pss;
+		private:
+			// Общий размер считанных данных
+			atomic <size_t> allSize{0};
+			// Текущий статус прогресс-бара
+			atomic <u_short> status{0};
+			// Прошлый статус прогресс-бара
+			atomic <u_short> rate{101};
+		private:
+			// Тип режима отладки
+			u_short debug = 0;
+			// Общий размер n-граммы
+			u_short order = 1;
+			// Флаг удаления временных файлов
+			bool cleartmp = true;
+			// Флаг проведения сегментации
+			bool segments = false;
+			// Общий размер данных
+			uintmax_t dataSize = 0;
+			// Размер сегмента в байтах
+			uintmax_t segmentSize = 0;
 			// Количество потоков для работы
 			size_t threads = thread::hardware_concurrency();
+		private:
+			// Создаем тредпул
+			tpool_t * tpool = nullptr;
+			// Объект работы с python
+			python_t * python = nullptr;
+			// Объект тулкита
+			toolkit_t * toolkit = nullptr;
+			// Объект log файла
+			const char * logfile = nullptr;
+			// Объект алфавита
+			const alphabet_t * alphabet = nullptr;
+			// Объект токенизатора
+			const tokenizer_t * tokenizer = nullptr;
+		private:
+			/**
+			 * start Метод инициализации работы тредпула
+			 */
+			void start();
+			/**
+			 * finish Метод завершения работы тредпула
+			 */
+			void finish();
+			/**
+			 * initPython Метод инициализации модуля питона
+			 */
+			void initPython();
+			/**
+			 * createDir Метод создания каталога для сохранения результата
+			 * @return адрес созданного каталога
+			 */
+			const string & createDir() const noexcept;
+			/**
+			 * getSize Функция получения размера в байтах
+			 * @param  str размер сегмента (b, kb, Mb, Gb)
+			 * @return     размер сегмента в байтах
+			 */
+			const long getSize(const string & str) const noexcept;
+			/**
+			 * train Обучения полученного текста
+			 * @param filename адрес файла для сохранения (без расширения)
+			 * @param text     список строк текста для обучения
+			 * @param idd      идентификатор документа
+			 */
+			void train(const string & filename, const list <string> & text, const size_t idd) noexcept;
 		public:
+			/**
+			 * setOrder Метод установки размер n-граммы
+			 * @param order размер n-граммы
+			 */
+			void setOrder(const u_short order) noexcept;
+			/**
+			 * setDebug Метод установки флага отладки
+			 * @param debug флаг отладки
+			 */
+			void setDebug(const u_short debug) noexcept;
+			/**
+			 * setAutoClean Метод установки флага автоочистки временных данных
+			 * @param flag значение флага для устаноки
+			 */
+			void setAutoClean(const bool flag) noexcept;
 			/**
 			 * setToolkit Метод установки объекта тулкита
 			 * @param toolkit объект тулкита
 			 */
-			void setToolkit(toolkit_t * toolkit);
+			void setToolkit(toolkit_t * toolkit) noexcept;
+			/**
+			 * setLogfile Метод установка файла для вывода логов
+			 * @param logifle адрес файла для вывода отладочной информации
+			 */
+			void setLogfile(const char * logfile) noexcept;
 			/**
 			 * setThreads Метод установки количества потоков
 			 * @param threads количество потоков для работы
 			 */
-			void setThreads(const size_t threads = 0);
+			void setThreads(const size_t threads = 0) noexcept;
+			/**
+			 * setAlphabet Метод установки алфавита
+			 * @param alphabet объект алфавита
+			 */
+			void setAlphabet(const alphabet_t * alphabet) noexcept;
+			/**
+			 * setTokenizer Метод установки токенизатора
+			 * @param tokenizer объект токенизатора
+			 */
+			void setTokenizer(const tokenizer_t * tokenizer) noexcept;
+			/**
+			 * setSegment Метод установки параметров сегментации
+			 * @param segments разрешить выполнять сегментацию файлов
+			 * @param size     размер каждого сегмента (auto - получить размер автоматически)
+			 */
+			void setSegment(const bool segments, const string & size = "auto") noexcept;
 		public:
 			/**
 			 * readFile Метод запуска чтение текстового корпуса из одного файла
 			 * @param filename адрес файла для чтения
-			 * @param status   функция вывода статуса обучения
 			 */
-			void readFile(const string & filename, function <void (const u_short)> status = nullptr);
+			void readFile(const string & filename) noexcept;
 			/**
 			 * readDir Метод запуска чтение текстового корпуса из каталога
-			 * @param path   адрес каталога для чтения
-			 * @param ext    расширение файла для поиска в каталоге
-			 * @param status функция вывода статуса обучения
+			 * @param path адрес каталога для чтения
+			 * @param ext  расширение файла для поиска в каталоге
 			 */
-			void readDir(const string & path, const string & ext, function <void (const string &, const u_short)> status = nullptr);
+			void readDir(const string & path, const string & ext) noexcept;
 		public:
 			/**
 			 * Конструктор
 			 */
-			Collector(){}
+			Collector();
 			/**
 			 * Конструктор
-			 * @param toolkit объект тулкита
+			 * @param toolkit  объект тулкита
+			 * @param alphabet объект алфавита
+			 * @param alphabet объект токенизатора
+			 * @param logifle  адрес файла для вывода отладочной информации
 			 */
-			Collector(toolkit_t * toolkit);
+			Collector(toolkit_t * toolkit, const alphabet_t * alphabet, const tokenizer_t * tokenizer, const char * logfile);
 			/**
-			 * Конструктор
-			 * @param toolkit объект тулкита
+			 * Деструктор
 			 */
-			Collector(const size_t threads);
-			/**
-			 * Конструктор
-			 * @param threads количество потоков для работы
-			 * @param toolkit объект тулкита
-			 */
-			Collector(const size_t threads, toolkit_t * toolkit);
+			~Collector() noexcept;
 	} collector_t;
 };
 

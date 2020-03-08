@@ -171,7 +171,6 @@ all:
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/idw.cpp -o $(BUILD)/idw.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/nwt.cpp -o $(BUILD)/nwt.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/env.cpp -o $(BUILD)/env.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/word.cpp -o $(BUILD)/word.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/arpa.cpp -o $(BUILD)/arpa.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/ablm.cpp -o $(BUILD)/ablm.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/python.cpp -o $(BUILD)/python.o && \
@@ -182,10 +181,9 @@ all:
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
 	$(CC) $(LIBS) -shared -fPIC -o $(BIN)/libs/liblm.$(EXT) $(BUILD)/idw.o $(BUILD)/nwt.o \
-	$(BUILD)/env.o $(BUILD)/word.o $(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o \
-	$(BUILD)/toolkit.o $(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/levenshtein.o \
-	$(BUILD)/collector.o $(BUILD)/progress.o && \
-	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/word.o \
+	$(BUILD)/env.o $(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o \
+	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/collector.o $(BUILD)/progress.o && \
+	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o \
 	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o \
 	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/progress.o && \
 	$(CC) $(BUILD)/alm.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
@@ -199,7 +197,6 @@ dev:
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/idw.cpp -o $(BUILD)/idw.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/nwt.cpp -o $(BUILD)/nwt.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/env.cpp -o $(BUILD)/env.o && \
-	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/word.cpp -o $(BUILD)/word.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/arpa.cpp -o $(BUILD)/arpa.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/ablm.cpp -o $(BUILD)/ablm.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/python.cpp -o $(BUILD)/python.o && \
@@ -209,7 +206,7 @@ dev:
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
-	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/word.o \
+	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o \
 	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o \
 	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/progress.o $(BUILD)/levenshtein.o && \
 	$(CC) $(DEBUG) $(BUILD)/alm.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
@@ -223,7 +220,6 @@ static:
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/idw.cpp -o $(BUILD)/idw.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/nwt.cpp -o $(BUILD)/nwt.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/env.cpp -o $(BUILD)/env.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/word.cpp -o $(BUILD)/word.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/arpa.cpp -o $(BUILD)/arpa.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/ablm.cpp -o $(BUILD)/ablm.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/python.cpp -o $(BUILD)/python.o && \
@@ -233,7 +229,7 @@ static:
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
-	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/word.o \
+	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o \
 	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o \
 	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/progress.o $(BUILD)/levenshtein.o && \
 	$(CC) $(BUILD)/alm.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \

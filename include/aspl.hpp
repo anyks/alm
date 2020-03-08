@@ -124,7 +124,7 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <typename Value>
-			static const int setval(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Value value){
+			static const int setval(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Value value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -158,7 +158,7 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const int setdat(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value, const string & md5 = ""){
+			static const int setdat(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value, const string & md5 = "") noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -201,7 +201,7 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const int setvals(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value){
+			static const int setvals(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -247,7 +247,7 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const int setstrs(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value){
+			static const int setstrs(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -293,7 +293,7 @@ namespace anyks {
 			 * @return      результат операции (количество записанных байт)
 			 */
 			template <typename Value>
-			static const int getval(const size_t pos, ifstream & file, Value & value){
+			static const int getval(const size_t pos, ifstream & file, Value & value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если файл открыт удачно
@@ -317,7 +317,7 @@ namespace anyks {
 			 * @return      результат операции (количество прочитанных байт)
 			 */
 			template <class Container>
-			static const int getdat(const size_t pos, ifstream & file, Container & value, string & md5){
+			static const int getdat(const size_t pos, ifstream & file, Container & value, string & md5) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если файл открыт удачно
@@ -364,7 +364,7 @@ namespace anyks {
 			 * @return      результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const int getvals(const size_t pos, ifstream & file, Container & value){
+			static const int getvals(const size_t pos, ifstream & file, Container & value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если файл открыт удачно
@@ -405,7 +405,7 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const int getstrs(const size_t pos, ifstream & file, Container & value){
+			static const int getstrs(const size_t pos, ifstream & file, Container & value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если файл открыт удачно
@@ -461,7 +461,7 @@ namespace anyks {
 			/**
 			 * init Метод инициализации класса
 			 */
-			void init(){
+			void init() noexcept {
 				// Смещаем указатель начала данных
 				this->address = strlen(HEADER);
 				// Выполняем расчёт модуля слова
@@ -474,7 +474,7 @@ namespace anyks {
 			/**
 			 * close Метод закрытия файла базы на чтение или запись
 			 */
-			void close(){
+			void close() noexcept {
 				// Обнуляем последнюю позицию в файле
 				this->rawpos = -1;
 				// Если файл открыт, закрываем его
@@ -487,7 +487,7 @@ namespace anyks {
 			 * @param status статус файлового потока
 			 * @param raw    открыть сырой файл
 			 */
-			void open(const method_t status, const bool raw = false){
+			void open(const method_t status, const bool raw = false) noexcept {
 				// Адрес файла для открытия
 				const string & filename = (!raw ? this->filename() : this->filename() + ".raw");
 				// Если адрес файла получен
@@ -525,7 +525,7 @@ namespace anyks {
 			 * filename Метод получения адреса файла базы
 			 * @return адрес файла базы
 			 */
-			const string filename() const {
+			const string filename() const noexcept {
 				// Результат работы функции
 				string result = "";
 				// Добавляем путь к базе
@@ -546,7 +546,7 @@ namespace anyks {
 			 * @param text текст для перевода в строку
 			 * @return     хэш md5
 			 */
-			const string md5(const vector <char> & dump) const {
+			const string md5(const vector <char> & dump) const noexcept {
 				// Результат работы функции
 				string result;
 				// Если текст передан
@@ -650,7 +650,7 @@ namespace anyks {
 			 * @param  filename адрес файла
 			 * @return          результат проверки
 			 */
-			const bool isFile(const string & filename) const {
+			const bool isFile(const string & filename) const noexcept {
 				// Результат проверки
 				bool result = false;
 				// Если адрес файла передан
@@ -668,7 +668,7 @@ namespace anyks {
 			 * @param  word слово для генерации
 			 * @return      идентификатор слова
 			 */
-			const size_t idw(const string & word) const {
+			const size_t idw(const string & word) const noexcept {
 				// Результат работы функции
 				size_t result = 0;
 				// Если слово передано
@@ -799,7 +799,7 @@ namespace anyks {
 			 * @param  size   размер данных для сжатия
 			 * @return        результат сжатия
 			 */
-			const vector <char> compress(const char * buffer = nullptr, const size_t size = 0) const {
+			const vector <char> compress(const char * buffer = nullptr, const size_t size = 0) const noexcept {
 				// Результат работы функции
 				vector <char> result;
 				// Если буфер передан
@@ -865,7 +865,7 @@ namespace anyks {
 			 * @param  size   размер данных для сжатия
 			 * @return        результат расжатия
 			 */
-			const vector <char> decompress(const char * buffer = nullptr, const size_t size = 0) const {
+			const vector <char> decompress(const char * buffer = nullptr, const size_t size = 0) const noexcept {
 				// Результат работы функции
 				vector <char> result;
 				// Если буфер передан
@@ -941,7 +941,7 @@ namespace anyks {
 			 * read Метод чтения данных из файлв в базу
 			 * @return результат операции (количество прочитанных байт)
 			 */
-			const int read(){
+			const int read() noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Адрес файла для открытия
@@ -991,7 +991,7 @@ namespace anyks {
 			 * write Метод записи данных базы в файл
 			 * @return результат операции (количество записанных байт)
 			 */
-			const int write(){
+			const int write() noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Адрес файла для открытия
@@ -1076,7 +1076,7 @@ namespace anyks {
 			 * @return      результат операции (количество записанных байт)
 			 */
 			template <typename Value>
-			const int set(const string & key, const Value value){
+			const int set(const string & key, const Value value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1101,7 +1101,7 @@ namespace anyks {
 			 * @param encrypt зашифровать данные
 			 * @return        результат операции (количество записанных байт)
 			 */
-			const int set(const string & key, const string & value, const bool encrypt = false){
+			const int set(const string & key, const string & value, const bool encrypt = false) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1137,7 +1137,7 @@ namespace anyks {
 			 * @param encrypt зашифровать данные
 			 * @return        результат операции (количество записанных байт)
 			 */
-			const int set(const string & key, const vector <char> & value, const bool encrypt = false){
+			const int set(const string & key, const vector <char> & value, const bool encrypt = false) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1181,7 +1181,7 @@ namespace anyks {
 			 * @param encrypt зашифровать данные
 			 * @return        результат операции (количество записанных байт)
 			 */
-			const int set(const string & key, const char * buffer, const size_t size, const bool encrypt = false){
+			const int set(const string & key, const char * buffer, const size_t size, const bool encrypt = false) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1225,7 +1225,7 @@ namespace anyks {
 			 * @return      результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			const int setValues(const string & key, const Container & value){
+			const int setValues(const string & key, const Container & value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1250,7 +1250,7 @@ namespace anyks {
 			 * @return      результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			const int setStrings(const string & key, const Container & value){
+			const int setStrings(const string & key, const Container & value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1276,7 +1276,7 @@ namespace anyks {
 			 * @return      результат операции (количество прочитанных байт)
 			 */
 			template <typename Value>
-			const int get(const string & key, Value & value){
+			const int get(const string & key, Value & value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1305,7 +1305,7 @@ namespace anyks {
 			 * @param decrypt расшифровать данные
 			 * @return        результат операции (количество прочитанных байт)
 			 */
-			const int get(const string & key, string & value, const bool decrypt = false){
+			const int get(const string & key, string & value, const bool decrypt = false) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1343,7 +1343,7 @@ namespace anyks {
 			 * @param decrypt расшифровать данные
 			 * @return        результат операции (количество прочитанных байт)
 			 */
-			const int get(const string & key, vector <char> & value, const bool decrypt = false){
+			const int get(const string & key, vector <char> & value, const bool decrypt = false) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1407,7 +1407,7 @@ namespace anyks {
 			 * @return      результат операции (количество прочитанных байт)
 			 */
 			template <class Container>
-			const int getValues(const string & key, Container & value){
+			const int getValues(const string & key, Container & value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1436,7 +1436,7 @@ namespace anyks {
 			 * @return      результат операции (количество прочитанных байт)
 			 */
 			template <class Container>
-			const int getStrings(const string & key, Container & value){
+			const int getStrings(const string & key, Container & value) noexcept {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
@@ -1462,7 +1462,7 @@ namespace anyks {
 			/**
 			 * clear Метод очистки всех данных
 			 */
-			void clear(){
+			void clear() noexcept {
 				// Закрываем открытый файл
 				this->close();
 				// Очищаем список ключей
@@ -1476,7 +1476,7 @@ namespace anyks {
 			 * setAES Метод установки размера шифрования
 			 * @param aeslen размер шифрования (128, 192, 256)
 			 */
-			void setAES(types_t aeslen){
+			void setAES(types_t aeslen) noexcept {
 				// Устанавливаем размер шифрования
 				this->aeslen = aeslen;
 			}
@@ -1484,7 +1484,7 @@ namespace anyks {
 			 * setRoundAES Метод установки количества раундов шифрования
 			 * @param round количество раундов шифрования
 			 */
-			void setRoundAES(const int round){
+			void setRoundAES(const int round) noexcept {
 				// Устанавливаем количество раундов шифрования
 				this->roundsAES = round;
 			}
@@ -1492,7 +1492,7 @@ namespace anyks {
 			 * setSalt Метод установки соли шифрования
 			 * @param salt соль для шифрования
 			 */
-			void setSalt(const string & salt){
+			void setSalt(const string & salt) noexcept {
 				// Если соль передана
 				if(!salt.empty()) this->salt = move(salt);
 			}
@@ -1500,7 +1500,7 @@ namespace anyks {
 			 * setPassword Метод установки пароля шифрования
 			 * @param password пароль шифрования
 			 */
-			void setPassword(const string & password){
+			void setPassword(const string & password) noexcept {
 				// Если пароль передан
 				if(!password.empty()) this->password = move(password);
 			}
@@ -1508,7 +1508,7 @@ namespace anyks {
 			 * setFilename Метод установки имени файла базы
 			 * @param filename адрес файла базы
 			 */
-			void setFilename(const string & filename){
+			void setFilename(const string & filename) noexcept {
 				// Если файл получен
 				if(!filename.empty()){
 					// Ищем расширение файла
@@ -1550,7 +1550,7 @@ namespace anyks {
 			/**
 			 * ASpl конструктор
 			 */
-			ASpl(){
+			ASpl() noexcept {
 				// Выполняем инициализацию
 				this->init();
 			}
@@ -1558,7 +1558,7 @@ namespace anyks {
 			 * ASpl конструктор
 			 * @param filename адрес файла базы
 			 */
-			ASpl(const string & filename){
+			ASpl(const string & filename) noexcept {
 				// Выполняем инициализацию
 				this->init();
 				// Устанавливаем файл базы
@@ -1569,7 +1569,7 @@ namespace anyks {
 			 * @param filename адрес файла базы
 			 * @param password пароль шифрования
 			 */
-			ASpl(const string & filename, const string & password){
+			ASpl(const string & filename, const string & password) noexcept {
 				// Выполняем инициализацию
 				this->init();
 				// Устанавливаем файл базы
@@ -1583,7 +1583,7 @@ namespace anyks {
 			 * @param password пароль шифрования
 			 * @param salt     соль для шифрования
 			 */
-			ASpl(const string & filename, const string & password, const string & salt){
+			ASpl(const string & filename, const string & password, const string & salt) noexcept {
 				// Выполняем инициализацию
 				this->init();
 				// Устанавливаем соль для шифрования
@@ -1596,7 +1596,7 @@ namespace anyks {
 			/**
 			 * ~ASpl деструктор
 			 */
-			~ASpl(){
+			~ASpl() noexcept {
 				// Очищаем все данные
 				this->clear();
 			}

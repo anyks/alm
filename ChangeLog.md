@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.0.3 Multiprocessor training and bug fixes
+- flag to performing data segmentation during training
+- flag to clearing temporary data during training
+- segment size for training data segmentation
+- number of threads for data collection
+
 ## 1.0.2 New methods and bug fixes
 - vprune - vocabulary pruning method
 - flag allowing the use of words consisting of mixed dictionaries

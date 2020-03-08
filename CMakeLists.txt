@@ -17,6 +17,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 # Подключаем зависимости
 set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS "-stdlib=libc++")
 
+# Устанавливаем флаг использования потоков
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+# Ищем библиотеку Threads
+find_package(Threads REQUIRED)
+
 # Ищем библиотеку ZLib
 find_package(ZLIB REQUIRED)
 
@@ -67,7 +72,6 @@ set(ALM_EXE ${PROJECT_BINARY_DIR}/../app/alm.cpp)
 set(ENV_LIB ${PROJECT_BINARY_DIR}/../src/env.cpp)
 set(IDW_LIB ${PROJECT_BINARY_DIR}/../src/idw.cpp)
 set(NWT_LIB ${PROJECT_BINARY_DIR}/../src/nwt.cpp)
-set(WORD_LIB ${PROJECT_BINARY_DIR}/../src/word.cpp)
 set(ARPA_LIB ${PROJECT_BINARY_DIR}/../src/arpa.cpp)
 set(ABLM_LIB ${PROJECT_BINARY_DIR}/../src/ablm.cpp)
 set(PYTHON_LIB ${PROJECT_BINARY_DIR}/../src/python.cpp)
@@ -108,7 +112,7 @@ elseif(UNIX)
 endif()
 
 # Создаем список модулей
-list(APPEND LIB_LISTS ${WORD_LIB} ${IDW_LIB} ${NWT_LIB} ${ALPHABET_LIB} ${ENV_LIB} ${LEVENSHTEIN_LIB} ${COLLECTOR_LIB} ${TOKENIZER_LIB} ${ARPA_LIB} ${PYTHON_LIB} ${ABLM_LIB} ${PROGRESS_LIB} ${TOOLKIT_LIB})
+list(APPEND LIB_LISTS ${IDW_LIB} ${NWT_LIB} ${ALPHABET_LIB} ${ENV_LIB} ${LEVENSHTEIN_LIB} ${COLLECTOR_LIB} ${TOKENIZER_LIB} ${ARPA_LIB} ${PYTHON_LIB} ${ABLM_LIB} ${PROGRESS_LIB} ${TOOLKIT_LIB})
 
 # Создание динамической библиотеки с именем alm
 add_library(lm STATIC ${LIB_LISTS})
@@ -117,4 +121,4 @@ add_library(lm STATIC ${LIB_LISTS})
 add_executable(alm ${ALM_EXE})
 
 # Выполняем линковку приложения
-target_link_libraries(alm lm ${GPERFTOOLS_LIB} ${BIGINT_LIB} ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES} ${PYTHON_LIBRARIES})
+target_link_libraries(alm lm Threads::Threads ${GPERFTOOLS_LIB} ${BIGINT_LIB} ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES} ${PYTHON_LIBRARIES})

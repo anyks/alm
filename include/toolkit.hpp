@@ -14,7 +14,7 @@
  */
 #include <set>
 #include <map>
-// #include <mutex>
+#include <mutex>
 #include <limits>
 #include <bitset>
 #include <vector>
@@ -111,11 +111,11 @@ namespace anyks {
 			size_t unknown = 0;
 			// Размер n-грамм
 			u_short size = DEFNGRAM;
+			// Флаг запрещающий очистку объект питона
+			bool notCleanPython = false;
 		private:
 			// Общая статистика
 			info_t info;
-			// Мютекс для блокировки потока
-			// mutex locker;
 			// Параметры алгоритма сглаживания
 			params_t params;
 			// Флаги параметров
@@ -124,6 +124,8 @@ namespace anyks {
 			set <size_t> badwords;
 			// Список хороших слов
 			set <size_t> goodwords;
+			// Мютекс блокировки потока
+			recursive_mutex locker;
 			// Список токенов приводимых к <unk>
 			set <token_t> tokenUnknown;
 			// Список запрещённых токенов
@@ -151,266 +153,291 @@ namespace anyks {
 			 * @param  word слово для генерации
 			 * @return      идентификатор слова
 			 */
-			const size_t getIdw(const wstring & word) const;
+			const size_t getIdw(const wstring & word) const noexcept;
 			/**
 			 * isOption Метод проверки наличия опции
 			 * @param option опция для проверки
 			 * @return       результат проверки
 			 */
-			const bool isOption(const options_t option) const;
+			const bool isOption(const options_t option) const noexcept;
 			/**
 			 * clearShielding Функция удаления экранирования
 			 * @param word  слово в котором следует удалить экранирование
 			 * @param front первый символ экранирования
 			 * @param back  последний символ экранирования
 			 */
-			void clearShielding(const string & word, const string & front = "<", const string & back = ">") const;
+			void clearShielding(const string & word, const string & front = "<", const string & back = ">") const noexcept;
 		public:
 			/**
 			 * getSize Метод получения размера n-грамы
 			 * @return длина n-граммы в языковой моделе
 			 */
-			const u_short getSize() const;
+			const u_short getSize() const noexcept;
 			/**
 			 * getOptions Метод извлечения установленных опций
 			 * @return установленные опции
 			 */
-			const u_int getOptions() const;
+			const u_int getOptions() const noexcept;
 			/**
 			 * getParams Метод извлечения параметров алгоритма сжатия
 			 * @return параметры алгоритма сжатия
 			 */
-			const params_t & getParams() const;
+			const params_t & getParams() const noexcept;
 			/**
 			 * getUnknown Метод извлечения неизвестного слова
 			 * @return установленное неизвестное слово
 			 */
-			const string getUnknown() const;
+			const string & getUnknown() const noexcept;
 			/**
 			 * getWordScript Метод извлечения скрипта обработки слов
 			 * @return адрес скрипта python обработки слов
 			 */
-			const string getWordScript() const;
+			const string & getWordScript() const noexcept;
 			/**
 			 * getUserTokenScript Метод извлечения скрипта обработки пользовательских токенов
 			 * @return адрес скрипта python обработки пользовательских токенов
 			 */
-			const string getUserTokenScript() const;
+			const string & getUserTokenScript() const noexcept;
 			/**
 			 * getBadwords Метод извлечения чёрного списка
 			 * @return чёрный список слов
 			 */
-			const set <size_t> & getBadwords() const;
+			const set <size_t> & getBadwords() const noexcept;
 			/**
 			 * getGoodwords Метод извлечения белого списка
 			 * @return белый список слов
 			 */
-			const set <size_t> & getGoodwords() const;
+			const set <size_t> & getGoodwords() const noexcept;
+			/**
+			 * getTokensUnknown Метод извлечения списка токенов приводимых к <unk>
+			 * @return список токенов
+			 */
+			const set <token_t> & getTokensUnknown() const noexcept;
+			/**
+			 * getTokensDisable Метод извлечения списка запрещённых токенов
+			 * @return список токенов
+			 */
+			const set <token_t> & getTokensDisable() const noexcept;
 			/**
 			 * getUserTokens Метод извлечения списка пользовательских токенов
 			 * @return список пользовательских токенов
 			 */
-			const vector <string> getUserTokens() const;
+			const vector <string> & getUserTokens() const noexcept;
 			/**
 			 * getUserTokenWord Метод получения пользовательского токена по его идентификатору
 			 * @param idw идентификатор пользовательского токена
 			 * @return    пользовательский токен соответствующий идентификатору
 			 */
-			const string getUserTokenWord(const size_t idw) const;
+			const string getUserTokenWord(const size_t idw) const noexcept;
 			/**
 			 * getUserTokenId Метод получения идентификатора пользовательского токена
 			 * @param name слово для которого нужно получить идентификатор
 			 * @return     идентификатор пользовательского токена соответствующий слову
 			 */
-			const size_t getUserTokenId(const string & name) const;
+			const size_t getUserTokenId(const string & name) const noexcept;
 		public:
 			/**
 			 * clear Метод очистки
 			 */
-			void clear();
+			void clear() noexcept;
 			/**
 			 * clearBadwords Метод очистки списка плохих слов
 			 */
-			void clearBadwords();
+			void clearBadwords() noexcept;
 			/**
 			 * clearGoodwords Метод очистки списка хороших слов
 			 */
-			void clearGoodwords();
+			void clearGoodwords() noexcept;
 			/**
 			 * clearUserTokens Метод очистки пользовательских токенов
 			 */
-			void clearUserTokens();
+			void clearUserTokens() noexcept;
 		public:
 			/**
 			 * setAllTokenUnknown Метод установки всех токенов идентифицируемых как <unk>
 			 */
-			void setAllTokenUnknown();
+			void setAllTokenUnknown() noexcept;
 			/**
 			 * setAllTokenDisable Метод установки всех токенов как не идентифицируемых
 			 */
-			void setAllTokenDisable();
+			void setAllTokenDisable() noexcept;
 		public:
 			/**
 			 * addBadword Метод добавления идентификатора похого слова в список
 			 * @param idw идентификатор слова
 			 */
-			void addBadword(const size_t idw);
+			void addBadword(const size_t idw) noexcept;
 			/**
 			 * addGoodword Метод добавления идентификатора хорошего слова в список
 			 * @param idw идентификатор слова
 			 */
-			void addGoodword(const size_t idw);
+			void addGoodword(const size_t idw) noexcept;
 			/**
 			 * addBadword Метод добавления похого слова в список
 			 * @param word слово для добавления
 			 */
-			void addBadword(const string & word);
+			void addBadword(const string & word) noexcept;
 			/**
 			 * addGoodword Метод добавления хорошего слова в список
 			 * @param word слово для добавления
 			 */
-			void addGoodword(const string & word);
+			void addGoodword(const string & word) noexcept;
 		public:
 			/**
 			 * setSize Метод установки размера n-граммы
 			 * @param size размер n-граммы
 			 */
-			void setSize(const u_short size);
+			void setSize(const u_short size) noexcept;
 			/**
 			 * setUnknown Метод установки неизвестного слова
 			 * @param word слово для добавления
 			 */
-			void setUnknown(const string & word);
+			void setUnknown(const string & word) noexcept;
 			/**
 			 * setOptions Метод установки опций
 			 * @param options опции для установки
 			 */
-			void setOptions(const u_int options);
+			void setOptions(const u_int options) noexcept;
+			/**
+			 * setPythonObj Метод установки внешнего объекта питона
+			 * @param python внешний объект питона
+			 */
+			void setPythonObj(python_t * python) noexcept;
 			/**
 			 * setLogfile Метод установка файла для вывода логов
 			 * @param logifle адрес файла для вывода отладочной информации
 			 */
-			void setLogfile(const char * logfile);
+			void setLogfile(const char * logfile) noexcept;
 			/**
 			 * setUserToken Метод добавления токена пользователя
 			 * @param name слово - обозначение токена
 			 */
-			void setUserToken(const string & name);
+			void setUserToken(const string & name) noexcept;
 			/**
 			 * setOption Метод подключения опции модуля
 			 * @param option опция для подключения
 			 */
-			void setOption(const options_t option);
+			void setOption(const options_t option) noexcept;
 			/**
 			 * unsetOption Метод отключения опции модуля
 			 * @param option опция для отключения
 			 */
-			void unsetOption(const options_t option);
+			void unsetOption(const options_t option) noexcept;
 			/**
 			 * setWordScript Метод установки скрипта обработки слов
 			 * @param script скрипт python обработки слов
 			 */
-			void setWordScript(const string & script);
+			void setWordScript(const string & script) noexcept;
 			/**
 			 * setTokenUnknown Метод установки списка токенов которых нужно идентифицировать как <unk>
 			 * @param options список токенов которых нужно идентифицировать как <unk>
 			 */
-			void setTokenUnknown(const string & options);
+			void setTokenUnknown(const string & options) noexcept;
 			/**
 			 * setTokenDisable Метод установки списка не идентифицируемых токенов
 			 * @param options список не идентифицируемых токенов
 			 */
-			void setTokenDisable(const string & options);
+			void setTokenDisable(const string & options) noexcept;
 			/**
 			 * setUserTokenScript Метод установки скрипта обработки пользовательских токенов
 			 * @param script скрипт python обработки пользовательских токенов
 			 */
-			void setUserTokenScript(const string & script);
+			void setUserTokenScript(const string & script) noexcept;
 			/**
 			 * setAlphabet Метод установки алфавита
 			 * @param alphabet объект алфавита
 			 */
-			void setAlphabet(const alphabet_t * alphabet);
+			void setAlphabet(const alphabet_t * alphabet) noexcept;
 			/**
 			 * setTokenizer Метод установки токенизатора
 			 * @param tokenizer объект токенизатора
 			 */
-			void setTokenizer(const tokenizer_t * tokenizer);
+			void setTokenizer(const tokenizer_t * tokenizer) noexcept;
 			/**
-			 * addBadwords Метод добавления списка идентификаторов плохих слов в список
+			 * setTokensUnknown Метод установки списка токенов приводимых к <unk>
+			 * @param tokens список токенов для установки
+			 */
+			void setTokensUnknown(const set <token_t> & tokens) noexcept;
+			/**
+			 * setTokensDisable Метод установки списка запрещённых токенов
+			 * @param tokens список токенов для установки
+			 */
+			void setTokensDisable(const set <token_t> & tokens) noexcept;
+			/**
+			 * setBadwords Метод установки списка идентификаторов плохих слов в список
 			 * @param badwords список идентификаторов плохих слов
 			 */
-			void addBadwords(const vector <size_t> & badwords);
+			void setBadwords(const set <size_t> & badwords) noexcept;
 			/**
-			 * addBadwords Метод добавления списка плохих слов в список
+			 * setBadwords Метод установки списка плохих слов в список
 			 * @param badwords список плохих слов
 			 */
-			void addBadwords(const vector <string> & badwords);
+			void setBadwords(const vector <string> & badwords) noexcept;
 			/**
-			 * addGoodwords Метод добавления списка идентификаторов хороших слов в список
+			 * setGoodwords Метод установки списка идентификаторов хороших слов в список
 			 * @param goodwords список идентификаторов хороших слов
 			 */
-			void addGoodwords(const vector <size_t> & goodwords);
+			void setGoodwords(const set <size_t> & goodwords) noexcept;
 			/**
-			 * addGoodwords Метод добавления списка хороших слов в список
+			 * setGoodwords Метод установки списка хороших слов в список
 			 * @param goodwords список хороших слов
 			 */
-			void addGoodwords(const vector <string> & goodwords);
+			void setGoodwords(const vector <string> & goodwords) noexcept;
 			/**
 			 * addText Метод добавления текста для расчёта
 			 * @param text текст который нужно добавить
 			 * @param idd  идентификатор документа
 			 */
-			void addText(const string & text, const size_t idd = 0);
+			void addText(const string & text, const size_t idd = 0) noexcept;
 			/**
 			 * addWord Метод добавления слова в словарь
 			 * @param word слово для добавления
 			 * @param idw  идентификатор слова, если нужно
 			 * @param idd  идентификатор документа
 			 */
-			void addWord(const wstring & word, const size_t idw = 0, const size_t idd = 0);
+			void addWord(const wstring & word, const size_t idw = 0, const size_t idd = 0) noexcept;
 			/**
 			 * setUserTokenMethod Метод добавления функции обработки пользовательского токена
 			 * @param name слово - обозначение токена
 			 * @param fn   внешняя функция обрабатывающая пользовательский токен
 			 */
-			void setUserTokenMethod(const string & name, function <bool (const string &, const string &)> fn);
+			void setUserTokenMethod(const string & name, function <bool (const string &, const string &)> fn) noexcept;
 		public:
 			/**
 			 * sweep Метод удаления низкочастотных n-грамм arpa
 			 * @param status статус расёта
 			 */
-			void sweep(function <void (const u_short)> status = nullptr);
+			void sweep(function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * train Метод запуска обучения языковой модели
 			 * @param status функция вывода статуса обучения
 			 */
-			void train(function <void (const u_short)> status = nullptr);
+			void train(function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * repair Метод ремонта уже расчитанной ранее arpa
 			 * @param status статус расёта
 			 */
-			void repair(function <void (const u_short)> status = nullptr);
+			void repair(function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * pruneVocab Метод прунинга словаря
 			 * @param wltf   пороговый вес слова для прунинга
 			 * @param status статус прунинга словаря
 			 */
-			void pruneVocab(const float wltf, function <void (const u_short)> status = nullptr);
+			void pruneVocab(const float wltf, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * modify Метод модификации arpa
 			 * @param filename адрес файла для чтения
 			 * @param flag     флаг модификации arpa
 			 * @param status   функция вывода статуса модификации
 			 */
-			void modify(const string & filename, modify_t flag, function <void (const u_short)> status = nullptr);
+			void modify(const string & filename, modify_t flag, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * prune Метод прунинга языковой модели
 			 * @param threshold порог частоты прунинга
 			 * @param mingram   значение минимальной n-граммы за которую нельзя прунить
 			 * @param status    функция вывода статуса обучения
 			 */
-			void prune(const double threshold, const u_short mingram, function <void (const u_short)> status = nullptr) const;
+			void prune(const double threshold, const u_short mingram, function <void (const u_short)> status = nullptr) const noexcept;
 			/**
 			 * init Метод инициализации языковой модели
 			 * @param algorithm алгоритм расчёта языковой модели
@@ -424,150 +451,150 @@ namespace anyks {
 			 * loadInfoVocab Метод загрузки бинарных информационных данных словаря
 			 * @param buffer буфер бинарных информационных данных словаря
 			 */
-			void loadInfoVocab(const vector <char> & buffer);
+			void loadInfoVocab(const vector <char> & buffer) noexcept;
 			/**
 			 * loadVocab Метод загрузки бинарных данных в словарь
 			 * @param buffer буфер с бинарными данными
 			 * @param arpa   нужно добавить только данные arpa
 			 */
-			void loadVocab(const vector <char> & buffer) const;
+			void loadVocab(const vector <char> & buffer) const noexcept;
 			/**
 			 * loadArpa Метод загрузки бинарных данных n-грамм в словарь
 			 * @param buffer буфер с бинарными данными
 			 * @param arpa   нужно добавить только данные arpa
 			 */
-			void loadArpa(const vector <char> & buffer, const bool arpa = false) const;
+			void loadArpa(const vector <char> & buffer, const bool arpa = false) const noexcept;
 		public:
 			/**
 			 * saveInfoVocab Метод сохранения бинарных информационных данных словаря
 			 * @param buffer буфер бинарных информационных данных словаря
 			 */
-			void saveInfoVocab(vector <char> & buffer) const;
+			void saveInfoVocab(vector <char> & buffer) const noexcept;
 			/**
 			 * saveVocab Метод извлечения данных словаря в бинарном виде
 			 * @param callback функция обратного вызова
 			 */
-			void saveVocab(function <void (const vector <char> &, const u_short)> callback) const;
+			void saveVocab(function <void (const vector <char> &, const u_short)> callback) const noexcept;
 			/**
 			 * writeArpa Метод записи данных в файл arpa
 			 * @param filename адрес файла для записи
 			 * @param status   функция вывода статуса записи
 			 */
-			void writeArpa(const string & filename, function <void (const u_short)> status = nullptr) const;
+			void writeArpa(const string & filename, function <void (const u_short)> status = nullptr) const noexcept;
 			/**
 			 * writeVocab Метод записи данных словаря в файл
 			 * @param filename адрес файла для записи
 			 * @param status   функция вывода статуса записи
 			 */
-			void writeVocab(const string & filename, function <void (const u_short)> status = nullptr) const;
+			void writeVocab(const string & filename, function <void (const u_short)> status = nullptr) const noexcept;
 			/**
 			 * writeNgrams Метод записи данных в файлы ngrams
 			 * @param filename адрес файла для записи
 			 * @param status   функция вывода статуса записи
 			 */
-			void writeNgrams(const string & filename, function <void (const u_short)> status = nullptr) const;
+			void writeNgrams(const string & filename, function <void (const u_short)> status = nullptr) const noexcept;
 			/**
 			 * saveArpa Метод извлечения данных n-грамм в бинарном виде
 			 * @param callback функция обратного вызова
 			 * @param arpa     нужно добавить только данные arpa
 			 */
-			void saveArpa(function <void (const vector <char> &, const u_short)> callback, const bool arpa = false) const;
+			void saveArpa(function <void (const vector <char> &, const u_short)> callback, const bool arpa = false) const noexcept;
 			/**
 			 * writeMap Метод записи карты последовательности в файл
 			 * @param filename адрес map файла карты последовательности
 			 * @param status   функция вывода статуса записи
 			 * @param delim    разделитель последовательностей
 			 */
-			void writeMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|") const;
+			void writeMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|") const noexcept;
 		public:
 			/**
 			 * readArpas Метод чтения данных из каталога файлов arpa
 			 * @param path   адрес где лежат arpa файлы
 			 * @param status функция вывода статуса чтения
 			 */
-			void readArpas(const string & path, function <void (const u_short)> status = nullptr);
+			void readArpas(const string & path, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * readNgrams Метод чтения данных из каталога файлов ngrams
 			 * @param path   адрес где лежат ngrams файлы
 			 * @param status функция вывода статуса чтения
 			 */
-			void readNgrams(const string & path, function <void (const u_short)> status = nullptr);
+			void readNgrams(const string & path, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * readArpa Метод чтения данных из файла arpa
 			 * @param filename адрес файла для чтения
 			 * @param status   функция вывода статуса чтения
 			 */
-			void readArpa(const string & filename, function <void (const u_short)> status = nullptr);
+			void readArpa(const string & filename, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * readVocab Метод чтения словаря из файла
 			 * @param filename файл для чтения словаря
 			 * @param status   функция вывода статуса чтения
 			 */
-			void readVocab(const string & filename, function <void (const u_short)> status = nullptr);
+			void readVocab(const string & filename, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * readNgram Метод чтения данных из файла ngrams
 			 * @param filename адрес файла для чтения
 			 * @param status   функция вывода статуса чтения
 			 */
-			void readNgram(const string & filename, function <void (const u_short)> status = nullptr);
+			void readNgram(const string & filename, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * readMaps Метод добавления - объединения карт последовательностей
 			 * @param path   адрес где лежат map файлы
 			 * @param status функция вывода статуса чтения
 			 * @param delim  разделитель последовательностей
 			 */
-			void readMaps(const string & path, function <void (const u_short)> status = nullptr, const string & delim = "|");
+			void readMaps(const string & path, function <void (const u_short)> status = nullptr, const string & delim = "|") noexcept;
 			/**
 			 * readMap Метод чтения карты последовательности из файла
 			 * @param filename адрес map файла карты последовательности
 			 * @param status   функция вывода статуса чтения
 			 * @param delim    разделитель последовательностей
 			 */
-			void readMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|");
+			void readMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|") noexcept;
 		public:
 			/**
 			 * Toolkit Конструктор
 			 */
-			Toolkit(){};
+			Toolkit() noexcept {};
 			/**
 			 * Toolkit Конструктор
 			 * @param tokenizer объект токенизатора
 			 */
-			Toolkit(const tokenizer_t * tokenizer);
+			Toolkit(const tokenizer_t * tokenizer) noexcept;
 			/**
 			 * Toolkit Конструктор
 			 * @param size размерность n-грамм
 			 */
-			Toolkit(const u_short size = DEFNGRAM);
+			Toolkit(const u_short size = DEFNGRAM) noexcept;
 			/**
 			 * Toolkit Конструктор
 			 * @param alphabet  объект алфавита
 			 * @param tokenizer объект токенизатора
 			 */
-			Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer);
+			Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer) noexcept;
 			/**
 			 * Toolkit Конструктор
 			 * @param alphabet объект алфавита
 			 * @param size     размерность n-грамм
 			 */
-			Toolkit(const alphabet_t * alphabet, const u_short size = DEFNGRAM);
+			Toolkit(const alphabet_t * alphabet, const u_short size = DEFNGRAM) noexcept;
 			/**
 			 * Toolkit Конструктор
 			 * @param tokenizer объект токенизатора
 			 * @param size      размерность n-грамм
 			 */
-			Toolkit(const tokenizer_t * tokenizer, const u_short size = DEFNGRAM);
+			Toolkit(const tokenizer_t * tokenizer, const u_short size = DEFNGRAM) noexcept;
 			/**
 			 * Toolkit Конструктор
 			 * @param alphabet  объект алфавита
 			 * @param tokenizer объект токенизатора
 			 * @param size      размерность n-грамм
 			 */
-			Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer, const u_short size = DEFNGRAM);
+			Toolkit(const alphabet_t * alphabet, const tokenizer_t * tokenizer, const u_short size = DEFNGRAM) noexcept;
 			/**
 			 * ~Toolkit Деструктор
 			 */
-			~Toolkit();
+			~Toolkit() noexcept;
 	} toolkit_t;
 };
 

@@ -51,7 +51,7 @@ namespace anyks {
 		 * mkdir Функция рекурсивного создания каталогов
 		 * @param path адрес каталогов
 		 */
-		static void mkdir(const string & path){
+		static void mkdir(const string & path) noexcept {
 			// Если путь передан
 			if(!path.empty()){
 				// Буфер с названием каталога
@@ -84,7 +84,7 @@ namespace anyks {
 		 * file Функция извлечения названия и расширения файла
 		 * @param filename адрес файла для извлечения его параметров
 		 */
-		static const pair <string, string> file(const string & filename){
+		static const pair <string, string> file(const string & filename) noexcept {
 			// Результат работы функции
 			pair <string, string> result;
 			// Если файл передан
@@ -113,63 +113,44 @@ namespace anyks {
 		 * @param  path путь до каталога
 		 * @return      количество дочерних элементов
 		 */
-		static const int rmdir(const string & path){
+		static const int rmdir(const string & path) noexcept {
 			// Результат работы функции
 			int result = -1;
 			// Если путь передан
 			if(!path.empty()){
-				try {
-					// Открываем указанный каталог
-					DIR * dir = opendir(path.c_str());
-					// Если каталог открыт
-					if(dir != nullptr){
-						// Устанавливаем количество дочерних элементов
-						result = 0;
-						// Создаем указатель на содержимое каталога
-						struct dirent * ptr = nullptr;
-						// Выполняем чтение содержимого каталога
-						while(!result && (ptr = readdir(dir))){
-							// Количество найденных элементов
-							int res = -1;
-							// Пропускаем названия текущие "." и внешние "..", так как идет рекурсия
-							if(!strcmp(ptr->d_name, ".") || !strcmp(ptr->d_name, "..")) continue;
-							// Получаем размер дочернего каталога
-							const size_t length = (path.length() + strlen(ptr->d_name) + 2);
-							// Создаем буфер данных
-							char * buffer = new char [length];
-							// Если память выделена
-							if(buffer != nullptr){
-								// Создаем структуру буфера статистики
-								struct stat statbuf;
-								// Заполняем нулями буфер
-								memset(buffer, 0 , length);
-								// Копируем в буфер название дочернего элемента
-								snprintf(buffer, length, "%s/%s", path.c_str(), ptr->d_name);
-								// Если статистика извлечена
-								if(!stat(buffer, &statbuf)){
-									// Если дочерний элемент является дирректорией
-									if(S_ISDIR(statbuf.st_mode)) res = rmdir(string(buffer, length));
-									// Если дочерний элемент является файлом то удаляем его
-									else res = ::unlink(buffer);
-								}
-							}
-							// Освобождаем выделенную ранее память
-							delete [] buffer;
-							// Запоминаем количество дочерних элементов
-							result = res;
+				// Открываем указанный каталог
+				DIR * dir = opendir(path.c_str());
+				// Если каталог открыт
+				if(dir != nullptr){
+					// Устанавливаем количество дочерних элементов
+					result = 0;
+					// Создаем указатель на содержимое каталога
+					struct dirent * ptr = nullptr;
+					// Выполняем чтение содержимого каталога
+					while(!result && (ptr = readdir(dir))){
+						// Количество найденных элементов
+						int res = -1;
+						// Создаем структуру буфера статистики
+						struct stat statbuf;
+						// Пропускаем названия текущие "." и внешние "..", так как идет рекурсия
+						if(!strcmp(ptr->d_name, ".") || !strcmp(ptr->d_name, "..")) continue;
+						// Получаем название каталога
+						const string & dirname = (path + string("/") + ptr->d_name);
+						// Если статистика извлечена
+						if(!stat(dirname.c_str(), &statbuf)){
+							// Если дочерний элемент является дирректорией
+							if(S_ISDIR(statbuf.st_mode)) res = rmdir(dirname);
+							// Если дочерний элемент является файлом то удаляем его
+							else res = ::unlink(dirname.c_str());
 						}
-						// Закрываем открытый каталог
-						closedir(dir);
+						// Запоминаем количество дочерних элементов
+						result = res;
 					}
-					// Удаляем последний каталог
-					if(!result) result = ::rmdir(path.c_str());
-				// Если происходит ошибка то игнорируем её
-				} catch(const bad_alloc &) {
-					// Выводим сообщение об ошибке
-					cerr << "error: bad alloc for recursive rm dir" << endl;
-					// Выходим из приложения
-					exit(EXIT_FAILURE);
+					// Закрываем открытый каталог
+					closedir(dir);
 				}
+				// Удаляем последний каталог
+				if(!result) result = ::rmdir(path.c_str());
 			}
 			// Выводим результат
 			return result;
@@ -179,7 +160,7 @@ namespace anyks {
 		 * @param  name имя пользователя
 		 * @return      полученный идентификатор пользователя
 		 */
-		static const uid_t getuid(const string & name){
+		static const uid_t getuid(const string & name) noexcept {
 			// Получаем идентификатор имени пользователя
 			struct passwd * pwd = getpwnam(name.c_str());
 			// Если идентификатор пользователя не найден
@@ -197,7 +178,7 @@ namespace anyks {
 		 * @param  name название группы пользователя
 		 * @return      полученный идентификатор группы пользователя
 		 */
-		static const gid_t getgid(const string & name){
+		static const gid_t getgid(const string & name) noexcept {
 			// Получаем идентификатор группы пользователя
 			struct group * grp = getgrnam(name.c_str());
 			// Если идентификатор группы не найден
@@ -215,7 +196,7 @@ namespace anyks {
 		 * @param  name адрес дирректории
 		 * @return      результат проверки
 		 */
-		static const bool isdir(const string & name){
+		static const bool isdir(const string & name) noexcept {
 			// Результат проверки
 			bool result = false;
 			// Если адрес дирректории передан
@@ -233,7 +214,7 @@ namespace anyks {
 		 * @param  name адрес файла
 		 * @return      результат проверки
 		 */
-		static const bool isfile(const string & name){
+		static const bool isfile(const string & name) noexcept {
 			// Результат проверки
 			bool result = false;
 			// Если адрес файла передан
@@ -251,7 +232,7 @@ namespace anyks {
 		 * @param  name адрес сокета
 		 * @return      результат проверки
 		 */
-		static const bool issock(const string & name){
+		static const bool issock(const string & name) noexcept {
 			// Результат проверки
 			bool result = false;
 			// Если адрес файла передан
@@ -264,6 +245,33 @@ namespace anyks {
 			// Выводим результат
 			return result;
 		}
+		/**
+		 * fsize Функция подсчёта размера файла
+		 * @param filename адрес файла для проверки
+		 * @return         размер файла в файловой системе
+		 */
+		static const uintmax_t fsize(const string & filename) noexcept {
+			// Результат работы функции
+			uintmax_t result = 0;
+			// Если адрес файла передан верный
+			if(!filename.empty() && isfile(filename)){
+				// Открываем файл на чтение
+				ifstream file(filename, ios::in);
+				// Если файл открыт
+				if(file.is_open()){
+					// Перемещаем указатель в конец файла
+					file.seekg(0, file.end);
+					// Определяем размер файла
+					result = file.tellg();
+					// Возвращаем указатель обратно
+					file.seekg(0, file.beg);
+					// Закрываем файл
+					file.close();
+				}
+			}
+			// Выводим результат
+			return result;
+		}
 // Если это clang v10 или выше
 #if defined(__clang__) && (__clang_major__ > 9)
 		/**
@@ -272,7 +280,7 @@ namespace anyks {
 		 * @param ext  расширение файла по которому идет фильтрация
 		 * @return     размер каталога в байтах
 		 */
-		static const uintmax_t dsize(const string & path, const string & ext){
+		static const uintmax_t dsize(const string & path, const string & ext) noexcept {
 			// Результат работы функции
 			uintmax_t result = 0;
 			// Если адрес каталога и расширение файлов переданы
@@ -305,7 +313,7 @@ namespace anyks {
 		 * @param ext  расширение файла по которому идет фильтрация
 		 * @return     размер каталога в байтах
 		 */
-		static const uintmax_t dsize(const string & path, const string & ext){
+		static const uintmax_t dsize(const string & path, const string & ext) noexcept {
 			// Результат работы функции
 			uintmax_t result = 0;
 			// Если адрес каталога и расширение файлов переданы
@@ -340,19 +348,8 @@ namespace anyks {
 								const size_t length = extension.length();
 								// Если расширение файла найдено
 								if(address.substr(address.length() - length, length).compare(extension) == 0){
-									// Открываем файл на чтение
-									ifstream file(address, ios::in);
-									// Если файл открыт
-									if(file.is_open()){
-										// Перемещаем указатель в конец файла
-										file.seekg(0, file.end);
-										// Определяем размер файла
-										result += file.tellg();
-										// Возвращаем указатель обратно
-										file.seekg(0, file.beg);
-										// Закрываем файл
-										file.close();
-									}
+									// Получаем размер файла
+									result += fsize(address);
 								}
 							}
 						}
@@ -371,7 +368,7 @@ namespace anyks {
 		 * @param user  данные пользователя
 		 * @param group идентификатор группы
 		 */
-		static void chown(const string & path, const string & user, const string & group){
+		static void chown(const string & path, const string & user, const string & group) noexcept {
 			// Если путь передан
 			if(!path.empty() && !user.empty() && !group.empty()
 			&& (realpath(path.c_str(), nullptr) != nullptr)){
@@ -390,7 +387,7 @@ namespace anyks {
 		 * @param  group идентификатор группы
 		 * @return       результат создания каталога
 		 */
-		static const bool makedir(const string & path, const string & user, const string & group){
+		static const bool makedir(const string & path, const string & user, const string & group) noexcept {
 			// Проверяем существует ли нужный нам каталог
 			if(!isdir(path)){
 				// Создаем каталог
@@ -408,7 +405,7 @@ namespace anyks {
 		 * @param filename адрес файла для чтения
 		 * @param callback функция обратного вызова
 		 */
-		static void rfile(const string & filename, function <void (const string &, const uintmax_t)> callback){
+		static void rfile(const string & filename, function <void (const string &, const uintmax_t)> callback) noexcept {
 			// Если адрес файла передан
 			if(!filename.empty()){
 				// Если файл существует
@@ -449,7 +446,7 @@ namespace anyks {
 		 * @param ext      расширение файла по которому идет фильтрация
 		 * @param callback функция обратного вызова
 		 */
-		static void rdir(const string & path, const string & ext, function <void (const string &, const uintmax_t)> callback){
+		static void rdir(const string & path, const string & ext, function <void (const string &, const uintmax_t)> callback) noexcept {
 			// Если адрес каталога и расширение файлов переданы
 			if(!path.empty() && !ext.empty() && isdir(path)){
 				// Устанавливаем область видимости
@@ -488,7 +485,7 @@ namespace anyks {
 		 * @param ext      расширение файла по которому идет фильтрация
 		 * @param callback функция обратного вызова
 		 */
-		static void rdir(const string & path, const string & ext, function <void (const string &, const uintmax_t)> callback){
+		static void rdir(const string & path, const string & ext, function <void (const string &, const uintmax_t)> callback) noexcept {
 			// Если адрес каталога и расширение файлов переданы
 			if(!path.empty() && !ext.empty() && isdir(path)){
 				// Получаем полный размер каталога

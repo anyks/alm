@@ -13,7 +13,7 @@
  * @param option опция для проверки
  * @return       результат проверки
  */
-const bool anyks::AbLM::isFlag(const flag_t flag) const {
+const bool anyks::AbLM::isFlag(const flag_t flag) const noexcept {
 	// Выполняем проверку наличия флага
 	return this->flags.test((u_short) flag);
 }
@@ -21,7 +21,7 @@ const bool anyks::AbLM::isFlag(const flag_t flag) const {
  * write Метод записи данных словаря в файл
  * @param status статус расёта
  */
-const bool anyks::AbLM::write(function <void (const u_short)> status){
+const bool anyks::AbLM::write(function <void (const u_short)> status) noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Устанавливаем тип шифрования
@@ -46,6 +46,10 @@ const bool anyks::AbLM::write(function <void (const u_short)> status){
 	this->aspl->set("alphabet", this->alphabet->get());
 	// Устанавливаем неизвестное слово если есть
 	this->aspl->set("unknown", this->toolkit->getUnknown());
+	// Устанавливаем список токенов приводимых к <unk>
+	this->aspl->setValues("tokensUnknown", this->toolkit->getTokensUnknown());
+	// Устанавливаем список запрещённых токенов
+	this->aspl->setValues("tokensDisable", this->toolkit->getTokensDisable());
 	// Устанавливаем тип шифрования
 	if(!this->meta.password.empty()){
 		// Если размер шифрования получен
@@ -233,7 +237,7 @@ const bool anyks::AbLM::write(function <void (const u_short)> status){
  * @param status статус расёта
  * @param info   выводить только информацию о словаре
  */
-const bool anyks::AbLM::read(function <void (const u_short)> status, const bool info){
+const bool anyks::AbLM::read(function <void (const u_short)> status, const bool info) noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Индекс выполнения загрузки и общее количество данных
@@ -291,13 +295,6 @@ const bool anyks::AbLM::read(function <void (const u_short)> status, const bool 
 				// Выходим из функции
 				return result;
 			}
-			// Если нужно вывести статистику загрузки
-			if(status != nullptr){
-				// Увеличиваем количество блоков
-				index++;
-				// Выводим результат если необходимо
-				status(u_short(index / float(count) * 100.0f));
-			}
 		}
 		// Если нужно загрузить все данные
 		if(!info){
@@ -332,6 +329,9 @@ const bool anyks::AbLM::read(function <void (const u_short)> status, const bool 
 				// Выходим из приложения
 				exit(EXIT_FAILURE);
 			}
+			/**
+			 * Блок получения количество основных данных
+			 */
 			{
 				// Считываем количество записей arpa
 				this->aspl->get("arpaCount", arpaCount);
@@ -346,6 +346,28 @@ const bool anyks::AbLM::read(function <void (const u_short)> status, const bool 
 					// Выходим из функции
 					return result;
 				}
+				// Если нужно вывести статистику загрузки
+				if(status != nullptr){
+					// Увеличиваем количество блоков
+					index++;
+					// Выводим результат если необходимо
+					status(u_short(index / float(count) * 100.0f));
+				}
+			}
+			/**
+			 * Блок извлечения списков детектируемых токенов
+			 */
+			{
+				// Список извлекаемых токенов
+				set <token_t> tokens;
+				// Извлекаем список токенов приводимых к <unk>
+				this->aspl->getValues("tokensUnknown", tokens);
+				// Если список токенов получен, устанавливаем его
+				if(!tokens.empty()) this->toolkit->setTokensUnknown(tokens);
+				// Извлекаем список запрещённых токенов
+				this->aspl->setValues("tokensDisable", tokens);
+				// Если список токенов получен, устанавливаем его
+				if(!tokens.empty()) this->toolkit->setTokensDisable(tokens);
 				// Если нужно вывести статистику загрузки
 				if(status != nullptr){
 					// Увеличиваем количество блоков
@@ -506,15 +528,15 @@ const bool anyks::AbLM::read(function <void (const u_short)> status, const bool 
 			 */
 			{
 				// Список идентификаторов слов
-				vector <size_t> words;
+				set <size_t> words;
 				// Выполняем извлечение чёрный список слов
 				this->aspl->getValues("badwords", words);
 				// Если список слов получен
-				if(!words.empty()) this->toolkit->addBadwords(words);
+				if(!words.empty()) this->toolkit->setBadwords(words);
 				// Выполняем извлечение белого списка слов
 				this->aspl->getValues("goodwords", words);
 				// Если список слов получен
-				if(!words.empty()) this->toolkit->addGoodwords(words);
+				if(!words.empty()) this->toolkit->setGoodwords(words);
 				// Если нужно вывести статистику загрузки
 				if(status != nullptr){
 					// Увеличиваем количество блоков
@@ -669,7 +691,7 @@ void anyks::AbLM::init(){
 /**
  * clear Метод очистки данных словаря
  */
-void anyks::AbLM::clear(){
+void anyks::AbLM::clear() noexcept {
 	// Обнуляем метаданные
 	this->meta = {};
 	// Обнуляем установленные флаги
@@ -687,7 +709,7 @@ void anyks::AbLM::clear(){
 /**
  * info Метод вывода инормационных данных словаря
  */
-void anyks::AbLM::info() const {
+void anyks::AbLM::info() const noexcept {
 	// Если название словаря указано
 	if(!this->meta.name.empty()){
 		// Выполняем очистку консоли
@@ -747,7 +769,7 @@ void anyks::AbLM::info() const {
  * setMeta Метод установки метаданных в формате json
  * @param meta метаданные в формате json
  */
-void anyks::AbLM::setMeta(const json & meta){
+void anyks::AbLM::setMeta(const json & meta) noexcept {
 	// Размер шифрования
 	u_short aes = 0;
 	// Считываем размер шифрования
@@ -780,7 +802,7 @@ void anyks::AbLM::setMeta(const json & meta){
  * setFlag Метод установки флага модуля
  * @param flag флаг для установки
  */
-void anyks::AbLM::setFlag(const flag_t flag){
+void anyks::AbLM::setFlag(const flag_t flag) noexcept {
 	// Устанавливаем флаг модуля
 	this->flags.set((u_short) flag);
 }
@@ -788,7 +810,7 @@ void anyks::AbLM::setFlag(const flag_t flag){
  * unsetFlag Метод отключения флага модуля
  * @param flag флаг для отключения
  */
-void anyks::AbLM::unsetFlag(const flag_t flag){
+void anyks::AbLM::unsetFlag(const flag_t flag) noexcept {
 	// Удаляем флаг модуля
 	this->flags.reset((u_short) flag);
 }
@@ -796,7 +818,7 @@ void anyks::AbLM::unsetFlag(const flag_t flag){
  * setLogfile Метод установка файла для вывода логов
  * @param logifle адрес файла для вывода отладочной информации
  */
-void anyks::AbLM::setLogfile(const char * logfile){
+void anyks::AbLM::setLogfile(const char * logfile) noexcept {
 	// Устанавливаем адрес файла логирования
 	this->logfile = logfile;
 }
@@ -804,7 +826,7 @@ void anyks::AbLM::setLogfile(const char * logfile){
  * setToolkit Метод установки объекта тулкита
  * @param toolkit объект тукита для установки
  */
-void anyks::AbLM::setToolkit(toolkit_t * toolkit){
+void anyks::AbLM::setToolkit(toolkit_t * toolkit) noexcept {
 	// Устанавливаем объект тулкита
 	this->toolkit = toolkit;
 }
@@ -812,7 +834,7 @@ void anyks::AbLM::setToolkit(toolkit_t * toolkit){
  * setAlphabet Метод установки объекта словаря
  * @param alphabet объект словаря для установки
  */
-void anyks::AbLM::setAlphabet(alphabet_t * alphabet){
+void anyks::AbLM::setAlphabet(alphabet_t * alphabet) noexcept {
 	// Устанавливаем объект алфавита
 	this->alphabet = alphabet;
 }
@@ -820,7 +842,7 @@ void anyks::AbLM::setAlphabet(alphabet_t * alphabet){
  * setTokenizer Метод установки токенизатора
  * @param tokenizer объект токенизатора
  */
-void anyks::AbLM::setTokenizer(tokenizer_t * tokenizer){
+void anyks::AbLM::setTokenizer(tokenizer_t * tokenizer) noexcept {
 	// Устанавливаем объект токенизатора
 	this->tokenizer = tokenizer;
 }
@@ -828,361 +850,19 @@ void anyks::AbLM::setTokenizer(tokenizer_t * tokenizer){
  * setFilename Метод установки адреса файла словаря
  * @param filename адрес файла словаря
  */
-void anyks::AbLM::setFilename(const string & filename){
+void anyks::AbLM::setFilename(const string & filename) noexcept {
 	// Устанавливаем имя файла
 	if(!filename.empty()) this->filename = filename;
 }
 /**
  * AbLM Конструктор
- * @param logifle адрес файла для вывода отладочной информации
- */
-anyks::AbLM::AbLM(const char * logfile){
-	// Устанавливаем адрес файла логов
-	this->setLogfile(logfile);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- */
-anyks::AbLM::AbLM(const string & filename){
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param meta     метаданные в формате json
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param toolkit  объект тукита для установки
- * @param alphabet объект словаря для установки
- */
-anyks::AbLM::AbLM(toolkit_t * toolkit, alphabet_t * alphabet){
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param toolkit  объект тукита для установки
- */
-anyks::AbLM::AbLM(const string & filename, toolkit_t * toolkit){
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param logifle  адрес файла для вывода отладочной информации
- */
-anyks::AbLM::AbLM(const string & filename, const char * logfile){
-	// Устанавливаем адрес файла логов
-	this->setLogfile(logfile);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param alphabet объект словаря для установки
- */
-anyks::AbLM::AbLM(const string & filename, alphabet_t * alphabet){
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param meta     метаданные в формате json
- * @param toolkit  объект тукита для установки
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta, toolkit_t * toolkit){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param meta     метаданные в формате json
- * @param alphabet объект словаря для установки
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta, alphabet_t * alphabet){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param toolkit  объект тукита для установки
- * @param alphabet объект словаря для установки
- */
-anyks::AbLM::AbLM(const string & filename, toolkit_t * toolkit, alphabet_t * alphabet){
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-}
-/**
- * AbLM Конструктор
- * @param filename  адрес файла словаря
- * @param toolkit   объект тукита для установки
- * @param alphabet  объект словаря для установки
- * @param tokenizer объект токенизатора
- */
-anyks::AbLM::AbLM(toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer){
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-	// Устанавливаем объект токенизатора
-	this->setTokenizer(tokenizer);
-}
-/**
- * AbLM Конструктор
- * @param filename  адрес файла словаря
- * @param toolkit   объект тукита для установки
- * @param tokenizer объект токенизатора
- */
-anyks::AbLM::AbLM(const string & filename, toolkit_t * toolkit, tokenizer_t * tokenizer){
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект токенизатора
-	this->setTokenizer(tokenizer);
-}
-/**
- * AbLM Конструктор
- * @param filename  адрес файла словаря
- * @param alphabet  объект словаря для установки
- * @param tokenizer объект токенизатора
- */
-anyks::AbLM::AbLM(const string & filename, alphabet_t * alphabet, tokenizer_t * tokenizer){
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-	// Устанавливаем объект токенизатора
-	this->setTokenizer(tokenizer);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param meta     метаданные в формате json
- * @param toolkit  объект тукита для установки
- * @param logifle  адрес файла для вывода отладочной информации
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta, toolkit_t * toolkit, const char * logfile){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
-	// Устанавливаем адрес файла логов
-	this->setLogfile(logfile);
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param meta     метаданные в формате json
- * @param toolkit  объект тукита для установки
- * @param alphabet объект словаря для установки
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta, toolkit_t * toolkit, alphabet_t * alphabet){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-}
-/**
- * AbLM Конструктор
- * @param filename  адрес файла словаря
- * @param meta      метаданные в формате json
- * @param toolkit   объект тукита для установки
- * @param tokenizer объект токенизатора
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta, toolkit_t * toolkit, tokenizer_t * tokenizer){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект токенизатора
-	this->setTokenizer(tokenizer);
-}
-/**
- * AbLM Конструктор
- * @param filename  адрес файла словаря
- * @param meta      метаданные в формате json
- * @param alphabet  объект словаря для установки
- * @param tokenizer объект токенизатора
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta, alphabet_t * alphabet, tokenizer_t * tokenizer){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-	// Устанавливаем объект токенизатора
-	this->setTokenizer(tokenizer);
-}
-/**
- * AbLM Конструктор
- * @param filename  адрес файла словаря
- * @param toolkit   объект тукита для установки
- * @param alphabet  объект словаря для установки
- * @param tokenizer объект токенизатора
- */
-anyks::AbLM::AbLM(const string & filename, toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer){
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-	// Устанавливаем объект токенизатора
-	this->setTokenizer(tokenizer);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param toolkit  объект тукита для установки
- * @param alphabet объект словаря для установки
- * @param logifle  адрес файла для вывода отладочной информации
- */
-anyks::AbLM::AbLM(const string & filename, toolkit_t * toolkit, alphabet_t * alphabet, const char * logfile){
-	// Устанавливаем адрес файла логов
-	this->setLogfile(logfile);
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-}
-/**
- * AbLM Конструктор
- * @param filename адрес файла словаря
- * @param meta     метаданные в формате json
- * @param toolkit  объект тукита для установки
- * @param alphabet объект словаря для установки
- * @param logifle  адрес файла для вывода отладочной информации
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta, toolkit_t * toolkit, alphabet_t * alphabet, const char * logfile){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
-	// Устанавливаем адрес файла логов
-	this->setLogfile(logfile);
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-}
-/**
- * AbLM Конструктор
- * @param filename  адрес файла словаря
- * @param meta      метаданные в формате json
- * @param toolkit   объект тукита для установки
- * @param tokenizer объект токенизатора
- * @param logifle   адрес файла для вывода отладочной информации
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta, toolkit_t * toolkit, tokenizer_t * tokenizer, const char * logfile){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
-	// Устанавливаем адрес файла логов
-	this->setLogfile(logfile);
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект токенизатора
-	this->setTokenizer(tokenizer);
-}
-/**
- * AbLM Конструктор
- * @param filename  адрес файла словаря
- * @param meta      метаданные в формате json
- * @param toolkit   объект тукита для установки
- * @param alphabet  объект словаря для установки
- * @param tokenizer объект токенизатора
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta, toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-	// Устанавливаем объект токенизатора
-	this->setTokenizer(tokenizer);
-}
-/**
- * AbLM Конструктор
  * @param filename  адрес файла словаря
  * @param toolkit   объект тукита для установки
  * @param alphabet  объект словаря для установки
  * @param tokenizer объект токенизатора
  * @param logifle   адрес файла для вывода отладочной информации
  */
-anyks::AbLM::AbLM(const string & filename, toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer, const char * logfile){
-	// Устанавливаем адрес файла логов
-	this->setLogfile(logfile);
-	// Устанавливаем объект тулкита
-	this->setToolkit(toolkit);
-	// Устанавливаем имя файла
-	this->setFilename(filename);
-	// Устанавливаем объект алфавита
-	this->setAlphabet(alphabet);
-	// Устанавливаем объект токенизатора
-	this->setTokenizer(tokenizer);
-}
-/**
- * AbLM Конструктор
- * @param filename  адрес файла словаря
- * @param meta      метаданные в формате json
- * @param toolkit   объект тукита для установки
- * @param alphabet  объект словаря для установки
- * @param tokenizer объект токенизатора
- * @param logifle   адрес файла для вывода отладочной информации
- */
-anyks::AbLM::AbLM(const string & filename, const json & meta, toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer, const char * logfile){
-	// Устанавливаем метаданные
-	this->setMeta(meta);
+anyks::AbLM::AbLM(const string & filename, toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer, const char * logfile) noexcept {
 	// Устанавливаем адрес файла логов
 	this->setLogfile(logfile);
 	// Устанавливаем объект тулкита
@@ -1197,7 +877,7 @@ anyks::AbLM::AbLM(const string & filename, const json & meta, toolkit_t * toolki
 /**
  * ~AbLM Деструктор
  */
-anyks::AbLM::~AbLM(){
+anyks::AbLM::~AbLM() noexcept {
 	// Выполняем очистику выделенных решений
 	this->clear();
 }

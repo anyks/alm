@@ -54,7 +54,7 @@ namespace anyks {
 			/**
 			 * work Метод обработки очереди задач в одном потоке
 			 */
-			void work(){
+			void work() noexcept {
 				// Запускаем бесконечный цикл
 				for(;;){
 					// Создаём текущее задание
@@ -80,7 +80,7 @@ namespace anyks {
 			/**
 			 * wait Метод ожидания выполнения задач
 			 */
-			void wait(){
+			void wait() noexcept {
 				{
 					// Останавливаем работу потоков
 					this->stop = true;
@@ -104,7 +104,7 @@ namespace anyks {
 			 * init Метод инициализации работы тредпула
 			 * @param threads количество потоков
 			 */
-			void init(const size_t threads = 0){
+			void init(const size_t threads = 0) noexcept {
 				// Ели количество потоков передано
 				if(threads > 0) this->threads = threads;
 				// Ели количество потоков передано
@@ -120,7 +120,7 @@ namespace anyks {
 			 * getTaskQueueSize Метод возврата количества сообщений в очереди задач на исполнение
 			 * @return результат работы функции
 			 */
-			const size_t getTaskQueueSize() const {
+			const size_t getTaskQueueSize() const noexcept {
 				// Выполняем блокировку уникальным мютексом
 				unique_lock <mutex> lock(this->queue_mutex);
 				// Выводим количество заданий
@@ -130,14 +130,14 @@ namespace anyks {
 			 * ThreadPool Конструктор
 			 * @param threads потоки
 			 */
-			explicit ThreadPool(const size_t threads = std::thread::hardware_concurrency()) : stop(false), threads(0) {
+			explicit ThreadPool(const size_t threads = std::thread::hardware_concurrency()) noexcept : stop(false), threads(0) {
 				// Ели количество потоков передано
 				if(threads > 0) this->threads = threads;
 			}
 			/**
 			 * ~ThreadPool Деструктор
 			 */
-			~ThreadPool(){
+			~ThreadPool() noexcept {
 				// Выполняем ожидание выполнения задач
 				this->wait();
 			}
@@ -151,7 +151,7 @@ namespace anyks {
 			 * @param func функция для обработки
 			 * @param args аргументы для передачи в функцию
 			 */
-			auto push(Func && func, Args && ... args) -> future <typename result_of <Func(Args...)>::type> {
+			auto push(Func && func, Args && ... args) noexcept -> future <typename result_of <Func(Args...)>::type> {
 				// Устанавливаем тип возвращаемого значения
 				using return_type = typename result_of <Func(Args...)>::type;
 				// Добавляем задачу в очередь для последующего исполнения

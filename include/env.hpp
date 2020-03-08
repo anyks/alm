@@ -35,9 +35,6 @@ namespace anyks {
 	 */
 	typedef class Env {
 		private:
-			// Объект алфавита
-			const alphabet_t * alphabet = nullptr;
-		private:
 			// Флаг автоматического чтения текстовой переменной
 			bool aread = false;
 			/**
@@ -50,87 +47,90 @@ namespace anyks {
 			// Список полученных переменных окружения
 			unordered_map <string, string> data;
 		private:
+			// Объект алфавита
+			const alphabet_t * alphabet = nullptr;
+		private:
 			/**
 			 * env Метод извлечения переменной окружения
 			 * @param  key переменная окружения
 			 * @return     значение переменной
 			 */
-			const string env(const string & key) const;
+			const string env(const string & key) const noexcept;
 		public:
 			/**
 			 * count Метод извлечения количества аргументов
 			 * @return количество полученных аргументов
 			 */
-			const u_short count() const;
+			const u_short count() const noexcept;
 			/**
 			 * get Метод извлечения содержимого переменной окружения
 			 * @param  name название переменной окружения
 			 * @return      значение переменной окружения
 			 */
-			const char * get(const string & name) const;
+			const char * get(const string & name) const noexcept;
 			/**
 			 * is Метод проверки наличия и значения переменной
 			 * @param key ключ - название переменной для проверки
 			 * @param val значение переменной для проверки (если требуется)
 			 */
-			const bool is(const string & key, const string & val = "") const;
+			const bool is(const string & key, const string & val = "") const noexcept;
 		public:
 			/**
 			 * autoRead Метод разрешения или запрещения автоматического чтения текстовой переменной
 			 * @param flag значение флага
 			 */
-			void autoRead(const bool flag);
+			void autoRead(const bool flag) noexcept;
 			/**
 			 * textEnv Метод установки списка имён которые нужно извлечь
 			 * @param text название переменной для извлечения текстовой информации из потока (если параметром не передана)
 			 */
-			void textEnv(const string & text);
+			void textEnv(const string & text) noexcept;
 			/**
 			 * prefixEnv Метод установки префикса переменной окружения
 			 * @param prefix префикс переменной окружения
 			 */
-			void prefixEnv(const string & prefix);
+			void prefixEnv(const string & prefix) noexcept;
 			/**
 			 * setAlphabet Метод установки алфавита
 			 * @param alphabet объект алфавита
 			 */
-			void setAlphabet(const alphabet_t * alphabet);
+			void setAlphabet(const alphabet_t * alphabet) noexcept;
 			/**
 			 * read Метод чтения данных переменных окружения
 			 * @param args  список переменных окружения
 			 * @param count количество переменных окружения
 			 */
-			void read(const char * args[], const u_short count);
+			void read(const char * args[], const u_short count) noexcept;
 		public:
 			/**
 			 * Env Конструктор
 			 * @param prefix префикс переменной окружения
 			 */
-			Env(const string & prefix);
+			Env(const string & prefix) noexcept;
 			/**
 			 * Env Конструктор
 			 * @param alphabet объект алфавита
 			 */
-			Env(const alphabet_t * alphabet = nullptr);
+			Env(const alphabet_t * alphabet = nullptr) noexcept;
 			/**
 			 * Env Конструктор
 			 * @param prefix префикс переменной окружения
 			 * @param text   название переменной для извлечения текстовой информации из потока (если параметром не передана)
 			 */
-			Env(const string & prefix, const string & text);
+			Env(const string & prefix, const string & text) noexcept;
 			/**
 			 * Env Конструктор
 			 * @param prefix   префикс переменной окружения
 			 * @param alphabet объект алфавита
 			 */
-			Env(const string & prefix, const alphabet_t * alphabet);
+			Env(const string & prefix, const alphabet_t * alphabet) noexcept;
 			/**
 			 * Env Конструктор
 			 * @param prefix   префикс переменной окружения
 			 * @param text     название переменной для извлечения текстовой информации из потока (если параметром не передана)
 			 * @param alphabet объект алфавита
 			 */
-			Env(const string & prefix, const string & text, const alphabet_t * alphabet);
+			Env(const string & prefix, const string & text, const alphabet_t * alphabet) noexcept;
 	} env_t;
 };
 

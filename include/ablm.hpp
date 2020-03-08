@@ -99,19 +99,19 @@ namespace anyks {
 			 * @param option опция для проверки
 			 * @return       результат проверки
 			 */
-			const bool isFlag(const flag_t flag) const;
+			const bool isFlag(const flag_t flag) const noexcept;
 		public:
 			/**
 			 * write Метод записи данных словаря в файл
 			 * @param status статус расёта
 			 */
-			const bool write(function <void (const u_short)> status = nullptr);
+			const bool write(function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * read Метод чтения данных словаря из файла
 			 * @param status статус расёта
 			 * @param info   выводить только информацию о словаре
 			 */
-			const bool read(function <void (const u_short)> status = nullptr, const bool info = false);
+			const bool read(function <void (const u_short)> status = nullptr, const bool info = false) noexcept;
 		public:
 			/**
 			 * Метод инициализации
@@ -120,215 +120,56 @@ namespace anyks {
 			/**
 			 * clear Метод очистки данных словаря
 			 */
-			void clear();
+			void clear() noexcept;
 			/**
 			 * info Метод вывода инормационных данных словаря
 			 */
-			void info() const;
+			void info() const noexcept;
 			/**
 			 * setMeta Метод установки метаданных в формате json
 			 * @param meta метаданные в формате json
 			 */
-			void setMeta(const json & meta);
+			void setMeta(const json & meta) noexcept;
 			/**
 			 * setFlag Метод установки флага модуля
 			 * @param flag флаг для установки
 			 */
-			void setFlag(const flag_t flag);
+			void setFlag(const flag_t flag) noexcept;
 			/**
 			 * unsetFlag Метод отключения флага модуля
 			 * @param flag флаг для отключения
 			 */
-			void unsetFlag(const flag_t flag);
+			void unsetFlag(const flag_t flag) noexcept;
 			/**
 			 * setLogfile Метод установка файла для вывода логов
 			 * @param logifle адрес файла для вывода отладочной информации
 			 */
-			void setLogfile(const char * logfile);
+			void setLogfile(const char * logfile) noexcept;
 			/**
 			 * setToolkit Метод установки объекта тулкита
 			 * @param toolkit объект тукита для установки
 			 */
-			void setToolkit(toolkit_t * toolkit);
+			void setToolkit(toolkit_t * toolkit) noexcept;
 			/**
 			 * setAlphabet Метод установки объекта словаря
 			 * @param alphabet объект словаря для установки
 			 */
-			void setAlphabet(alphabet_t * alphabet);
+			void setAlphabet(alphabet_t * alphabet) noexcept;
 			/**
 			 * setTokenizer Метод установки токенизатора
 			 * @param tokenizer объект токенизатора
 			 */
-			void setTokenizer(tokenizer_t * tokenizer);
+			void setTokenizer(tokenizer_t * tokenizer) noexcept;
 			/**
 			 * setFilename Метод установки адреса файла словаря
 			 * @param filename адрес файла словаря
 			 */
-			void setFilename(const string & filename);
+			void setFilename(const string & filename) noexcept;
 		public:
 			/**
 			 * AbLM Конструктор
 			 */
-			AbLM(){};
-			/**
-			 * AbLM Конструктор
-			 * @param logifle адрес файла для вывода отладочной информации
-			 */
-			AbLM(const char * logfile);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 */
-			AbLM(const string & filename);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param meta     метаданные в формате json
-			 */
-			AbLM(const string & filename, const json & meta);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param toolkit  объект тукита для установки
-			 * @param alphabet объект словаря для установки
-			 */
-			AbLM(toolkit_t * toolkit, alphabet_t * alphabet);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param toolkit  объект тукита для установки
-			 */
-			AbLM(const string & filename, toolkit_t * toolkit);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param logifle  адрес файла для вывода отладочной информации
-			 */
-			AbLM(const string & filename, const char * logfile);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param alphabet объект словаря для установки
-			 */
-			AbLM(const string & filename, alphabet_t * alphabet);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param meta     метаданные в формате json
-			 * @param toolkit  объект тукита для установки
-			 */
-			AbLM(const string & filename, const json & meta, toolkit_t * toolkit);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param meta     метаданные в формате json
-			 * @param alphabet объект словаря для установки
-			 */
-			AbLM(const string & filename, const json & meta, alphabet_t * alphabet);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param toolkit  объект тукита для установки
-			 * @param alphabet объект словаря для установки
-			 */
-			AbLM(const string & filename, toolkit_t * toolkit, alphabet_t * alphabet);
-			/**
-			 * AbLM Конструктор
-			 * @param filename  адрес файла словаря
-			 * @param toolkit   объект тукита для установки
-			 * @param alphabet  объект словаря для установки
-			 * @param tokenizer объект токенизатора
-			 */
-			AbLM(toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer);
-			/**
-			 * AbLM Конструктор
-			 * @param filename  адрес файла словаря
-			 * @param toolkit   объект тукита для установки
-			 * @param tokenizer объект токенизатора
-			 */
-			AbLM(const string & filename, toolkit_t * toolkit, tokenizer_t * tokenizer);
-			/**
-			 * AbLM Конструктор
-			 * @param filename  адрес файла словаря
-			 * @param alphabet  объект словаря для установки
-			 * @param tokenizer объект токенизатора
-			 */
-			AbLM(const string & filename, alphabet_t * alphabet, tokenizer_t * tokenizer);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param meta     метаданные в формате json
-			 * @param toolkit  объект тукита для установки
-			 * @param logifle  адрес файла для вывода отладочной информации
-			 */
-			AbLM(const string & filename, const json & meta, toolkit_t * toolkit, const char * logfile);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param meta     метаданные в формате json
-			 * @param toolkit  объект тукита для установки
-			 * @param alphabet объект словаря для установки
-			 */
-			AbLM(const string & filename, const json & meta, toolkit_t * toolkit, alphabet_t * alphabet);
-			/**
-			 * AbLM Конструктор
-			 * @param filename  адрес файла словаря
-			 * @param meta      метаданные в формате json
-			 * @param toolkit   объект тукита для установки
-			 * @param tokenizer объект токенизатора
-			 */
-			AbLM(const string & filename, const json & meta, toolkit_t * toolkit, tokenizer_t * tokenizer);
-			/**
-			 * AbLM Конструктор
-			 * @param filename  адрес файла словаря
-			 * @param meta      метаданные в формате json
-			 * @param alphabet  объект словаря для установки
-			 * @param tokenizer объект токенизатора
-			 */
-			AbLM(const string & filename, const json & meta, alphabet_t * alphabet, tokenizer_t * tokenizer);
-			/**
-			 * AbLM Конструктор
-			 * @param filename  адрес файла словаря
-			 * @param toolkit   объект тукита для установки
-			 * @param alphabet  объект словаря для установки
-			 * @param tokenizer объект токенизатора
-			 */
-			AbLM(const string & filename, toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param toolkit  объект тукита для установки
-			 * @param alphabet объект словаря для установки
-			 * @param logifle  адрес файла для вывода отладочной информации
-			 */
-			AbLM(const string & filename, toolkit_t * toolkit, alphabet_t * alphabet, const char * logfile);
-			/**
-			 * AbLM Конструктор
-			 * @param filename адрес файла словаря
-			 * @param meta     метаданные в формате json
-			 * @param toolkit  объект тукита для установки
-			 * @param alphabet объект словаря для установки
-			 * @param logifle  адрес файла для вывода отладочной информации
-			 */
-			AbLM(const string & filename, const json & meta, toolkit_t * toolkit, alphabet_t * alphabet, const char * logfile);
-			/**
-			 * AbLM Конструктор
-			 * @param filename  адрес файла словаря
-			 * @param meta      метаданные в формате json
-			 * @param toolkit   объект тукита для установки
-			 * @param tokenizer объект токенизатора
-			 * @param logifle   адрес файла для вывода отладочной информации
-			 */
-			AbLM(const string & filename, const json & meta, toolkit_t * toolkit, tokenizer_t * tokenizer, const char * logfile);
-			/**
-			 * AbLM Конструктор
-			 * @param filename  адрес файла словаря
-			 * @param meta      метаданные в формате json
-			 * @param toolkit   объект тукита для установки
-			 * @param alphabet  объект словаря для установки
-			 * @param tokenizer объект токенизатора
-			 */
-			AbLM(const string & filename, const json & meta, toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer);
+			AbLM() noexcept {};
 			/**
 			 * AbLM Конструктор
 			 * @param filename  адрес файла словаря
@@ -337,21 +178,11 @@ namespace anyks {
 			 * @param tokenizer объект токенизатора
 			 * @param logifle   адрес файла для вывода отладочной информации
 			 */
-			AbLM(const string & filename, toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer, const char * logfile);
-			/**
-			 * AbLM Конструктор
-			 * @param filename  адрес файла словаря
-			 * @param meta      метаданные в формате json
-			 * @param toolkit   объект тукита для установки
-			 * @param alphabet  объект словаря для установки
-			 * @param tokenizer объект токенизатора
-			 * @param logifle   адрес файла для вывода отладочной информации
-			 */
-			AbLM(const string & filename, const json & meta, toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer, const char * logfile);
+			AbLM(const string & filename, toolkit_t * toolkit, alphabet_t * alphabet, tokenizer_t * tokenizer, const char * logfile) noexcept;
 			/**
 			 * ~AbLM Деструктор
 			 */
-			~AbLM();
+			~AbLM() noexcept;
 	} ablm_t;
 };
 

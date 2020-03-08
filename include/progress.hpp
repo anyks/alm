@@ -44,28 +44,28 @@ namespace anyks {
 			/**
 			 * clear Метод сброса данных
 			 */
-			void clear();
+			void clear() noexcept;
 			/**
 			 * status Метод вывод статуса в текстовом виде
 			 * @param status текущий статус
 			 */
-			void status(const u_short status = 0);
+			void status(const u_short status = 0) noexcept;
 			/**
 			 * update Метод обновления прогресса
 			 * @param status текущий статус
 			 */
-			void update(const u_short status = 0);
+			void update(const u_short status = 0) noexcept;
 			/**
 			 * description Метод установки описания работы
 			 * @param text текст описания работы
 			 */
-			void description(const string & text);
+			void description(const string & text) noexcept;
 			/**
 			 * title Метод установки заголовка
 			 * @param start  заголовок при работе прогресса
 			 * @param finish заголовок при завершении прогресса
 			 */
-			void title(const string & start, const string & finish = "");
+			void title(const string & start, const string & finish = "") noexcept;
 	} progress_t;
 };
 

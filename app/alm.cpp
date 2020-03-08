@@ -22,7 +22,7 @@ using json = nlohmann::json;
  * version Функция вывода версии приложения
  * @param address адрес приложения
  */
-void version(const char * address){
+void version(const char * address) noexcept {
 	// Позиция в каталоге
 	size_t pos = 0;
 #ifdef __linux__
@@ -63,7 +63,7 @@ void version(const char * address){
 /**
  * help Функция вывода справки
  */
-void help(){
+void help() noexcept {
 	// Формируем строку справки
 	const string msg = "\r\n\x1B[32m\x1B[1musage:\x1B[0m alm [-V | --version] [-h | --help] "
 	"[-alphabet <value> | --alphabet=<value>] [<args>]\r\n\r\n\r\n"
@@ -87,6 +87,8 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing accounting of all collected n-grams:                            [-all-grams | --all-grams]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing the use of words consisting of mixed dictionaries:              [-mixed-dicts | --mixed-dicts]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag to reset the frequency of an unknown word:                               [-reset-unk | --reset-unk]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag to clearing temporary data during training:                              [-train-autoclean | --train-autoclean]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag to performing data segmentation during training:                         [-train-segments | --train-segments]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of all data:                                 [-w-bin-all | --w-bin-all]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of users tokens:                             [-w-bin-utokens | --w-bin-utokens]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of domain zones:                             [-w-bin-domzones | --w-bin-domzones]\r\n\r\n"
@@ -108,6 +110,7 @@ void help(){
 	"\x1B[33m\x1B[1m×\x1B[0m text file training corpus:                          [-corpus <value> | --corpus=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m extension files corpus:                             [-ext <value> | --ext=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with text corpus:                    [-path <value> | --path=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m number of threads for data collection:              [-threads <value> | --threads=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt text for tokens export:          [-w-tokens-text <value> | --w-tokens-text=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.json text for tokens export:         [-w-tokens-json <value> | --w-tokens-json=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt text for tokens import:          [-r-tokens-text <value> | --r-tokens-text=<value>]\r\n\r\n"
@@ -144,6 +147,8 @@ void help(){
 	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m list of tokens for identification as <unk>:         [-tokens-unknown <value1|value2|...> | --tokens-unknown=<value1|value2|...>]\r\n"
 	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m segment size for training data segmentation:        [-train-segment-size <value> | --train-segment-size=<value>]\r\n"
+	"  \x1B[1m-\x1B[0m (nb | nkb | nMb | nGb), example: --train-segment-size=4096Mb\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m debug mode:                                         [-debug <value> | --debug=<value>]\r\n"
 	"  \x1B[1m-\x1B[0m (0 - off | 1 - progress | 2 - console)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m method application:                                 [-method <value> | --method=<value>]\r\n"
@@ -160,7 +165,7 @@ void help(){
  * @param flag     флаг типа сообщения (info, error, warning)
  * @param end      флаг выхода из приложения
  */
-void print(const string & text, const char * filename = nullptr, const alphabet_t::log_t flag = alphabet_t::log_t::error, const bool end = true){
+void print(const string & text, const char * filename = nullptr, const alphabet_t::log_t flag = alphabet_t::log_t::error, const bool end = true) noexcept {
 	// Результат работы функции
 	if(!text.empty()){
 		// Выполняем логирование
@@ -175,7 +180,7 @@ void print(const string & text, const char * filename = nullptr, const alphabet_
  * @param  argv массив параметров
  * @return      код выхода из приложения
  */
-int main(int argc, char * argv[]){
+int main(int argc, char * argv[]) noexcept {
 	// Создаём алфавит
 	alphabet_t alphabet;
 	// Бинарный файл словаря
@@ -229,7 +234,7 @@ int main(int argc, char * argv[]){
 			// Очищаем список букв алфавита
 			letters.clear();
 			// Выполняем считывание всех строк текста
-			fsys_t::rfile(filename, [&letters](const string & line, const uintmax_t size){
+			fsys_t::rfile(filename, [&letters](const string & line, const uintmax_t size) noexcept {
 				// Если текст получен
 				if(!line.empty()) letters.append(line);
 			});
@@ -334,24 +339,24 @@ int main(int argc, char * argv[]){
 				// Чёрный список слов
 				vector <string> badwords;
 				// Выполняем считывание всех слов для чёрного списка
-				fsys_t::rfile(value, [&badwords, &toolkit](const string & line, const uintmax_t fileSize){
+				fsys_t::rfile(value, [&badwords, &toolkit](const string & line, const uintmax_t fileSize) noexcept {
 					// Если текст получен
 					if(!line.empty()) badwords.push_back(line);
 				});
 				// Если чёрный список получен, устанавливаем его
-				if(!badwords.empty()) toolkit.addBadwords(badwords);
+				if(!badwords.empty()) toolkit.setBadwords(badwords);
 			}
 			// Если адрес файла белого списка получен
 			if((value = env.get("goodwords")) != nullptr){
 				// Белый список слов
 				vector <string> goodwords;
 				// Выполняем считывание всех слов для белого списка
-				fsys_t::rfile(value, [&goodwords, &toolkit](const string & line, const uintmax_t fileSize){
+				fsys_t::rfile(value, [&goodwords, &toolkit](const string & line, const uintmax_t fileSize) noexcept {
 					// Если текст получен
 					if(!line.empty()) goodwords.push_back(line);
 				});
 				// Если белый список получен, устанавливаем его
-				if(!goodwords.empty()) toolkit.addGoodwords(goodwords);
+				if(!goodwords.empty()) toolkit.setGoodwords(goodwords);
 			}
 			// Если неизвестное слово получено
 			if((value = env.get("unknown-word")) != nullptr) toolkit.setUnknown(value);
@@ -383,7 +388,7 @@ int main(int argc, char * argv[]){
 					// Данные в формате json
 					string data = "";
 					// Выполняем считывание всех строк текста
-					fsys_t::rfile(realpath(value, nullptr), [&data](const string & line, const uintmax_t fileSize){
+					fsys_t::rfile(realpath(value, nullptr), [&data](const string & line, const uintmax_t fileSize) noexcept {
 						// Добавляем полученные строки
 						data.append(line);
 					});
@@ -405,7 +410,7 @@ int main(int argc, char * argv[]){
 					}
 				}
 				// Выполняем чтение бинарных данных
-				ablm.read([debug, &pss](const u_short status){
+				ablm.read([debug, &pss](const u_short status) noexcept {
 					// Отображаем ход процесса
 					switch(debug){
 						case 1: pss.update(status); break;
@@ -454,11 +459,11 @@ int main(int argc, char * argv[]){
 						// Устанавливаем название файла
 						if(debug > 0) pss.description(readfile + string(" -> ") + writefile);
 						// Выполняем считывание всех строк текста
-						fsys_t::rfile(readfile, [&](const string & text, const uintmax_t fileSize){
+						fsys_t::rfile(readfile, [&](const string & text, const uintmax_t fileSize) noexcept {
 							// Если текст получен
 							if(!text.empty()){
 								// Выполняем преобразование текста в json
-								tokenizer.textToJson(text, [&](const string & text){
+								tokenizer.textToJson(text, [&](const string & text) noexcept {
 									// Если текст получен
 									if(!text.empty()){
 										// Если нужно сохранить json
@@ -466,7 +471,7 @@ int main(int argc, char * argv[]){
 										// Если нужно сохранить в виде текста
 										else if(env.is("w-tokens-text")) {
 											// Пытаемся восстановить текст из json объекта
-											tokenizer.jsonToText(text, [&](const string & text){
+											tokenizer.jsonToText(text, [&](const string & text) noexcept {
 												// Если текст получен
 												if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
 											});
@@ -528,7 +533,7 @@ int main(int argc, char * argv[]){
 						// Устанавливаем название файла
 						if(debug > 0) pss.description(readfile + string(" -> ") + writefile);
 						// Выполняем считывание всех строк текста
-						fsys_t::rfile(readfile, [&](const string & text, const uintmax_t fileSize){
+						fsys_t::rfile(readfile, [&](const string & text, const uintmax_t fileSize) noexcept {
 							// Если текст получен
 							if(!text.empty()) textData.append(text);
 							// Если отладка включена
@@ -562,7 +567,7 @@ int main(int argc, char * argv[]){
 									// Если данные получены
 									if(item.value().is_array()){
 										// Пытаемся восстановить текст из json объекта
-										tokenizer.jsonToText(item.value().dump(), [&](const string & text){
+										tokenizer.jsonToText(item.value().dump(), [&](const string & text) noexcept {
 											// Если текст получен
 											if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
 										});
@@ -608,7 +613,7 @@ int main(int argc, char * argv[]){
 						// Расширение файлов текстового корпуса
 						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
 						// Переходим по всему списку файлов в каталоге
-						fsys_t::rdir(readpath, ext, [&](const string & filename, const uintmax_t dirSize){
+						fsys_t::rdir(readpath, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
 							// Очищаем объект данных json
 							jsonData.clear();
 							// Очищаем текстовый блок данных
@@ -616,7 +621,7 @@ int main(int argc, char * argv[]){
 							// Устанавливаем название файла
 							if(debug > 0) pss.description(filename);
 							// Выполняем считывание всех строк текста
-							fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+							fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 								// Если текст получен
 								if(!text.empty()){
 									// Если это json
@@ -624,7 +629,7 @@ int main(int argc, char * argv[]){
 									// Если это текстовый формат
 									else {
 										// Выполняем преобразование текста в json
-										tokenizer.textToJson(text, [&](const string & text){
+										tokenizer.textToJson(text, [&](const string & text) noexcept {
 											// Если текст получен
 											if(!text.empty()) jsonData.push_back(json::parse(text));
 										});
@@ -663,7 +668,7 @@ int main(int argc, char * argv[]){
 											// Если данные получены
 											if(item.value().is_array()){
 												// Пытаемся восстановить текст из json объекта
-												tokenizer.jsonToText(item.value().dump(), [&](const string & text){
+												tokenizer.jsonToText(item.value().dump(), [&](const string & text) noexcept {
 													// Если текст получен
 													if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
 												});
@@ -737,14 +742,14 @@ int main(int argc, char * argv[]){
 						// Запоминаем что это json
 						isJSON = true;
 						// Пытаемся восстановить текст из json объекта
-						tokenizer.jsonToText(text, [&](const string & text){
+						tokenizer.jsonToText(text, [&](const string & text) noexcept {
 							// Если текст получен
 							if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
 						});
 					// Иначе обрабатываем как обычный текст
 					} else {
 						// Выполняем преобразование текста в json
-						tokenizer.textToJson(text, [&](const string & text){
+						tokenizer.textToJson(text, [&](const string & text) noexcept {
 							// Если текст получен
 							if(!text.empty()) textData = move(alphabet.format("%s\r\n", text.c_str()));
 						});
@@ -822,7 +827,7 @@ int main(int argc, char * argv[]){
 				// Список полученных букв
 				map <string, string> letters;
 				// Выполняем считывание всех строк текста
-				fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+				fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 					// Если текст получен
 					if(!text.empty()){
 						// Список пар букв
@@ -901,7 +906,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем считывание всех строк текста
-					fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize){
+					fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 						// Если текст получен
 						if(!text.empty()){
 							// Устанавливаем собранные текстовые данные
@@ -957,7 +962,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем обучение
-					toolkit.train([debug, &pss](const u_short status){
+					toolkit.train([debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -973,53 +978,76 @@ int main(int argc, char * argv[]){
 				} else {
 					// Если путь получен
 					if(((value = env.get("path")) != nullptr) && fsys_t::isdir(value)){
-						// Идентификатор документа
-						size_t idd = 0, size = 0;
-						// Статус и процентное соотношение
-						u_short status = 0, rate = 100;
 						// Запоминаем путь к файлам
 						const string path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
 						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
-						// Если отладка включена, выводим индикатор загрузки
-						if(debug > 0){
-							// Устанавливаем заголовки прогресс-бара
-							pss.title("Load text corpus", "Load text corpus is done");
-							// Выводим индикатор прогресс-бара
-							switch(debug){
-								case 1: pss.update(); break;
-								case 2: pss.status(); break;
+						// Если количество ядер передано
+						if(((value = env.get("threads")) != nullptr) &&
+						alphabet.isNumber(alphabet.convert(value))){
+							// Объявляем объект коллектора
+							collector_t collector(&toolkit, &alphabet, &tokenizer, env.get("log"));
+							// Устанавливаем режим отладки
+							collector.setDebug(debug);
+							// Устанавливаем размер n-граммы
+							collector.setOrder(order);
+							// Устанавливаем количество потоков
+							collector.setThreads(stoi(value));
+							// Устанавливаем флаг автоочистки
+							collector.setAutoClean(env.is("train-autoclean"));
+							// Устанавливаем флаг сегментации
+							collector.setSegment(
+								env.is("train-segments"),
+								((value = env.get("train-segment-size")) != nullptr ? value : "auto")
+							);
+							// Выполняем чтение данных файла
+							collector.readDir(path, ext);
+						// Иначе выполняем сборку обычным способом
+						} else {
+							// Идентификатор документа
+							size_t idd = 0, size = 0;
+							// Статус и процентное соотношение
+							u_short status = 0, rate = 100;
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Load text corpus", "Load text corpus is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
 							}
-						}
-						// Переходим по всему списку файлов в каталоге
-						fsys_t::rdir(path, ext, [&idd, &rate, &status, &size, debug, &pss, &toolkit](const string & filename, const uintmax_t dirSize){
-							// Устанавливаем название файла
-							if(debug > 0) pss.description(filename);
-							// Выполняем считывание всех строк текста
-							fsys_t::rfile(filename, [idd, &rate, &status, &size, dirSize, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize){
-								// Если текст получен
-								if(!text.empty()) toolkit.addText(text, idd);
-								// Если отладка включена
-								if(debug > 0){
-									// Общий полученный размер данных
-									size += text.size();
-									// Подсчитываем статус выполнения
-									status = u_short(size / float(dirSize) * 100.0f);
-									// Если процентное соотношение изменилось
-									if(rate != status){
-										// Запоминаем текущее процентное соотношение
-										rate = status;
-										// Отображаем ход процесса
-										switch(debug){
-											case 1: pss.update(status); break;
-											case 2: pss.status(status); break;
+							// Переходим по всему списку файлов в каталоге
+							fsys_t::rdir(path, ext, [&idd, &rate, &status, &size, debug, &pss, &toolkit](const string & filename, const uintmax_t dirSize) noexcept {
+								// Устанавливаем название файла
+								if(debug > 0) pss.description(filename);
+								// Выполняем считывание всех строк текста
+								fsys_t::rfile(filename, [idd, &rate, &status, &size, dirSize, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize) noexcept {
+									// Если текст получен
+									if(!text.empty()) toolkit.addText(text, idd);
+									// Если отладка включена
+									if(debug > 0){
+										// Общий полученный размер данных
+										size += text.size();
+										// Подсчитываем статус выполнения
+										status = u_short(size / float(dirSize) * 100.0f);
+										// Если процентное соотношение изменилось
+										if(rate != status){
+											// Запоминаем текущее процентное соотношение
+											rate = status;
+											// Отображаем ход процесса
+											switch(debug){
+												case 1: pss.update(status); break;
+												case 2: pss.status(status); break;
+											}
 										}
 									}
-								}
+								});
+								// Увеличиваем идентификатор документа
+								idd++;
 							});
-							// Увеличиваем идентификатор документа
-							idd++;
-						});
+						}
 						// Если файл arpa для записи указан
 						if(env.is("w-arpa")){
 							// Если отладка включена, выводим индикатор загрузки
@@ -1035,7 +1063,7 @@ int main(int argc, char * argv[]){
 								}
 							}
 							// Выполняем обучение
-							toolkit.train([debug, &pss](const u_short status){
+							toolkit.train([debug, &pss](const u_short status) noexcept {
 								// Отображаем ход процесса
 								switch(debug){
 									case 1: pss.update(status); break;
@@ -1050,77 +1078,69 @@ int main(int argc, char * argv[]){
 						}
 					// Если файл корпуса получен
 					} else if(((value = env.get("corpus")) != nullptr) && fsys_t::isfile(value)){
-						/*
-						// Объявляем объект коллектора
-						collector_t collector(1, &toolkit);
 						// Запоминаем адрес файла
 						const string filename = realpath(value, nullptr);
-						// Если отладка включена, выводим индикатор загрузки
-						if(debug > 0){
-							// Устанавливаем название файла
-							pss.description(filename);
-							// Устанавливаем заголовки прогресс-бара
-							pss.title("Load text corpus", "Load text corpus is done");
-							// Выводим индикатор прогресс-бара
-							switch(debug){
-								case 1: pss.update(); break;
-								case 2: pss.status(); break;
-							}
-						}
-						// Выполняем чтение данных файла
-						collector.readFile(filename, [&](const u_short status){
-							// Отображаем ход процесса
-							switch(debug){
-								case 1: pss.update(status); break;
-								case 2: pss.status(status); break;
-							}
-						});
-						// Отображаем ход процесса
-						switch(debug){
-							case 1: pss.update(100); break;
-							case 2: pss.status(100); break;
-						}
-						*/
-						// Идентификатор документа
-						size_t size = 0;
-						// Статус и процентное соотношение
-						u_short status = 0, rate = 100;
-						// Запоминаем адрес файла
-						const string filename = realpath(value, nullptr);
-						// Если отладка включена, выводим индикатор загрузки
-						if(debug > 0){
-							// Устанавливаем название файла
-							pss.description(filename);
-							// Устанавливаем заголовки прогресс-бара
-							pss.title("Load text corpus", "Load text corpus is done");
-							// Выводим индикатор прогресс-бара
-							switch(debug){
-								case 1: pss.update(); break;
-								case 2: pss.status(); break;
-							}
-						}
-						// Выполняем считывание всех строк текста
-						fsys_t::rfile(filename, [&rate, &status, &size, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize){
-							// Если текст получен
-							if(!text.empty()) toolkit.addText(text, 0);
-							// Если отладка включена
+						// Если количество ядер передано
+						if(((value = env.get("threads")) != nullptr) &&
+						alphabet.isNumber(alphabet.convert(value))){
+							// Объявляем объект коллектора
+							collector_t collector(&toolkit, &alphabet, &tokenizer, env.get("log"));
+							// Устанавливаем режим отладки
+							collector.setDebug(debug);
+							// Устанавливаем размер n-граммы
+							collector.setOrder(order);
+							// Устанавливаем количество потоков
+							collector.setThreads(stoi(value));
+							// Устанавливаем флаг автоочистки
+							collector.setAutoClean(env.is("train-autoclean"));
+							// Устанавливаем флаг сегментации
+							collector.setSegment(
+								env.is("train-segments"),
+								((value = env.get("train-segment-size")) != nullptr ? value : "auto")
+							);
+							// Выполняем чтение данных файла
+							collector.readFile(filename);
+						// Иначе выполняем сборку обычным способом
+						} else {
+							// Идентификатор документа
+							size_t size = 0;
+							// Статус и процентное соотношение
+							u_short status = 0, rate = 100;
+							// Если отладка включена, выводим индикатор загрузки
 							if(debug > 0){
-								// Общий полученный размер данных
-								size += text.size();
-								// Подсчитываем статус выполнения
-								status = u_short(size / float(fileSize) * 100.0f);
-								// Если процентное соотношение изменилось
-								if(rate != status){
-									// Запоминаем текущее процентное соотношение
-									rate = status;
-									// Отображаем ход процесса
-									switch(debug){
-										case 1: pss.update(status); break;
-										case 2: pss.status(status); break;
-									}
+								// Устанавливаем название файла
+								pss.description(filename);
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Load text corpus", "Load text corpus is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
 								}
 							}
-						});
+							// Выполняем считывание всех строк текста
+							fsys_t::rfile(filename, [&rate, &status, &size, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize) noexcept {
+								// Если текст получен
+								if(!text.empty()) toolkit.addText(text, 0);
+								// Если отладка включена
+								if(debug > 0){
+									// Общий полученный размер данных
+									size += text.size();
+									// Подсчитываем статус выполнения
+									status = u_short(size / float(fileSize) * 100.0f);
+									// Если процентное соотношение изменилось
+									if(rate != status){
+										// Запоминаем текущее процентное соотношение
+										rate = status;
+										// Отображаем ход процесса
+										switch(debug){
+											case 1: pss.update(status); break;
+											case 2: pss.status(status); break;
+										}
+									}
+								}
+							});
+						}
 						// Если файл arpa для записи указан
 						if(env.is("w-arpa")){
 							// Если отладка включена, выводим индикатор загрузки
@@ -1136,7 +1156,7 @@ int main(int argc, char * argv[]){
 								}
 							}
 							// Выполняем обучение
-							toolkit.train([debug, &pss](const u_short status){
+							toolkit.train([debug, &pss](const u_short status) noexcept {
 								// Отображаем ход процесса
 								switch(debug){
 									case 1: pss.update(status); break;
@@ -1175,7 +1195,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем загрузку файла n-грамм
-					toolkit.readNgram(filename, [debug, &pss](const u_short status){
+					toolkit.readNgram(filename, [debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1206,7 +1226,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем загрузку файлов n-грамм
-					toolkit.readNgrams(path, [debug, &pss](const u_short status){
+					toolkit.readNgrams(path, [debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1238,7 +1258,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем загрузку файла arpa
-					toolkit.readArpa(filename, [debug, &pss](const u_short status){
+					toolkit.readArpa(filename, [debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1269,7 +1289,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем загрузку файла arpa
-					toolkit.readArpas(path, [debug, &pss](const u_short status){
+					toolkit.readArpas(path, [debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1301,7 +1321,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем загрузку файла словаря vocab
-					toolkit.readVocab(filename, [debug, &pss](const u_short status){
+					toolkit.readVocab(filename, [debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1328,11 +1348,11 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Переходим по всему списку словарей в каталоге
-					fsys_t::rdir(realpath(value, nullptr), "vocab", [debug, &pss, &toolkit](const string & filename, const uintmax_t dirSize){
+					fsys_t::rdir(realpath(value, nullptr), "vocab", [debug, &pss, &toolkit](const string & filename, const uintmax_t dirSize) noexcept {
 						// Устанавливаем название файла
 						if(debug > 0) pss.description(filename);
 						// Выполняем загрузку файла словаря vocab
-						toolkit.readVocab(filename, [debug, &pss](const u_short status){
+						toolkit.readVocab(filename, [debug, &pss](const u_short status) noexcept {
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1362,7 +1382,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Считываем карту последовательности
-						toolkit.readMap(filename, [debug, &pss](const u_short status){
+						toolkit.readMap(filename, [debug, &pss](const u_short status) noexcept {
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1393,7 +1413,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Считываем список карт последовательностей
-						toolkit.readMaps(path, [debug, &pss](const u_short status){
+						toolkit.readMaps(path, [debug, &pss](const u_short status) noexcept {
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1422,7 +1442,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем обучение
-					toolkit.train([debug, &pss](const u_short status){
+					toolkit.train([debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1450,7 +1470,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем исправление arpa файла
-					toolkit.repair([debug, &pss](const u_short status){
+					toolkit.repair([debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1477,7 +1497,7 @@ int main(int argc, char * argv[]){
 						}
 					}
 					// Выполняем удаление редких n-грамм
-					toolkit.sweep([debug, &pss](const u_short status){
+					toolkit.sweep([debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1506,7 +1526,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Выполняем прунинг словаря
-						toolkit.pruneVocab(stof(value), [debug, &pss](const u_short status){
+						toolkit.pruneVocab(stof(value), [debug, &pss](const u_short status) noexcept {
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1545,7 +1565,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Выполняем прунинг
-						toolkit.prune(prune, size, [debug, &pss](const u_short status){
+						toolkit.prune(prune, size, [debug, &pss](const u_short status) noexcept {
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1595,7 +1615,7 @@ int main(int argc, char * argv[]){
 							}
 						}
 						// Выполняем модификацию файла
-						toolkit.modify(filename, modify, [debug, &pss](const u_short status){
+						toolkit.modify(filename, modify, [debug, &pss](const u_short status) noexcept {
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1629,7 +1649,7 @@ int main(int argc, char * argv[]){
 					}
 				}
 				// Выполняем извлечение словаря в файл
-				toolkit.writeVocab(value, [debug, &pss](const u_short status){
+				toolkit.writeVocab(value, [debug, &pss](const u_short status) noexcept {
 					// Отображаем ход процесса
 					switch(debug){
 						case 1: pss.update(status); break;
@@ -1660,7 +1680,7 @@ int main(int argc, char * argv[]){
 					}
 				}
 				// Выполняем сохранение каты последовательности
-				toolkit.writeMap(value, [debug, &pss](const u_short status){
+				toolkit.writeMap(value, [debug, &pss](const u_short status) noexcept {
 					// Отображаем ход процесса
 					switch(debug){
 						case 1: pss.update(status); break;
@@ -1690,7 +1710,7 @@ int main(int argc, char * argv[]){
 					}
 				}
 				// Выполняем сохранение arpa файла
-				toolkit.writeArpa(value, [debug, &pss](const u_short status){
+				toolkit.writeArpa(value, [debug, &pss](const u_short status) noexcept {
 					// Отображаем ход процесса
 					switch(debug){
 						case 1: pss.update(status); break;
@@ -1721,7 +1741,7 @@ int main(int argc, char * argv[]){
 					}
 				}
 				// Выполняем сохранение файлов n-грамм
-				toolkit.writeNgrams(value, [debug, &pss](const u_short status){
+				toolkit.writeNgrams(value, [debug, &pss](const u_short status) noexcept {
 					// Отображаем ход процесса
 					switch(debug){
 						case 1: pss.update(status); break;
@@ -1743,7 +1763,7 @@ int main(int argc, char * argv[]){
 					// Данные в формате json
 					string data = "";
 					// Выполняем считывание всех строк текста
-					fsys_t::rfile(realpath(value, nullptr), [&data](const string & line, const uintmax_t fileSize){
+					fsys_t::rfile(realpath(value, nullptr), [&data](const string & line, const uintmax_t fileSize) noexcept {
 						// Добавляем полученные строки
 						data.append(line);
 					});
@@ -1783,7 +1803,7 @@ int main(int argc, char * argv[]){
 					}
 				}
 				// Выполняем запись бинарных данных
-				ablm.write([debug, &pss](const u_short status){
+				ablm.write([debug, &pss](const u_short status) noexcept {
 					// Отображаем ход процесса
 					switch(debug){
 						case 1: pss.update(status); break;

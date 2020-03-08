@@ -78,47 +78,47 @@ namespace anyks {
 			 * setAbbr Метод добавления аббревиатуры
 			 * @param word слово для добавления
 			 */
-			void setAbbr(const string & word);
+			void setAbbr(const string & word) noexcept;
 			/**
 			 * setAbbr Метод добавления аббревиатуры
 			 * @param word слово для добавления
 			 */
-			void setAbbr(const wstring & word);
+			void setAbbr(const wstring & word) noexcept;
 			/**
 			 * setAbbrs Метод установки списка аббревиатур
 			 * @param abbrs список аббревиатур
 			 */
-			void setAbbrs(const set <size_t> & abbrs);
+			void setAbbrs(const set <size_t> & abbrs) noexcept;
 			/**
 			 * setAlphabet Метод установки алфавита
 			 * @param alphabet объект алфавита
 			 */
-			void setAlphabet(const alphabet_t * alphabet);
+			void setAlphabet(const alphabet_t * alphabet) noexcept;
 		public:
 			/**
 			 * getAbbrs Метод извлечения списка аббревиатур
 			 * @return список аббревиатур
 			 */
-			const set <size_t> & getAbbrs() const;
+			const set <size_t> & getAbbrs() const noexcept;
 		public:
 			/**
 			 * idw Метод извлечения идентификатора слова
 			 * @param  word слово для получения идентификатора
 			 * @return      идентификатор слова
 			 */
-			const size_t idw(const wstring & word) const;
+			const size_t idw(const wstring & word) const noexcept;
 			/**
 			 * idt Метод извлечения идентификатора токена
 			 * @param  word слово для получения идентификатора
 			 * @return      идентификатор токена
 			 */
-			const token_t idt(const wstring & word) const;
+			const token_t idt(const wstring & word) const noexcept;
 			/**
 			 * isAbbr Метод проверки слова на соответствие аббревиатуры
 			 * @param  word слово для проверки
 			 * @return      результат проверки
 			 */
-			const bool isAbbr(const wstring & word) const;
+			const bool isAbbr(const wstring & word) const noexcept;
 		public:
 			/**
 			 * readline Метод извлечения строки из текста
@@ -126,56 +126,56 @@ namespace anyks {
 			 * @param  str строка для извлечения текста
 			 * @return     файловый поток с текущий позиции
 			 */
-			istream & readline(istream & is, string & str) const;
+			istream & readline(istream & is, string & str) const noexcept;
 			/**
 			 * restore Метод восстановления текста из контекста
 			 * @param context токенизированный контекст
 			 * @return        результирующий текст
 			 */
-			const string restore(const vector <string> & context) const;
+			const string restore(const vector <string> & context) const noexcept;
 			/**
 			 * restore Метод восстановления текста из контекста
 			 * @param context токенизированный контекст
 			 * @return        результирующий текст
 			 */
-			const wstring restore(const vector <wstring> & context) const;
+			const wstring restore(const vector <wstring> & context) const noexcept;
 		public:
 			/**
 			 * clear Метод очистки собранных данных
 			 */
-			void clear();
+			void clear() noexcept;
 			/**
 			 * update Метод обновления параметров
 			 */
-			void update();
+			void update() noexcept;
 			/**
 			 * jsonToText Метод преобразования текста в формате json в текст
 			 * @param text     текст для преобразования в формате json
 			 * @param callback функция обратного вызова, на каждой итерации
 			 */
-			void jsonToText(const string & text, function <void (const string &)> callback) const;
+			void jsonToText(const string & text, function <void (const string &)> callback) const noexcept;
 			/**
 			 * textToJson Метод преобразования текста в json
 			 * @param text     текст для преобразования
 			 * @param callback функция обратного вызова, на каждой итерации
 			 */
-			void textToJson(const string & text, function <void (const string &)> callback) const;
+			void textToJson(const string & text, function <void (const string &)> callback) const noexcept;
 			/**
 			 * run Метод разбивки текста на токены
 			 * @param text     входной текст для обработки
 			 * @param callback функция обратного вызова, на каждой итерации
 			 */
-			void run(const string & text, function <const bool (const wstring &, const vector <string> &, const bool, const bool)> callback) const;
+			void run(const string & text, function <const bool (const wstring &, const vector <string> &, const bool, const bool)> callback) const noexcept;
 		public:
 			/**
 			 * Tokenizer Конструктор
 			 * @param alphabet объект алфавита
 			 */
-			Tokenizer(const alphabet_t * alphabet = nullptr);
+			Tokenizer(const alphabet_t * alphabet = nullptr) noexcept;
 			/**
 			 * ~Tokenizer Деструктор
 			 */
-			~Tokenizer();
+			~Tokenizer() noexcept;
 	} tokenizer_t;
 };
 

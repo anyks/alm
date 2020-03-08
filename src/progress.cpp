@@ -11,7 +11,7 @@
 /**
  * clear Метод сброса данных
  */
-void anyks::Progress::clear(){
+void anyks::Progress::clear() noexcept {
 	// Сбрасываем индикатор процесса
 	this->litem = "|";
 	// Обнуляем оставшееся время
@@ -28,7 +28,7 @@ void anyks::Progress::clear(){
  * status Метод вывод статуса в текстовом виде
  * @param status текущий статус
  */
-void anyks::Progress::status(const u_short status){
+void anyks::Progress::status(const u_short status) noexcept {
 	// Если статус не 100%
 	if((status < 100) && (this->progress != status)){
 		// Пишем процент загрузки
@@ -79,7 +79,7 @@ void anyks::Progress::status(const u_short status){
  * update Метод обновления прогресса
  * @param status текущий статус
  */
-void anyks::Progress::update(const u_short status){
+void anyks::Progress::update(const u_short status) noexcept {
 	// Если статус не 100%
 	if((status < 100) && (this->progress != status)){
 		// Структура размеров экрана консоли
@@ -158,7 +158,7 @@ void anyks::Progress::update(const u_short status){
  * description Метод установки описания работы
  * @param text текст описания работы
  */
-void anyks::Progress::description(const string & text){
+void anyks::Progress::description(const string & text) noexcept {
 	// Если текст передан, устанавливаем описание работы
 	if(!text.empty()) this->desc = text;
 }
@@ -167,7 +167,7 @@ void anyks::Progress::description(const string & text){
  * @param start  заголовок при работе прогресса
  * @param finish заголовок при завершении прогресса
  */
-void anyks::Progress::title(const string & start, const string & finish){
+void anyks::Progress::title(const string & start, const string & finish) noexcept {
 	// Если заголовок прогресса передан
 	if(!start.empty()) this->title1 = start;
 	// Если заголовок завершения прогресса передан

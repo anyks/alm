@@ -12,7 +12,7 @@
  * setAbbr Метод добавления аббревиатуры
  * @param word слово для добавления
  */
-void anyks::Tokenizer::setAbbr(const string & word){
+void anyks::Tokenizer::setAbbr(const string & word) noexcept {
 	// Если слово передано, добавляем его в список аббревиатур
 	if(!word.empty()) this->abbrs.emplace(this->idw(this->alphabet->convert(word)));
 }
@@ -20,7 +20,7 @@ void anyks::Tokenizer::setAbbr(const string & word){
  * setAbbr Метод добавления аббревиатуры
  * @param word слово для добавления
  */
-void anyks::Tokenizer::setAbbr(const wstring & word){
+void anyks::Tokenizer::setAbbr(const wstring & word) noexcept {
 	// Если слово передано, добавляем его в список аббревиатур
 	if(!word.empty()) this->abbrs.emplace(this->idw(word));
 }
@@ -28,7 +28,7 @@ void anyks::Tokenizer::setAbbr(const wstring & word){
  * setAbbrs Метод установки списка аббревиатур
  * @param abbrs список аббревиатур
  */
-void anyks::Tokenizer::setAbbrs(const set <size_t> & abbrs){
+void anyks::Tokenizer::setAbbrs(const set <size_t> & abbrs) noexcept {
 	// Если список аббревиатур передан
 	if(!abbrs.empty()) this->abbrs = move(abbrs);
 }
@@ -36,7 +36,7 @@ void anyks::Tokenizer::setAbbrs(const set <size_t> & abbrs){
  * setAlphabet Метод установки алфавита
  * @param alphabet объект алфавита
  */
-void anyks::Tokenizer::setAlphabet(const alphabet_t * alphabet){
+void anyks::Tokenizer::setAlphabet(const alphabet_t * alphabet) noexcept {
 	// Устанавливаем алфавит
 	this->alphabet = alphabet;
 	// Выполняем обновление параметров
@@ -46,7 +46,7 @@ void anyks::Tokenizer::setAlphabet(const alphabet_t * alphabet){
  * getAbbrs Метод извлечения списка аббревиатур
  * @return список аббревиатур
  */
-const set <size_t> & anyks::Tokenizer::getAbbrs() const {
+const set <size_t> & anyks::Tokenizer::getAbbrs() const noexcept {
 	// Выводим список аббревиатур
 	return this->abbrs;
 }
@@ -55,7 +55,7 @@ const set <size_t> & anyks::Tokenizer::getAbbrs() const {
  * @param  word слово для получения идентификатора
  * @return      идентификатор слова
  */
-const size_t anyks::Tokenizer::idw(const wstring & word) const {
+const size_t anyks::Tokenizer::idw(const wstring & word) const noexcept {
 	// Формируем идентификатор слова
 	return this->idWord.get(word);
 }
@@ -64,7 +64,7 @@ const size_t anyks::Tokenizer::idw(const wstring & word) const {
  * @param  word слово для получения идентификатора
  * @return      идентификатор токена
  */
-const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const {
+const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept {
 	// Результат работы функции
 	token_t result = token_t::null;
 	// Если слово передано
@@ -220,7 +220,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const {
 		// Если это число то выводим токен числа
 		} else if(this->alphabet->isNumber(word)) result = token_t::num;
 		// Если слово не идентифицируемо и не разрешено, устанавливаем неизвестное слово
-		if((result == token_t::null) && !this->alphabet->isAllowed(word)) result = token_t::unk;
+		if((result == token_t::null) && (!this->alphabet->isAllowed(word) && !this->alphabet->isLatian(word))) result = token_t::unk;
 	}
 	// Выводим результат
 	return result;
@@ -230,7 +230,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const {
  * @param  word слово для проверки
  * @return      результат проверки
  */
-const bool anyks::Tokenizer::isAbbr(const wstring & word) const {
+const bool anyks::Tokenizer::isAbbr(const wstring & word) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если слово передано
@@ -262,7 +262,7 @@ const bool anyks::Tokenizer::isAbbr(const wstring & word) const {
  * @param  str строка для извлечения текста
  * @return     файловый поток с текущий позиции
  */
-istream & anyks::Tokenizer::readline(istream & is, string & str) const {
+istream & anyks::Tokenizer::readline(istream & is, string & str) const noexcept {
 	// Очищаем строку
 	str.clear();
 	// Создаем сторожа файлового потока
@@ -301,7 +301,7 @@ istream & anyks::Tokenizer::readline(istream & is, string & str) const {
  * @param context токенизированный контекст
  * @return        результирующий текст
  */
-const string anyks::Tokenizer::restore(const vector <string> & context) const {
+const string anyks::Tokenizer::restore(const vector <string> & context) const noexcept {
 	// Результат работы функции
 	string result = "";
 	// Если контекст передан
@@ -334,7 +334,7 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const {
 		 * @param index индекс токена в контексте
 		 * @return      тип токена в контексте
 		 */
-		auto typeFn = [&context, this](const size_t index = 0){
+		auto typeFn = [&context, this](const size_t index = 0) noexcept {
 			// Результат работы функции
 			type_t result = type_t::null;
 			// Если индекс слова не вышел за границы массива
@@ -488,7 +488,7 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const {
  * @param context токенизированный контекст
  * @return        результирующий текст
  */
-const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const {
+const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const noexcept {
 	// Результат работы функции
 	wstring result = L"";
 	// Если контекст передан
@@ -519,7 +519,7 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 		 * @param index индекс токена в контексте
 		 * @return      тип токена в контексте
 		 */
-		auto typeFn = [&context, this](const size_t index = 0){
+		auto typeFn = [&context, this](const size_t index = 0) noexcept {
 			// Результат работы функции
 			type_t result = type_t::null;
 			// Если индекс слова не вышел за границы массива
@@ -669,14 +669,14 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 /**
  * clear Метод очистки собранных данных
  */
-void anyks::Tokenizer::clear(){
+void anyks::Tokenizer::clear() noexcept {
 	// Очищаем список аббревиатур
 	this->abbrs.clear();
 }
 /**
  * update Метод обновления параметров
  */
-void anyks::Tokenizer::update(){
+void anyks::Tokenizer::update() noexcept {
 	// Устанавливаем алфавит и смещение в 19 позиций (количество системных токенов arpa)
 	this->idWord.set(this->alphabet, 19);
 }
@@ -685,7 +685,7 @@ void anyks::Tokenizer::update(){
  * @param text     текст для преобразования в формате json
  * @param callback функция обратного вызова, на каждой итерации
  */
-void anyks::Tokenizer::jsonToText(const string & text, function <void (const string &)> callback) const {
+void anyks::Tokenizer::jsonToText(const string & text, function <void (const string &)> callback) const noexcept {
 	// Если текст передан, и текст не больше 100Mb в одну строку
 	if(!text.empty() && (this->alphabet != nullptr)){
 		// Получаем данные в виде json
@@ -721,7 +721,7 @@ void anyks::Tokenizer::jsonToText(const string & text, function <void (const str
  * @param text     текст для преобразования
  * @param callback функция обратного вызова, на каждой итерации
  */
-void anyks::Tokenizer::textToJson(const string & text, function <void (const string &)> callback) const {
+void anyks::Tokenizer::textToJson(const string & text, function <void (const string &)> callback) const noexcept {
 	// Если текст передан, и текст не больше 100Mb в одну строку
 	if(!text.empty() && (text.size() <= MAX_STRING_BYTES) && (this->alphabet != nullptr)){
 		// Формируем результат
@@ -729,7 +729,7 @@ void anyks::Tokenizer::textToJson(const string & text, function <void (const str
 		// Результирующий объект
 		vector <vector <string>> result;
 		// Выполняем разбивку на токенизацию
-		this->run(text, [&result, &tokens, &callback, this](const wstring & word, const vector <string> & context, const bool reset, const bool end){
+		this->run(text, [&result, &tokens, &callback, this](const wstring & word, const vector <string> & context, const bool reset, const bool end) noexcept {
 			// Если это сброс контекста
 			if(reset || end){
 				// Формируем новый список токенов
@@ -770,7 +770,7 @@ void anyks::Tokenizer::textToJson(const string & text, function <void (const str
  * @param text     входной текст для обработки
  * @param callback функция обратного вызова, на каждой итерации
  */
-void anyks::Tokenizer::run(const string & text, function <const bool (const wstring &, const vector <string> &, const bool, const bool)> callback) const {
+void anyks::Tokenizer::run(const string & text, function <const bool (const wstring &, const vector <string> &, const bool, const bool)> callback) const noexcept {
 	// Если текст передан, и текст не больше 100Mb в одну строку
 	if(!text.empty() && (text.size() <= MAX_STRING_BYTES) && (this->alphabet != nullptr)){
 		// Типы флагов
@@ -806,7 +806,7 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
 		 * @param end  конец обработки текста
 		 * @return     нужно ли завершить работу
 		 */
-		auto callbackFn = [&begin, &context, &callback](const wstring & word, const bool end){
+		auto callbackFn = [&begin, &context, &callback](const wstring & word, const bool end) noexcept {
 			// Отдаём результат
 			const bool result = callback(word, context, begin && context.empty(), end);
 			// Запоминаем что работа началась
@@ -820,7 +820,7 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
 		 * @param coordinates список координат в тексте
 		 * @return            результат проверки
 		 */
-		auto erangeFn = [](const size_t pos, const map <size_t, size_t> & coordinates){
+		auto erangeFn = [](const size_t pos, const map <size_t, size_t> & coordinates) noexcept {
 			// Результат проверки
 			bool result = false;
 			// Если в списке нет неустановленных координат
@@ -1111,12 +1111,24 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
 						} else if((open = !open)) {
 							// Если слово не пустое
 							if(!word.empty()){
-								// Добавляем слово в контекст
-								context.push_back(this->alphabet->convert(word));
-								// Выводим полученное слово
-								if(!callbackFn(word, end)) return;
-								// Очищаем слово
-								word.clear();
+								// Если апостроф который находится в латинском слове
+								if((letter == L'\'') && this->alphabet->isLatian({next}) &&
+								this->alphabet->isLatian(this->alphabet->toLower(word))){
+									// Отмечаем что символ изоляции не открыт
+									open = false;
+									// Добавляем символ к слову
+									word.append(1, letter);
+									// Продолжаем дальше
+									continue;
+								// Если это нормальное состояние
+								} else {
+									// Добавляем слово в контекст
+									context.push_back(this->alphabet->convert(word));
+									// Выводим полученное слово
+									if(!callbackFn(word, end)) return;
+									// Очищаем слово
+									word.clear();
+								}
 							}
 							// Выводим знак препинания
 							if(!callbackFn({letter}, end)) return;
@@ -1160,14 +1172,14 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
  * Tokenizer Конструктор
  * @param alphabet объект алфавита
  */
-anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet){
+anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept {
 	// Устанавливаем лафавит
 	if(alphabet != nullptr) this->setAlphabet(alphabet);
 }
 /**
  * ~Tokenizer Деструктор
  */
-anyks::Tokenizer::~Tokenizer(){
+anyks::Tokenizer::~Tokenizer() noexcept {
 	// Выполняем очистку собранных данных
 	this->clear();
 }

@@ -77,42 +77,42 @@ namespace anyks {
 			 * get Метод получения распарсенных данных
 			 * @return параметры полученные в результате парсинга
 			 */
-			const data_t & get();
+			const data_t & get() noexcept;
 			/**
 			 * getZones Метод извлечения списка пользовательских зон интернета
 			 */
-			const set <wstring> & getZones() const;
+			const set <wstring> & getZones() const noexcept;
 		public:
 			/**
 			 * clear Метод очистки результатов парсинга
 			 */
-			void clear();
+			void clear() noexcept;
 			/**
 			 * parse Метод парсинга URI строки
 			 * @param text текст для парсинга
 			 */
-			void parse(const wstring & text);
+			void parse(const wstring & text) noexcept;
 			/**
 			 * setZone Метод установки пользовательской зоны
 			 * @param zone пользовательская зона
 			 */
-			void setZone(const wstring & zone);
+			void setZone(const wstring & zone) noexcept;
 			/**
 			 * setLetters Метод добавления букв алфавита
 			 * @param letters список букв алфавита
 			 */
-			void setLetters(const wstring & letters);
+			void setLetters(const wstring & letters) noexcept;
 			/**
 			 * setZones Метод установки списка пользовательских зон
 			 * @param zones список доменных зон интернета
 			 */
-			void setZones(const set <wstring> & zones);
+			void setZones(const set <wstring> & zones) noexcept;
 			/**
 			 * Uri Конструктор
 			 * @param letters список букв алфавита
 			 * @param text    текст для парсинга
 			 */
-			Uri(const wstring & letters = L"", const wstring & text = L"");
+			Uri(const wstring & letters = L"", const wstring & text = L"") noexcept;
 	} uri_t;
 };
 

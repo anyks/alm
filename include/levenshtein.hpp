@@ -52,7 +52,7 @@ namespace anyks {
 			 * @param  z третье число
 			 * @return   самое минимальное значение из 3-х чисел
 			 */
-			const float minimum(const float x, const float y, const float z) const;
+			const float minimum(const float x, const float y, const float z) const noexcept;
 			/**
 			 * minimum Метод определения минимального значения
 			 * @param  x первое число
@@ -60,7 +60,69 @@ namespace anyks {
 			 * @param  z третье число
 			 * @return   самое минимальное значение из 3-х чисел
 			 */
-			const u_short minimum(const u_short x, const u_short y, const u_short z) const;
+			const u_short minimum(const u_short x, const u_short y, const u_short z) const noexcept;
+		public:
+			/**
+			 * mulct Определение количества штрафов на основе Дамерау-Левенштейна
+			 * @param  pattern шаблон с которым идет сравнение
+			 * @param  text    исходный текст
+			 * @return         дистанция
+			 */
+			const u_short mulct(const string & pattern, const string & text) const noexcept;
+			/**
+			 * mulct Определение количества штрафов на основе Дамерау-Левенштейна
+			 * @param  pattern шаблон с которым идет сравнение
+			 * @param  text    исходный текст
+			 * @return         дистанция
+			 */
+			const u_short mulct(const wstring & pattern, const wstring & text) const noexcept;
+		public:
+			/**
+			 * damerau Определение дистанции Дамерау-Левенштейна в фразах
+			 * @param  pattern шаблон с которым идет сравнение
+			 * @param  text    исходный текст
+			 * @return         дистанция
+			 */
+			const u_short damerau(const string & pattern, const string & text) const noexcept;
+			/**
+			 * damerau Определение дистанции Дамерау-Левенштейна в фразах
+			 * @param  pattern шаблон с которым идет сравнение
+			 * @param  text    исходный текст
+			 * @return         дистанция
+			 */
+			const u_short damerau(const wstring & pattern, const wstring & text) const noexcept;
+		public:
+			/**
+			 * distance Определение дистанции в фразах
+			 * @param  pattern шаблон с которым идет сравнение
+			 * @param  text    исходный текст
+			 * @return         дистанция
+			 */
+			const u_short distance(const string & pattern, const string & text) const noexcept;
+			/**
+			 * distance Определение дистанции в фразах
+			 * @param  pattern шаблон с которым идет сравнение
+			 * @param  text    исходный текст
+			 * @return         дистанция
+			 */
+			const u_short distance(const wstring & pattern, const wstring & text) const noexcept;
+		public:
+			/**
+			 * tanimoto Метод определения коэффициента Жаккара (частное — коэф. Танимото)
+			 * @param  first  первое слово
+			 * @param  second второе слово
+			 * @param  stl    размер подстроки при сравнении двух слов (от 1 до минимального размера слова)
+			 * @return        коэффициент Танимото
+			 */
+			const float tanimoto(const string & first, const string & second, const u_short stl = 2) const noexcept;
+			/**
+			 * tanimoto Метод определения коэффициента Жаккара (частное — коэф. Танимото)
+			 * @param  first  первое слово
+			 * @param  second второе слово
+			 * @param  stl    размер подстроки при сравнении двух слов (от 1 до минимального размера слова)
+			 * @return        коэффициент Танимото
+			 */
+			const float tanimoto(const wstring & first, const wstring & second, const u_short stl = 2) const noexcept;
 		public:
 			/**
 			 * weighted Метод определения веса сравниваемого слова
@@ -69,7 +131,7 @@ namespace anyks {
 			 * @param  weighter функции сравнения весов
 			 * @return          вес сравниваемого слова
 			 */
-			const float weighted(const string & first, const string & second, const weighter_t * weighter = nullptr) const;
+			const float weighted(const string & first, const string & second, const weighter_t * weighter = nullptr) const noexcept;
 			/**
 			 * weighted Метод определения веса сравниваемого слова
 			 * @param  first    первое слово
@@ -77,65 +139,8 @@ namespace anyks {
 			 * @param  weighter функции сравнения весов
 			 * @return          вес сравниваемого слова
 			 */
-			const float weighted(const wstring & first, const wstring & second, const weighter_t * weighter = nullptr) const;
-			/**
-			 * tanimoto Метод определения коэффициента Жаккара (частное — коэф. Танимото)
-			 * @param  first  первое слово
-			 * @param  second второе слово
-			 * @param  stl    размер подстроки при сравнении двух слов (от 1 до минимального размера слова)
-			 * @return        коэффициент Танимото
-			 */
-			const float tanimoto(const string & first, const string & second, const u_short stl = 2) const;
-			/**
-			 * tanimoto Метод определения коэффициента Жаккара (частное — коэф. Танимото)
-			 * @param  first  первое слово
-			 * @param  second второе слово
-			 * @param  stl    размер подстроки при сравнении двух слов (от 1 до минимального размера слова)
-			 * @return        коэффициент Танимото
-			 */
-			const float tanimoto(const wstring & first, const wstring & second, const u_short stl = 2) const;
-			/**
-			 * mulct Определение количества штрафов на основе Дамерау-Левенштейна
-			 * @param  pattern шаблон с которым идет сравнение
-			 * @param  text    исходный текст
-			 * @return         дистанция
-			 */
-			const u_short mulct(const string & pattern, const string & text) const;
-			/**
-			 * mulct Определение количества штрафов на основе Дамерау-Левенштейна
-			 * @param  pattern шаблон с которым идет сравнение
-			 * @param  text    исходный текст
-			 * @return         дистанция
-			 */
-			const u_short mulct(const wstring & pattern, const wstring & text) const;
-			/**
-			 * damerau Определение дистанции Дамерау-Левенштейна в фразах
-			 * @param  pattern шаблон с которым идет сравнение
-			 * @param  text    исходный текст
-			 * @return         дистанция
-			 */
-			const u_short damerau(const string & pattern, const string & text) const;
-			/**
-			 * damerau Определение дистанции Дамерау-Левенштейна в фразах
-			 * @param  pattern шаблон с которым идет сравнение
-			 * @param  text    исходный текст
-			 * @return         дистанция
-			 */
-			const u_short damerau(const wstring & pattern, const wstring & text) const;
-			/**
-			 * distance Определение дистанции в фразах
-			 * @param  pattern шаблон с которым идет сравнение
-			 * @param  text    исходный текст
-			 * @return         дистанция
-			 */
-			const u_short distance(const string & pattern, const string & text) const;
-			/**
-			 * distance Определение дистанции в фразах
-			 * @param  pattern шаблон с которым идет сравнение
-			 * @param  text    исходный текст
-			 * @return         дистанция
-			 */
-			const u_short distance(const wstring & pattern, const wstring & text) const;
+			const float weighted(const wstring & first, const wstring & second, const weighter_t * weighter = nullptr) const noexcept;
+		public:
 			/**
 			 * needlemanWunsch Метод натяжения слов
 			 * @param first    первое слово
@@ -145,7 +150,7 @@ namespace anyks {
 			 * @param gap      размер разрыва
 			 * @return         количество очков
 			 */
-			const int needlemanWunsch(const string & first, const string & second, const int match = 1, const int mismatch = -1, const int gap = -2) const;
+			const int needlemanWunsch(const string & first, const string & second, const int match = 1, const int mismatch = -1, const int gap = -2) const noexcept;
 			/**
 			 * needlemanWunsch Метод натяжения слов
 			 * @param first    первое слово
@@ -155,7 +160,7 @@ namespace anyks {
 			 * @param gap      размер разрыва
 			 * @return         количество очков
 			 */
-			const int needlemanWunsch(const wstring & first, const wstring & second, const int match = 1, const int mismatch = -1, const int gap = -2) const;
+			const int needlemanWunsch(const wstring & first, const wstring & second, const int match = 1, const int mismatch = -1, const int gap = -2) const noexcept;
 	} lev_t;
 };
 

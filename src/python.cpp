@@ -11,7 +11,7 @@
 /**
  * clear Метод очистки списка скриптов
  */
-void anyks::Python::clear(){
+void anyks::Python::clear() noexcept {
 	// Переходим по всем собранным скриптам
 	for(auto & script : this->scripts){
 		// Выполняем очистику всех параметров
@@ -26,14 +26,14 @@ void anyks::Python::clear(){
 /**
  * setDebug Метод установки режима отладки
  */
-void anyks::Python::setDebug(){
+void anyks::Python::setDebug() noexcept {
 	// Устанавливаем режим отладки
 	this->debug = true;
 }
 /**
  * unsetDebug Метод отключения режима отладки
  */
-void anyks::Python::unsetDebug(){
+void anyks::Python::unsetDebug() noexcept {
 	// Отключаем режим отладки
 	this->debug = false;
 }
@@ -41,7 +41,7 @@ void anyks::Python::unsetDebug(){
  * remove Метод удаления добавленного скрипта по его имени
  * @param sid идентификатор скрипта
  */
-void anyks::Python::remove(const size_t sid){
+void anyks::Python::remove(const size_t sid) noexcept {
 	// Если имя скрипта передано
 	if(sid > 0){
 		// Извлекаем скрипт
@@ -62,7 +62,7 @@ void anyks::Python::remove(const size_t sid){
  * setTokenizer Метод установки токенизатора
  * @param tokenizer указатель на токенизатор
  */
-void anyks::Python::setTokenizer(const tokenizer_t * tokenizer){
+void anyks::Python::setTokenizer(const tokenizer_t * tokenizer) noexcept {
 	// Устанавливаем модуль генератора
 	this->tokenizer = tokenizer;
 }
@@ -70,7 +70,7 @@ void anyks::Python::setTokenizer(const tokenizer_t * tokenizer){
  * empty Проверка на пустое количество скриптов
  * @return результат проверки
  */
-const bool anyks::Python::empty() const {
+const bool anyks::Python::empty() const noexcept {
 	// Выводим результат
 	return this->scripts.empty();
 }
@@ -78,7 +78,7 @@ const bool anyks::Python::empty() const {
  * count Метод определения количества добавленных скриптов
  * @return количество добавленных скриптов
  */
-const size_t anyks::Python::count() const {
+const size_t anyks::Python::count() const noexcept {
 	// Выводим результат
 	return this->scripts.size();
 }
@@ -88,7 +88,7 @@ const size_t anyks::Python::count() const {
  * @param args   количество аргументов передаваемых в функцию запуска
  * @return       идентификатор добавленного скрипта
  */
-const size_t anyks::Python::add(const string & script, const u_short args){
+const size_t anyks::Python::add(const string & script, const u_short args) noexcept {
 	// Результат работы функции
 	size_t result = 0;
 	// Если скрипт передан
@@ -213,7 +213,7 @@ const size_t anyks::Python::add(const string & script, const u_short args){
  * @param  arr  массив аргументов для передачи в скрипт
  * @return      результат выполнения скрипта
  */
-const wstring anyks::Python::run(const size_t sid, const vector <string> & args, const vector <string> & arr) const {
+const wstring anyks::Python::run(const size_t sid, const vector <string> & args, const vector <string> & arr) const noexcept {
 	// Результат работы функции
 	wstring result = L"";
 	// Если имя передано
@@ -300,24 +300,24 @@ const wstring anyks::Python::run(const size_t sid, const vector <string> & args,
 /**
  * Python Конструктор
  */
-anyks::Python::Python(){
+anyks::Python::Python() noexcept {
 	// Выполняем инициализацию питона
-	Py_Initialize();
+	if(!Py_IsInitialized()) Py_Initialize();
 }
 /**
  * Python Конструктор
  * @param tokenizer указатель на токенизатор
  */
-anyks::Python::Python(const tokenizer_t * tokenizer){
+anyks::Python::Python(const tokenizer_t * tokenizer) noexcept {
 	// Выполняем инициализацию питона
-	Py_Initialize();
+	if(!Py_IsInitialized()) Py_Initialize();
 	// Выполняем установку токенизатора
 	this->setTokenizer(tokenizer);
 }
 /**
  * ~Python Деструктор
  */
-anyks::Python::~Python(){
+anyks::Python::~Python() noexcept {
 	// Очищаем список полученных скриптов
 	this->clear();
 	// Выполняем завершение работы питона

@@ -12,21 +12,21 @@
  * get Метод получения распарсенных данных
  * @return параметры полученные в результате парсинга
  */
-const anyks::Uri::data_t & anyks::Uri::get(){
+const anyks::Uri::data_t & anyks::Uri::get() noexcept {
 	// Выводим результат парсинга
 	return this->data;
 }
 /**
  * getZones Метод извлечения списка пользовательских зон интернета
  */
-const set <wstring> & anyks::Uri::getZones() const {
+const set <wstring> & anyks::Uri::getZones() const noexcept {
 	// Выводим список пользовательских зон интернета
 	return this->user;
 }
 /**
  * clear Метод очистки результатов парсинга
  */
-void anyks::Uri::clear(){
+void anyks::Uri::clear() noexcept {
 	// Очищаем список пользовательских зон
 	this->user.clear();
 	// Очищаем блок полученных данных
@@ -44,14 +44,14 @@ void anyks::Uri::clear(){
  * parse Метод парсинга URI строки
  * @param text текст для парсинга
  */
-void anyks::Uri::parse(const wstring & text){
+void anyks::Uri::parse(const wstring & text) noexcept {
 	// Если текст передан
 	if(!text.empty()){
 		/**
 		 * emailFn Функция извлечения данных электронного адреса
 		 * @param text текст для парсинга
 		 */
-		auto emailFn = [this](const wstring & text){
+		auto emailFn = [this](const wstring & text) noexcept {
 			// Результат работы функции
 			data_t result;
 			// Если текст передан
@@ -94,7 +94,7 @@ void anyks::Uri::parse(const wstring & text){
 		 * domainFn Функция извлечения данных доменного имени
 		 * @param text текст для парсинга
 		 */
-		auto domainFn = [this](const wstring & text){
+		auto domainFn = [this](const wstring & text) noexcept {
 			// Результат работы функции
 			data_t result;
 			// Если текст передан
@@ -157,7 +157,7 @@ void anyks::Uri::parse(const wstring & text){
 		 * ipFn Функция извлечения данных ip адресов
 		 * @param text текст для парсинга
 		 */
-		auto ipFn = [](const wstring & text){
+		auto ipFn = [](const wstring & text) noexcept {
 			// Результат работы функции
 			data_t result;
 			// Если текст передан
@@ -244,7 +244,7 @@ void anyks::Uri::parse(const wstring & text){
  * setZone Метод установки пользовательской зоны
  * @param zone пользовательская зона
  */
-void anyks::Uri::setZone(const wstring & zone){
+void anyks::Uri::setZone(const wstring & zone) noexcept {
 	// Если зона передана и она не существует
 	if(!zone.empty() && (this->national.count(zone) < 1) && (this->general.count(zone) < 1)){
 		// Добавляем зону в список
@@ -255,7 +255,7 @@ void anyks::Uri::setZone(const wstring & zone){
  * setLetters Метод добавления букв алфавита
  * @param letters список букв алфавита
  */
-void anyks::Uri::setLetters(const wstring & letters){
+void anyks::Uri::setLetters(const wstring & letters) noexcept {
 	// Если буквы переданы запоминаем их
 	if(!letters.empty()) this->letters = move(letters);
 }
@@ -263,7 +263,7 @@ void anyks::Uri::setLetters(const wstring & letters){
  * setZones Метод установки списка пользовательских зон
  * @param zones список доменных зон интернета
  */
-void anyks::Uri::setZones(const set <wstring> & zones){
+void anyks::Uri::setZones(const set <wstring> & zones) noexcept {
 	// Если список зон не пустой
 	if(!zones.empty()) this->user = move(zones);
 }
@@ -272,7 +272,7 @@ void anyks::Uri::setZones(const set <wstring> & zones){
  * @param letters список букв алфавита
  * @param text    текст для парсинга
  */
-anyks::Uri::Uri(const wstring & letters, const wstring & text){
+anyks::Uri::Uri(const wstring & letters, const wstring & text) noexcept {
 	// Создаем список национальных доменов
 	this->national.emplace(L"ac");
 	this->national.emplace(L"ad");
