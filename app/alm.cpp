@@ -123,6 +123,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa for export:                     [-w-arpa <value> | --w-arpa=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.vocab for export:                    [-w-vocab <value> | --w-vocab=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams for export:                   [-w-ngram <value> | --w-ngram=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt or dir path for words import:    [-r-words <value> | --r-words=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m binary file address *.alm for import:               [-r-bin <value> | --r-bin=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.json meta for import:                [-r-bin-meta <value> | --r-bin-meta=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.map for import:                      [-r-map <value> | --r-map=<value>]\r\n\r\n"
@@ -510,13 +511,10 @@ int main(int argc, char * argv[]) noexcept {
 								// Закрываем файл
 								file.close();
 							}
-							// Если отладка включена
-							if(status < 100){
-								// Отображаем ход процесса
-								switch(debug){
-									case 1: pss.update(100); break;
-									case 2: pss.status(100); break;
-								}
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
 							}
 						// Сообщаем что контекст пустой
 						} else print("context is empty", env.get("log"));
@@ -590,13 +588,10 @@ int main(int argc, char * argv[]) noexcept {
 							} else print("broken json file", env.get("log"));
 						// Сообщаем что контекст пустой
 						} else print("context is empty", env.get("log"));
-						// Если отладка включена
-						if(status < 100){
-							// Отображаем ход процесса
-							switch(debug){
-								case 1: pss.update(100); break;
-								case 2: pss.status(100); break;
-							}
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
 						}
 					// Выходим из приложения и выводим сообщение
 					} else print("file to write result is not found", env.get("log"));
@@ -720,13 +715,10 @@ int main(int argc, char * argv[]) noexcept {
 								}
 							// Сообщаем что контекст пустой
 							} else print("context is empty", env.get("log"));
-							// Если отладка включена
-							if(status < 100){
-								// Отображаем ход процесса
-								switch(debug){
-									case 1: pss.update(100); break;
-									case 2: pss.status(100); break;
-								}
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
 							}
 						});
 					// Выходим из приложения и выводим сообщение
@@ -860,13 +852,10 @@ int main(int argc, char * argv[]) noexcept {
 				});
 				// Устанавливаем собранные буквы
 				if(!letters.empty()) alphabet.setSubstitutes(letters);
-				// Если отладка включена
-				if(status < 100){
-					// Отображаем ход процесса
-					switch(debug){
-						case 1: pss.update(100); break;
-						case 2: pss.status(100); break;
-					}
+				// Отображаем ход процесса
+				switch(debug){
+					case 1: pss.update(100); break;
+					case 2: pss.status(100); break;
 				}
 			}
 			// Если передан метод обучения, загрузка карт последовательностей или списка n-грамм
@@ -935,13 +924,10 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 					});
-					// Если отладка включена
-					if(status < 100){
-						// Отображаем ход процесса
-						switch(debug){
-							case 1: pss.update(100); break;
-							case 2: pss.status(100); break;
-						}
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
 					}
 				}
 			}
@@ -1174,7 +1160,7 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			// Проверяем правильно ли указаны адреса файлов
 			} else if(((env.is("r-map") || env.is("r-maps")) &&
-			(env.is("r-vocab") || env.is("r-vocabs"))) || (env.is("r-ngram") ||
+			(env.is("r-vocab") || env.is("r-vocabs") || env.is("r-words"))) || (env.is("r-ngram") ||
 			env.is("r-ngrams")) || (env.is("r-arpa") || env.is("r-arpas")) || !binDictFile.empty()) {
 				// Если требуется загрузить файл n-грамм
 				if(((value = env.get("r-ngram")) != nullptr) && fsys_t::isfile(value)){
@@ -1218,7 +1204,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Устанавливаем название файла
 						pss.description(path);
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read n-grams files", "Read n-grams files is done");
+						pss.title("Read n-gram files", "Read n-gram files is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -1335,12 +1321,16 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				// Если требуется загрузить список словарей
 				} else if(((value = env.get("r-vocabs")) != nullptr) && fsys_t::isdir(value)) {
+					// Параметры индикаторы процесса
+					size_t size = 0, status = 0, rate = 0;
+					// Расширение файлов текстового корпуса
+					const string ext = ((value = env.get("ext")) != nullptr ? value : "vocab");
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read vocabs files", "Read vocabs files is done");
+						pss.title("Read vocab files", "Read vocab files is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -1348,18 +1338,138 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Переходим по всему списку словарей в каталоге
-					fsys_t::rdir(realpath(value, nullptr), "vocab", [debug, &pss, &toolkit](const string & filename, const uintmax_t dirSize) noexcept {
-						// Устанавливаем название файла
-						if(debug > 0) pss.description(filename);
+					fsys_t::rdir(realpath(value, nullptr), ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
 						// Выполняем загрузку файла словаря vocab
-						toolkit.readVocab(filename, [debug, &pss](const u_short status) noexcept {
-							// Отображаем ход процесса
-							switch(debug){
-								case 1: pss.update(status); break;
-								case 2: pss.status(status); break;
+						toolkit.readVocab(filename);
+						// Если отладка включена, выводим индикатор загрузки
+						if(debug > 0){
+							// Устанавливаем название файла
+							pss.description(filename);
+							// Общий полученный размер данных
+							size += fsys_t::fsize(filename);
+							// Подсчитываем статус выполнения
+							status = u_short(size / float(dirSize) * 100.0f);
+							// Если процентное соотношение изменилось
+							if(rate != status){
+								// Запоминаем текущее процентное соотношение
+								rate = status;
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(status); break;
+									case 2: pss.status(status); break;
+								}
+							}
+						}
+					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
+				}
+				// Если требуется загрузить файл списка слов
+				if(((value = env.get("r-words")) != nullptr) && fsys_t::isfile(value)){
+					// Параметры индикаторы процесса
+					size_t size = 0, status = 0, rate = 0;
+					// Запоминаем адрес файла
+					const string filename = realpath(value, nullptr);
+					// Если отладка включена, выводим индикатор загрузки
+					if(debug > 0){
+						// Очищаем предыдущий прогресс-бар
+						pss.clear();
+						// Устанавливаем название файла
+						pss.description(filename);
+						// Устанавливаем заголовки прогресс-бара
+						pss.title("Read words file", "Read words file is done");
+						// Выводим индикатор прогресс-бара
+						switch(debug){
+							case 1: pss.update(); break;
+							case 2: pss.status(); break;
+						}
+					}
+					// Выполняем загрузку файла словаря списка слов
+					fsys_t::rfile(filename, [&](const string & word, const uintmax_t fileSize) noexcept {
+						// Если слово получено
+						if(!word.empty()){
+							// Добавляем слово в словарь
+							toolkit.addWord(alphabet.convert(word));
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Общий полученный размер данных
+								size += word.size();
+								// Подсчитываем статус выполнения
+								status = u_short(size / float(fileSize) * 100.0f);
+								// Если процентное соотношение изменилось
+								if(rate != status){
+									// Запоминаем текущее процентное соотношение
+									rate = status;
+									// Отображаем ход процесса
+									switch(debug){
+										case 1: pss.update(status); break;
+										case 2: pss.status(status); break;
+									}
+								}
+							}
+						}
+					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
+				// Если требуется загрузить каталог списка слов
+				} else if(((value = env.get("r-words")) != nullptr) && fsys_t::isdir(value)) {
+					// Параметры индикаторы процесса
+					size_t size = 0, status = 0, rate = 0;
+					// Расширение файлов текстового корпуса
+					const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
+					// Если отладка включена, выводим индикатор загрузки
+					if(debug > 0){
+						// Очищаем предыдущий прогресс-бар
+						pss.clear();
+						// Устанавливаем заголовки прогресс-бара
+						pss.title("Read words file", "Read words file is done");
+						// Выводим индикатор прогресс-бара
+						switch(debug){
+							case 1: pss.update(); break;
+							case 2: pss.status(); break;
+						}
+					}
+					// Переходим по всему списку словарей в каталоге
+					fsys_t::rdir(realpath(value, nullptr), ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
+						// Если отладка включена, выводим название файла
+						if(debug > 0) pss.description(filename);
+						// Выполняем загрузку файла словаря списка слов
+						fsys_t::rfile(filename, [&](const string & word, const uintmax_t fileSize) noexcept {
+							// Если слово получено
+							if(!word.empty()){
+								// Добавляем слово в словарь
+								toolkit.addWord(alphabet.convert(word));
+								// Если отладка включена, выводим индикатор загрузки
+								if(debug > 0){
+									// Общий полученный размер данных
+									size += word.size();
+									// Подсчитываем статус выполнения
+									status = u_short(size / float(dirSize) * 100.0f);
+									// Если процентное соотношение изменилось
+									if(rate != status){
+										// Запоминаем текущее процентное соотношение
+										rate = status;
+										// Отображаем ход процесса
+										switch(debug){
+											case 1: pss.update(status); break;
+											case 2: pss.status(status); break;
+										}
+									}
+								}
 							}
 						});
 					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
 				}
 				// Если требуется загрузить карту последовательности или список карт последовательностей
 				if((env.is("r-map") || env.is("r-maps")) && (env.is("r-vocab") || env.is("r-vocabs"))){
@@ -1405,7 +1515,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем название файла
 							pss.description(path);
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Read maps files", "Read maps files is done");
+							pss.title("Read map files", "Read map files is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;

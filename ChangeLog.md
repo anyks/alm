@@ -5,6 +5,7 @@
 - flag to clearing temporary data during training
 - segment size for training data segmentation
 - number of threads for data collection
+- file address *.txt or dir path for words import
 
 ## 1.0.2 New methods and bug fixes
 - vprune - vocabulary pruning method

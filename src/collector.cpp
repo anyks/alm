@@ -383,13 +383,13 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 				this->allSize = 0;
 				// Отображаем ход процесса
 				switch(this->debug){
-					case 1: pss.update(100); break;
-					case 2: pss.status(100); break;
+					case 1: this->pss.update(100); break;
+					case 2: this->pss.status(100); break;
 				}
 				// Очищаем предыдущий прогресс-бар
 				this->pss.clear();
 				// Устанавливаем заголовки прогресс-бара
-				this->pss.title("Concatenate text corpora", "Concatenate text corpora is done");
+				this->pss.title("Read vocab files", "Read vocab files is done");
 				// Выводим индикатор прогресс-бара
 				switch(this->debug){
 					case 1: this->pss.update(); break;
@@ -399,34 +399,15 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 			// Переходим по всему списку словарей в каталоге
 			fsys_t::rdir(dir, "vocab", [this](const string & filename, const uintmax_t dirSize) noexcept {
 				// Выполняем загрузку файла словаря vocab
-				this->toolkit->readVocab(filename, [this](const u_short status){
-					// Если отладка включена, выводим индикатор загрузки
-					if(this->debug > 0){
-						// Общий полученный размер данных
-						this->allSize += status;
-						// Подсчитываем статус выполнения
-						this->status = u_short(this->allSize / 200.0f * 100.0f);
-						// Если процентное соотношение изменилось
-						if(this->rate != this->status){
-							// Запоминаем текущее процентное соотношение
-							this->rate.store(this->status, memory_order_relaxed);
-							// Отображаем ход процесса
-							switch(this->debug){
-								case 1: this->pss.update(this->status); break;
-								case 2: this->pss.status(this->status); break;
-							}
-						}
-					}
-				});
-			});
-			// Выполняем загрузку карт последовательностей
-			this->toolkit->readMaps(dir, [this](const u_short status) noexcept {
+				this->toolkit->readVocab(filename);
 				// Если отладка включена, выводим индикатор загрузки
 				if(this->debug > 0){
+					// Устанавливаем название файла
+					this->pss.description(filename);
 					// Общий полученный размер данных
-					this->allSize += status;
+					this->allSize += fsys_t::fsize(filename);
 					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / 200.0f * 100.0f);
+					this->status = u_short(this->allSize / float(dirSize) * 100.0f);
 					// Если процентное соотношение изменилось
 					if(this->rate != this->status){
 						// Запоминаем текущее процентное соотношение
@@ -437,6 +418,31 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 							case 2: this->pss.status(this->status); break;
 						}
 					}
+				}
+			});
+			// Если отладка включена, выводим индикатор загрузки
+			if(this->debug > 0){
+				// Отображаем ход процесса
+				switch(this->debug){
+					case 1: this->pss.update(100); break;
+					case 2: this->pss.status(100); break;
+				}
+				// Очищаем предыдущий прогресс-бар
+				this->pss.clear();
+				// Устанавливаем заголовки прогресс-бара
+				this->pss.title("Read map files", "Read map files is done");
+				// Выводим индикатор прогресс-бара
+				switch(this->debug){
+					case 1: this->pss.update(); break;
+					case 2: this->pss.status(); break;
+				}
+			}
+			// Выполняем загрузку карт последовательностей
+			this->toolkit->readMaps(dir, [this](const u_short status) noexcept {
+				// Отображаем ход процесса
+				switch(this->debug){
+					case 1: this->pss.update(status); break;
+					case 2: this->pss.status(status); break;
 				}
 			});
 			// Если нужно удалить временный каталог, удаляем его
@@ -540,13 +546,13 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 				this->allSize = 0;
 				// Отображаем ход процесса
 				switch(this->debug){
-					case 1: pss.update(100); break;
-					case 2: pss.status(100); break;
+					case 1: this->pss.update(100); break;
+					case 2: this->pss.status(100); break;
 				}
 				// Очищаем предыдущий прогресс-бар
 				this->pss.clear();
 				// Устанавливаем заголовки прогресс-бара
-				this->pss.title("Concatenate text corpora", "Concatenate text corpora is done");
+				this->pss.title("Read vocab files", "Read vocab files is done");
 				// Выводим индикатор прогресс-бара
 				switch(this->debug){
 					case 1: this->pss.update(); break;
@@ -556,34 +562,15 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 			// Переходим по всему списку словарей в каталоге
 			fsys_t::rdir(dir, "vocab", [this](const string & filename, const uintmax_t dirSize) noexcept {
 				// Выполняем загрузку файла словаря vocab
-				this->toolkit->readVocab(filename, [this](const u_short status){
-					// Если отладка включена, выводим индикатор загрузки
-					if(this->debug > 0){
-						// Общий полученный размер данных
-						this->allSize += status;
-						// Подсчитываем статус выполнения
-						this->status = u_short(this->allSize / 200.0f * 100.0f);
-						// Если процентное соотношение изменилось
-						if(this->rate != this->status){
-							// Запоминаем текущее процентное соотношение
-							this->rate.store(this->status, memory_order_relaxed);
-							// Отображаем ход процесса
-							switch(this->debug){
-								case 1: this->pss.update(this->status); break;
-								case 2: this->pss.status(this->status); break;
-							}
-						}
-					}
-				});
-			});
-			// Выполняем загрузку карт последовательностей
-			this->toolkit->readMaps(dir, [this](const u_short status) noexcept {
+				this->toolkit->readVocab(filename);
 				// Если отладка включена, выводим индикатор загрузки
 				if(this->debug > 0){
+					// Устанавливаем название файла
+					this->pss.description(filename);
 					// Общий полученный размер данных
-					this->allSize += status;
+					this->allSize += fsys_t::fsize(filename);
 					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / 200.0f * 100.0f);
+					this->status = u_short(this->allSize / float(dirSize) * 100.0f);
 					// Если процентное соотношение изменилось
 					if(this->rate != this->status){
 						// Запоминаем текущее процентное соотношение
@@ -594,6 +581,31 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 							case 2: this->pss.status(this->status); break;
 						}
 					}
+				}
+			});
+			// Если отладка включена, выводим индикатор загрузки
+			if(this->debug > 0){
+				// Отображаем ход процесса
+				switch(this->debug){
+					case 1: this->pss.update(100); break;
+					case 2: this->pss.status(100); break;
+				}
+				// Очищаем предыдущий прогресс-бар
+				this->pss.clear();
+				// Устанавливаем заголовки прогресс-бара
+				this->pss.title("Read map files", "Read map files is done");
+				// Выводим индикатор прогресс-бара
+				switch(this->debug){
+					case 1: this->pss.update(); break;
+					case 2: this->pss.status(); break;
+				}
+			}
+			// Выполняем загрузку карт последовательностей
+			this->toolkit->readMaps(dir, [this](const u_short status) noexcept {
+				// Отображаем ход процесса
+				switch(this->debug){
+					case 1: this->pss.update(status); break;
+					case 2: this->pss.status(status); break;
 				}
 			});
 			// Если нужно удалить временный каталог, удаляем его
