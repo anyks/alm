@@ -15,13 +15,14 @@
 #include <string>
 #include <fstream>
 #include <codecvt>
-#include <iostream>
+#include <sstream>
 #include <unistd.h>
 #include <functional>
 #include <pwd.h>
 #include <grp.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <sys/mman.h>
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -34,7 +35,6 @@
  * Наши модули
  */
 #include <alphabet.hpp>
-#include <tokenizer.hpp>
 
 // Устанавливаем область видимости
 using namespace std;
@@ -326,8 +326,6 @@ namespace anyks {
 					struct stat info;
 					// Создаём объект алфавита
 					alphabet_t alphabet;
-					// Получаем длину адреса
-					const size_t length = path.size();
 					// Создаем указатель на содержимое каталога
 					struct dirent * ptr = nullptr;
 					// Выполняем чтение содержимого каталога
@@ -410,30 +408,54 @@ namespace anyks {
 			if(!filename.empty()){
 				// Если файл существует
 				if(isfile(filename)){
-					// Создаём объект токенизатора
-					tokenizer_t tokenizer;
-					// Открываем файл на чтение
-					ifstream file(filename, ios::binary);
-					// Если файл открыт
-					if(file.is_open()){
-						// Строка чтения из файла
-						string text;
-						// Перемещаем указатель в конец файла
-						file.seekg(0, file.end);
-						// Определяем размер файла
-						const uintmax_t size = file.tellg();
-						// Возвращаем указатель обратно
-						file.seekg(0, file.beg);
-						// Считываем до тех пор пока все удачно
-						while(file.good()){
-							// Считываем строку из файла
-							tokenizer.readline(file, text);
-							// Если текст получен
-							if(!text.empty()) callback(text, size);
+					// Файловый дескриптор файла
+					int fd = -1;
+					// Структура статистики файла
+					struct stat info;
+					// Если файл не открыт
+					if((fd = open(filename.c_str(), O_RDONLY)) < 0)
+						// Выводим сообщение об ошибке
+						cerr << "error: the file name: \"" << filename << "\" is broken" << endl;
+					// Если файл открыт удачно
+					else if(fstat(fd, &info) < 0)
+						// Выводим сообщение об ошибке
+						cerr << "error: the file name: \"" << filename << "\" is unknown size" << endl;
+					// Иначе продолжаем
+					else {
+						// Буфер входящих данных
+						void * buffer = nullptr;
+						// Выполняем отображение файла в памяти
+						if((buffer = mmap(0, info.st_size, PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED)
+							// Выводим сообщение что прочитать файл не удалось
+							cerr << "error: the file name: \"" << filename << "\" is not read" << endl;
+						// Если файл прочитан удачно
+						else if(buffer != nullptr) {
+							// Значение текущей и предыдущей буквы
+							char letter = 0, old = 0;
+							// Смещение в буфере и длина полученной строки
+							size_t offset = 0, length = 0;
+							// Получаем размер файла
+							const uintmax_t size = info.st_size;
+							// Переходим по всему буферу
+							for(uintmax_t i = 0; i < size; i++){
+								// Получаем значение текущей буквы
+								letter = reinterpret_cast <char *> (buffer)[i];
+								// Если текущая буква является переносом строк
+								if((i > 0) && (letter == '\n')){
+									// Если предыдущая буква была возвратом каретки, уменьшаем длину строки
+									length = ((old == '\r' ? i - 1 : i) - offset);
+									// Если длина слова получена, выводим полученную строку
+									if(length > 0) callback(string((char *) buffer + offset, length), size);
+									// Выполняем смещение
+									offset = (i + 1);
+								}
+								// Запоминаем предыдущую букву
+								old = letter;
+							}
 						}
-						// Закрываем файл
-						file.close();
 					}
+					// Если файл открыт, закрываем его
+					if(fd > -1) close(fd);
 				// Выводим сообщение об ошибке
 				} else cerr << "error: the file name: \"" << filename << "\" is not found" << endl;
 			}
@@ -500,8 +522,6 @@ namespace anyks {
 						struct stat info;
 						// Создаём объект алфавита
 						alphabet_t alphabet;
-						// Получаем длину адреса
-						const size_t length = path.size();
 						// Создаем указатель на содержимое каталога
 						struct dirent * ptr = nullptr;
 						// Выполняем чтение содержимого каталога

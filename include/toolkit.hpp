@@ -219,6 +219,11 @@ namespace anyks {
 			 */
 			const set <token_t> & getTokensDisable() const noexcept;
 			/**
+			 * getStatistic Метод извлечения общей статистики
+			 * @return общее количество документов и слов в корпусах при обучении
+			 */
+			const pair <size_t, size_t> getStatistic() const noexcept;
+			/**
 			 * getUserTokens Метод извлечения списка пользовательских токенов
 			 * @return список пользовательских токенов
 			 */
@@ -364,6 +369,12 @@ namespace anyks {
 			 */
 			void setTokensDisable(const set <token_t> & tokens) noexcept;
 			/**
+			 * getStatistic Метод установки общей статистики
+			 * @param ad общее количество документов при обучении
+			 * @param cw общее количество слов при обучении
+			 */
+			void getStatistic(const size_t ad, const size_t cw) noexcept;
+			/**
 			 * setBadwords Метод установки списка идентификаторов плохих слов в список
 			 * @param badwords список идентификаторов плохих слов
 			 */
@@ -389,6 +400,13 @@ namespace anyks {
 			 * @param idd  идентификатор документа
 			 */
 			void addText(const string & text, const size_t idd = 0) noexcept;
+			/**
+			 * addWord Метод добавления слова в словарь
+			 * @param word слово для добавления
+			 * @param idw  идентификатор слова, если нужно
+			 * @param idd  идентификатор документа
+			 */
+			void addWord(const word_t & word, const size_t idw = 0, const size_t idd = 0) noexcept;
 			/**
 			 * addWord Метод добавления слова в словарь
 			 * @param word слово для добавления
@@ -448,22 +466,28 @@ namespace anyks {
 			void init(const algorithm_t algorithm, const bool modified = false, const bool prepares = false, const double mod = 0.0);
 		public:
 			/**
+			 * loadVocab Метод загрузки бинарных данных в словарь
+			 * @param buffer буфер с бинарными данными
+			 * @param arpa   нужно добавить только данные arpa
+			 */
+			void loadVocab(const vector <char> & buffer) noexcept;
+			/**
 			 * loadInfoVocab Метод загрузки бинарных информационных данных словаря
 			 * @param buffer буфер бинарных информационных данных словаря
 			 */
 			void loadInfoVocab(const vector <char> & buffer) noexcept;
 			/**
-			 * loadVocab Метод загрузки бинарных данных в словарь
-			 * @param buffer буфер с бинарными данными
-			 * @param arpa   нужно добавить только данные arpa
-			 */
-			void loadVocab(const vector <char> & buffer) const noexcept;
-			/**
 			 * loadArpa Метод загрузки бинарных данных n-грамм в словарь
 			 * @param buffer буфер с бинарными данными
 			 * @param arpa   нужно добавить только данные arpa
 			 */
-			void loadArpa(const vector <char> & buffer, const bool arpa = false) const noexcept;
+			void loadArpa(const vector <char> & buffer, const bool arpa = false) noexcept;
+			/**
+			 * appendArpa Метод добавления бинарных данных в словарь
+			 * @param buffer буфер с бинарными данными
+			 * @param idd    идентификатор документа в котором получена n-грамма
+			 */
+			void appendArpa(const vector <char> & buffer, const size_t idd = 0) const noexcept;
 		public:
 			/**
 			 * saveInfoVocab Метод сохранения бинарных информационных данных словаря
@@ -506,6 +530,17 @@ namespace anyks {
 			 * @param delim    разделитель последовательностей
 			 */
 			void writeMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|") const noexcept;
+		public:
+			/**
+			 * words Метод извлечения слов из словаря
+			 * @param callback функция обратного вызова (word, idw, count words)
+			 */
+			void words(function <const bool (const word_t &, const size_t, const size_t)> callback) const noexcept;
+			/**
+			 * words Метод извлечения слов из словаря
+			 * @param callback функция обратного вызова (word, idw, oc, dc, count words)
+			 */
+			void words(function <const bool (const wstring &, const size_t, const size_t, const size_t, const size_t)> callback) const noexcept;
 		public:
 			/**
 			 * readArpas Метод чтения данных из каталога файлов arpa

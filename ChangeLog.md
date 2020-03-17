@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.0.4 Performance optimization and bug fixes
+- flag to save intermediate data during training
+
 ## 1.0.3 Multiprocessor training and bug fixes
 - flag to performing data segmentation during training
 - flag to clearing temporary data during training

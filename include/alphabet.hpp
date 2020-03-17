@@ -43,12 +43,57 @@ namespace anyks {
 	 */
 	typedef class Alphabet {
 		private:
+			/**
+			 * Nums структура параметров чисел
+			 */
+			typedef struct Nums {
+				// Названия римских цифр
+				const set <wchar_t> roman = {L'm', L'd', L'c', L'l', L'x', L'i', L'v'};
+				// Список арабских цифр
+				const set <wchar_t> arabs = {L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9'};
+				// Шаблоны римских форматов
+				const vector <wstring> i = {L"", L"I", L"II", L"III", L"IV", L"V", L"VI", L"VII", L"VIII", L"IX"};
+				const vector <wstring> x = {L"", L"X", L"XX", L"XXX", L"XL", L"L", L"LX", L"LXX", L"LXXX", L"XC"};
+				const vector <wstring> c = {L"", L"C", L"CC", L"CCC", L"CD", L"D", L"DC", L"DCC", L"DCCC", L"CM"};
+				const vector <wstring> m = {L"", L"M", L"MM", L"MMM", L"MMMM"};
+			} nums_t;
+		private:
+			// Локализация приложения
+			std::locale utf8;
 			// Латинский тип алфавита
 			bool typeLatian = true;
-			// Локализация приложения
-			string encoding = "en_US.UTF-8";
 			// Алфавит словаря
 			wstring alphabet = L"abcdefghijklmnopqrstuvwxyz";
+		private:
+			// Числовые параметры
+			const nums_t numsSymbols;
+			// Список разрешённых спец-символом
+			const std::set <wchar_t> allowedSymbols = {
+				L'~', L'-', L'+', L'=',
+				L'*', L'/', L':', L'%',
+				L'|', L'^', L'&', L'#', L'\\'
+			};
+			// Список спец-символом
+			const std::set <wchar_t> specialSymbols = {
+				L'~', L'_', L'@', L'#', L'№',
+				L'%', L'&', L'$', L'|', L'<',
+				L'>', L'§', L'©', L'\\'
+			};
+			// Список символов изоляции
+			const std::set <wchar_t> isolationSymbols = {
+				L'(', L')', L'[', L']', L'{',
+				L'}', L'"', L'«', L'»', L'„',
+				L'“', L'`', L'\'',
+			};
+			// Список символов симиляции
+			const std::set <wchar_t> similarsSymbols = {
+				L'a', L'b', L'c', L'e', L'h', L'k',
+				L'm', L'o', L'p', L't', L'u', L'x'
+			};
+			// Список математических символов
+			const std::set <wchar_t> mathSymbols = {L'+', L'-', L'=', L'/', L'*', L'^'};
+			// Список знаков пунктуации
+			const std::set <wchar_t> punctsSymbols = {L'.', L',', L'?', L'!', L':', L';'};
 		public:
 			// log_t Флаги логирования
 			enum class log_t : u_short {info, warning, error};
@@ -524,13 +569,13 @@ namespace anyks {
 			/**
 			 * Alphabet Конструктор
 			 */
-			Alphabet() noexcept {};
+			Alphabet(const string & locale = "en_US.UTF-8") noexcept;
 			/**
 			 * Alphabet Конструктор
 			 * @param alphabet алфавит символов для текущего языка
 			 * @param locale   локализация приложения
 			 */
-			Alphabet(const string & alphabet, const string & locale = "") noexcept;
+			Alphabet(const string & alphabet, const string & locale = "en_US.UTF-8") noexcept;
 	} alphabet_t;
 	/**
 	 * Оператор чтения из потока

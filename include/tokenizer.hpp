@@ -102,6 +102,14 @@ namespace anyks {
 			const set <size_t> & getAbbrs() const noexcept;
 		public:
 			/**
+			 * fti Метод удаления дробной части числа
+			 * @param  num   число для обработки
+			 * @param  count количество символов после запятой
+			 * @return       число без дробной части
+			 */
+			const size_t fti(const double num, const u_short count = 0) const noexcept;
+		public:
+			/**
 			 * idw Метод извлечения идентификатора слова
 			 * @param  word слово для получения идентификатора
 			 * @return      идентификатор слова

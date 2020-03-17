@@ -36,13 +36,14 @@ namespace anyks {
 	 */
 	typedef class Idw {
 		private:
-			// Список модулей для каждой буквы алфавита
-			vector <size_t> xs;
-		private:
-			// Модуль вектора
-			size_t modulus = 0;
 			// Смещение в алфавите
 			u_short offset = 0;
+			// Модули векторов
+			size_t mod1 = 0, mod2 = 0;
+		private:
+			// Список модулей для каждой буквы алфавита
+			vector <size_t> xs1, xs2;
+		private:
 			// Список букв разрешенных в последовательности
 			wstring letters = L"¶";
 			// Объект основного алфавита
@@ -50,6 +51,11 @@ namespace anyks {
 		public:
 			// Получаем максимальное значение идентификатора
 			static constexpr size_t NIDW = numeric_limits <size_t>::max();
+		private:
+			/**
+			 * initSequence Метод инициализации параметров последовательности
+			 */
+			void initSequence() noexcept;
 		public:
 			/**
 			 * setOffset Метод установки смещения в алфавите
@@ -63,6 +69,12 @@ namespace anyks {
 			 */
 			const size_t get(const wstring & word) const noexcept;
 			/**
+			 * get Метод генерирования идентификатора последовательности
+			 * @param  seq последовательность для генерации
+			 * @return     идентификатор последовательности
+			 */
+			const size_t get(const vector <size_t> & seq) const noexcept;
+			/**
 			 * set Метод установки алфавита
 			 * @param alphabet объект алфавита
 			 * @param offset   смещение в алфавите
@@ -72,7 +84,7 @@ namespace anyks {
 			/**
 			 * Idw Конструктор
 			 */
-			Idw() noexcept {};
+			Idw() noexcept;
 			/**
 			 * Idw Конструктор
 			 * @param offset смещение в алфавите

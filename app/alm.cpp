@@ -38,7 +38,7 @@ void version(const char * address) noexcept {
 	// Определяем адрес приложения
 	string appname = realpath(address, nullptr);
 	// Ищем каталог
-	if((pos = appname.rfind("/")) != string::npos) appname = move(appname.substr(0, pos));
+	if((pos = appname.rfind("/")) != string::npos) appname = appname.substr(0, pos);
 	// Выводим версию приложения
 	printf(
 		"\r\n%s %s (built: %s %s)\r\n"
@@ -87,7 +87,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing accounting of all collected n-grams:                            [-all-grams | --all-grams]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing the use of words consisting of mixed dictionaries:              [-mixed-dicts | --mixed-dicts]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag to reset the frequency of an unknown word:                               [-reset-unk | --reset-unk]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag to clearing temporary data during training:                              [-train-autoclean | --train-autoclean]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag to save intermediate data during training:                               [-train-intermed | --train-intermed]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag to performing data segmentation during training:                         [-train-segments | --train-segments]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of all data:                                 [-w-bin-all | --w-bin-all]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of users tokens:                             [-w-bin-utokens | --w-bin-utokens]\r\n\r\n"
@@ -126,14 +126,10 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt or dir path for words import:    [-r-words <value> | --r-words=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m binary file address *.alm for import:               [-r-bin <value> | --r-bin=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.json meta for import:                [-r-bin-meta <value> | --r-bin-meta=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.map for import:                      [-r-map <value> | --r-map=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.map files:                    [-r-maps <value> | --r-maps=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.vocab for import:                    [-r-vocab <value> | --r-vocab=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.vocab files:                  [-r-vocabs <value> | --r-vocabs=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams for import:                   [-r-ngram <value> | --r-ngram=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.ngrams files:                 [-r-ngrams <value> | --r-ngrams=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa for import:                     [-r-arpa <value> | --r-arpa=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.arpa files:                   [-r-arpas <value> | --r-arpas=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.map or dir path for import:          [-r-map <value> | --r-map=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.vocab or dir path for import:        [-r-vocab <value> | --r-vocab=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams or dir path for import:       [-r-ngram <value> | --r-ngram=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa or dir path for import:         [-r-arpa <value> | --r-arpa=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address abbreviations for import:              [-r-abbrs <value> | --r-abbrs=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address domain zones for import:               [-r-domain-zones <value> | --r-domain-zones=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address for restore mixed words for import:    [-r-mix-restwords <value> | --r-mix-restwords=<value>]\r\n\r\n"
@@ -340,7 +336,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Чёрный список слов
 				vector <string> badwords;
 				// Выполняем считывание всех слов для чёрного списка
-				fsys_t::rfile(value, [&badwords, &toolkit](const string & line, const uintmax_t fileSize) noexcept {
+				fsys_t::rfile(value, [&badwords](const string & line, const uintmax_t fileSize) noexcept {
 					// Если текст получен
 					if(!line.empty()) badwords.push_back(line);
 				});
@@ -352,7 +348,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Белый список слов
 				vector <string> goodwords;
 				// Выполняем считывание всех слов для белого списка
-				fsys_t::rfile(value, [&goodwords, &toolkit](const string & line, const uintmax_t fileSize) noexcept {
+				fsys_t::rfile(value, [&goodwords](const string & line, const uintmax_t fileSize) noexcept {
 					// Если текст получен
 					if(!line.empty()) goodwords.push_back(line);
 				});
@@ -743,7 +739,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Выполняем преобразование текста в json
 						tokenizer.textToJson(text, [&](const string & text) noexcept {
 							// Если текст получен
-							if(!text.empty()) textData = move(alphabet.format("%s\r\n", text.c_str()));
+							if(!text.empty()) textData = alphabet.format("%s\r\n", text.c_str());
 						});
 					}
 					// Если результат получен
@@ -860,7 +856,7 @@ int main(int argc, char * argv[]) noexcept {
 			}
 			// Если передан метод обучения, загрузка карт последовательностей или списка n-грамм
 			if((env.is("r-abbrs") || env.is("r-domain-zones")) && (env.is("method", "train") ||
-			env.is("r-map") || env.is("r-maps") || env.is("r-ngram") || env.is("r-ngrams"))){
+			(env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) || env.is("r-ngram"))){
 				// Тип считываемого файла
 				u_short type = 0;
 				// Устанавливаем режим считывания файла аббревиатур
@@ -980,7 +976,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем количество потоков
 							collector.setThreads(stoi(value));
 							// Устанавливаем флаг автоочистки
-							collector.setAutoClean(env.is("train-autoclean"));
+							collector.setIntermed(env.is("train-intermed"));
 							// Устанавливаем флаг сегментации
 							collector.setSegment(
 								env.is("train-segments"),
@@ -1078,7 +1074,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем количество потоков
 							collector.setThreads(stoi(value));
 							// Устанавливаем флаг автоочистки
-							collector.setAutoClean(env.is("train-autoclean"));
+							collector.setIntermed(env.is("train-intermed"));
 							// Устанавливаем флаг сегментации
 							collector.setSegment(
 								env.is("train-segments"),
@@ -1159,9 +1155,7 @@ int main(int argc, char * argv[]) noexcept {
 					} else print("path or file with corpus texts is not specified", env.get("log"));
 				}
 			// Проверяем правильно ли указаны адреса файлов
-			} else if(((env.is("r-map") || env.is("r-maps")) &&
-			(env.is("r-vocab") || env.is("r-vocabs") || env.is("r-words"))) || (env.is("r-ngram") ||
-			env.is("r-ngrams")) || (env.is("r-arpa") || env.is("r-arpas")) || !binDictFile.empty()) {
+			} else if((env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) || env.is("r-ngram") || env.is("r-arpa") || !binDictFile.empty()) {
 				// Если требуется загрузить файл n-грамм
 				if(((value = env.get("r-ngram")) != nullptr) && fsys_t::isfile(value)){
 					// Запоминаем адрес файла
@@ -1194,7 +1188,7 @@ int main(int argc, char * argv[]) noexcept {
 						case 2: pss.status(100); break;
 					}
 				// Если требуется загрузить список файлов n-грамм
-				} else if(((value = env.get("r-ngrams")) != nullptr) && fsys_t::isdir(value)) {
+				} else if(((value = env.get("r-ngram")) != nullptr) && fsys_t::isdir(value)) {
 					// Запоминаем каталог для загрузки
 					const string path = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
@@ -1257,7 +1251,7 @@ int main(int argc, char * argv[]) noexcept {
 						case 2: pss.status(100); break;
 					}
 				// Если нужно загрузить список файлов arpa
-				} else if(((value = env.get("r-arpas")) != nullptr) && fsys_t::isdir(value)) {
+				} else if(((value = env.get("r-arpa")) != nullptr) && fsys_t::isdir(value)) {
 					// Запоминаем каталог для загрузки
 					const string path = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
@@ -1320,7 +1314,7 @@ int main(int argc, char * argv[]) noexcept {
 						case 2: pss.status(100); break;
 					}
 				// Если требуется загрузить список словарей
-				} else if(((value = env.get("r-vocabs")) != nullptr) && fsys_t::isdir(value)) {
+				} else if(((value = env.get("r-vocab")) != nullptr) && fsys_t::isdir(value)) {
 					// Параметры индикаторы процесса
 					size_t size = 0, status = 0, rate = 0;
 					// Расширение файлов текстового корпуса
@@ -1472,7 +1466,7 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				}
 				// Если требуется загрузить карту последовательности или список карт последовательностей
-				if((env.is("r-map") || env.is("r-maps")) && (env.is("r-vocab") || env.is("r-vocabs"))){
+				if(env.is("r-map") && env.is("r-vocab")){
 					// Если нужно загрузить карту последовательности
 					if(((value = env.get("r-map")) != nullptr) && fsys_t::isfile(value)){
 						// Запоминаем адрес файла
@@ -1505,7 +1499,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 2: pss.status(100); break;
 						}
 					// Если нужно загрузить список карт последовательностей
-					} else if(((value = env.get("r-maps")) != nullptr) && fsys_t::isdir(value)){
+					} else if(((value = env.get("r-map")) != nullptr) && fsys_t::isdir(value)){
 						// Запоминаем каталог для загрузки
 						const string path = realpath(value, nullptr);
 						// Если отладка включена, выводим индикатор загрузки
@@ -1538,7 +1532,7 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				}
 				// Если конфигурация файлов верная и требуется обучение
-				if(env.is("w-arpa") && (env.is("r-map") || env.is("r-maps") || env.is("r-ngram") || env.is("r-ngrams"))){
+				if(env.is("w-arpa") && (((env.is("r-vocab") || env.is("r-words")) && env.is("r-map")) || env.is("r-ngram"))){
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -1773,8 +1767,8 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			}
 			// Если файл для извлечения карты последовательности передан
-			if((env.is("method", "train") || env.is("r-map") || env.is("r-maps") || env.is("r-ngram") ||
-			env.is("r-ngrams") || !binDictFile.empty()) && ((value = env.get("w-map")) != nullptr)){
+			if((env.is("method", "train") || (env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) ||
+			env.is("r-ngram") || !binDictFile.empty()) && ((value = env.get("w-map")) != nullptr)){
 				// Если отладка включена, выводим индикатор загрузки
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар
@@ -1834,8 +1828,8 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			}
 			// Если файл для сохранения n-грамм передан
-			if((env.is("method", "train") || env.is("r-map") || env.is("r-maps") || env.is("r-ngram") ||
-			env.is("r-ngrams") || !binDictFile.empty()) && ((value = env.get("w-ngram")) != nullptr)){
+			if((env.is("method", "train") || (env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) ||
+			env.is("r-ngram") || !binDictFile.empty()) && ((value = env.get("w-ngram")) != nullptr)){
 				// Если отладка включена, выводим индикатор загрузки
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар

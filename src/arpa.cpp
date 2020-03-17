@@ -394,7 +394,7 @@ const string anyks::Arpa::context(const vocab_t * context) const noexcept {
 		// Извлекаем предшествующую n-грамму
 		while(context->father != nullptr){
 			// Получаем слово для добавления в строку
-			word = (context->weight != 0.0f ? move(this->word(context->idw, this->uppers(context).first)) : "");
+			word = (context->weight != 0.0f ? this->word(context->idw, this->uppers(context).first) : "");
 			// Если слово получено
 			if(!word.empty()){
 				// Если строка не пустая, добавляем пробел
@@ -475,9 +475,9 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const noexcep
 					// Устанавливаем регистры слова
 					tmp.setUppers(ups);
 					// Выводим результат
-					result = move(tmp.real());
+					result = tmp.real();
 				// Иначе выводим слово без учёта регистра
-				} else result = move(word->str());
+				} else result = word->str();
 			// Устанавливаем как неизвестное слово
 			} else result = "<unk>";
 		}
@@ -672,35 +672,41 @@ void anyks::Arpa::fixupProbs(const u_short gram) const noexcept {
 	}
 }
 /**
- * Метод получения регистров слов для юниграммы
- * @param idw    идентификатор слова для которого требуется получить регистры
+ * Метод получения регистров слов
  * @param uppers список регистров слова
  */
-void anyks::Arpa::uniUppers(const size_t idw, std::set <size_t> & uppers) const noexcept {
-	// Очищаем список регистров слов
-	if(!uppers.empty()) uppers.clear();
-	// Если идентификатор передан
-	if((idw > 0) && (idw < idw_t::NIDW)){
-		// Список n-грамм для работы
-		list <vocab_t *> ngrams;
-		// Переходим по всем граммам корпуса
-		for(u_short i = 2; i <= this->size; i++){
-			// Выполняем запрос грамм
-			this->get(i, &ngrams);
-			// Если n-граммы получены
-			if(!ngrams.empty()){
-				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams){
-					// Переходим по всему списку слов
-					for(auto & value : * item){
-						// Если идентификатор слова соответствует
-						if(this->event(idw) && (value.second.idw == idw) && !value.second.uppers.empty()){
-							// Получаем регистры слова
-							size_t ups = this->uppers(value.second.uppers, value.second.oc).first;
-							// Формируем список регистов данного слова
-							if(ups > 0) uppers.emplace(ups);
-							// Выходим из цикла
-							break;
+void anyks::Arpa::uniUppers(multimap <size_t, size_t> & uppers) const noexcept {
+	// Список n-грамм для работы
+	list <vocab_t *> ngrams;
+	// Переходим по всем граммам корпуса
+	for(u_short i = 2; i <= this->size; i++){
+		// Выполняем запрос грамм
+		this->get(i, &ngrams);
+		// Если n-граммы получены
+		if(!ngrams.empty()){
+			// Переходим по всему списку полученных n-грамм
+			for(auto & item : ngrams){
+				// Переходим по всему списку слов
+				for(auto & value : * item){
+					// Если идентификатор слова соответствует
+					if(this->event(value.second.idw) && !value.second.uppers.empty()){
+						// Получаем регистры слова
+						size_t ups = this->uppers(value.second.uppers, value.second.oc).first;
+						// Формируем список регистов данного слова
+						if((ups > 0) && (uppers.count(value.second.idw) < 1)) uppers.emplace(value.second.idw, ups);
+						// Иначе ищем уже похожие регистры слова
+						else if(ups > 0) {
+							// Результат поиска похожего регистра
+							bool isExistUpp = false;
+							// Получаем уже добавленный список регистров слова
+							const auto & ret = uppers.equal_range(value.second.idw);
+							// Переходим по всему списку регистров
+							for(auto it = ret.first; it != ret.second; ++it){
+								// Если такой регистр есть выходим
+								if((isExistUpp = (it->second == ups))) break;
+							}
+							// Если такой регистр не существует, добавляем его
+							if(!isExistUpp) uppers.emplace(value.second.idw, ups);
 						}
 					}
 				}
@@ -846,7 +852,7 @@ const string anyks::Arpa::stamp() const noexcept {
 	// Создаем формат полученного времени
 	const string & dateformat = "%m/%d/%Y %H:%M:%S";
 	// Копируем в буфер полученную дату и время
-	const int length = strftime(date, sizeof(date), dateformat.c_str(), timeinfo);
+	strftime(date, sizeof(date), dateformat.c_str(), timeinfo);
 	// Блок для записи
 	return this->alphabet->format(
 		"#\n#  version:   %s\n"
@@ -917,8 +923,6 @@ const bool anyks::Arpa::emplace(const vector <pair_t> & seq, const float weight)
 				vocab_t * obj = &this->vocab;
 				// Переходим по всему объекту
 				for(auto & item : seq){
-					// Запоминаем текущий объект
-					const vocab_t * father = obj;
 					// Проверяем существует ли данное слово в n-грамме
 					auto it = obj->find(item.first);
 					// Если слово существует
@@ -976,8 +980,6 @@ const bool anyks::Arpa::emplace(const vector <pair_t> & seq, const float weight)
 			if(checkFn(tmp)){
 				// Переходим по всему объекту
 				for(auto & item : seq){
-					// Запоминаем текущий объект
-					const vocab_t * father = obj;
 					// Проверяем существует ли данное слово в n-грамме
 					auto it = obj->find(item.first);
 					// Если это не конечная грамма
@@ -1069,7 +1071,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 			 * @param idw идентификатор родительской граммы
 			 * @param seq последовательность для удаления
 			 */
-			auto checkFn = [&ngrams, noid, this](const size_t idw, const vector <size_t> & seq) noexcept {
+			auto checkFn = [&ngrams](const size_t idw, const vector <size_t> & seq) noexcept {
 				// Результат работы функции
 				bool result = false;
 				// Если список n-грамм получен
@@ -1389,7 +1391,9 @@ const size_t anyks::Arpa::count(const u_short gram, const bool real) const noexc
 	// Если это юниграмма
 	if(!real && (gram == 1)){
 		// Список регистров слова
-		std::set <size_t> uppers;
+		multimap <size_t, size_t> uppers;
+		// Получаем список регистров слова
+		this->uniUppers(uppers);
 		// Переходим по всему списку юниграмм
 		for(auto & value : this->vocab){
 			// Если n-грамма имеет вес
@@ -1398,10 +1402,8 @@ const size_t anyks::Arpa::count(const u_short gram, const bool real) const noexc
 				result++;
 				// Если это нормальное слово
 				if(this->event(value.second.idw) && !this->isOption(options_t::lowerCase)){
-					// Получаем список регистров слова
-					this->uniUppers(value.second.idw, uppers);
-					// Если список регистров получен
-					if(!uppers.empty()) result += uppers.size();
+					// Получаем количество регистров слова
+					result += uppers.count(value.second.idw);
 				}
 			}
 		}
@@ -1496,20 +1498,20 @@ void anyks::Arpa::removeWord(const size_t idw) noexcept {
 	}
 }
 /**
- * setWordMethod Метод установки функции получения слова
- * @param word функция получения слова
- */
-void anyks::Arpa::setWordMethod(words_t word) noexcept {
-	// Устанавливаем функцию получения слова
-	this->getWord = word;
-}
-/**
  * setSize Метод установки максимального размера n-граммы
  * @param size максимальный размер n-граммы
  */
 void anyks::Arpa::setSize(const u_short size) noexcept {
 	// Устанавливаем максимальный размер n-граммы
 	if((size >= 1) && (size <= MAXSIZE)) this->size = size;
+}
+/**
+ * setWordMethod Метод установки функции получения слова
+ * @param word функция получения слова
+ */
+void anyks::Arpa::setWordMethod(words_t word) noexcept {
+	// Устанавливаем функцию получения слова
+	this->getWord = word;
 }
 /**
  * setLogfile Метод установка файла для вывода логов
@@ -1578,7 +1580,7 @@ void anyks::Arpa::del(const vector <size_t> & seq) const noexcept {
 				// Удаляем лишние пробелы
 				context = this->alphabet->trim(context);
 				// Если контекст получен
-				if(!context.empty()){
+				if(debug && !context.empty()){
 					// Выводим сообщение
 					this->alphabet->log("the context [%s] is wrong, delete is not possible", alphabet_t::log_t::warning, this->logfile, context.c_str());
 				}
@@ -1637,9 +1639,9 @@ void anyks::Arpa::inc(const vector <pair_t> & seq, const float value) const noex
 					context.append(" ");
 				}
 				// Удаляем лишние пробелы
-				context = move(this->alphabet->trim(context));
+				context = this->alphabet->trim(context);
 				// Если контекст получен
-				if(!context.empty()){
+				if(debug && !context.empty()){
 					// Выводим сообщение
 					this->alphabet->log("the context [%s] is wrong, increment is not possible", alphabet_t::log_t::warning, this->logfile, context.c_str());
 				}
@@ -1650,11 +1652,53 @@ void anyks::Arpa::inc(const vector <pair_t> & seq, const float value) const noex
 	}
 }
 /**
- * load Метод загрузки бинарных данных в словарь
+ * addBin Метод добавления бинарных данных в словарь
+ * @param buffer буфер с бинарными данными
+ * @param idd    идентификатор документа в котором получена n-грамма
+ */
+void anyks::Arpa::addBin(const vector <char> & buffer, const size_t idd) const noexcept {
+	// Если буфер передан
+	if(!buffer.empty()){
+		// Количество слов в последовательности
+		u_short count = 0;
+		// Смещение в буфере
+		size_t offset = 0;
+		// Полученные данные последовательности
+		vector <seq_t> seq;
+		// Получаем данные буфера
+		const char * data = buffer.data();
+		// Извлекаем количество слов в последовательности
+		memcpy(&count, data + offset, sizeof(count));
+		// Увеличиваем смещение
+		offset += sizeof(count);
+		// Если последовательность получена
+		if(count > 0){
+			// Полученная последовательность
+			seq_t sequence;
+			// Выделяем память для последовательности
+			seq.resize(count);
+			// Переходим по всем словам последовательности
+			for(u_short i = 0; i < count; i++){
+				// Извлекаем данные слова
+				memcpy(&sequence, data + offset, sizeof(sequence));
+				// Добавляем последовательность в список
+				seq[i] = sequence;
+				// Увеличиваем смещение
+				offset += sizeof(sequence);
+			}
+			// Добавляем полученные данные
+			this->add(seq, idd);
+		}
+		// Очищаем собранный список n-грамм
+		if(!this->ngrams.empty()) this->ngrams.clear();
+	}
+}
+/**
+ * setBin Метод установки бинарных данных в словарь
  * @param buffer буфер с бинарными данными
  * @param arpa   нужно добавить только данные arpa
  */
-void anyks::Arpa::load(const vector <char> & buffer, const bool arpa) const noexcept {
+void anyks::Arpa::setBin(const vector <char> & buffer, const bool arpa) const noexcept {
 	// Если буфер передан
 	if(!buffer.empty()){
 		// Количество слов в последовательности
@@ -1702,6 +1746,374 @@ void anyks::Arpa::load(const vector <char> & buffer, const bool arpa) const noex
 		// Очищаем собранный список n-грамм
 		if(!this->ngrams.empty()) this->ngrams.clear();
 	}
+}
+/**
+ * data Метод извлечения данных arpa
+ * @param gram     размер n-граммы для извлечения
+ * @param callback функция обратного вызова
+ */
+void anyks::Arpa::data(const u_short gram, function <void (const string &)> callback) const noexcept {
+	// Если n-граммы существуют
+	if(!this->vocab.empty()){
+		// Строка результата и вес n-граммы
+		string result = "", weight = "", backoff = "";
+		// Если это юниграмма
+		if(gram == 1){
+			// Слово для извлечения
+			string word = "";
+			// Список регистров слова
+			multimap <size_t, size_t> uppers;
+			// Если слова нужно выводить не в нижнем регистре
+			if(!this->isOption(options_t::lowerCase)) this->uniUppers(uppers);
+			// Переходим по всему списку юниграмм
+			for(auto & value : this->vocab){
+				// Очищаем предыдущие граммы
+				result.clear();
+				// Если n-грамма имеет вес
+				if(value.second.weight != 0.0f){
+					// Если это -Infinity или псевдо-ноль
+					if((value.second.weight == this->zero) || (value.second.weight == this->pseudoZero))
+						// Устанавливаем вес равный псевдо-нулю
+						weight = to_string(this->pseudoZero);
+					// Если это нормальный вес
+					else weight = to_string(value.second.weight);
+					// Если слово имеет частоту отката
+					if((gram < this->size) && ((value.second.backoff != this->zero) && (this->weights(&value.second) != 0.0f))){
+						// Получаем обратную частоту модели
+						backoff = (value.second.backoff != 0.0f ? to_string(value.second.backoff) : "0");
+					// Иначе очищаем обратную частоту документа
+					} else backoff.clear();
+					// Если регистры слова существуют
+					if(uppers.count(value.second.idw) > 0){
+						// Получаем диапазон регистров слова
+						const auto & ret = uppers.equal_range(value.second.idw);
+						// Переходим по всему списку регистров
+						for(auto it = ret.first; it != ret.second; ++it){
+							// Получаем слово
+							word = this->word(value.second.idw, it->second);
+							// Если слово получено
+							if(!word.empty()){
+								// Формируем слово с учётом регистра
+								result = this->alphabet->format("%s\t%s", weight.c_str(), word.c_str());
+								// Если обратная частота документа присутствует
+								if(!backoff.empty()){
+									// Добавляем разделитель
+									result.append("\t");
+									// Добавляем частоту отката
+									result.append(backoff);
+								}
+								// Выводим результат
+								callback(result);
+							}
+						}
+					}
+					// Получаем слово
+					word = this->word(value.second.idw);
+					// Если слово получено
+					if(!word.empty()){
+						// Формируем слово без учёта регистра
+						result = this->alphabet->format("%s\t%s", weight.c_str(), word.c_str());
+						// Если обратная частота документа присутствует
+						if(!backoff.empty()){
+							// Добавляем разделитель
+							result.append("\t");
+							// Добавляем частоту отката
+							result.append(backoff);
+						}
+						// Выводим результат
+						callback(result);
+					}
+				}
+			}
+		// Если это n-грамма
+		} else {
+			// Список n-грамм для работы
+			list <vocab_t *> ngrams;
+			// Выполняем извлечение n-грамм
+			this->get(gram, &ngrams);
+			// Если список n-грамм получен
+			if(!ngrams.empty()){
+				// Полученный контекст
+				string context = "";
+				// Переходим по всему списку полученных n-грамм
+				for(auto & item : ngrams){
+					// Переходим по всему списку слов
+					for(auto & value : * item){
+						// Если n-грамма имеет вес
+						if(value.second.weight != 0.0f){
+							// Если это -Infinity или псевдо-ноль
+							if((value.second.weight == this->zero) || (value.second.weight == this->pseudoZero))
+								// Устанавливаем вес равный псевдо-нулю
+								weight = to_string(this->pseudoZero);
+							// Если это нормальный вес
+							else weight = to_string(value.second.weight);
+							// Получаем данные контекста
+							context = this->context(&value.second);
+							// Если контекст получен
+							if(!context.empty()){
+								// Формируем результат с учётом регистра
+								result = this->alphabet->format("%s\t%s", weight.c_str(), context.c_str());
+								// Если контекст существует
+								if(!result.empty()){
+									// Если слово имеет частоту отката
+									if((gram < this->size) && ((value.second.backoff != this->zero) && (this->weights(&value.second) != 0.0f))){
+										// Добавляем разделитель
+										result.append("\t");
+										// Получаем обратную частоту модели
+										backoff = (value.second.backoff != 0.0f ? to_string(value.second.backoff) : "0");
+										// Добавляем частоту отката
+										result.append(move(backoff));
+									}
+									// Если слово существует, выводим его
+									callback(result);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	// Выводим пустой результат
+	} else callback("");
+}
+/**
+ * grams Метод извлечения данных n-грамм в текстовом виде
+ * @param gram     размер n-граммы для извлечения
+ * @param callback функция обратного вызова
+ */
+void anyks::Arpa::grams(const u_short gram, function <void (const string &)> callback) const noexcept {
+	// Если n-граммы существуют
+	if(!this->vocab.empty()){
+		// Если это юниграмма
+		if(gram == 1){
+			// Слово для извлечения
+			string word = "";
+			// Список регистров слова
+			multimap <size_t, size_t> uppers;
+			// Если слова нужно выводить не в нижнем регистре
+			if(!this->isOption(options_t::lowerCase)) this->uniUppers(uppers);
+			// Переходим по всему списку юниграмм
+			for(auto & value : this->vocab){
+				// Если n-грамма имеет вес
+				if(value.second.weight != 0.0f){
+					// Если регистры слова существуют
+					if(uppers.count(value.second.idw) > 0){
+						// Получаем диапазон регистров слова
+						const auto & ret = uppers.equal_range(value.second.idw);
+						// Переходим по всему списку регистров
+						for(auto it = ret.first; it != ret.second; ++it){
+							// Получаем слово
+							word = this->word(value.second.idw, it->second);
+							// Выводим слово с учётом регистра
+							if(!word.empty()) callback(this->alphabet->format("%s\t%lld | %lld", word.c_str(), value.second.oc, value.second.dc));
+						}
+					}
+					// Получаем слово
+					word = this->word(value.second.idw);
+					// Выводим слово без учёта регистра
+					if(!word.empty()) callback(this->alphabet->format("%s\t%lld | %lld", word.c_str(), value.second.oc, value.second.dc));
+				}
+			}
+		// Если это n-грамма
+		} else {
+			// Список n-грамм для работы
+			list <vocab_t *> ngrams;
+			// Выполняем извлечение n-грамм
+			this->get(gram, &ngrams);
+			// Если список n-грамм получен
+			if(!ngrams.empty()){
+				// Полученный контекст
+				string context = "";
+				// Переходим по всему списку полученных n-грамм
+				for(auto & item : ngrams){
+					// Переходим по всему списку слов
+					for(auto & value : * item){
+						// Если это верная n-грамма
+						if(value.second.weight != 0.0f){
+							// Получаем данные контекста
+							context = this->context(&value.second);
+							// Формируем результат с учётом регистра
+							if(!context.empty()) callback(this->alphabet->format("%s\t%lld | %lld", context.c_str(), value.second.oc, value.second.dc));
+						}
+					}
+				}
+			}
+		}
+	// Выводим пустой результат
+	} else callback("");
+}
+/**
+ * getBin Метод извлечения данных arpa в бинарном виде
+ * @param arpa     флаг извлечения только arpa
+ * @param callback функция обратного вызова
+ */
+void anyks::Arpa::getBin(const bool arpa, function <void (const vector <char> &, const u_short)> callback) const noexcept {
+	// Если данные загружены
+	if(!this->vocab.empty()){
+		// Данные последовательности
+		seq_t sequence;
+		// Индекс обработки статуса
+		size_t index = 0;
+		// Собранная последовательность
+		vector <seq_t> seq;
+		// Буфер данных n-граммы
+		vector <char> buffer;
+		/**
+		 * resultFn Метод формирования результата
+		 */
+		auto resultFn = [&buffer, &seq, &index, &callback, this]() noexcept {
+			// Получаем количество n-грамм в списке
+			u_short count = seq.size();
+			// Получаем бинарные данные количества слов
+			const char * bin = reinterpret_cast <const char *> (&count);
+			// Добавляем в буфер количество слов
+			buffer.insert(buffer.end(), bin, bin + sizeof(count));
+			// Переходим по всему списку последовательности
+			for(auto & item : seq){
+				// Получаем бинарные данные последовательности
+				bin = reinterpret_cast <const char *> (&item);
+				// Добавляем в буфер бинарные данные последовательности
+				buffer.insert(buffer.end(), bin, bin + sizeof(item));
+			}
+			// Выводим собранную последовательность
+			callback(buffer, u_short(index / float(this->vocab.size()) * 100.0f));
+			// Очищаем полученный буфер n-граммы
+			buffer.clear();
+		};
+		/**
+		 * runFn Прототип функции запуска формирования map карты последовательностей
+		 * @param словарь для извлечения слова с его параметрами
+		 */
+		function <void (const vocab_t *)> runFn;
+		/**
+		 * runFn Функция запуска формирования map карты последовательностей
+		 * @param vocab словарь для извлечения слова с его параметрами
+		 */
+		runFn = [&](const vocab_t * vocab) noexcept {
+			// Регистры слова
+			pair_t uppers;
+			// Идентификатор полученного и добавленного слова
+			size_t idw = idw_t::NIDW, aidw = 0;
+			// Получаем объект данных
+			const vocab_t * obj = (vocab != nullptr ? vocab : &this->vocab);
+			// Если есть смысл обрабатывать варианты
+			if(this->weights(obj) != 0.0f){
+				// Переходим по всему объекту с данными
+				for(auto & item : * obj){
+					// Увеличиваем индекс если это юниграмма
+					if(vocab == nullptr) index++;
+					// Если это верная n-грамма
+					if(item.second.weight != 0.0f){
+						// Запоминаем идентификатор добавленного слова
+						idw = sequence.idw;
+						// Получаем лучший регистр слова
+						uppers = this->uppers(item.second.uppers, item.second.oc);
+						// Формируем блок слова
+						sequence.ups = uppers.first;
+						// Извлекаем основные данные
+						sequence.idw     = item.second.idw;
+						sequence.weight  = item.second.weight;
+						sequence.backoff = item.second.backoff;
+						// Если нужно извлечь все данные
+						if(!arpa){
+							// Запоминаем параметры граммы
+							sequence.oc = item.second.oc;
+							sequence.dc = item.second.dc;
+						}
+						// Формируем последовательность
+						seq.push_back(sequence);
+						// Если еще есть продолжение граммы
+						if(!item.second.empty()) runFn(&item.second);
+						// Иначе выводим то что есть
+						else if(idw != aidw) {
+							// Запоминаем идентификатор добавленного слова
+							aidw = idw;
+							// Выводим результат
+							resultFn();
+						}
+						// Удаляем последний элемент в списке
+						seq.pop_back();
+					}
+				}
+			// Выводим собранную последовательность
+			} else resultFn();
+		};
+		// Запускаем извлечение данных
+		runFn(nullptr);
+	// Выводим пустой результат
+	} else callback({}, 0);
+}
+/**
+ * map Метод извлечения карты последовательностей в виде CSV
+ * @param callback функция обратного вызова
+ * @param delim    разделитель последовательностей
+ */
+void anyks::Arpa::map(function <void (const string &, const u_short)> callback, const string & delim) const noexcept {
+	// Если данные загружены
+	if(!this->vocab.empty()){
+		// Регистры слова
+		pair_t uppers;
+		// Индекс обработки статуса
+		size_t index = 0;
+		/**
+		 * runFn Прототип функции запуска формирования map карты последовательностей
+		 * @param словарь для извлечения слова с его параметрами
+		 * @param сформированная строка последовательности
+		 */
+		function <void (const vocab_t *, const string &)> runFn;
+		/**
+		 * runFn Функция запуска формирования map карты последовательностей
+		 * @param vocab словарь для извлечения слова с его параметрами
+		 * @param str   сформированная строка последовательности
+		 */
+		runFn = [&](const vocab_t * vocab, const string & str) noexcept {
+			// Строка для извлечения данных
+			string data = "";
+			// Получаем объект данных
+			const vocab_t * obj = (vocab != nullptr ? vocab : &this->vocab);
+			// Если есть смысл обрабатывать варианты
+			if(this->weights(obj) != 0.0f){
+				// Переходим по всему объекту с данными
+				for(auto & item : * obj){
+					// Получаем данные строки
+					data = str;
+					// Увеличиваем индекс если это юниграмма
+					if(vocab == nullptr) index++;
+					// Если это верная n-грамма
+					if(item.second.weight != 0.0f){
+						// Добавляем разделитель
+						if(!data.empty()) data.append(delim);
+						// Получаем лучший регистр слова
+						uppers = this->uppers(item.second.uppers, item.second.oc);
+						// Добавляем полученные данные
+						data.append(to_string(item.second.idw));
+						// Добавляем экранирование характеристик
+						data.append(":{");
+						// Добавляем встречаемость n-граммы
+						data.append(to_string(item.second.oc));
+						// Добавляем разделитель
+						data.append(",");
+						// Добавляем количество документов где, встретилась n-грамма
+						data.append(to_string(item.second.dc));
+						// Добавляем разделитель
+						data.append(",");
+						// Добавляем регистр слова
+						data.append(to_string(uppers.first));
+						// Закрываем экранирование характеристик
+						data.append("}");
+						// Если еще есть продолжение граммы
+						if(!item.second.empty()) runFn(&item.second, data);
+						// Иначе выводим то что есть
+						else callback(data, u_short(index / float(this->vocab.size()) * 100.0f));
+					}
+				}
+			// Выводим собранную последовательность
+			} else callback(str, u_short(index / float(this->vocab.size()) * 100.0f));
+		};
+		// Запускаем извлечение данных
+		runFn(nullptr, "");
+	// Выводим пустой результат
+	} else callback("", 0);
 }
 /**
  * set Метод установки последовательности в словарь
@@ -2023,213 +2435,6 @@ void anyks::Arpa::add(const vector <seq_t> & seq, const size_t idd, const bool r
 		// Очищаем собранный список n-грамм
 		if(!this->ngrams.empty()) this->ngrams.clear();
 	}
-}
-/**
- * prune Метод прунинга языковой модели
- * @param threshold порог частоты прунинга
- * @param mingram   значение минимальной n-граммы за которую нельзя прунить
- * @param status    функция вывода статуса обучения
- */
-void anyks::Arpa::prune(const double threshold, const u_short mingram, function <void (const u_short)> status) const noexcept {
-	// Проверяем включён ли режим отладки
-	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
-	// Если словарь не пустой
-	if(!this->vocab.empty() && (this->size > 1)){
-		/**
-		 * sumFn Функция подсчёта суммы весов n-граммы
-		 * @param gram    значение текущей n-граммы
-		 * @param context контекст которому принадлежит слово
-		 * @return        подсчитанная сумма весов
-		 */
-		auto sumFn = [this](const u_short gram, const vocab_t * context) noexcept {
-			// Результат работы функции
-			float result = 0.0f;
-			// Если контекст передан
-			if(context != nullptr){
-				// Извлекаем предшествующую n-грамму
-				while(context->father != nullptr){
-					// Запоминаем результат
-					if((context->weight != this->zero) &&
-					(context->idw != size_t(token_t::start)) &&
-					((gram > 1) || !this->isOption(options_t::resetUnk) ||
-					(context->idw != size_t(token_t::unk)))) result += context->weight;
-					/**
-					 * Если мы вычисляем предельную вероятность контекста униграммы <s>,
-					 * мы должны искать </s> вместо неё, поскольку у начала предложения вес = 0.
-					 */
-					if(context->idw == size_t(token_t::start)) result += context->father->at((size_t) token_t::finish).weight;
-					// Выполняем смещение
-					context = context->father;
-				}
-			}
-			// Выводим результат
-			return result;
-		};
-		// Список n-грамм для работы
-		list <vocab_t *> ngrams;
-		// Количество n-грамм которые нужно обработать
-		size_t counts = 0, index = 0;
-		// Текущий и предыдущий статус
-		u_short actual = 0, past = 100;
-		// Устанавливаем нуминатор и денуминатор
-		double numerator = 0.0, denominator = 0.0;
-		// Частота и обратная частота документа
-		float weight = 0.0f, backoff = 0.0f, total = 0.0f;
-		// Если размер минимальной n-граммы не установлен, устанавливаем его
-		const u_short gram = (mingram == 0 ? this->size : mingram);
-		// Переходим по всем n-граммам задом наперёд
-		for(u_short i = this->size; (i > 0) && (i >= gram); i--){
-			// Получаем количество n-грамм
-			counts += this->count(i, true);
-		}
-		// Переходим по всем n-граммам задом наперёд
-		for(u_short i = this->size; (i > 0) && (i >= gram); i--){
-			// Выполняем извлечение n-грамм
-			this->get(i, &ngrams);
-			// Если список n-грамм получен
-			if(!ngrams.empty()){
-				// Количество обработанных n-грамм
-				size_t prunedNgrams = 0;
-				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams){
-					// Если в n-грамме есть дочерные граммы
-					if(!item->empty()){
-						// Обнуляем нумератор
-						numerator = 0.0;
-						// Обнуляем денумератор
-						denominator = 0.0;
-						// Получаем обратную частоту документа
-						backoff = item->backoff;
-						// Если обратная частота документа существует
-						if(backoff != 0.0f){
-							/**
-							 * Вычисляем числитель и знаменатель обратной частоты отката,
-							 * чтобы мы могли быстро вычислить корректировку BOW из-за отсутствия одного пробника.
-							 */
-							if(!this->compute(item, i - 1, numerator, denominator)){
-								// Увеличиваем количество обработанных n-грамм
-								index++;
-								// Пропускаем ход
-								continue;
-							}
-							// Получаем сумму весов
-							total = sumFn(i, item);
-							// Прунник всех вариантов
-							bool allPruned = true;
-							// Переходим по всему слов в контексте
-							for(auto & value : * item){
-								// Если частота n-граммы существует
-								if(value.second.weight != 0.0f){
-									// Генерируем обратную частоту n-граммы
-									float bow = this->backoff(value.second.idw, item, i - 2);
-									// Расчитываем новую обратную частоту документа
-									float nbow = (log10(numerator + pow(10, value.second.weight)) - log10(denominator + pow(10, bow)));
-									/**
-									 * Вычислить изменение энтропии за счет удаления ngram
-									 * deltaH = - P(H) x
-									 *  {P(W | H) [log P(w|h') + log BOW'(h) - log P(w|h)] +
-									 *  (1 - \sum_{v,h ngrams} P(v|h)) [log BOW'(h) - log BOW(h)]}
-									 *
-									 * (1-\sum_{v,h ngrams}) - масса вероятности,
-									 * оставшаяся от n-граммы текущего порядка,
-									 * и такая же, как числитель в BOW(h).
-									 */
-									float delta = (bow + nbow - value.second.weight);
-									// Считаем дельту энтропии
-									float deltaEntropy = (- pow(10, total) * (pow(10, value.second.weight) * delta + numerator * (nbow - backoff)));
-									/**
-									 * Вычисляем относительное изменение модели (трейн-сета) перплексия
-									 *  (PPL' - PPL)/PPL = PPL'/PPL - 1
-									 *                   = exp(H')/exp(H) - 1
-									 *                   = exp(H' - H) - 1
-									 */
-									double perpChange = (pow(10, deltaEntropy) - 1.0);
-									// Проверяем выполнен ли прунинг
-									bool pruned = ((threshold > 0) && (perpChange < threshold));
-									/**
-									 * Убеждаемся, что мы не удаляем n-граммы,
-									 * чьи частоты отката нам необходимы ...
-									 */
-									if(pruned && ((value.second.backoff != this->zero) && (this->weights(&value.second) != 0.0f))) pruned = false;
-									// Если отладка включена
-									if(debug){
-										// Выводим статистику в сообщении
-										this->alphabet->log(
-											"CONTEXT %s WORD %s CONTEXTPROB %4.6f OLDPROB %4.6f NEWPROB %4.6f DELTA-H %4.6f DELTA-LOGP %4.6f PPL-CHANGE %4.6f PRUNED %u",
-											alphabet_t::log_t::info,
-											this->logfile,
-											this->context(item).c_str(),
-											this->word(value.second.idw, this->uppers(&value.second).first).c_str(),
-											total,
-											value.second.weight,
-											(bow + nbow),
-											deltaEntropy,
-											delta,
-											perpChange,
-											pruned
-										);
-									}
-									// Если пруннинг выполнен
-									if(pruned){
-										// Запоминаем количество обработанных n-грамм
-										prunedNgrams++;
-										// Удаляем вес n-граммы
-										value.second.weight = 0.0f;
-									// Отмечаем что пруннинг выполнен не всех n-грамм
-									} else allPruned = false;
-								}
-								// Если функция вывода статуса передана
-								if(status != nullptr){
-									// Увеличиваем количество обработанных n-грамм
-									index++;
-									// Выполняем расчёт текущего статуса
-									actual = u_short(index / float(counts) * 100.0f);
-									// Если статус обновился
-									if(actual != past){
-										// Запоминаем текущий статус
-										past = actual;
-										// Выводим статус обработки
-										status(actual);
-									}
-								}
-							}
-							/**
-							 * Если мы удалили все n-граммы для этого контекста,
-							 * мы можем удалить сам контекст,
-							 * но только если текущий контекст не является префиксом более длинного.
-							 */
-							if(allPruned && (this->weights(item) == 0.0f)) item->backoff = this->zero;
-						}
-					}
-				}
-				// Если отладка включена
-				if(debug && (prunedNgrams > 0)){
-					// Выводим статистику в сообщении
-					this->alphabet->log("pruned %u %u-grams", alphabet_t::log_t::info, this->logfile, prunedNgrams, i);
-				}
-			}
-		}
-		/**
-		 * Здесь важно, чтобы мы вычисляли веса отката в возрастающем порядке,
-		 * поскольку старшие по порядку относятся к младшим в алгоритме отсрочки.
-		 * Обратите внимание, что будут сгенерированны узлы отката только для тех контекстов,
-		 * в которых есть слова с явными вероятностями.
-		 * Но это именно так, как и должно быть.
-		 */
-		for(u_short i = 1; i <= this->size; i++){
-			// Выполняем извлечение n-грамм
-			this->get(i, &ngrams);
-			// Если список n-грамм получен
-			if(!ngrams.empty()){
-				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams){
-					// Если в n-грамме есть дочерные граммы
-					if(!item->empty()) this->backoffs(i - 1, item);
-				}
-			}
-		}
-	// Сообщаем что словарь оказался пустым
-	} else if(debug) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "vocab is empty");
 }
 /**
  * sweep Метод удаления низкочастотных n-грамм arpa
@@ -2679,7 +2884,7 @@ void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept 
 					// Переходим по всему списку юниграмм
 					for(auto & value : this->vocab){
 						// Если функция вывода статуса передана
-						if(status != nullptr){
+						if((value.first >= 0) && (status != nullptr)){
 							// Увеличиваем значение индекса
 							index++;
 							// Выполняем расчёт текущего статуса
@@ -2714,7 +2919,7 @@ void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept 
 								// Переходим по всему списку грамм
 								for(auto & value : * item){
 									// Если функция вывода статуса передана
-									if(status != nullptr){
+									if((value.first >= 0) && (status != nullptr)){
 										// Увеличиваем значение индекса
 										index++;
 										// Выполняем расчёт текущего статуса
@@ -2751,378 +2956,212 @@ void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept 
 	} else if(debug) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "vocab is empty");
 }
 /**
- * data Метод извлечения данных arpa
- * @param gram     размер n-граммы для извлечения
- * @param callback функция обратного вызова
+ * prune Метод прунинга языковой модели
+ * @param threshold порог частоты прунинга
+ * @param mingram   значение минимальной n-граммы за которую нельзя прунить
+ * @param status    функция вывода статуса обучения
  */
-void anyks::Arpa::data(const u_short gram, function <void (const string &)> callback) const noexcept {
-	// Если n-граммы существуют
-	if(!this->vocab.empty()){
-		// Строка результата и вес n-граммы
-		string result = "", weight = "", backoff = "";
-		// Если это юниграмма
-		if(gram == 1){
-			// Слово для извлечения
-			string word = "";
-			// Список регистров слова
-			std::set <size_t> uppers;
-			// Переходим по всему списку юниграмм
-			for(auto & value : this->vocab){
-				// Очищаем предыдущие граммы
-				result.clear();
-				// Если n-грамма имеет вес
-				if(value.second.weight != 0.0f){
-					// Если это -Infinity или псевдо-ноль
-					if((value.second.weight == this->zero) || (value.second.weight == this->pseudoZero))
-						// Устанавливаем вес равный псевдо-нулю
-						weight = move(to_string(this->pseudoZero));
-					// Если это нормальный вес
-					else weight = move(to_string(value.second.weight));
-					// Если слово имеет частоту отката
-					if((gram < this->size) && ((value.second.backoff != this->zero) && (this->weights(&value.second) != 0.0f))){
-						// Получаем обратную частоту модели
-						backoff = (value.second.backoff != 0.0f ? move(to_string(value.second.backoff)) : "0");
-					// Иначе очищаем обратную частоту документа
-					} else backoff.clear();
-					// Если слова нужно выводить не в нижнем регистре
-					if(!this->isOption(options_t::lowerCase)){
-						// Получаем список регистров слова
-						this->uniUppers(value.second.idw, uppers);
-					}
-					// Если список получен
-					if(!uppers.empty()){
-						// Переходим по всему списку регистров
-						for(auto & ups : uppers){
-							// Получаем слово
-							word = move(this->word(value.second.idw, ups));
-							// Если слово получено
-							if(!word.empty()){
-								// Формируем слово с учётом регистра
-								result = move(this->alphabet->format("%s\t%s", weight.c_str(), word.c_str()));
-								// Если обратная частота документа присутствует
-								if(!backoff.empty()){
-									// Добавляем разделитель
-									result.append("\t");
-									// Добавляем частоту отката
-									result.append(backoff);
-								}
-								// Выводим результат
-								callback(result);
-							}
-						}
-					}
-					// Получаем слово
-					word = move(this->word(value.second.idw));
-					// Если слово получено
-					if(!word.empty()){
-						// Формируем слово без учёта регистра
-						result = move(this->alphabet->format("%s\t%s", weight.c_str(), word.c_str()));
-						// Если обратная частота документа присутствует
-						if(!backoff.empty()){
-							// Добавляем разделитель
-							result.append("\t");
-							// Добавляем частоту отката
-							result.append(backoff);
-						}
-						// Выводим результат
-						callback(result);
-					}
+void anyks::Arpa::prune(const double threshold, const u_short mingram, function <void (const u_short)> status) const noexcept {
+	// Проверяем включён ли режим отладки
+	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+	// Если словарь не пустой
+	if(!this->vocab.empty() && (this->size > 1)){
+		/**
+		 * sumFn Функция подсчёта суммы весов n-граммы
+		 * @param gram    значение текущей n-граммы
+		 * @param context контекст которому принадлежит слово
+		 * @return        подсчитанная сумма весов
+		 */
+		auto sumFn = [this](const u_short gram, const vocab_t * context) noexcept {
+			// Результат работы функции
+			float result = 0.0f;
+			// Если контекст передан
+			if(context != nullptr){
+				// Извлекаем предшествующую n-грамму
+				while(context->father != nullptr){
+					// Запоминаем результат
+					if((context->weight != this->zero) &&
+					(context->idw != size_t(token_t::start)) &&
+					((gram > 1) || !this->isOption(options_t::resetUnk) ||
+					(context->idw != size_t(token_t::unk)))) result += context->weight;
+					/**
+					 * Если мы вычисляем предельную вероятность контекста униграммы <s>,
+					 * мы должны искать </s> вместо неё, поскольку у начала предложения вес = 0.
+					 */
+					if(context->idw == size_t(token_t::start)) result += context->father->at((size_t) token_t::finish).weight;
+					// Выполняем смещение
+					context = context->father;
 				}
 			}
-		// Если это n-грамма
-		} else {
-			// Список n-грамм для работы
-			list <vocab_t *> ngrams;
+			// Выводим результат
+			return result;
+		};
+		// Список n-грамм для работы
+		list <vocab_t *> ngrams;
+		// Количество n-грамм которые нужно обработать
+		size_t counts = 0, index = 0;
+		// Текущий и предыдущий статус
+		u_short actual = 0, past = 100;
+		// Частота и обратная частота документа
+		float backoff = 0.0f, total = 0.0f;
+		// Устанавливаем нуминатор и денуминатор
+		double numerator = 0.0, denominator = 0.0;
+		// Если размер минимальной n-граммы не установлен, устанавливаем его
+		const u_short gram = (mingram == 0 ? this->size : mingram);
+		// Переходим по всем n-граммам задом наперёд
+		for(u_short i = this->size; (i > 0) && (i >= gram); i--){
+			// Получаем количество n-грамм
+			counts += this->count(i, true);
+		}
+		// Переходим по всем n-граммам задом наперёд
+		for(u_short i = this->size; (i > 0) && (i >= gram); i--){
 			// Выполняем извлечение n-грамм
-			this->get(gram, &ngrams);
+			this->get(i, &ngrams);
 			// Если список n-грамм получен
 			if(!ngrams.empty()){
-				// Значение регистров слова
-				size_t uppers = 0;
-				// Полученный контекст
-				string context = "";
+				// Количество обработанных n-грамм
+				size_t prunedNgrams = 0;
 				// Переходим по всему списку полученных n-грамм
 				for(auto & item : ngrams){
-					// Переходим по всему списку слов
-					for(auto & value : * item){
-						// Если n-грамма имеет вес
-						if(value.second.weight != 0.0f){
-							// Если это -Infinity или псевдо-ноль
-							if((value.second.weight == this->zero) || (value.second.weight == this->pseudoZero))
-								// Устанавливаем вес равный псевдо-нулю
-								weight = move(to_string(this->pseudoZero));
-							// Если это нормальный вес
-							else weight = move(to_string(value.second.weight));
-							// Получаем данные контекста
-							context = move(this->context(&value.second));
-							// Если контекст получен
-							if(!context.empty()){
-								// Формируем результат с учётом регистра
-								result = move(this->alphabet->format("%s\t%s", weight.c_str(), context.c_str()));
-								// Если контекст существует
-								if(!result.empty()){
-									// Если слово имеет частоту отката
-									if((gram < this->size) && ((value.second.backoff != this->zero) && (this->weights(&value.second) != 0.0f))){
-										// Добавляем разделитель
-										result.append("\t");
-										// Получаем обратную частоту модели
-										backoff = (value.second.backoff != 0.0f ? move(to_string(value.second.backoff)) : "0");
-										// Добавляем частоту отката
-										result.append(move(backoff));
+					// Если в n-грамме есть дочерные граммы
+					if(!item->empty()){
+						// Обнуляем нумератор
+						numerator = 0.0;
+						// Обнуляем денумератор
+						denominator = 0.0;
+						// Получаем обратную частоту документа
+						backoff = item->backoff;
+						// Если обратная частота документа существует
+						if(backoff != 0.0f){
+							/**
+							 * Вычисляем числитель и знаменатель обратной частоты отката,
+							 * чтобы мы могли быстро вычислить корректировку BOW из-за отсутствия одного пробника.
+							 */
+							if(!this->compute(item, i - 1, numerator, denominator)){
+								// Увеличиваем количество обработанных n-грамм
+								index++;
+								// Пропускаем ход
+								continue;
+							}
+							// Получаем сумму весов
+							total = sumFn(i, item);
+							// Прунник всех вариантов
+							bool allPruned = true;
+							// Переходим по всему слов в контексте
+							for(auto & value : * item){
+								// Если частота n-граммы существует
+								if(value.second.weight != 0.0f){
+									// Генерируем обратную частоту n-граммы
+									float bow = this->backoff(value.second.idw, item, i - 2);
+									// Расчитываем новую обратную частоту документа
+									float nbow = (log10(numerator + pow(10, value.second.weight)) - log10(denominator + pow(10, bow)));
+									/**
+									 * Вычислить изменение энтропии за счет удаления ngram
+									 * deltaH = - P(H) x
+									 *  {P(W | H) [log P(w|h') + log BOW'(h) - log P(w|h)] +
+									 *  (1 - \sum_{v,h ngrams} P(v|h)) [log BOW'(h) - log BOW(h)]}
+									 *
+									 * (1-\sum_{v,h ngrams}) - масса вероятности,
+									 * оставшаяся от n-граммы текущего порядка,
+									 * и такая же, как числитель в BOW(h).
+									 */
+									float delta = (bow + nbow - value.second.weight);
+									// Считаем дельту энтропии
+									float deltaEntropy = (- pow(10, total) * (pow(10, value.second.weight) * delta + numerator * (nbow - backoff)));
+									/**
+									 * Вычисляем относительное изменение модели (трейн-сета) перплексия
+									 *  (PPL' - PPL)/PPL = PPL'/PPL - 1
+									 *                   = exp(H')/exp(H) - 1
+									 *                   = exp(H' - H) - 1
+									 */
+									double perpChange = (pow(10, deltaEntropy) - 1.0);
+									// Проверяем выполнен ли прунинг
+									bool pruned = ((threshold > 0) && (perpChange < threshold));
+									/**
+									 * Убеждаемся, что мы не удаляем n-граммы,
+									 * чьи частоты отката нам необходимы ...
+									 */
+									if(pruned && ((value.second.backoff != this->zero) && (this->weights(&value.second) != 0.0f))) pruned = false;
+									// Если отладка включена
+									if(debug){
+										// Выводим статистику в сообщении
+										this->alphabet->log(
+											"CONTEXT %s WORD %s CONTEXTPROB %4.6f OLDPROB %4.6f NEWPROB %4.6f DELTA-H %4.6f DELTA-LOGP %4.6f PPL-CHANGE %4.6f PRUNED %u",
+											alphabet_t::log_t::info,
+											this->logfile,
+											this->context(item).c_str(),
+											this->word(value.second.idw, this->uppers(&value.second).first).c_str(),
+											total,
+											value.second.weight,
+											(bow + nbow),
+											deltaEntropy,
+											delta,
+											perpChange,
+											pruned
+										);
 									}
-									// Если слово существует, выводим его
-									callback(result);
+									// Если пруннинг выполнен
+									if(pruned){
+										// Запоминаем количество обработанных n-грамм
+										prunedNgrams++;
+										// Удаляем вес n-граммы
+										value.second.weight = 0.0f;
+									// Отмечаем что пруннинг выполнен не всех n-грамм
+									} else allPruned = false;
+								}
+								// Если функция вывода статуса передана
+								if(status != nullptr){
+									// Увеличиваем количество обработанных n-грамм
+									index++;
+									// Выполняем расчёт текущего статуса
+									actual = u_short(index / float(counts) * 100.0f);
+									// Если статус обновился
+									if(actual != past){
+										// Запоминаем текущий статус
+										past = actual;
+										// Выводим статус обработки
+										status(actual);
+									}
 								}
 							}
+							/**
+							 * Если мы удалили все n-граммы для этого контекста,
+							 * мы можем удалить сам контекст,
+							 * но только если текущий контекст не является префиксом более длинного.
+							 */
+							if(allPruned && (this->weights(item) == 0.0f)) item->backoff = this->zero;
 						}
 					}
+				}
+				// Если отладка включена
+				if(debug && (prunedNgrams > 0)){
+					// Выводим статистику в сообщении
+					this->alphabet->log("pruned %u %u-grams", alphabet_t::log_t::info, this->logfile, prunedNgrams, i);
 				}
 			}
 		}
-	// Выводим пустой результат
-	} else callback("");
-}
-/**
- * grams Метод извлечения данных n-грамм в текстовом виде
- * @param gram     размер n-граммы для извлечения
- * @param callback функция обратного вызова
- */
-void anyks::Arpa::grams(const u_short gram, function <void (const string &)> callback) const noexcept {
-	// Если n-граммы существуют
-	if(!this->vocab.empty()){
-		// Если это юниграмма
-		if(gram == 1){
-			// Слово для извлечения
-			string word = "";
-			// Список регистров слова
-			std::set <size_t> uppers;
-			// Переходим по всему списку юниграмм
-			for(auto & value : this->vocab){
-				// Если n-грамма имеет вес
-				if(value.second.weight != 0.0f){
-					// Если слова нужно выводить не в нижнем регистре
-					if(!this->isOption(options_t::lowerCase)){
-						// Получаем список регистров слова
-						this->uniUppers(value.second.idw, uppers);
-					}
-					// Если список получен
-					if(!uppers.empty()){
-						// Переходим по всему списку регистров
-						for(auto & ups : uppers){
-							// Получаем слово
-							word = move(this->word(value.second.idw, ups));
-							// Выводим слово с учётом регистра
-							if(!word.empty()) callback(this->alphabet->format("%s\t%lld | %lld", word.c_str(), value.second.oc, value.second.dc));
-						}
-					}
-					// Получаем слово
-					word = move(this->word(value.second.idw));
-					// Выводим слово без учёта регистра
-					if(!word.empty()) callback(this->alphabet->format("%s\t%lld | %lld", word.c_str(), value.second.oc, value.second.dc));
-				}
-			}
-		// Если это n-грамма
-		} else {
-			// Список n-грамм для работы
-			list <vocab_t *> ngrams;
+		/**
+		 * Здесь важно, чтобы мы вычисляли веса отката в возрастающем порядке,
+		 * поскольку старшие по порядку относятся к младшим в алгоритме отсрочки.
+		 * Обратите внимание, что будут сгенерированны узлы отката только для тех контекстов,
+		 * в которых есть слова с явными вероятностями.
+		 * Но это именно так, как и должно быть.
+		 */
+		for(u_short i = 1; i <= this->size; i++){
 			// Выполняем извлечение n-грамм
-			this->get(gram, &ngrams);
+			this->get(i, &ngrams);
 			// Если список n-грамм получен
 			if(!ngrams.empty()){
-				// Значение регистров слова
-				size_t uppers = 0;
-				// Полученный контекст
-				string context = "";
 				// Переходим по всему списку полученных n-грамм
 				for(auto & item : ngrams){
-					// Переходим по всему списку слов
-					for(auto & value : * item){
-						// Если это верная n-грамма
-						if(value.second.weight != 0.0f){
-							// Получаем данные контекста
-							context = move(this->context(&value.second));
-							// Формируем результат с учётом регистра
-							if(!context.empty()) callback(this->alphabet->format("%s\t%lld | %lld", context.c_str(), value.second.oc, value.second.dc));
-						}
-					}
+					// Если в n-грамме есть дочерные граммы
+					if(!item->empty()) this->backoffs(i - 1, item);
 				}
 			}
 		}
-	// Выводим пустой результат
-	} else callback("");
+	// Сообщаем что словарь оказался пустым
+	} else if(debug) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "vocab is empty");
 }
-/**
- * save Метод извлечения данных arpa в бинарном виде
- * @param arpa     флаг извлечения только arpa
- * @param callback функция обратного вызова
- */
-void anyks::Arpa::save(const bool arpa, function <void (const vector <char> &, const u_short)> callback) const noexcept {
-	// Если данные загружены
-	if(!this->vocab.empty()){
-		// Данные последовательности
-		seq_t sequence;
-		// Индекс обработки статуса
-		size_t index = 0;
-		// Собранная последовательность
-		vector <seq_t> seq;
-		// Буфер данных n-граммы
-		vector <char> buffer;
-		/**
-		 * resultFn Метод формирования результата
-		 */
-		auto resultFn = [&buffer, &seq, &index, &callback, this]() noexcept {
-			// Получаем количество n-грамм в списке
-			u_short count = seq.size();
-			// Получаем бинарные данные количества слов
-			const char * bin = reinterpret_cast <const char *> (&count);
-			// Добавляем в буфер количество слов
-			buffer.insert(buffer.end(), bin, bin + sizeof(count));
-			// Переходим по всему списку последовательности
-			for(auto & item : seq){
-				// Получаем бинарные данные последовательности
-				bin = reinterpret_cast <const char *> (&item);
-				// Добавляем в буфер бинарные данные последовательности
-				buffer.insert(buffer.end(), bin, bin + sizeof(item));
-			}
-			// Выводим собранную последовательность
-			callback(buffer, u_short(index / float(this->vocab.size()) * 100.0f));
-			// Очищаем полученный буфер n-граммы
-			buffer.clear();
-		};
-		/**
-		 * runFn Прототип функции запуска формирования map карты последовательностей
-		 * @param словарь для извлечения слова с его параметрами
-		 */
-		function <void (const vocab_t *)> runFn;
-		/**
-		 * runFn Функция запуска формирования map карты последовательностей
-		 * @param vocab словарь для извлечения слова с его параметрами
-		 */
-		runFn = [&](const vocab_t * vocab) noexcept {
-			// Регистры слова
-			pair_t uppers;
-			// Идентификатор полученного и добавленного слова
-			size_t idw = idw_t::NIDW, aidw = 0;
-			// Получаем объект данных
-			const vocab_t * obj = (vocab != nullptr ? vocab : &this->vocab);
-			// Если есть смысл обрабатывать варианты
-			if(this->weights(obj) != 0.0f){
-				// Переходим по всему объекту с данными
-				for(auto & item : * obj){
-					// Увеличиваем индекс если это юниграмма
-					if(vocab == nullptr) index++;
-					// Если это верная n-грамма
-					if(item.second.weight != 0.0f){
-						// Запоминаем идентификатор добавленного слова
-						idw = sequence.idw;
-						// Получаем лучший регистр слова
-						uppers = move(this->uppers(item.second.uppers, item.second.oc));
-						// Формируем блок слова
-						sequence.ups = uppers.first;
-						// Извлекаем основные данные
-						sequence.idw     = item.second.idw;
-						sequence.weight  = item.second.weight;
-						sequence.backoff = item.second.backoff;
-						// Если нужно извлечь все данные
-						if(!arpa){
-							sequence.oc  = item.second.oc;
-							sequence.dc  = item.second.dc;
-						}
-						// Формируем последовательность
-						seq.push_back(sequence);
-						// Если еще есть продолжение граммы
-						if(!item.second.empty()) runFn(&item.second);
-						// Иначе выводим то что есть
-						else if(idw != aidw) {
-							// Запоминаем идентификатор добавленного слова
-							aidw = idw;
-							// Выводим результат
-							resultFn();
-						}
-						// Удаляем последний элемент в списке
-						seq.pop_back();
-					}
-				}
-			// Выводим собранную последовательность
-			} else resultFn();
-		};
-		// Запускаем извлечение данных
-		runFn(nullptr);
-	// Выводим пустой результат
-	} else callback({}, 0);
-}
-/**
- * map Метод извлечения карты последовательностей в виде CSV
- * @param callback функция обратного вызова
- * @param delim    разделитель последовательностей
- */
-void anyks::Arpa::map(function <void (const string &, const u_short)> callback, const string & delim) const noexcept {
-	// Если данные загружены
-	if(!this->vocab.empty()){
-		// Регистры слова
-		pair_t uppers;
-		// Индекс обработки статуса
-		size_t index = 0;
-		/**
-		 * runFn Прототип функции запуска формирования map карты последовательностей
-		 * @param словарь для извлечения слова с его параметрами
-		 * @param сформированная строка последовательности
-		 */
-		function <void (const vocab_t *, const string &)> runFn;
-		/**
-		 * runFn Функция запуска формирования map карты последовательностей
-		 * @param vocab словарь для извлечения слова с его параметрами
-		 * @param str   сформированная строка последовательности
-		 */
-		runFn = [&](const vocab_t * vocab, const string & str) noexcept {
-			// Строка для извлечения данных
-			string data = "";
-			// Получаем объект данных
-			const vocab_t * obj = (vocab != nullptr ? vocab : &this->vocab);
-			// Если есть смысл обрабатывать варианты
-			if(this->weights(obj) != 0.0f){
-				// Переходим по всему объекту с данными
-				for(auto & item : * obj){
-					// Получаем данные строки
-					data = str;
-					// Увеличиваем индекс если это юниграмма
-					if(vocab == nullptr) index++;
-					// Если это верная n-грамма
-					if(item.second.weight != 0.0f){
-						// Добавляем разделитель
-						if(!data.empty()) data.append(delim);
-						// Получаем лучший регистр слова
-						uppers = move(this->uppers(item.second.uppers, item.second.oc));
-						// Добавляем полученные данные
-						data.append(to_string(item.second.idw));
-						// Добавляем экранирование характеристик
-						data.append(":{");
-						// Добавляем встречаемость n-граммы
-						data.append(to_string(item.second.oc));
-						// Добавляем разделитель
-						data.append(",");
-						// Добавляем количество документов где, встретилась n-грамма
-						data.append(to_string(item.second.dc));
-						// Добавляем разделитель
-						data.append(",");
-						// Добавляем регистр слова
-						data.append(to_string(uppers.first));
-						// Закрываем экранирование характеристик
-						data.append("}");
-						// Если еще есть продолжение граммы
-						if(!item.second.empty()) runFn(&item.second, data);
-						// Иначе выводим то что есть
-						else callback(data, u_short(index / float(this->vocab.size()) * 100.0f));
-					}
-				}
-			// Выводим собранную последовательность
-			} else callback(str, u_short(index / float(this->vocab.size()) * 100.0f));
-		};
-		// Запускаем извлечение данных
-		runFn(nullptr, "");
-	// Выводим пустой результат
-	} else callback("", 0);
-};
 /**
  * Arpa Конструктор
  * @param word функция получения слова
@@ -3544,7 +3583,7 @@ void anyks::KneserNey::prepare(const u_short gram) const noexcept {
 					// Обнуляем текущую встречаемость
 					value.second.oc = 0;
 					// Формируем ключ записи
-					key = move(make_pair(gram == 1 ? 0 : value.second.father->idw, value.second.idw));
+					key = make_pair(gram == 1 ? 0 : value.second.father->idw, value.second.idw);
 					// Добавляем слово в список
 					range.emplace(key, &value.second);
 				}
@@ -3555,7 +3594,7 @@ void anyks::KneserNey::prepare(const u_short gram) const noexcept {
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Формируем ключ записи
-				key = move(make_pair(gram == 1 ? 0 : value.second.father->idw, value.second.idw));
+				key = make_pair(gram == 1 ? 0 : value.second.father->idw, value.second.idw);
 				// Получаем список слов для которых нужно пересчитать встречаемость
 				auto ret = range.equal_range(key);
 				// Переходим по всему списку найденных вариантов

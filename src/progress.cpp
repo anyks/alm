@@ -123,7 +123,7 @@ void anyks::Progress::update(const u_short status) noexcept {
 			// Запоминаем текущее время
 			this->startTime = time(nullptr);
 			// Отображаем оставшиеся знаки загрузки
-			for(size_t i = 0; i < (w.ws_col - 4); i++) printf("\e[47m \x1B[0m");
+			for(size_t i = 0; i < size_t(w.ws_col - 4); i++) printf("\e[47m \x1B[0m");
 			// Отображаем индикатор процесса
 			printf(" \x1B[33m\x1B[1m%s\x1B[0m\e[0m\r\n\r\n", this->litem);
 		// Если статус больше 0

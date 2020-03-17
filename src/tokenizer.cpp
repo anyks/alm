@@ -51,6 +51,43 @@ const set <size_t> & anyks::Tokenizer::getAbbrs() const noexcept {
 	return this->abbrs;
 }
 /**
+ * fti Метод удаления дробной части числа
+ * @param  num   число для обработки
+ * @param  count количество символов после запятой
+ * @return       число без дробной части
+ */
+const size_t anyks::Tokenizer::fti(const double num, const u_short count) const noexcept {
+	// Результат работы функции
+	size_t result = 0;
+	// Если число больше 0
+	if(num > 0.0f){
+		// Если количество знаков после запятой не нулевой
+		if(count > 0) result = (num * pow(10, floor(count)));
+		// Если размер не указан
+		else {
+			// Определяем количество знаков после запятой
+			u_short count = 0;
+			// Расчёт текущего числа
+			size_t number = 0;
+			// Получаем текущее число
+			const float tmp = fmod(num, 1);
+			// Выполняем перебор чисел после запятой до нулей
+			for(size_t i = 10;; i *= 10){
+				// Выполняем смещение по числам после запятой
+				number = ((size_t) (tmp * i) % 10);
+				// Если число является нулём, выходим
+				if((number <= 0) || (count >= 9)) break;
+				// Считаем количество чисел после запятой
+				else count++;
+			}
+			// Выполняем основной расчёт
+			result = (num * (count > 0 ? pow(10, floor(count)) : pow(10, floor(log10(num)))));
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * idw Метод извлечения идентификатора слова
  * @param  word слово для получения идентификатора
  * @return      идентификатор слова
@@ -242,7 +279,7 @@ const bool anyks::Tokenizer::isAbbr(const wstring & word) const noexcept {
 		// Выполняем поиск точки
 		if((pos = word.find(L'.')) != wstring::npos){
 			// Обрезаем слово до точки
-			tmp = move(word.substr(0, pos));
+			tmp = word.substr(0, pos);
 		// Иначе запоминаем слово как оно есть
 		} else tmp = move(word);
 		// Если слово не пустое
@@ -478,7 +515,7 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 			typeContext.push(tokenType);
 		}
 		// Формируем результат
-		result = move(this->alphabet->convert(text));
+		result = this->alphabet->convert(text);
 	}
 	// Выводим результат
 	return result;
@@ -729,7 +766,7 @@ void anyks::Tokenizer::textToJson(const string & text, function <void (const str
 		// Результирующий объект
 		vector <vector <string>> result;
 		// Выполняем разбивку на токенизацию
-		this->run(text, [&result, &tokens, &callback, this](const wstring & word, const vector <string> & context, const bool reset, const bool end) noexcept {
+		this->run(text, [&result, &tokens, this](const wstring & word, const vector <string> & context, const bool reset, const bool end) noexcept {
 			// Если это сброс контекста
 			if(reset || end){
 				// Формируем новый список токенов

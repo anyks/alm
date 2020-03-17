@@ -78,13 +78,13 @@ void anyks::Uri::parse(const wstring & text) noexcept {
 					// Запоминаем тип параметра
 					result.type = types_t::email;
 					// Запоминаем uri адрес
-					result.uri = move(match[1].str());
+					result.uri = match[1].str();
 					// Запоминаем логин пользователя
-					result.user = move(match[2].str());
+					result.user = match[2].str();
 					// Запоминаем название электронного ящика
-					result.data = move(match[3].str());
+					result.data = match[3].str();
 					// Запоминаем домен верхнего уровня
-					result.domain = move(match[4].str());
+					result.domain = match[4].str();
 				}
 			}
 			// Выводим результат
@@ -119,19 +119,19 @@ void anyks::Uri::parse(const wstring & text) noexcept {
 					// Запоминаем тип параметра
 					result.type = types_t::domain;
 					// Запоминаем uri адрес
-					result.uri = move(match[0].str());
+					result.uri = match[0].str();
 					// Запоминаем название домена
-					result.data = move(match[2].str());
+					result.data = match[2].str();
 					// Запоминаем порт запроса
-					result.port = move(match[4].str());
+					result.port = match[4].str();
 					// Запоминаем путь запроса
-					result.path = move(match[5].str());
+					result.path = match[5].str();
 					// Запоминаем домен верхнего уровня
-					result.domain = move(match[3].str());
+					result.domain = match[3].str();
 					// Запоминаем параметры запроса
-					result.params = move(match[6].str());
+					result.params = match[6].str();
 					// Запоминаем протокол
-					result.protocol = move(match[1].str());
+					result.protocol = match[1].str();
 					// Если протокол не указан
 					if(result.protocol.empty()){
 						// Если домен верхнего уровня не является таковым, очищаем все
@@ -181,34 +181,34 @@ void anyks::Uri::parse(const wstring & text) noexcept {
 				// Если результат найден
 				if(!match.empty()){
 					// Запоминаем uri адрес
-					result.uri = move(match[0].str());
+					result.uri = match[0].str();
 					// Извлекаем полученные данные
-					const wstring & mac = move(match[2].str());
-					const wstring & ip4 = move(match[4].str());
-					const wstring & ip6 = move(match[3].str());
-					const wstring & network = move(match[1].str());
+					const wstring & mac = match[2].str();
+					const wstring & ip4 = match[4].str();
+					const wstring & ip6 = match[3].str();
+					const wstring & network = match[1].str();
 					// Если это MAC адрес
 					if(!mac.empty()){
 						// Запоминаем сам параметр
-						result.data = move(mac);
+						result.data = mac;
 						// Запоминаем тип параметра
 						result.type = types_t::mac;
 					// Если это IPv4 адрес
 					} else if(!ip4.empty()){
 						// Запоминаем сам параметр
-						result.data = move(ip4);
+						result.data = ip4;
 						// Запоминаем тип параметра
 						result.type = types_t::ipv4;
 					// Если это IPv6 адрес
 					} else if(!ip6.empty()) {
 						// Запоминаем сам параметр
-						result.data = move(ip6);
+						result.data = ip6;
 						// Запоминаем тип параметра
 						result.type = types_t::ipv6;
 					// Если это параметры сети
 					} else if(!network.empty()) {
 						// Запоминаем сам параметр
-						result.data = move(network);
+						result.data = network;
 						// Запоминаем тип параметра
 						result.type = types_t::network;
 					}
@@ -220,16 +220,16 @@ void anyks::Uri::parse(const wstring & text) noexcept {
 		// Очищаем результаты предыдущей работы
 		this->clear();
 		// Запрашиваем данные электронной почты
-		data_t email = move(emailFn(text));
+		data_t email = emailFn(text);
 		// Если тип не получен
 		if(email.type == types_t::null){
 			// Запрашиваем данные доменного имени
-			data_t domain = move(domainFn(text));
+			data_t domain = domainFn(text);
 			// Если данные домена не получены или протокол не найден
 			if((domain.type == types_t::null)
 			|| (domain.type == types_t::wrong)){
 				// Выполняем поиск ip адресов
-				data_t ip = move(ipFn(text));
+				data_t ip = ipFn(text);
 				// Если результат получен
 				if(ip.type != types_t::null) this->data = move(ip);
 				// Если же ip адре не получен то возвращаем данные домена

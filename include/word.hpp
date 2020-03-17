@@ -147,7 +147,7 @@ namespace anyks {
 	typedef class Word : public wstring {
 		private:
 			/**
-			 * trim Функция удаления начальных и конечных пробелов
+			 * trim Метод удаления начальных и конечных пробелов
 			 * @param str  строка для обработки
 			 * @param meta метаданные слова
 			 * @param loc  локаль
@@ -188,17 +188,17 @@ namespace anyks {
 				if(!this->empty()){
 					// Очищаем список позиций
 					this->uppers = 0;
-					// Объявляем локаль
-					const locale utf8("en_US.UTF-8");
+					// Получаем длину слова
+					const size_t length = this->length();
 					/**
 					 * setFn Функция установки буквы
 					 * @param index индекс буквы в слове
 					 */
-					auto setFn = [&utf8, this](const size_t index) noexcept {
+					auto setFn = [this](const size_t index = 0) noexcept {
 						// Получаем значение текущей буквы
 						wchar_t * letter = &this->at(index);
 						// Получаем букву в нижнем регистре
-						wchar_t c = tolower(* letter, utf8);
+						wchar_t c = tolower(* letter);
 						// Если буквы не равны
 						if((* letter) != c){
 							// Переводим букву в нижний регистр
@@ -207,12 +207,17 @@ namespace anyks {
 							this->uppers += (1 << index);
 						}
 					};
-					// Переходим по всем буквам слова
-					for(size_t i = 0, j = this->length() - 1; j > ((this->length() / 2) - 1); i++, j--){
-						// Устанавливаем первую букву
-						setFn(i);
-						// Устанавливаем вторую букву
-						if(i != j) setFn(j);
+					// Если длина слова всего один символ
+					if(length == 1) setFn();
+					// Выполняем перебор слова
+					else {
+						// Переходим по всем буквам слова
+						for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+							// Устанавливаем первую букву
+							setFn(i);
+							// Устанавливаем вторую букву
+							if(i != j) setFn(j);
+						}
 					}
 				}
 			}
@@ -223,10 +228,8 @@ namespace anyks {
 			 * @return  результат проверки
 			 */
 			const bool isUpCase(wchar_t c) noexcept {
-				// Объявляем локаль
-				const locale utf8("en_US.UTF-8");
 				// Если буквы не равны значит это верхний регистр
-				return (tolower(c, utf8) != c);
+				return (tolower(c, locale("en_US.UTF-8")) != c);
 			}
 		private:
 			/**
@@ -242,7 +245,7 @@ namespace anyks {
 					// Объявляем конвертер
 					wstring_convert <codecvt_utf8 <wchar_t>> conv;
 					// Выполняем конвертирование в utf-8 строку
-					result = move(conv.to_bytes(str));
+					result = conv.to_bytes(str);
 				}
 				// Выводим результат
 				return result;
@@ -260,7 +263,7 @@ namespace anyks {
 					// Объявляем конвертер
 					wstring_convert <codecvt_utf8 <wchar_t>> conv;
 					// Выполняем конвертирование в utf-8 строку
-					result = move(conv.from_bytes(str));
+					result = conv.from_bytes(str);
 				}
 				// Выводим результат
 				return result;
@@ -271,12 +274,10 @@ namespace anyks {
 			 * @return     строка в нижнем регистре
 			 */
 			const wstring & lower(const wstring & str) const noexcept {
-				// Объявляем локаль
-				const locale utf8("en_US.UTF-8");
 				// Получаем временную строку
 				wstring * tmp = const_cast <wstring *> (&str);
 				// Переходим по всем символам
-				for(auto & c : * tmp) c = tolower(c, utf8);
+				for(auto & c : * tmp) c = tolower(c);
 				// Выводим результат
 				return str;
 			}
@@ -286,12 +287,10 @@ namespace anyks {
 			 * @return     строка в верхнем регистре
 			 */
 			const wstring & upper(const wstring & str) const noexcept {
-				// Объявляем локаль
-				const locale utf8("en_US.UTF-8");
 				// Получаем временную строку
 				wstring * tmp = const_cast <wstring *> (&str);
 				// Переходим по всем символам
-				for(auto & c : * tmp) c = toupper(c, utf8);
+				for(auto & c : * tmp) c = toupper(c);
 				// Выводим результат
 				return str;
 			}
@@ -486,12 +485,21 @@ namespace anyks {
 				const wstring & wstr = word.wreal();
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -514,12 +522,21 @@ namespace anyks {
 				const wstring & wstr = this->wstr(s);
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -542,12 +559,21 @@ namespace anyks {
 				const wstring & wstr = wstring(s);
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -571,12 +597,21 @@ namespace anyks {
 				const ocdc_t & meta = this->getmeta();
 				// Получаем временную строку
 				const wstring & wstr = this->wstr(string(n, c));
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -600,12 +635,21 @@ namespace anyks {
 				const wstring & wstr = wstring(n, c);
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -627,12 +671,21 @@ namespace anyks {
 				const ocdc_t & meta = this->getmeta();
 				// Получаем временную строку
 				const wstring & wstr = this->wstr(str);
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -653,12 +706,21 @@ namespace anyks {
 				size_t uppers = this->uppers;
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = str.length() - 1; j > ((str.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = str.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(str.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(str.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(str.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(str.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(str.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(str);
@@ -682,12 +744,21 @@ namespace anyks {
 				const ocdc_t & meta = this->getmeta();
 				// Получаем временную строку
 				const wstring & wstr = this->wstr(string(s, n));
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -711,12 +782,21 @@ namespace anyks {
 				const wstring & wstr = wstring(s, n);
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -740,12 +820,21 @@ namespace anyks {
 				const ocdc_t & meta = this->getmeta();
 				// Получаем временную строку
 				const wstring & wstr = this->wstr(string(str, subpos, sublen));
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -770,12 +859,21 @@ namespace anyks {
 				const ocdc_t & meta = this->getmeta();
 				// Получаем временную строку
 				const wstring & wstr = wstring(str, subpos, sublen);
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -800,12 +898,21 @@ namespace anyks {
 				const ocdc_t & meta = this->getmeta();
 				// Получаем временную строку
 				const wstring & wstr = wstring(first, last);
-				// Переходим по всем буквам слова
-				for(size_t i = 0, j = wstr.length() - 1; j > ((wstr.length() / 2) - 1); i++, j--){
+				// Получаем длину слова
+				const size_t length = wstr.length();
+				// Если длина слова всего 1 символ
+				if((length == 1) && this->isUpCase(wstr.front())){
 					// Если регистр букв изменился, запоминаем это
-					if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
-					// Устанавливаем регистр для второй буквы
-					if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					uppers += (1 << this->length());
+				// Если слово длиннее 1-го символа
+				} else {
+					// Переходим по всем буквам слова
+					for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+						// Если регистр букв изменился, запоминаем это
+						if(this->isUpCase(wstr.at(i))) uppers += (1 << (this->length() + i));
+						// Устанавливаем регистр для второй буквы
+						if((i != j) && this->isUpCase(wstr.at(j))) uppers += (1 << (this->length() + j));
+					}
 				}
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->append(wstr);
@@ -1087,7 +1194,7 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, const char * s) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем временную строку
 				const wstring & wstr = this->wstr(s);
 				// Запоминаем метаданные
@@ -1111,7 +1218,7 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, const wchar_t * s) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Вставляем строку в нужную позицию
 				tmp.insert(pos, s);
 				// Запоминаем метаданные
@@ -1133,7 +1240,7 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, const Word & str) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Вставляем строку в нужную позицию
 				tmp.insert(pos, str.wreal());
 				// Запоминаем метаданные
@@ -1155,7 +1262,7 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, const string & str) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Вставляем строку в нужную позицию
 				tmp.insert(pos, this->wstr(str));
 				// Запоминаем метаданные
@@ -1177,7 +1284,7 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, const wstring & str) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Вставляем строку в нужную позицию
 				tmp.insert(pos, str);
 				// Запоминаем метаданные
@@ -1200,7 +1307,7 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, size_t n, char c) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Вставляем строку в нужную позицию
@@ -1223,11 +1330,11 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, size_t n, wchar_t c) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
-				// Запоминаем метаданные
-				const ocdc_t & meta = this->getmeta();
+				wstring tmp = this->wreal();
 				// Вставляем строку в нужную позицию
 				tmp.insert(pos, wstring(n, c));
+				// Запоминаем метаданные
+				const ocdc_t & meta = this->getmeta();
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1246,7 +1353,7 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, const char * s, size_t n) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Вставляем строку в нужную позицию
@@ -1269,11 +1376,11 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, const wchar_t * s, size_t n) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
-				// Запоминаем метаданные
-				const ocdc_t & meta = this->getmeta();
+				wstring tmp = this->wreal();
 				// Вставляем строку в нужную позицию
 				tmp.insert(pos, wstring(s, n));
+				// Запоминаем метаданные
+				const ocdc_t & meta = this->getmeta();
 				// Добавляем к строке переданную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1293,7 +1400,7 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, const Word & str, size_t subpos, size_t sublen) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Вставляем строку в нужную позицию
@@ -1317,7 +1424,7 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, const string & str, size_t subpos, size_t sublen) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Вставляем строку в нужную позицию
@@ -1341,7 +1448,7 @@ namespace anyks {
 			 */
 			Word & insert(size_t pos, const wstring & str, size_t subpos, size_t sublen) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Запоминаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Вставляем строку в нужную позицию
@@ -1502,11 +1609,11 @@ namespace anyks {
 			 */
 			Word & erase(size_t pos = 0, size_t len = npos) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
-				// Получаем текущие метаданные
-				const ocdc_t & meta = this->getmeta();
+				wstring tmp = this->wreal();
 				// Удаляем указанные символы
 				tmp.erase(pos, len);
+				// Получаем текущие метаданные
+				const ocdc_t & meta = this->getmeta();
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1524,7 +1631,7 @@ namespace anyks {
 			template <class const_iterator>
 			iterator erase(const_iterator p) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем индекс позиции
@@ -1549,7 +1656,7 @@ namespace anyks {
 			template <class const_iterator>
 			iterator erase(const_iterator first, const_iterator last) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем индекс позиции
@@ -1575,7 +1682,7 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, const char * s) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем временную строку
@@ -1600,13 +1707,11 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, const wchar_t * s) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
-				// Получаем временную строку
-				const wstring & wstr = wstring(s);
+				wstring tmp = this->wreal();
+				// Выполняем замену в слове
+				tmp.replace(pos, len, wstring(s));
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Выполняем замену в слове
-				tmp.replace(pos, len, wstr);
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1625,13 +1730,11 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, const Word & word) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
-				// Получаем временную строку
-				const wstring & wstr = word.wreal();
+				wstring tmp = this->wreal();
+				// Выполняем замену в слове
+				tmp.replace(pos, len, word.wreal());
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Выполняем замену в слове
-				tmp.replace(pos, len, wstr);
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1651,7 +1754,7 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, size_t n, char c) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем временную строку
@@ -1677,13 +1780,11 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, size_t n, wchar_t c) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
-				// Получаем временную строку
-				const wstring & wstr = wstring(n, c);
+				wstring tmp = this->wreal();
+				// Выполняем замену в слове
+				tmp.replace(pos, len, wstring(n, c));
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Выполняем замену в слове
-				tmp.replace(pos, len, wstr);
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1702,7 +1803,7 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, const string & str) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем временную строку
@@ -1727,11 +1828,11 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, const wstring & str) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
-				// Получаем текущие метаданные
-				const ocdc_t & meta = this->getmeta();
+				wstring tmp = this->wreal();
 				// Выполняем замену в слове
 				tmp.replace(pos, len, str);
+				// Получаем текущие метаданные
+				const ocdc_t & meta = this->getmeta();
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1751,13 +1852,11 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, const char * s, size_t n) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Получаем временную строку
-				const wstring & wstr = this->wstr(string(s, n));
 				// Выполняем замену в слове
-				tmp.replace(pos, len, wstr);
+				tmp.replace(pos, len, this->wstr(string(s, n)));
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1777,13 +1876,11 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, const wchar_t * s, size_t n) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
-				// Получаем временную строку
-				const wstring & wstr = wstring(s, n);
+				wstring tmp = this->wreal();
+				// Выполняем замену в слове
+				tmp.replace(pos, len, wstring(s, n));
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Выполняем замену в слове
-				tmp.replace(pos, len, wstr);
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1804,13 +1901,11 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, const string & str, size_t subpos, size_t sublen) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Получаем временную строку
-				const wstring & wstr = this->wstr(string(str, subpos, sublen));
 				// Выполняем замену в слове
-				tmp.replace(pos, len, wstr);
+				tmp.replace(pos, len, this->wstr(string(str, subpos, sublen)));
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1831,13 +1926,11 @@ namespace anyks {
 			 */
 			Word & replace(size_t pos, size_t len, const wstring & str, size_t subpos, size_t sublen) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Получаем временную строку
-				const wstring & wstr = wstring(str, subpos, sublen);
 				// Выполняем замену в слове
-				tmp.replace(pos, len, wstr);
+				tmp.replace(pos, len, wstring(str, subpos, sublen));
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1857,13 +1950,11 @@ namespace anyks {
 			template <class const_iterator>
 			Word & replace(const_iterator i1, const_iterator i2, const char * s) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Получаем временную строку
-				const wstring & wstr = this->wstr(string(s));
 				// Выполняем замену в слове
-				tmp.replace(i1, i2, wstr.c_str());
+				tmp.replace(i1, i2, this->wstr(string(s)).c_str());
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1883,11 +1974,11 @@ namespace anyks {
 			template <class const_iterator>
 			Word & replace(const_iterator i1, const_iterator i2, const wchar_t * s) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
-				// Получаем текущие метаданные
-				const ocdc_t & meta = this->getmeta();
+				wstring tmp = this->wreal();
 				// Выполняем замену в слове
 				tmp.replace(i1, i2, s);
+				// Получаем текущие метаданные
+				const ocdc_t & meta = this->getmeta();
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1908,13 +1999,11 @@ namespace anyks {
 			template <class const_iterator>
 			Word & replace(const_iterator i1, const_iterator i2, size_t n, char c) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Получаем временную строку
-				const wstring & wstr = this->wstr(string(n, c));
 				// Выполняем замену в слове
-				tmp.replace(i1, i2, wstr.c_str());
+				tmp.replace(i1, i2, this->wstr(string(n, c)).c_str());
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -1935,7 +2024,7 @@ namespace anyks {
 			template <class const_iterator>
 			Word & replace(const_iterator i1, const_iterator i2, size_t n, wchar_t c) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Выполняем замену в слове
@@ -1959,7 +2048,7 @@ namespace anyks {
 			template <class const_iterator>
 			Word & replace(const_iterator i1, const_iterator i2, const Word & str) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Выполняем замену в слове
@@ -1983,7 +2072,7 @@ namespace anyks {
 			template <class const_iterator>
 			Word & replace(const_iterator i1, const_iterator i2, const string & str) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Выполняем замену в слове
@@ -2007,7 +2096,7 @@ namespace anyks {
 			template <class const_iterator>
 			Word & replace(const_iterator i1, const_iterator i2, const wstring & str) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Выполняем замену в слове
 				tmp.replace(i1, i2, str.c_str());
 				// Получаем текущие метаданные
@@ -2032,13 +2121,11 @@ namespace anyks {
 			template <class const_iterator>
 			Word & replace(const_iterator i1, const_iterator i2, const char * s, size_t n) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
-				// Получаем временную строку
-				const wstring & wstr = this->wstr(string(s, n));
 				// Выполняем замену в слове
-				tmp.replace(i1, i2, wstr.c_str());
+				tmp.replace(i1, i2, this->wstr(string(s, n)).c_str());
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -2059,7 +2146,7 @@ namespace anyks {
 			template <class const_iterator>
 			Word & replace(const_iterator i1, const_iterator i2, const wchar_t * s, size_t n) noexcept {
 				// Получаем текущее слово
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Выполняем замену в слове
@@ -2083,12 +2170,12 @@ namespace anyks {
 			 */
 			template <class const_iterator, class InputIterator>
 			Word & replace(const_iterator i1, const_iterator i2, InputIterator first, InputIterator last) noexcept {
-				// Получаем текущие метаданные
-				const ocdc_t & meta = this->getmeta();
 				// Получаем временную строку
-				wstring tmp = move(this->wreal());
+				wstring tmp = this->wreal();
 				// Выполняем замену в строке
 				tmp.replace(i1, i2, first, last);
+				// Получаем текущие метаданные
+				const ocdc_t & meta = this->getmeta();
 				// Устанавливаем полученную строку
 				reinterpret_cast <wstring *> (this)->assign(tmp);
 				// Устанавливаем регистры слова
@@ -2105,7 +2192,7 @@ namespace anyks {
 			 */
 			void swap(Word & str) noexcept {
 				// Получаем строку для обмена
-				wstring tmp = move(str.wreal());
+				wstring tmp = str.wreal();
 				// Выполняем обмен данными
 				reinterpret_cast <wstring *> (this)->swap(tmp);
 				// Добавляем метаданные
@@ -2119,7 +2206,7 @@ namespace anyks {
 			 */
 			void swap(string & str) noexcept {
 				// Получаем строку для обмена
-				wstring tmp = move(this->wstr(str));
+				wstring tmp = this->wstr(str);
 				// Получаем текущие метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Выполняем обмен данными
@@ -2518,12 +2605,10 @@ namespace anyks {
 			 * @return получившаяся строка
 			 */
 			Word lower() const noexcept {
-				// Объявляем локаль
-				const locale utf8("en_US.UTF-8");
 				// Получаем строку из текущего слова
-				wstring word = move(this->wstr());
+				wstring word = this->wstr();
 				// Переходим по всем символам
-				for(auto & c : word) c = tolower(c, utf8);
+				for(auto & c : word) c = tolower(c);
 				// Выводим результат
 				return trim(word, this->getmeta());
 			}
@@ -2532,12 +2617,10 @@ namespace anyks {
 			 * @return получившаяся строка
 			 */
 			Word upper() const noexcept {
-				// Объявляем локаль
-				const locale utf8("en_US.UTF-8");
 				// Получаем строку из текущего слова
-				wstring word = move(this->wstr());
+				wstring word = this->wstr();
 				// Переходим по всем символам
-				for(auto & c : word) c = toupper(c, utf8);
+				for(auto & c : word) c = toupper(c);
 				// Выводим результат
 				return trim(word, this->getmeta());
 			}
@@ -2549,7 +2632,7 @@ namespace anyks {
 			 */
 			Word substr(size_t pos = 0, size_t len = npos) const noexcept {
 				// Получаем строку из текущего слова
-				wstring word = move(this->wreal());
+				wstring word = this->wreal();
 				// Выводим результат
 				return Word(word.substr(pos, len), this->getmeta());
 			}
@@ -2560,7 +2643,7 @@ namespace anyks {
 			 */
 			const char * data() const noexcept {
 				// Получаем текущую строку
-				this->current = move(this->real());
+				this->current = this->real();
 				// Выводим результат
 				return this->current.data();
 			}
@@ -2570,7 +2653,7 @@ namespace anyks {
 			 */
 			const char * c_str() const noexcept {
 				// Получаем текущую строку
-				this->current = move(this->real());
+				this->current = this->real();
 				// Выводим результат
 				return this->current.c_str();
 			}
@@ -2583,7 +2666,7 @@ namespace anyks {
 			 */
 			size_t copy(char * s, size_t len, size_t pos = 0) const noexcept {
 				// Получаем текущее значение слова
-				const string & word = move(this->real());
+				const string & word = this->real();
 				// Выполняем копирование данных
 				return word.copy(s, len, pos);
 			}
@@ -2596,7 +2679,7 @@ namespace anyks {
 			 */
 			size_t copy(wchar_t * s, size_t len, size_t pos = 0) const noexcept {
 				// Получаем текущее значение слова
-				const wstring & word = move(this->wreal());
+				const wstring & word = this->wreal();
 				// Выполняем копирование данных
 				return word.copy(s, len, pos);
 			}
@@ -2611,7 +2694,7 @@ namespace anyks {
 				// Если строка не пустая
 				if(!this->empty()){
 					// Выводим результат
-					result = move(this->str(* reinterpret_cast <const wstring *> (this)));
+					result = this->str(* reinterpret_cast <const wstring *> (this));
 				}
 				// Выводим результат
 				return result;
@@ -2642,26 +2725,35 @@ namespace anyks {
 				else {
 					// Буква в слове
 					wchar_t * letter = nullptr;
-					// Объявляем локаль
-					const locale utf8("en_US.UTF-8");
 					// Получаем строку из текущего слова
-					wstring word = move(this->wstr());
-					// Переходим по всем буквам слова
-					for(size_t i = 0, j = word.length() - 1; j > ((word.length() / 2) - 1); i++, j--){
-						// Проверяем существует ли позиция в списке регистров
-						if((i <= 31) && ((1 << i) & this->uppers)){
-							// Получаем букву в слове
-							letter = &word.at(i);
-							// Переводим букву в верхний регистр
-							(* letter) = toupper(* letter, utf8);
-						// Выходим если предел превышен
-						} else if(i > 31) break;
-						// Если и у второй буквы нужно сменить регистр
-						if((i != j) && (j <= 31) && ((1 << j) & this->uppers)){
-							// Получаем букву в слове
-							letter = &word.at(j);
-							// Переводим букву в верхний регистр
-							(* letter) = toupper(* letter, utf8);
+					wstring word = this->wstr();
+					// Получаем длину слова
+					const size_t length = word.length();
+					// Если длина слова всего 1 символ
+					if((length == 1) && (this->uppers == 1)){
+						// Получаем букву в слове
+						letter = &word.at(0);
+						// Переводим букву в верхний регистр
+						(* letter) = toupper(* letter);
+					// Если длина слова длиннее
+					} else {
+						// Переходим по всем буквам слова
+						for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+							// Проверяем существует ли позиция в списке регистров
+							if((i <= 31) && ((1 << i) & this->uppers)){
+								// Получаем букву в слове
+								letter = &word.at(i);
+								// Переводим букву в верхний регистр
+								(* letter) = toupper(* letter);
+							// Выходим если предел превышен
+							} else if(i > 31) break;
+							// Если и у второй буквы нужно сменить регистр
+							if((i != j) && (j <= 31) && ((1 << j) & this->uppers)){
+								// Получаем букву в слове
+								letter = &word.at(j);
+								// Переводим букву в верхний регистр
+								(* letter) = toupper(* letter);
+							}
 						}
 					}
 					// Выводим результат
@@ -2679,26 +2771,35 @@ namespace anyks {
 				else {
 					// Буква в слове
 					wchar_t * letter = nullptr;
-					// Объявляем локаль
-					const locale utf8("en_US.UTF-8");
 					// Получаем строку из текущего слова
-					wstring word = move(this->wstr());
-					// Переходим по всем буквам слова
-					for(size_t i = 0, j = word.length() - 1; j > ((word.length() / 2) - 1); i++, j--){
-						// Проверяем существует ли позиция в списке регистров
-						if((i <= 31) && ((1 << i) & this->uppers)){
-							// Получаем букву в слове
-							letter = &word.at(i);
-							// Переводим букву в верхний регистр
-							(* letter) = toupper(* letter, utf8);
-						// Выходим если предел превышен
-						} else if(i > 31) break;
-						// Если и у второй буквы нужно сменить регистр
-						if((i != j) && (j <= 31) && ((1 << j) & this->uppers)){
-							// Получаем букву в слове
-							letter = &word.at(j);
-							// Переводим букву в верхний регистр
-							(* letter) = toupper(* letter, utf8);
+					wstring word = this->wstr();
+					// Получаем длину слова
+					const size_t length = word.length();
+					// Если длина слова всего 1 символ
+					if((length == 1) && (this->uppers == 1)){
+						// Получаем букву в слове
+						letter = &word.at(0);
+						// Переводим букву в верхний регистр
+						(* letter) = toupper(* letter);
+					// Если длина слова длиннее
+					} else {
+						// Переходим по всем буквам слова
+						for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+							// Проверяем существует ли позиция в списке регистров
+							if((i <= 31) && ((1 << i) & this->uppers)){
+								// Получаем букву в слове
+								letter = &word.at(i);
+								// Переводим букву в верхний регистр
+								(* letter) = toupper(* letter);
+							// Выходим если предел превышен
+							} else if(i > 31) break;
+							// Если и у второй буквы нужно сменить регистр
+							if((i != j) && (j <= 31) && ((1 << j) & this->uppers)){
+								// Получаем букву в слове
+								letter = &word.at(j);
+								// Переводим букву в верхний регистр
+								(* letter) = toupper(* letter);
+							}
 						}
 					}
 					// Выводим результат
@@ -2756,7 +2857,7 @@ namespace anyks {
 				// Получаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем строку слова
-				string word = move(this->real());
+				string word = this->real();
 				// Добавляем к слову символ
 				word.append(1, c);
 				// Выводим результат
@@ -2771,7 +2872,7 @@ namespace anyks {
 				// Получаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем строку слова
-				wstring word = move(this->wreal());
+				wstring word = this->wreal();
 				// Добавляем к слову символ
 				word.append(1, c);
 				// Выводим результат
@@ -2786,7 +2887,7 @@ namespace anyks {
 				// Получаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем строку слова
-				string word = move(this->real());
+				string word = this->real();
 				// Добавляем к слову символ
 				word.append(s);
 				// Выводим результат
@@ -2801,7 +2902,7 @@ namespace anyks {
 				// Получаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем строку слова
-				wstring word = move(this->wreal());
+				wstring word = this->wreal();
 				// Добавляем к слову символ
 				word.append(s);
 				// Выводим результат
@@ -2829,7 +2930,7 @@ namespace anyks {
 				// Получаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем строку слова
-				string str = move(this->real());
+				string str = this->real();
 				// Добавляем к слову символ
 				str.append(word);
 				// Выводим результат
@@ -2844,7 +2945,7 @@ namespace anyks {
 				// Получаем метаданные
 				const ocdc_t & meta = this->getmeta();
 				// Получаем строку слова
-				wstring str = move(this->wreal());
+				wstring str = this->wreal();
 				// Добавляем к слову символ
 				str.append(word);
 				// Выводим результат

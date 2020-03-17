@@ -55,7 +55,7 @@ const char * anyks::Env::get(const string & name) const noexcept {
 		// Запрашиваем данные из переменной окружения
 		else {
 			// Извлекаем данные переменной окружения
-			this->variable = move(this->env(name));
+			this->variable = this->env(name);
 			// Если переменная окружения получена
 			if(!this->variable.empty()) result = this->variable.c_str();
 		}
@@ -112,7 +112,7 @@ void anyks::Env::prefixEnv(const string & prefix) noexcept {
 	// Если префикс передан, устанавливаем его
 	if(!prefix.empty() && (this->alphabet != nullptr)){
 		// Устанавливаем префикс переменной
-		this->prefix = move(this->alphabet->toUpper(prefix));
+		this->prefix = this->alphabet->toUpper(prefix);
 	}
 }
 /**
@@ -129,10 +129,10 @@ void anyks::Env::setAlphabet(const alphabet_t * alphabet) noexcept {
  * @param count количество переменных окружения
  */
 void anyks::Env::read(const char * args[], const u_short count) noexcept {
+	// Позиция найденного значения
+	size_t pos = 0;
 	// Требуется прочитать значение
 	bool isValue = false;
-	// Позиция найденного значения
-	size_t pos = 0, loc = 0;
 	// Строка аргумента, ключ и занчение
 	string arg = "", key = "", val = "";
 	// Переходим по массиву аргументов
@@ -148,22 +148,22 @@ void anyks::Env::read(const char * args[], const u_short count) noexcept {
 			// Если знак равенства найден
 			if(pos != string::npos){
 				// Получаем ключ
-				key = move(arg.substr(2, pos - 2));
+				key = arg.substr(2, pos - 2);
 				// Получаем значение
-				val = move(arg.substr(pos + 1, arg.length() - (pos + 1)));
+				val = arg.substr(pos + 1, arg.length() - (pos + 1));
 			// Если знак равенства не найден
 			} else {
 				// Очищаем значение
 				val.clear();
 				// Получаем ключ
-				key = move(arg.substr(2, arg.length() - 2));
+				key = arg.substr(2, arg.length() - 2);
 			}
 			// Добавляем полученные данные в список переменных
 			if(!key.empty()) this->data.emplace(key, val);
 		// Если это относительное значение переменной
 		} else if(arg.front() == '-') {
 			// Получаем ключ
-			key = move(arg.substr(1, arg.length() - 1));
+			key = arg.substr(1, arg.length() - 1);
 			// Устанавливаем полученное значение
 			this->data.emplace(key, "-yes-");
 			// Устанавливаем ожидание значения
