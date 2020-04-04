@@ -21,6 +21,7 @@
 /**
  * Наши модули
  */
+#include <alm.hpp>
 #include <aspl.hpp>
 #include <fsys.hpp>
 #include <toolkit.hpp>
@@ -82,6 +83,8 @@ namespace anyks {
 			// Адрес файла словаря
 			string filename = "";
 		private:
+			// Объект языковой модели
+			alm_t * alm = nullptr;
 			// Объект бинарного контейнера
 			aspl_t * aspl = nullptr;
 			// Объект тулкита
@@ -107,11 +110,17 @@ namespace anyks {
 			 */
 			const bool write(function <void (const u_short)> status = nullptr) noexcept;
 			/**
-			 * read Метод чтения данных словаря из файла
+			 * readAlm Метод чтения данных словаря из файла в объект toolkit
 			 * @param status статус расёта
 			 * @param info   выводить только информацию о словаре
 			 */
-			const bool read(function <void (const u_short)> status = nullptr, const bool info = false) noexcept;
+			const bool readAlm(function <void (const u_short)> status = nullptr, const bool info = false) noexcept;
+			/**
+			 * readToolkit Метод чтения данных словаря из файла в объект toolkit
+			 * @param status статус расёта
+			 * @param info   выводить только информацию о словаре
+			 */
+			const bool readToolkit(function <void (const u_short)> status = nullptr, const bool info = false) noexcept;
 		public:
 			/**
 			 * Метод инициализации
@@ -125,6 +134,11 @@ namespace anyks {
 			 * info Метод вывода инормационных данных словаря
 			 */
 			void info() const noexcept;
+			/**
+			 * setAlm Метод установки объекта языковой модели
+			 * @param alm объект языковой модели для установки
+			 */
+			void setAlm(alm_t * alm) noexcept;
 			/**
 			 * setMeta Метод установки метаданных в формате json
 			 * @param meta метаданные в формате json
@@ -170,6 +184,15 @@ namespace anyks {
 			 * AbLM Конструктор
 			 */
 			AbLM() noexcept {};
+			/**
+			 * AbLM Конструктор
+			 * @param filename  адрес файла словаря
+			 * @param alm       объект языковой модели для установки
+			 * @param alphabet  объект словаря для установки
+			 * @param tokenizer объект токенизатора
+			 * @param logifle   адрес файла для вывода отладочной информации
+			 */
+			AbLM(const string & filename, alm_t * alm, alphabet_t * alphabet, tokenizer_t * tokenizer, const char * logfile) noexcept;
 			/**
 			 * AbLM Конструктор
 			 * @param filename  адрес файла словаря

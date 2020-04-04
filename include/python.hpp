@@ -24,6 +24,7 @@
 #include <idw.hpp>
 #include <fsys.hpp>
 #include <alphabet.hpp>
+#include <tokenizer.hpp>
 
 using namespace std;
 

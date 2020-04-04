@@ -1,5 +1,18 @@
 # Change Log
 
+## 2.0.0 New methods and bug fixes
+### Mthods
+- **ppl** - perplexity calculation method
+- **checktext** - text validation method
+- **fixcase** - words case correction method
+- **counts** - method counts of ngrams in the text
+### Params
+- ngram size for the counts method
+- text to be processed as a string
+- file address *.txt for texts export
+- file address *.txt or dir path for texts import
+- flag arpa file loading without pre-processing the words
+
 ## 1.0.3 Multiprocessor training and bug fixes
 - flag to performing data segmentation during training
 - flag to clearing temporary data during training

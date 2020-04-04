@@ -102,6 +102,14 @@ namespace anyks {
 			const set <size_t> & getAbbrs() const noexcept;
 		public:
 			/**
+			 * fti Метод удаления дробной части числа
+			 * @param  num   число для обработки
+			 * @param  count количество символов после запятой
+			 * @return       число без дробной части
+			 */
+			const size_t fti(const double num, const u_short count = 0) const noexcept;
+		public:
+			/**
 			 * idw Метод извлечения идентификатора слова
 			 * @param  word слово для получения идентификатора
 			 * @return      идентификатор слова
@@ -166,6 +174,12 @@ namespace anyks {
 			 * @param callback функция обратного вызова, на каждой итерации
 			 */
 			void run(const string & text, function <const bool (const wstring &, const vector <string> &, const bool, const bool)> callback) const noexcept;
+			/**
+			 * run Метод разбивки текста на токены
+			 * @param text     входной текст для обработки
+			 * @param callback функция обратного вызова, на каждой итерации
+			 */
+			void run(const wstring & text, function <const bool (const wstring &, const vector <string> &, const bool, const bool)> callback) const noexcept;
 		public:
 			/**
 			 * Tokenizer Конструктор

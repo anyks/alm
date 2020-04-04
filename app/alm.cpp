@@ -7,6 +7,7 @@
  */
 
 #include <env.hpp>
+#include <alm.hpp>
 #include <ablm.hpp>
 #include <toolkit.hpp>
 #include <progress.hpp>
@@ -38,7 +39,7 @@ void version(const char * address) noexcept {
 	// Определяем адрес приложения
 	string appname = realpath(address, nullptr);
 	// Ищем каталог
-	if((pos = appname.rfind("/")) != string::npos) appname = move(appname.substr(0, pos));
+	if((pos = appname.rfind("/")) != string::npos) appname = appname.substr(0, pos);
 	// Выводим версию приложения
 	printf(
 		"\r\n%s %s (built: %s %s)\r\n"
@@ -68,14 +69,18 @@ void help() noexcept {
 	const string msg = "\r\n\x1B[32m\x1B[1musage:\x1B[0m alm [-V | --version] [-h | --help] "
 	"[-alphabet <value> | --alphabet=<value>] [<args>]\r\n\r\n\r\n"
 	"\x1B[34m\x1B[1mmethods:\x1B[0m\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m tokens: text tokenization method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m vprune: vocabulary pruning method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m aprune: language model pruning method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m train:  language model training method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m sweep:  high backoff n-gram removal method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m info:   binary dictionary information method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m repair: broken language model recovery method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m modify: method for modifying a language model\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mppl:\x1B[0m perplexity calculation method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mtokens:\x1B[0m text tokenization method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mvprune:\x1B[0m vocabulary pruning method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1maprune:\x1B[0m language model pruning method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mtrain:\x1B[0m language model training method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mfixcase:\x1B[0m words case correction method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mchecktext:\x1B[0m text validation method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1msweep:\x1B[0m high backoff n-gram removal method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1minfo:\x1B[0m binary dictionary information method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mcounts:\x1B[0m method counts of ngrams in the text\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mrepair:\x1B[0m broken language model recovery method\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mmodify:\x1B[0m method for modifying a language model\r\n"
 	"  \x1B[1m-\x1B[0m (emplace | remove | change | replace)\r\n\r\n\r\n"
 	"\x1B[34m\x1B[1mflags:\x1B[0m\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m case-insensitive flag:                                                        [-lower-case | --lower-case]\r\n\r\n"
@@ -85,10 +90,13 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to consider words from the white list only:                     [-only-good | --only-good]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to use interpolation in estimating:                             [-interpolate | --interpolate]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing accounting of all collected n-grams:                            [-all-grams | --all-grams]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag arpa file loading without pre-processing the words:                      [-confidence | --confidence]\r\n\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing the use of words consisting of mixed dictionaries:              [-mixed-dicts | --mixed-dicts]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag to reset the frequency of an unknown word:                               [-reset-unk | --reset-unk]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag to clearing temporary data during training:                              [-train-autoclean | --train-autoclean]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag to save intermediate data during training:                               [-train-intermed | --train-intermed]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag to performing data segmentation during training:                         [-train-segments | --train-segments]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag allowing need to change grams, after calculating:                        [-kneserney-prepares | --kneserney-prepares]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag allowing modification of the number of already changed minor n-grams:    [-kneserney-modified | --kneserney-modified]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of all data:                                 [-w-bin-all | --w-bin-all]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of users tokens:                             [-w-bin-utokens | --w-bin-utokens]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of domain zones:                             [-w-bin-domzones | --w-bin-domzones]\r\n\r\n"
@@ -110,7 +118,9 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m text file training corpus:                          [-corpus <value> | --corpus=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m extension files corpus:                             [-ext <value> | --ext=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m directory path with text corpus:                    [-path <value> | --path=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m text to be processed as a string:                   [-text <value> | --text=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m number of threads for data collection:              [-threads <value> | --threads=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt for texts export:                [-w-text <value> | --w-text=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt text for tokens export:          [-w-tokens-text <value> | --w-tokens-text=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.json text for tokens export:         [-w-tokens-json <value> | --w-tokens-json=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt text for tokens import:          [-r-tokens-text <value> | --r-tokens-text=<value>]\r\n\r\n"
@@ -123,17 +133,14 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa for export:                     [-w-arpa <value> | --w-arpa=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.vocab for export:                    [-w-vocab <value> | --w-vocab=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams for export:                   [-w-ngram <value> | --w-ngram=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt or dir path for texts import:    [-r-text <value> | --r-text=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt or dir path for words import:    [-r-words <value> | --r-words=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m binary file address *.alm for import:               [-r-bin <value> | --r-bin=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.json meta for import:                [-r-bin-meta <value> | --r-bin-meta=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.map for import:                      [-r-map <value> | --r-map=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.map files:                    [-r-maps <value> | --r-maps=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.vocab for import:                    [-r-vocab <value> | --r-vocab=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.vocab files:                  [-r-vocabs <value> | --r-vocabs=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams for import:                   [-r-ngram <value> | --r-ngram=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.ngrams files:                 [-r-ngrams <value> | --r-ngrams=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa for import:                     [-r-arpa <value> | --r-arpa=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with *.arpa files:                   [-r-arpas <value> | --r-arpas=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.map or dir path for import:          [-r-map <value> | --r-map=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.vocab or dir path for import:        [-r-vocab <value> | --r-vocab=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams or dir path for import:       [-r-ngram <value> | --r-ngram=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa or dir path for import:         [-r-arpa <value> | --r-arpa=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address abbreviations for import:              [-r-abbrs <value> | --r-abbrs=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address domain zones for import:               [-r-domain-zones <value> | --r-domain-zones=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address for restore mixed words for import:    [-r-mix-restwords <value> | --r-mix-restwords=<value>]\r\n\r\n"
@@ -144,6 +151,8 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m modification flag for modify method:                [-modify <value> | --modify=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m delta size for smoothing by addsmooth algorithm:    [-delta <value> | --delta=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m discount size for smoothing by cdiscount algorithm: [-discount <value> | --discount=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m ngram size for the counts method:                   [-ngrams <value> | --ngrams=<value>]\r\n"
+	"  \x1B[1m-\x1B[0m (bigram | trigram)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m list of tokens to disable:                          [-tokens-disable <value1|value2|...> | --tokens-disable=<value1|value2|...>]\r\n"
 	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m list of tokens for identification as <unk>:         [-tokens-unknown <value1|value2|...> | --tokens-unknown=<value1|value2|...>]\r\n"
@@ -153,7 +162,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m debug mode:                                         [-debug <value> | --debug=<value>]\r\n"
 	"  \x1B[1m-\x1B[0m (0 - off | 1 - progress | 2 - console)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m method application:                                 [-method <value> | --method=<value>]\r\n"
-	"  \x1B[1m-\x1B[0m (train | repair | modify | sweep | vprune | aprune | tokens | info)\r\n\r\n"
+	"  \x1B[1m-\x1B[0m (ppl | train | repair | modify | sweep | vprune | aprune | tokens | counts | fixcase | checktext | info)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m smoothing algorithm:                                [-smoothing <value> | --smoothing=<value>]\r\n"
 	"  \x1B[1m-\x1B[0m (goodturing | cdiscount | ndiscount | addsmooth | wittenbell | kneserney | mkneserney)\r\n\r\n";
 	// Выводим сообщение справки
@@ -242,8 +251,6 @@ int main(int argc, char * argv[]) noexcept {
 		}
 		// Если алфавит получен
 		if(!binDictFile.empty() || !letters.empty()){
-			// Дополнительный коэффициент алгоритма сглаживания
-			float mod = 0.0f;
 			// Режим отладки и общий размер n-граммы
 			u_short debug = 0, order = 1;
 			// Устанавливаем символы алфавита
@@ -257,8 +264,17 @@ int main(int argc, char * argv[]) noexcept {
 			}
 			// Если общий размер n-граммы получен
 			if((value = env.get("size")) != nullptr) order = stoi(value);
+			// Проверяем требуется ли указывать тип сглаживания
+			const bool noSmoothing = (
+				!binDictFile.empty() ||
+				env.is("method", "ppl") ||
+				env.is("method", "tokens") ||
+				env.is("method", "counts") ||
+				env.is("method", "fixcase") ||
+				env.is("method", "checktext")
+			);
 			// Если бинарный файл не указан
-			if(binDictFile.empty() && !env.is("method", "tokens")){
+			if(!noSmoothing){
 				// Если алгоритм получен
 				if(env.is("smoothing") && (string(env.get("smoothing")).compare("-yes-") != 0)){
 					// Проверяем правильность введённого алгоритма сглаживания
@@ -277,14 +293,18 @@ int main(int argc, char * argv[]) noexcept {
 			// Если основной метод работы получен
 			if(env.is("method") && (string(env.get("method")).compare("-yes-") != 0)){
 				// Проверяем правильность введённого основного метода работы
-				if(!env.is("method", "info") &&
+				if(!env.is("method", "ppl") &&
+				!env.is("method", "info") &&
 				!env.is("method", "sweep") &&
 				!env.is("method", "train") &&
 				!env.is("method", "tokens") &&
 				!env.is("method", "repair") &&
 				!env.is("method", "modify") &&
 				!env.is("method", "aprune") &&
-				!env.is("method", "vprune"))
+				!env.is("method", "vprune") &&
+				!env.is("method", "counts") &&
+				!env.is("method", "fixcase") &&
+				!env.is("method", "checktext"))
 					// Выводим сообщение в консоль
 					print(alphabet.format("the method name \"%s\" is bad", env.get("method")), env.get("log"));
 			// Сообщаем что метод не указан
@@ -292,21 +312,757 @@ int main(int argc, char * argv[]) noexcept {
 			// Если ни один файл для сохранения не передан, выходим
 			if(!env.is("w-map") && !env.is("w-arpa") &&
 			!env.is("w-vocab") && !env.is("w-ngram") &&
-			!env.is("w-bin") && !env.is("method", "info") &&
-			!env.is("method", "tokens")){
+			!env.is("w-bin") && !env.is("method", "ppl") &&
+			!env.is("method", "info") && !env.is("method", "counts") &&
+			!env.is("method", "tokens") && !env.is("method", "fixcase") &&
+			!env.is("method", "checktext")){
 				// Выводим сообщение и выходим из приложения
 				print("file address to save is not specified", env.get("log"));
-			}
-			// Если алгоритм сглаживания ConstDiscount или AddSmooth, запрашиваем дополнительные параметры
-			if(env.is("smoothing", "cdiscount") || env.is("smoothing", "addsmooth")){
-				// Считываем флаг дополнительной модификации
-				value = (env.is("smoothing", "cdiscount") ? env.get("discount") : env.get("delta"));
-				// Если значение получено
-				if(value != nullptr) mod = stof(value);
 			}
 			/** Начало работы основных методов **/
 			// Создаём токенизатор
 			tokenizer_t tokenizer(&alphabet);
+			// Если это работа с уже собранной языковой моделью
+			if(env.is("method", "ppl") || env.is("method", "counts") || env.is("method", "fixcase") || env.is("method", "checktext")){
+				// Создаём обхъект языковой модели
+				alm_t alm(&alphabet, &tokenizer);
+				// Устанавливаем адрес файла для логирования
+				alm.setLogfile(env.get("log"));
+				// Устанавливаем режим отладки
+				if(debug == 2) alm.setOption(alm_t::options_t::debug);
+				// Разрешаем детектировать слова состоящее из смешанных словарей
+				if(env.is("mixed-dicts")) alm.setOption(alm_t::options_t::mixdicts);
+				// Разрешаем выполнять загрузку содержимого arpa, в том виде, в каком она есть. Без перетокенизации содержимого.
+				if(env.is("confidence")) alm.setOption(alm_t::options_t::confidence);
+				// Если нужно установить все токены для идентифицирования как <unk>
+				if(env.is("tokens-all-unknown")) alm.setAllTokenUnknown();
+				// Если нужно установить все токены как не идентифицируемые
+				if(env.is("tokens-all-disable")) alm.setAllTokenDisable();
+				// Если неизвестное слово получено
+				if((value = env.get("unknown-word")) != nullptr) alm.setUnknown(value);
+				// Если адрес скрипта получен
+				if((value = env.get("word-script")) != nullptr) alm.setWordScript(value);
+				// Если нужно установить список токенов которые нужно идентифицировать как <unk>
+				if((value = env.get("tokens-unknown")) != nullptr) alm.setTokenUnknown(value);
+				// Если нужно установить список не идентифицируемых токенов
+				if((value = env.get("tokens-disable")) != nullptr) alm.setTokenDisable(value);
+				// Если адрес файла чёрного списка получен
+				if((value = env.get("badwords")) != nullptr){
+					// Чёрный список слов
+					vector <string> badwords;
+					// Выполняем считывание всех слов для чёрного списка
+					fsys_t::rfile(value, [&badwords](const string & line, const uintmax_t fileSize) noexcept {
+						// Если текст получен
+						if(!line.empty()) badwords.push_back(line);
+					});
+					// Если чёрный список получен, устанавливаем его
+					if(!badwords.empty()) alm.setBadwords(badwords);
+				}
+				// Если адрес файла белого списка получен
+				if((value = env.get("goodwords")) != nullptr){
+					// Белый список слов
+					vector <string> goodwords;
+					// Выполняем считывание всех слов для белого списка
+					fsys_t::rfile(value, [&goodwords](const string & line, const uintmax_t fileSize) noexcept {
+						// Если текст получен
+						if(!line.empty()) goodwords.push_back(line);
+					});
+					// Если белый список получен, устанавливаем его
+					if(!goodwords.empty()) alm.setGoodwords(goodwords);
+				}
+				// Если пользовательские токены получены
+				if(((value = env.get("utokens")) != nullptr) && (string(value).compare("-yes-") != 0)){
+					// Список пользовательских токенов
+					vector <wstring> tokens;
+					// Выполняем извлечение пользовательских токенов
+					alphabet.split(value, "|", tokens);
+					// Если список токенов получен
+					if(!tokens.empty()){
+						// Если адрес скрипта получен
+						if((value = env.get("utoken-script")) != nullptr){
+							// Устанавливаем адрес скрипта
+							alm.setUserTokenScript(value);
+							// Переходим по всему списку токенов
+							for(auto & item : tokens) alm.setUserToken(alphabet.convert(item));
+						}
+					}
+				}
+				// Активируем питоновские скрипты
+				alm.initPython();
+				// Если нужно использовать бинарный контейнер
+				if(!binDictFile.empty()){
+					// Создаём бинарный контейнер
+					ablm_t ablm(binDictFile, &alm, &alphabet, &tokenizer, env.get("log"));
+					// Если метаданные переданы
+					if(((value = env.get("r-bin-meta")) != nullptr) && fsys_t::isfile(value)){
+						// Данные в формате json
+						string data = "";
+						// Выполняем считывание всех строк текста
+						fsys_t::rfile(realpath(value, nullptr), [&data](const string & line, const uintmax_t fileSize) noexcept {
+							// Добавляем полученные строки
+							data.append(line);
+						});
+						// Если скрипт получен
+						if(!data.empty()) ablm.setMeta(json::parse(data));
+					}
+					// Устанавливаем флаг отладки
+					if(debug == 1) ablm.setFlag(ablm_t::flag_t::debug);
+					// Выполняем инициализацию словаря
+					ablm.init();
+					// Если отладка включена, выводим индикатор загрузки
+					if(debug > 0){
+						// Устанавливаем заголовки прогресс-бара
+						pss.title("Read dictionary", "Read dictionary is done");
+						// Выводим индикатор прогресс-бара
+						switch(debug){
+							case 1: pss.update(); break;
+							case 2: pss.status(); break;
+						}
+					}
+					// Выполняем чтение бинарных данных
+					ablm.readAlm([debug, &pss](const u_short status) noexcept {
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(status); break;
+							case 2: pss.status(status); break;
+						}
+					});
+				// Если требуется загрузить arpa
+				} else if(((value = env.get("r-arpa")) != nullptr) && fsys_t::isfile(value)){
+					// Запоминаем адрес файла
+					const string filename = realpath(value, nullptr);
+					// Если отладка включена, выводим индикатор загрузки
+					if(debug > 0){
+						// Очищаем предыдущий прогресс-бар
+						pss.clear();
+						// Устанавливаем название файла
+						pss.description(filename);
+						// Устанавливаем заголовки прогресс-бара
+						pss.title("Read arpa file", "Read arpa file is done");
+						// Выводим индикатор прогресс-бара
+						switch(debug){
+							case 1: pss.update(); break;
+							case 2: pss.status(); break;
+						}
+					}
+					// Выполняем чтение arpa
+					alm.read(filename, [debug, &pss](const u_short status) noexcept {
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(status); break;
+							case 2: pss.status(status); break;
+						}
+					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
+				// Если arpa файл не указан
+				} else print("language model file address is empty", env.get("log"));
+				// Если это расчёт перплексии
+				if(env.is("method", "ppl")){
+					// Если текст передан
+					if((value = env.get("text")) != nullptr){
+						// Выполняем расчёт перплексии
+						auto ppl = alm.perplexity(value);
+						// Если отладка отключена
+						if(debug < 2){
+							// Выводим текст перплексии
+							// printf("Text: %s\r\n", value);
+							// Выводим сообщение отладки - количество слов
+							printf("%zu sentences, %zu words, %zu OOVs\r\n", ppl.sentences, ppl.words, ppl.oovs);
+							// Выводим сообщение отладки - результатов расчёта
+							printf("%zu zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\r\n\r\n", ppl.zeroprobs, ppl.logprob, ppl.ppl, ppl.ppl1);
+						}
+					// Если адрес текстового файла или каталог передан
+					} else if(((value = env.get("r-text")) != nullptr) && (fsys_t::isfile(value) || fsys_t::isdir(value))){
+						// Запоминаем адрес файла
+						const string path = realpath(value, nullptr);
+						// Расширение файлов текстового корпуса
+						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
+						// Если отладка включена, выводим индикатор загрузки
+						if(debug > 0){
+							// Очищаем предыдущий прогресс-бар
+							pss.clear();
+							// Устанавливаем название файла
+							pss.description(path);
+							// Устанавливаем заголовки прогресс-бара
+							pss.title("Calculation perplexity", "Calculation perplexity is done");
+							// Выводим индикатор прогресс-бара
+							switch(debug){
+								case 1: pss.update(); break;
+								case 2: pss.status(); break;
+							}
+						}
+						// Выполняем расчёт перплексии
+						auto ppl = alm.pplByFiles(path, [debug, &pss](const u_short status){
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(status); break;
+								case 2: pss.status(status); break;
+							}
+						}, ext);
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
+						}
+						// Если отладка отключена
+						if(debug < 2){
+							// Выводим сообщение отладки - количество слов
+							printf("%zu sentences, %zu words, %zu OOVs\r\n", ppl.sentences, ppl.words, ppl.oovs);
+							// Выводим сообщение отладки - результатов расчёта
+							printf("%zu zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\r\n\r\n", ppl.zeroprobs, ppl.logprob, ppl.ppl, ppl.ppl1);
+						}
+					// Сообщаем что текст не указан
+					} else print("text is empty", env.get("log"));
+				// Если это метод проверки текста
+				} else if(env.is("method", "checktext")){
+					// Если текст передан
+					if((value = env.get("text")) != nullptr){
+						// Выполняем првоерку текста
+						auto res = alm.check(value);
+						// Выводим результат
+						printf("%s | %s\r\n\r\n", value, (res.first ? "YES" : "NO"));
+					// Если адрес текстового файла или каталог передан
+					} else if(((value = env.get("r-text")) != nullptr) && fsys_t::isfile(value) && env.is("w-text")){
+						// Запоминаем адрес файла
+						const string filename = realpath(value, nullptr);
+						// Открываем файл на запись
+						ofstream file(env.get("w-text"), ios::binary);
+						// Если файл открыт
+						if(file.is_open()){
+							// Статус и процентное соотношение
+							u_short status = 0, rate = 100;
+							// Общий размер полученных данных
+							size_t size = 0, count = 0, exists = 0;
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем название файла
+								pss.description(filename);
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Read text file", "Read text file is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
+							}
+							// Выполняем считывание всех строк текста
+							fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+								// Если текст получен
+								if(!text.empty()){
+									// Считаем количество обработанных предложений
+									count++;
+									// Выполняем првоерку текста
+									auto res = alm.check(text);
+									// Если слово найдено считаем количество предложений
+									if(res.first) exists++;
+									// Выводим результат
+									if(debug == 2) printf("%zu | %s | %s\r\n\r\n", count, text.c_str(), (res.first ? "YES" : "NO"));
+									// Формируем текст для записи в файл
+									const string & str = alphabet.format("%zu | %s | %s\r\n", count, text.c_str(), (res.first ? "YES" : "NO"));
+									// Если строка получена, записываем в файл
+									if(!str.empty()) file.write(str.data(), str.size());
+								}
+								// Если отладка включена
+								if(debug > 0){
+									// Общий полученный размер данных
+									size += text.size();
+									// Подсчитываем статус выполнения
+									status = u_short(size / float(fileSize) * 100.0f);
+									// Если процентное соотношение изменилось
+									if(rate != status){
+										// Запоминаем текущее процентное соотношение
+										rate = status;
+										// Отображаем ход процесса
+										switch(debug){
+											case 1: pss.update(status); break;
+											case 2: pss.status(status); break;
+										}
+									}
+								}
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+							// Выводим сообщение об общем количестве обработанных предложений
+							printf("All texts: %zu\r\nExists texts: %zu\r\nNot exists texts: %zu\r\n\r\n", count, exists, count - exists);
+							// Формируем текст для записи в файл
+							const string & str = alphabet.format("\r\nAll texts: %zu\r\nExists texts: %zu\r\nNot exists texts: %zu\r\n", count, exists, count - exists);
+							// Если строка получена, записываем в файл
+							if(!str.empty()) file.write(str.data(), str.size());
+							// Закрываем файл
+							file.close();
+						}
+					// Если адрес текстового файла или каталог передан
+					} else if(((value = env.get("r-text")) != nullptr) && fsys_t::isdir(value) && env.is("w-text")){
+						// Запоминаем каталога с файлами
+						const string path = realpath(value, nullptr);
+						// Расширение файлов текстового корпуса
+						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
+						// Открываем файл на запись
+						ofstream file(env.get("w-text"), ios::binary);
+						// Если файл открыт
+						if(file.is_open()){
+							// Статус и процентное соотношение
+							u_short status = 0, rate = 100;
+							// Общий размер полученных данных
+							size_t size = 0, count = 0, exists = 0;
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Read text file", "Read text file is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
+							}
+							// Переходим по всему списку файлов в каталоге
+							fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
+								// Устанавливаем название файла
+								pss.description(filename);
+								// Выполняем считывание всех строк текста
+								fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+									// Если текст получен
+									if(!text.empty()){
+										// Считаем количество обработанных предложений
+										count++;
+										// Выполняем првоерку текста
+										auto res = alm.check(text);
+										// Если слово найдено считаем количество предложений
+										if(res.first) exists++;
+										// Выводим результат
+										if(debug == 2) printf("%zu | %s | %s\r\n\r\n", count, text.c_str(), (res.first ? "YES" : "NO"));
+										// Формируем текст для записи в файл
+										const string & str = alphabet.format("%zu | %s | %s\r\n", count, text.c_str(), (res.first ? "YES" : "NO"));
+										// Если строка получена, записываем в файл
+										if(!str.empty()) file.write(str.data(), str.size());
+									}
+									// Если отладка включена
+									if(debug > 0){
+										// Общий полученный размер данных
+										size += text.size();
+										// Подсчитываем статус выполнения
+										status = u_short(size / float(dirSize) * 100.0f);
+										// Если процентное соотношение изменилось
+										if(rate != status){
+											// Запоминаем текущее процентное соотношение
+											rate = status;
+											// Отображаем ход процесса
+											switch(debug){
+												case 1: pss.update(status); break;
+												case 2: pss.status(status); break;
+											}
+										}
+									}
+								});
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+							// Выводим сообщение об общем количестве обработанных предложений
+							printf("All texts: %zu\r\nExists texts: %zu\r\nNot exists texts: %zu\r\n\r\n", count, exists, count - exists);
+							// Формируем текст для записи в файл
+							const string & str = alphabet.format("\r\nAll texts: %zu\r\nExists texts: %zu\r\nNot exists texts: %zu\r\n", count, exists, count - exists);
+							// Если строка получена, записываем в файл
+							if(!str.empty()) file.write(str.data(), str.size());
+							// Закрываем файл
+							file.close();
+						}
+					// Сообщаем что текст не указан
+					} else print("text is empty", env.get("log"));
+				// Если это метод исправления регистров слов
+				} else if(env.is("method", "fixcase")){
+					// Если текст передан
+					if((value = env.get("text")) != nullptr){
+						// Выводим результат
+						printf("%s\r\n\r\n", alm.fixUppers(value).c_str());
+					// Если адрес текстового файла или каталог передан
+					} else if(((value = env.get("r-text")) != nullptr) && fsys_t::isfile(value) && env.is("w-text")){
+						// Запоминаем адрес файла
+						const string filename = realpath(value, nullptr);
+						// Открываем файл на запись
+						ofstream file(env.get("w-text"), ios::binary);
+						// Если файл открыт
+						if(file.is_open()){
+							// Общий размер полученных данных
+							size_t size = 0;
+							// Статус и процентное соотношение
+							u_short status = 0, rate = 100;
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем название файла
+								pss.description(filename);
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Read text file", "Read text file is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
+							}
+							// Выполняем считывание всех строк текста
+							fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+								// Если текст получен
+								if(!text.empty()){
+									// Выполняем првоерку текста
+									const string & str = alm.fixUppers(text);
+									// Если строка получена
+									if(!str.empty()){
+										// Выводим результат
+										if(debug == 2) printf("%s\r\n\r\n", str.c_str());
+										// Формируем текст для записи в файл
+										const string & text = alphabet.format("%s\r\n", str.c_str());
+										// Если строка получена, записываем в файл
+										if(!text.empty()) file.write(text.data(), text.size());
+									}
+								}
+								// Если отладка включена
+								if(debug > 0){
+									// Общий полученный размер данных
+									size += text.size();
+									// Подсчитываем статус выполнения
+									status = u_short(size / float(fileSize) * 100.0f);
+									// Если процентное соотношение изменилось
+									if(rate != status){
+										// Запоминаем текущее процентное соотношение
+										rate = status;
+										// Отображаем ход процесса
+										switch(debug){
+											case 1: pss.update(status); break;
+											case 2: pss.status(status); break;
+										}
+									}
+								}
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+							// Закрываем файл
+							file.close();
+						}
+					// Если адрес текстового файла или каталог передан
+					} else if(((value = env.get("r-text")) != nullptr) && fsys_t::isdir(value) && env.is("w-text")){
+						// Запоминаем каталога с файлами
+						const string path = realpath(value, nullptr);
+						// Расширение файлов текстового корпуса
+						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
+						// Открываем файл на запись
+						ofstream file(env.get("w-text"), ios::binary);
+						// Если файл открыт
+						if(file.is_open()){
+							// Общий размер полученных данных
+							size_t size = 0;
+							// Статус и процентное соотношение
+							u_short status = 0, rate = 100;
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Read text file", "Read text file is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
+							}
+							// Переходим по всему списку файлов в каталоге
+							fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
+								// Устанавливаем название файла
+								pss.description(filename);
+								// Выполняем считывание всех строк текста
+								fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+									// Если текст получен
+									if(!text.empty()){
+										// Выполняем првоерку текста
+										const string & str = alm.fixUppers(text);
+										// Если строка получена
+										if(!str.empty()){
+											// Выводим результат
+											if(debug == 2) printf("%s\r\n\r\n", str.c_str());
+											// Формируем текст для записи в файл
+											const string & text = alphabet.format("%s\r\n", str.c_str());
+											// Если строка получена, записываем в файл
+											if(!text.empty()) file.write(text.data(), text.size());
+										}
+									}
+									// Если отладка включена
+									if(debug > 0){
+										// Общий полученный размер данных
+										size += text.size();
+										// Подсчитываем статус выполнения
+										status = u_short(size / float(dirSize) * 100.0f);
+										// Если процентное соотношение изменилось
+										if(rate != status){
+											// Запоминаем текущее процентное соотношение
+											rate = status;
+											// Отображаем ход процесса
+											switch(debug){
+												case 1: pss.update(status); break;
+												case 2: pss.status(status); break;
+											}
+										}
+									}
+								});
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+							// Закрываем файл
+							file.close();
+						}
+					// Сообщаем что текст не указан
+					} else print("text is empty", env.get("log"));
+				// Если это метод определения количества n-грамм в тексте
+				} else if(env.is("method", "counts")){
+					// Определяем какое количество n-грамм нужно проверить
+					const u_short ngrams = (env.is("ngrams", "trigram") ? 3 : (env.is("ngrams", "bigram") ? 2 : 1));
+					// Если текст передан
+					if((value = env.get("text")) != nullptr){
+						// Определяем тип размеров n-грамм
+						switch(ngrams){
+							// Если размер n-грамм не определен
+							case 1: printf("%zu [%hugram] | %s\r\n\r\n", alm.grams(value), alm.getSize(), value); break;
+							// Если размер n-грамм биграммы
+							case 2: printf("%zu [%hugram] | %s\r\n\r\n", alm.bigrams(value), ngrams, value); break;
+							// Если размер n-грамм триграммы
+							case 3: printf("%zu [%hugram] | %s\r\n\r\n", alm.trigrams(value), ngrams, value); break;
+						}
+					// Если адрес текстового файла или каталог передан
+					} else if(((value = env.get("r-text")) != nullptr) && fsys_t::isfile(value) && env.is("w-text")){
+						// Запоминаем адрес файла
+						const string filename = realpath(value, nullptr);
+						// Открываем файл на запись
+						ofstream file(env.get("w-text"), ios::binary);
+						// Если файл открыт
+						if(file.is_open()){
+							// Общий размер полученных данных
+							size_t size = 0, count = 0;
+							// Статус и процентное соотношение
+							u_short status = 0, rate = 100;
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем название файла
+								pss.description(filename);
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Read text file", "Read text file is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
+							}
+							// Выполняем считывание всех строк текста
+							fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+								// Если текст получен
+								if(!text.empty()){
+									// Количество грамм в тексте
+									size_t grams = 0;
+									// Определяем тип размеров n-грамм
+									switch(ngrams){
+										// Если размер n-грамм не определен
+										case 1: {
+											// Выполняем расчёт количества n-грамм
+											grams = alm.grams(text);
+											// Выводим сообщение в консоль
+											if(debug == 2) printf("%zu | %s\r\n\r\n", grams, text.c_str());
+											// Формируем текст для записи в файл
+											const string & str = alphabet.format("%zu | %s\r\n", grams, text.c_str());
+											// Если строка получена, записываем в файл
+											if(!str.empty()) file.write(str.data(), str.size());
+										} break;
+										// Если размер n-грамм биграммы
+										case 2: {
+											// Выполняем расчёт количества биграмм
+											grams = alm.bigrams(text);
+											// Выводим сообщение в консоль
+											if(debug == 2) printf("%zu | %s\r\n\r\n", grams, text.c_str());
+											// Формируем текст для записи в файл
+											const string & str = alphabet.format("%zu | %s\r\n", grams, text.c_str());
+											// Если строка получена, записываем в файл
+											if(!str.empty()) file.write(str.data(), str.size());
+										} break;
+										// Если размер n-грамм триграммы
+										case 3: {
+											// Выполняем расчёт количества триграмм
+											grams = alm.trigrams(text);
+											// Выводим сообщение в консоль
+											if(debug == 2) printf("%zu | %s\r\n\r\n", grams, text.c_str());
+											// Формируем текст для записи в файл
+											const string & str = alphabet.format("%zu | %s\r\n", grams, text.c_str());
+											// Если строка получена, записываем в файл
+											if(!str.empty()) file.write(str.data(), str.size());
+										} break;
+									}
+									// Увкличиваем количество собранных n-грамм
+									count += grams;
+								}
+								// Если отладка включена
+								if(debug > 0){
+									// Общий полученный размер данных
+									size += text.size();
+									// Подсчитываем статус выполнения
+									status = u_short(size / float(fileSize) * 100.0f);
+									// Если процентное соотношение изменилось
+									if(rate != status){
+										// Запоминаем текущее процентное соотношение
+										rate = status;
+										// Отображаем ход процесса
+										switch(debug){
+											case 1: pss.update(status); break;
+											case 2: pss.status(status); break;
+										}
+									}
+								}
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+							// Выводим сообщение об общем количестве обработанных n-грамм
+							printf("Counts %hugrams: %zu\r\n\r\n", (ngrams == 1 ? alm.getSize() : ngrams), count);
+							// Формируем текст для записи в файл
+							const string & str = alphabet.format("\r\nCounts %hugrams: %zu\r\n", (ngrams == 1 ? alm.getSize() : ngrams), count);
+							// Если строка получена, записываем в файл
+							if(!str.empty()) file.write(str.data(), str.size());
+							// Закрываем файл
+							file.close();
+						}
+					// Если адрес текстового файла или каталог передан
+					} else if(((value = env.get("r-text")) != nullptr) && fsys_t::isdir(value) && env.is("w-text")){
+						// Запоминаем каталога с файлами
+						const string path = realpath(value, nullptr);
+						// Расширение файлов текстового корпуса
+						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
+						// Открываем файл на запись
+						ofstream file(env.get("w-text"), ios::binary);
+						// Если файл открыт
+						if(file.is_open()){
+							// Общий размер полученных данных
+							size_t size = 0, count = 0;
+							// Статус и процентное соотношение
+							u_short status = 0, rate = 100;
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Read text file", "Read text file is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
+							}
+							// Переходим по всему списку файлов в каталоге
+							fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
+								// Устанавливаем название файла
+								pss.description(filename);
+								// Выполняем считывание всех строк текста
+								fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+									// Если текст получен
+									if(!text.empty()){
+										// Количество грамм в тексте
+										size_t grams = 0;
+										// Определяем тип размеров n-грамм
+										switch(ngrams){
+											// Если размер n-грамм не определен
+											case 1: {
+												// Выполняем расчёт количества n-грамм
+												grams = alm.grams(text);
+												// Выводим сообщение в консоль
+												if(debug == 2) printf("%zu | %s\r\n\r\n", grams, text.c_str());
+												// Формируем текст для записи в файл
+												const string & str = alphabet.format("%zu | %s\r\n", grams, text.c_str());
+												// Если строка получена, записываем в файл
+												if(!str.empty()) file.write(str.data(), str.size());
+											} break;
+											// Если размер n-грамм биграммы
+											case 2: {
+												// Выполняем расчёт количества биграмм
+												grams = alm.bigrams(text);
+												// Выводим сообщение в консоль
+												if(debug == 2) printf("%zu | %s\r\n\r\n", grams, text.c_str());
+												// Формируем текст для записи в файл
+												const string & str = alphabet.format("%zu | %s\r\n", grams, text.c_str());
+												// Если строка получена, записываем в файл
+												if(!str.empty()) file.write(str.data(), str.size());
+											} break;
+											// Если размер n-грамм триграммы
+											case 3: {
+												// Выполняем расчёт количества триграмм
+												grams = alm.trigrams(text);
+												// Выводим сообщение в консоль
+												if(debug == 2) printf("%zu | %s\r\n\r\n", grams, text.c_str());
+												// Формируем текст для записи в файл
+												const string & str = alphabet.format("%zu | %s\r\n", grams, text.c_str());
+												// Если строка получена, записываем в файл
+												if(!str.empty()) file.write(str.data(), str.size());
+											} break;
+										}
+										// Увкличиваем количество собранных n-грамм
+										count += grams;
+									}
+									// Если отладка включена
+									if(debug > 0){
+										// Общий полученный размер данных
+										size += text.size();
+										// Подсчитываем статус выполнения
+										status = u_short(size / float(dirSize) * 100.0f);
+										// Если процентное соотношение изменилось
+										if(rate != status){
+											// Запоминаем текущее процентное соотношение
+											rate = status;
+											// Отображаем ход процесса
+											switch(debug){
+												case 1: pss.update(status); break;
+												case 2: pss.status(status); break;
+											}
+										}
+									}
+								});
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+							// Выводим сообщение об общем количестве обработанных n-грамм
+							printf("Counts %hugrams: %zu\r\n\r\n", (ngrams == 1 ? alm.getSize() : ngrams), count);
+							// Формируем текст для записи в файл
+							const string & str = alphabet.format("\r\nCounts %hugrams: %zu\r\n", (ngrams == 1 ? alm.getSize() : ngrams), count);
+							// Если строка получена, записываем в файл
+							if(!str.empty()) file.write(str.data(), str.size());
+							// Закрываем файл
+							file.close();
+						}
+					// Сообщаем что текст не указан
+					} else print("text is empty", env.get("log"));
+				}
+				// Выходим из приложения
+				return 0;
+			}
 			// Создаём объект тулкита языковой модели
 			toolkit_t toolkit(&alphabet, &tokenizer, order);
 			// Устанавливаем адрес файла для логирования
@@ -325,6 +1081,8 @@ int main(int argc, char * argv[]) noexcept {
 			if(env.is("lower-case")) toolkit.setOption(toolkit_t::options_t::lowerCase);
 			// Разрешаем детектировать слова состоящее из смешанных словарей
 			if(env.is("mixed-dicts")) toolkit.setOption(toolkit_t::options_t::mixdicts);
+			// Разрешаем выполнять загрузку содержимого arpa, в том виде, в каком она есть. Без перетокенизации содержимого.
+			if(env.is("confidence")) toolkit.setOption(toolkit_t::options_t::confidence);
 			// Разрешаем выполнять интерполяцию при расчёте arpa
 			if(env.is("interpolate")) toolkit.setOption(toolkit_t::options_t::interpolate);
 			// Если нужно установить все токены для идентифицирования как <unk>
@@ -340,7 +1098,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Чёрный список слов
 				vector <string> badwords;
 				// Выполняем считывание всех слов для чёрного списка
-				fsys_t::rfile(value, [&badwords, &toolkit](const string & line, const uintmax_t fileSize) noexcept {
+				fsys_t::rfile(value, [&badwords](const string & line, const uintmax_t fileSize) noexcept {
 					// Если текст получен
 					if(!line.empty()) badwords.push_back(line);
 				});
@@ -352,7 +1110,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Белый список слов
 				vector <string> goodwords;
 				// Выполняем считывание всех слов для белого списка
-				fsys_t::rfile(value, [&goodwords, &toolkit](const string & line, const uintmax_t fileSize) noexcept {
+				fsys_t::rfile(value, [&goodwords](const string & line, const uintmax_t fileSize) noexcept {
 					// Если текст получен
 					if(!line.empty()) goodwords.push_back(line);
 				});
@@ -411,7 +1169,7 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				}
 				// Выполняем чтение бинарных данных
-				ablm.read([debug, &pss](const u_short status) noexcept {
+				ablm.readToolkit([debug, &pss](const u_short status) noexcept {
 					// Отображаем ход процесса
 					switch(debug){
 						case 1: pss.update(status); break;
@@ -743,7 +1501,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Выполняем преобразование текста в json
 						tokenizer.textToJson(text, [&](const string & text) noexcept {
 							// Если текст получен
-							if(!text.empty()) textData = move(alphabet.format("%s\r\n", text.c_str()));
+							if(!text.empty()) textData = alphabet.format("%s\r\n", text.c_str());
 						});
 					}
 					// Если результат получен
@@ -774,6 +1532,15 @@ int main(int argc, char * argv[]) noexcept {
 				exit(0);
 			// Иначе выполняем инициализацию алгоритма сглаживания
 			} else if(env.is("smoothing")) {
+				// Дополнительный коэффициент алгоритма сглаживания
+				float mod = 0.0f;
+				// Если алгоритм сглаживания ConstDiscount или AddSmooth, запрашиваем дополнительные параметры
+				if(env.is("smoothing", "cdiscount") || env.is("smoothing", "addsmooth")){
+					// Считываем флаг дополнительной модификации
+					value = (env.is("smoothing", "cdiscount") ? env.get("discount") : env.get("delta"));
+					// Если значение получено
+					if(value != nullptr) mod = stof(value);
+				}
 				// Если это WittenBell
 				if(env.is("smoothing", "wittenbell")) toolkit.init(toolkit_t::algorithm_t::wittenBell, false, false, 0.0);
 				// Если это AddSmooth
@@ -860,7 +1627,7 @@ int main(int argc, char * argv[]) noexcept {
 			}
 			// Если передан метод обучения, загрузка карт последовательностей или списка n-грамм
 			if((env.is("r-abbrs") || env.is("r-domain-zones")) && (env.is("method", "train") ||
-			env.is("r-map") || env.is("r-maps") || env.is("r-ngram") || env.is("r-ngrams"))){
+			(env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) || env.is("r-ngram"))){
 				// Тип считываемого файла
 				u_short type = 0;
 				// Устанавливаем режим считывания файла аббревиатур
@@ -980,7 +1747,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем количество потоков
 							collector.setThreads(stoi(value));
 							// Устанавливаем флаг автоочистки
-							collector.setAutoClean(env.is("train-autoclean"));
+							collector.setIntermed(env.is("train-intermed"));
 							// Устанавливаем флаг сегментации
 							collector.setSegment(
 								env.is("train-segments"),
@@ -1078,7 +1845,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем количество потоков
 							collector.setThreads(stoi(value));
 							// Устанавливаем флаг автоочистки
-							collector.setAutoClean(env.is("train-autoclean"));
+							collector.setIntermed(env.is("train-intermed"));
 							// Устанавливаем флаг сегментации
 							collector.setSegment(
 								env.is("train-segments"),
@@ -1159,9 +1926,7 @@ int main(int argc, char * argv[]) noexcept {
 					} else print("path or file with corpus texts is not specified", env.get("log"));
 				}
 			// Проверяем правильно ли указаны адреса файлов
-			} else if(((env.is("r-map") || env.is("r-maps")) &&
-			(env.is("r-vocab") || env.is("r-vocabs") || env.is("r-words"))) || (env.is("r-ngram") ||
-			env.is("r-ngrams")) || (env.is("r-arpa") || env.is("r-arpas")) || !binDictFile.empty()) {
+			} else if((env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) || env.is("r-ngram") || env.is("r-arpa") || !binDictFile.empty()) {
 				// Если требуется загрузить файл n-грамм
 				if(((value = env.get("r-ngram")) != nullptr) && fsys_t::isfile(value)){
 					// Запоминаем адрес файла
@@ -1194,9 +1959,11 @@ int main(int argc, char * argv[]) noexcept {
 						case 2: pss.status(100); break;
 					}
 				// Если требуется загрузить список файлов n-грамм
-				} else if(((value = env.get("r-ngrams")) != nullptr) && fsys_t::isdir(value)) {
+				} else if(((value = env.get("r-ngram")) != nullptr) && fsys_t::isdir(value)) {
 					// Запоминаем каталог для загрузки
 					const string path = realpath(value, nullptr);
+					// Расширение файлов текстового корпуса
+					const string ext = ((value = env.get("ext")) != nullptr ? value : "ngrams");
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -1212,7 +1979,7 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Выполняем загрузку файлов n-грамм
-					toolkit.readNgrams(path, [debug, &pss](const u_short status) noexcept {
+					toolkit.readNgrams(path, ext, [debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1257,9 +2024,11 @@ int main(int argc, char * argv[]) noexcept {
 						case 2: pss.status(100); break;
 					}
 				// Если нужно загрузить список файлов arpa
-				} else if(((value = env.get("r-arpas")) != nullptr) && fsys_t::isdir(value)) {
+				} else if(((value = env.get("r-arpa")) != nullptr) && fsys_t::isdir(value)) {
 					// Запоминаем каталог для загрузки
 					const string path = realpath(value, nullptr);
+					// Расширение файлов текстового корпуса
+					const string ext = ((value = env.get("ext")) != nullptr ? value : "arpa");
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -1275,7 +2044,7 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Выполняем загрузку файла arpa
-					toolkit.readArpas(path, [debug, &pss](const u_short status) noexcept {
+					toolkit.readArpas(path, ext, [debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1320,9 +2089,11 @@ int main(int argc, char * argv[]) noexcept {
 						case 2: pss.status(100); break;
 					}
 				// Если требуется загрузить список словарей
-				} else if(((value = env.get("r-vocabs")) != nullptr) && fsys_t::isdir(value)) {
+				} else if(((value = env.get("r-vocab")) != nullptr) && fsys_t::isdir(value)) {
 					// Параметры индикаторы процесса
 					size_t size = 0, status = 0, rate = 0;
+					// Запоминаем каталог для загрузки
+					const string path = realpath(value, nullptr);
 					// Расширение файлов текстового корпуса
 					const string ext = ((value = env.get("ext")) != nullptr ? value : "vocab");
 					// Если отладка включена, выводим индикатор загрузки
@@ -1338,7 +2109,7 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Переходим по всему списку словарей в каталоге
-					fsys_t::rdir(realpath(value, nullptr), ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
+					fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
 						// Выполняем загрузку файла словаря vocab
 						toolkit.readVocab(filename);
 						// Если отладка включена, выводим индикатор загрузки
@@ -1421,6 +2192,8 @@ int main(int argc, char * argv[]) noexcept {
 				} else if(((value = env.get("r-words")) != nullptr) && fsys_t::isdir(value)) {
 					// Параметры индикаторы процесса
 					size_t size = 0, status = 0, rate = 0;
+					// Запоминаем каталог для загрузки
+					const string path = realpath(value, nullptr);
 					// Расширение файлов текстового корпуса
 					const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
 					// Если отладка включена, выводим индикатор загрузки
@@ -1436,7 +2209,7 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Переходим по всему списку словарей в каталоге
-					fsys_t::rdir(realpath(value, nullptr), ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
+					fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
 						// Если отладка включена, выводим название файла
 						if(debug > 0) pss.description(filename);
 						// Выполняем загрузку файла словаря списка слов
@@ -1472,7 +2245,7 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				}
 				// Если требуется загрузить карту последовательности или список карт последовательностей
-				if((env.is("r-map") || env.is("r-maps")) && (env.is("r-vocab") || env.is("r-vocabs"))){
+				if(env.is("r-map") && env.is("r-vocab")){
 					// Если нужно загрузить карту последовательности
 					if(((value = env.get("r-map")) != nullptr) && fsys_t::isfile(value)){
 						// Запоминаем адрес файла
@@ -1505,9 +2278,11 @@ int main(int argc, char * argv[]) noexcept {
 							case 2: pss.status(100); break;
 						}
 					// Если нужно загрузить список карт последовательностей
-					} else if(((value = env.get("r-maps")) != nullptr) && fsys_t::isdir(value)){
+					} else if(((value = env.get("r-map")) != nullptr) && fsys_t::isdir(value)){
 						// Запоминаем каталог для загрузки
 						const string path = realpath(value, nullptr);
+						// Расширение файлов текстового корпуса
+						const string ext = ((value = env.get("ext")) != nullptr ? value : "map");
 						// Если отладка включена, выводим индикатор загрузки
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
@@ -1523,7 +2298,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 						// Считываем список карт последовательностей
-						toolkit.readMaps(path, [debug, &pss](const u_short status) noexcept {
+						toolkit.readMaps(path, ext, [debug, &pss](const u_short status) noexcept {
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -1538,7 +2313,7 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				}
 				// Если конфигурация файлов верная и требуется обучение
-				if(env.is("w-arpa") && (env.is("r-map") || env.is("r-maps") || env.is("r-ngram") || env.is("r-ngrams"))){
+				if(env.is("w-arpa") && (((env.is("r-vocab") || env.is("r-words")) && env.is("r-map")) || env.is("r-ngram"))){
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -1773,8 +2548,8 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			}
 			// Если файл для извлечения карты последовательности передан
-			if((env.is("method", "train") || env.is("r-map") || env.is("r-maps") || env.is("r-ngram") ||
-			env.is("r-ngrams") || !binDictFile.empty()) && ((value = env.get("w-map")) != nullptr)){
+			if((env.is("method", "train") || (env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) ||
+			env.is("r-ngram") || !binDictFile.empty()) && ((value = env.get("w-map")) != nullptr)){
 				// Если отладка включена, выводим индикатор загрузки
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар
@@ -1834,8 +2609,8 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			}
 			// Если файл для сохранения n-грамм передан
-			if((env.is("method", "train") || env.is("r-map") || env.is("r-maps") || env.is("r-ngram") ||
-			env.is("r-ngrams") || !binDictFile.empty()) && ((value = env.get("w-ngram")) != nullptr)){
+			if((env.is("method", "train") || (env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) ||
+			env.is("r-ngram") || !binDictFile.empty()) && ((value = env.get("w-ngram")) != nullptr)){
 				// Если отладка включена, выводим индикатор загрузки
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар

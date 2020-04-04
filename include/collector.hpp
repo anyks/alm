@@ -13,6 +13,7 @@
  * Стандартная библиотека
  */
 #include <cmath>
+#include <mutex>
 #include <ctime>
 #include <regex>
 #include <atomic>
@@ -38,20 +39,22 @@ namespace anyks {
 			progress_t pss;
 		private:
 			// Общий размер считанных данных
-			atomic <size_t> allSize{0};
+			atomic <float> allSize{0};
 			// Текущий статус прогресс-бара
 			atomic <u_short> status{0};
 			// Прошлый статус прогресс-бара
 			atomic <u_short> rate{101};
 		private:
+			// Мютекс для блокировки потока
+			mutex locker;
 			// Тип режима отладки
 			u_short debug = 0;
 			// Общий размер n-граммы
 			u_short order = 1;
-			// Флаг удаления временных файлов
-			bool cleartmp = true;
 			// Флаг проведения сегментации
 			bool segments = false;
+			// Флаг вывода промежуточных результатов
+			bool intermed = false;
 			// Общий размер данных
 			uintmax_t dataSize = 0;
 			// Размер сегмента в байтах
@@ -114,10 +117,10 @@ namespace anyks {
 			 */
 			void setDebug(const u_short debug) noexcept;
 			/**
-			 * setAutoClean Метод установки флага автоочистки временных данных
+			 * setIntermed Метод установки флага вывода промежуточных результатов
 			 * @param flag значение флага для устаноки
 			 */
-			void setAutoClean(const bool flag) noexcept;
+			void setIntermed(const bool flag) noexcept;
 			/**
 			 * setToolkit Метод установки объекта тулкита
 			 * @param toolkit объект тулкита

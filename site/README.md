@@ -41,6 +41,10 @@
   - [Обучение с чёрным списком](https://github.com/anyks/alm/blob/master/site#%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D1%81-%D1%87%D1%91%D1%80%D0%BD%D1%8B%D0%BC-%D1%81%D0%BF%D0%B8%D1%81%D0%BA%D0%BE%D0%BC)
   - [Обучение с неизвестным словом](https://github.com/anyks/alm/blob/master/site#%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5-%D1%81-%D0%BD%D0%B5%D0%B8%D0%B7%D0%B2%D0%B5%D1%81%D1%82%D0%BD%D1%8B%D0%BC-%D1%81%D0%BB%D0%BE%D0%B2%D0%BE%D0%BC)
   - [Токенизация текста](https://github.com/anyks/alm/blob/master/site#%D1%82%D0%BE%D0%BA%D0%B5%D0%BD%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F-%D1%82%D0%B5%D0%BA%D1%81%D1%82%D0%B0)
+  - [Расчёт перплексии](https://github.com/anyks/alm/#perplexity-calculation)
+  - [Проверка существования контекста](https://github.com/anyks/alm/#checking-context-in-text)
+  - [Исправление регистров слов](https://github.com/anyks/alm/#fix-words-case)
+  - [Проверка количества n-грамм](https://github.com/anyks/alm/#check-counts-ngrams)
 - [Лицензия](https://github.com/anyks/alm/blob/master/site#%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F)
 - [Контакты](https://github.com/anyks/alm/blob/master/site#%D0%BA%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D1%8B)
 
@@ -779,6 +783,50 @@ $ echo 'Hello World?' | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгде�
 **Формирование строки из json**
 ```bash
 $ echo '[["Hello","World","?"]]' | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens
+```
+
+### Расчёт перплексии
+```bash
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method ppl -debug 1 -r-arpa ./lm.arpa -confidence
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method ppl -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt
+```
+
+### Проверка существования контекста
+```bash
+$ echo "<s> Сегодня сыграл и в Олега ударил яркий прожектор патрульный трактор с корпоративным сектором </s>" | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./checks.txt
+```
+
+### Исправление регистров слов
+```bash
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method fixcase -debug 1 -r-arpa ./lm.arpa -confidence
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method fixcase -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./fix.txt
+```
+
+### Проверка количества n-грамм
+```bash
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -debug 1 -r-arpa ./5.arpa -confidence
+```
+
+```bash
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams bigram -debug 1 -r-arpa ./5.arpa -confidence
+```
+
+```bash
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams trigram -debug 1 -r-arpa ./5.arpa -confidence
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams bigram -debug 1 -r-arpa ./5.arpa -confidence -r-text ./text.txt -w-text ./counts.txt
 ```
 
 * * *

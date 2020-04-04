@@ -167,7 +167,8 @@ CONFIG = -std=c++11 -O2 -pipe -mfma -mrdrnd -mf16c -fno-permissive -Wno-pedantic
 all:
 	mkdir -p $(BUILD) && \
 	mkdir -p $(BIN)/libs && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./app/alm.cpp -o $(BUILD)/alm.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./app/alm.cpp -o $(BUILD)/main.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/alm.cpp -o $(BUILD)/alm.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/idw.cpp -o $(BUILD)/idw.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/nwt.cpp -o $(BUILD)/nwt.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/env.cpp -o $(BUILD)/env.o && \
@@ -181,19 +182,20 @@ all:
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
 	$(CC) $(LIBS) -shared -fPIC -o $(BIN)/libs/liblm.$(EXT) $(BUILD)/idw.o $(BUILD)/nwt.o \
-	$(BUILD)/env.o $(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o \
+	$(BUILD)/env.o $(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/alm.o \
 	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/collector.o $(BUILD)/progress.o && \
-	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o \
+	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/alm.o \
 	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o \
 	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/progress.o && \
-	$(CC) $(BUILD)/alm.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
+	$(CC) $(BUILD)/main.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
 	rm -rf $(BUILD)
 
 # Правила сборки под Dev
 dev:
 	mkdir -p $(BUILD) && \
 	mkdir -p $(BIN)/libs && \
-	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./app/alm.cpp -o $(BUILD)/alm.o && \
+	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./app/alm.cpp -o $(BUILD)/main.o && \
+	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/alm.cpp -o $(BUILD)/alm.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/idw.cpp -o $(BUILD)/idw.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/nwt.cpp -o $(BUILD)/nwt.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/env.cpp -o $(BUILD)/env.o && \
@@ -206,17 +208,18 @@ dev:
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
-	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o \
+	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/alm.o \
 	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o \
 	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/progress.o $(BUILD)/levenshtein.o && \
-	$(CC) $(DEBUG) $(BUILD)/alm.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
+	$(CC) $(DEBUG) $(BUILD)/main.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
 	rm -rf $(BUILD)
 
 # Правила статической сборки
 static:
 	mkdir -p $(BUILD) && \
 	mkdir -p $(BIN)/libs && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./app/alm.cpp -o $(BUILD)/alm.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./app/alm.cpp -o $(BUILD)/main.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/alm.cpp -o $(BUILD)/alm.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/idw.cpp -o $(BUILD)/idw.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/nwt.cpp -o $(BUILD)/nwt.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/env.cpp -o $(BUILD)/env.o && \
@@ -229,10 +232,10 @@ static:
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
-	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o \
+	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/alm.o \
 	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o \
 	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/progress.o $(BUILD)/levenshtein.o && \
-	$(CC) $(BUILD)/alm.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
+	$(CC) $(BUILD)/main.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
 	rm -rf $(BUILD)
 
 # Правило очистки

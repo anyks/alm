@@ -114,7 +114,7 @@ const size_t anyks::Python::add(const string & script, const u_short args) noexc
 					// Ищем название файла
 					const size_t pos = file.rfind(".");
 					// Если точка найдена
-					if(pos != string::npos) name = move(file.substr(0, pos));
+					if(pos != string::npos) name = file.substr(0, pos);
 					// Иначе запоминаем скрипт как он есть
 					else name = move(file);
 					// Получаем идентификатор скрипта
@@ -288,7 +288,7 @@ const wstring anyks::Python::run(const size_t sid, const vector <string> & args,
 				// Получаем результат
 				const wchar_t * res = PyUnicode_AsWideCharString(value, &size);
 				// Получаем результат
-				if(res != nullptr) result = move(wstring(res, size));
+				if(res != nullptr) result = wstring(res, size);
 				// Очищаем полученное значение
 				Py_DECREF(value);
 			}

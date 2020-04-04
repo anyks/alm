@@ -63,6 +63,7 @@ namespace anyks {
 				allGrams,   // Флаг предписывающий использовать все полученные n-граммы
 				mixdicts,   // Флаг разрешающий детектировать слова из смешанных словарей
 				lowerCase,  // Флаг предписывающий использовать слова в нижнем регистре
+				confidence, // Флаг разрешающий загружать n-граммы из arpa так-как они есть
 				interpolate // Флаг предписывающий выполнять интерполяцию при расчёте частот
 			};
 			// Флаги модификации
@@ -119,7 +120,7 @@ namespace anyks {
 			// Параметры алгоритма сглаживания
 			params_t params;
 			// Флаги параметров
-			bitset <8> options;
+			bitset <9> options;
 			// Список плохих слов
 			set <size_t> badwords;
 			// Список хороших слов
@@ -149,17 +150,18 @@ namespace anyks {
 			const tokenizer_t * tokenizer = nullptr;
 		private:
 			/**
-			 * getIdw Метод генерирования идентификатора слова
-			 * @param  word слово для генерации
-			 * @return      идентификатор слова
-			 */
-			const size_t getIdw(const wstring & word) const noexcept;
-			/**
 			 * isOption Метод проверки наличия опции
 			 * @param option опция для проверки
 			 * @return       результат проверки
 			 */
 			const bool isOption(const options_t option) const noexcept;
+			/**
+			 * getIdw Метод генерирования идентификатора слова
+			 * @param  word  слово для генерации
+			 * @param  check нужно выполнить дополнительную проверку слова
+			 * @return       идентификатор слова
+			 */
+			const size_t getIdw(const wstring & word, const bool check = true) const noexcept;
 			/**
 			 * clearShielding Функция удаления экранирования
 			 * @param word  слово в котором следует удалить экранирование
@@ -218,6 +220,11 @@ namespace anyks {
 			 * @return список токенов
 			 */
 			const set <token_t> & getTokensDisable() const noexcept;
+			/**
+			 * getStatistic Метод извлечения общей статистики
+			 * @return общее количество документов и слов в корпусах при обучении
+			 */
+			const pair <size_t, size_t> getStatistic() const noexcept;
 			/**
 			 * getUserTokens Метод извлечения списка пользовательских токенов
 			 * @return список пользовательских токенов
@@ -364,6 +371,12 @@ namespace anyks {
 			 */
 			void setTokensDisable(const set <token_t> & tokens) noexcept;
 			/**
+			 * getStatistic Метод установки общей статистики
+			 * @param ad общее количество документов при обучении
+			 * @param cw общее количество слов при обучении
+			 */
+			void getStatistic(const size_t ad, const size_t cw) noexcept;
+			/**
 			 * setBadwords Метод установки списка идентификаторов плохих слов в список
 			 * @param badwords список идентификаторов плохих слов
 			 */
@@ -389,6 +402,13 @@ namespace anyks {
 			 * @param idd  идентификатор документа
 			 */
 			void addText(const string & text, const size_t idd = 0) noexcept;
+			/**
+			 * addWord Метод добавления слова в словарь
+			 * @param word слово для добавления
+			 * @param idw  идентификатор слова, если нужно
+			 * @param idd  идентификатор документа
+			 */
+			void addWord(const word_t & word, const size_t idw = 0, const size_t idd = 0) noexcept;
 			/**
 			 * addWord Метод добавления слова в словарь
 			 * @param word слово для добавления
@@ -448,22 +468,28 @@ namespace anyks {
 			void init(const algorithm_t algorithm, const bool modified = false, const bool prepares = false, const double mod = 0.0);
 		public:
 			/**
+			 * loadVocab Метод загрузки бинарных данных в словарь
+			 * @param buffer буфер с бинарными данными
+			 * @param arpa   нужно добавить только данные arpa
+			 */
+			void loadVocab(const vector <char> & buffer) noexcept;
+			/**
 			 * loadInfoVocab Метод загрузки бинарных информационных данных словаря
 			 * @param buffer буфер бинарных информационных данных словаря
 			 */
 			void loadInfoVocab(const vector <char> & buffer) noexcept;
 			/**
-			 * loadVocab Метод загрузки бинарных данных в словарь
-			 * @param buffer буфер с бинарными данными
-			 * @param arpa   нужно добавить только данные arpa
-			 */
-			void loadVocab(const vector <char> & buffer) const noexcept;
-			/**
 			 * loadArpa Метод загрузки бинарных данных n-грамм в словарь
 			 * @param buffer буфер с бинарными данными
 			 * @param arpa   нужно добавить только данные arpa
 			 */
-			void loadArpa(const vector <char> & buffer, const bool arpa = false) const noexcept;
+			void loadArpa(const vector <char> & buffer, const bool arpa = false) noexcept;
+			/**
+			 * appendArpa Метод добавления бинарных данных в словарь
+			 * @param buffer буфер с бинарными данными
+			 * @param idd    идентификатор документа в котором получена n-грамма
+			 */
+			void appendArpa(const vector <char> & buffer, const size_t idd = 0) const noexcept;
 		public:
 			/**
 			 * saveInfoVocab Метод сохранения бинарных информационных данных словаря
@@ -508,17 +534,16 @@ namespace anyks {
 			void writeMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|") const noexcept;
 		public:
 			/**
-			 * readArpas Метод чтения данных из каталога файлов arpa
-			 * @param path   адрес где лежат arpa файлы
-			 * @param status функция вывода статуса чтения
+			 * words Метод извлечения слов из словаря
+			 * @param callback функция обратного вызова (word, idw, count words)
 			 */
-			void readArpas(const string & path, function <void (const u_short)> status = nullptr) noexcept;
+			void words(function <const bool (const word_t &, const size_t, const size_t)> callback) const noexcept;
 			/**
-			 * readNgrams Метод чтения данных из каталога файлов ngrams
-			 * @param path   адрес где лежат ngrams файлы
-			 * @param status функция вывода статуса чтения
+			 * words Метод извлечения слов из словаря
+			 * @param callback функция обратного вызова (word, idw, oc, dc, count words)
 			 */
-			void readNgrams(const string & path, function <void (const u_short)> status = nullptr) noexcept;
+			void words(function <const bool (const wstring &, const size_t, const size_t, const size_t, const size_t)> callback) const noexcept;
+		public:
 			/**
 			 * readArpa Метод чтения данных из файла arpa
 			 * @param filename адрес файла для чтения
@@ -538,19 +563,35 @@ namespace anyks {
 			 */
 			void readNgram(const string & filename, function <void (const u_short)> status = nullptr) noexcept;
 			/**
-			 * readMaps Метод добавления - объединения карт последовательностей
-			 * @param path   адрес где лежат map файлы
-			 * @param status функция вывода статуса чтения
-			 * @param delim  разделитель последовательностей
-			 */
-			void readMaps(const string & path, function <void (const u_short)> status = nullptr, const string & delim = "|") noexcept;
-			/**
 			 * readMap Метод чтения карты последовательности из файла
 			 * @param filename адрес map файла карты последовательности
 			 * @param status   функция вывода статуса чтения
 			 * @param delim    разделитель последовательностей
 			 */
 			void readMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|") noexcept;
+		public:
+			/**
+			 * readArpas Метод чтения данных из каталога файлов arpa
+			 * @param path   адрес где лежат arpa файлы
+			 * @param ext    расширение файлов в каталоге
+			 * @param status функция вывода статуса чтения
+			 */
+			void readArpas(const string & path, const string & ext, function <void (const u_short)> status = nullptr) noexcept;
+			/**
+			 * readNgrams Метод чтения данных из каталога файлов ngrams
+			 * @param path   адрес где лежат ngrams файлы
+			 * @param ext    расширение файлов в каталоге
+			 * @param status функция вывода статуса чтения
+			 */
+			void readNgrams(const string & path, const string & ext, function <void (const u_short)> status = nullptr) noexcept;
+			/**
+			 * readMaps Метод добавления - объединения карт последовательностей
+			 * @param path   адрес где лежат map файлы
+			 * @param ext    расширение файлов в каталоге
+			 * @param status функция вывода статуса чтения
+			 * @param delim  разделитель последовательностей
+			 */
+			void readMaps(const string & path, const string & ext, function <void (const u_short)> status = nullptr, const string & delim = "|") noexcept;
 		public:
 			/**
 			 * Toolkit Конструктор

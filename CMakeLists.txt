@@ -7,15 +7,17 @@ cmake_minimum_required(VERSION 2.8)
 # Название проекта
 project(ANYKS LANGUAGES CXX)
 
-# Устанавливаем параметры сборки
-set(CMAKE_CXX_FLAGS "-fPIC -g")
+# Устанавливаем название вендора
+set(PROJECT_VENDOR_LONG "ANYKS")
+set(ORG_WEBSITE "https://anyks.com")
+set(APP_NAME "Smart Language Model")
 
-# Способ первый: затребовать от компилятора фичу cxx_std_17
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED on)
-
-# Подключаем зависимости
-set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS "-stdlib=libc++")
+# Устанавливаем адрес установки
+if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local" OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local/")
+	set(INSTALL_TO_USR TRUE)
+else()
+	set(INSTALL_TO_USR FALSE)
+endif()
 
 # Устанавливаем флаг использования потоков
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -55,6 +57,57 @@ find_package(OpenSSL REQUIRED)
 message("OpenSSL libraries: ${OPENSSL_LIBRARIES}")
 message("OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
 
+# Формируем время для копирайта
+string(TIMESTAMP CURRENT_YEAR "%Y")
+string(TIMESTAMP CURRENT_TIME "%d.%m.%Y %H:%M:%S")
+# Формируем копирайт
+set(PROJECT_COPYRIGHT "Copyright (c) ${CURRENT_YEAR} ${PROJECT_VENDOR_LONG}")
+# Выводим сообщение о начале работы
+message(STATUS "Creating \"${APP_NAME}\" application")
+
+# Set build type
+# if(NOT CMAKE_BUILD_TYPE)
+#	set(CMAKE_BUILD_TYPE Debug)
+# endif()
+message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
+
+# Подключаем зависимости
+set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS "-stdlib=libc++")
+# Устанавливаем опции компилятора
+message(STATUS "Using C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "Using C compiler: ${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+
+# Способ первый: затребовать от компилятора фичу cxx_std_17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
+
+# Подстраиваемся под компилятор
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -fPIC -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CC_OPT_FLAGS} ${CXX_OPT_FLAGS}")
+
+# Если режим отладки включён
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+	message(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
+else()
+	message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+	message(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
+endif()
+
+# Устанавливаем путь установки приложения
+set(CMAKE_PREFIX_PATH $ENV{ALM_PREFIX_PATH} ${CMAKE_PREFIX_PATH})
+
+# Если установка требуется
+if(INSTALL_TO_USR)
+	set(CONFIG_INSTALL_DEST "/${CONFIG_INSTALL_DEST}")
+endif()
+
+# Устанавливаем адрес каталога установки
+set(CONFIG_INSTALL_DEST "etc/${PROJECT_NAME}")
+
 # Подключаем заголовочные файлы
 include_directories(${OPENSSL_INCLUDE_DIR})
 # Добавляем библиотеки в список
@@ -70,6 +123,7 @@ set(ALM_EXE ${PROJECT_BINARY_DIR}/../app/alm.cpp)
 
 # Добавляем исходники
 set(ENV_LIB ${PROJECT_BINARY_DIR}/../src/env.cpp)
+set(ALM_LIB ${PROJECT_BINARY_DIR}/../src/alm.cpp)
 set(IDW_LIB ${PROJECT_BINARY_DIR}/../src/idw.cpp)
 set(NWT_LIB ${PROJECT_BINARY_DIR}/../src/nwt.cpp)
 set(ARPA_LIB ${PROJECT_BINARY_DIR}/../src/arpa.cpp)
@@ -112,7 +166,7 @@ elseif(UNIX)
 endif()
 
 # Создаем список модулей
-list(APPEND LIB_LISTS ${IDW_LIB} ${NWT_LIB} ${ALPHABET_LIB} ${ENV_LIB} ${LEVENSHTEIN_LIB} ${COLLECTOR_LIB} ${TOKENIZER_LIB} ${ARPA_LIB} ${PYTHON_LIB} ${ABLM_LIB} ${PROGRESS_LIB} ${TOOLKIT_LIB})
+list(APPEND LIB_LISTS ${IDW_LIB} ${NWT_LIB} ${ALPHABET_LIB} ${ENV_LIB} ${LEVENSHTEIN_LIB} ${COLLECTOR_LIB} ${TOKENIZER_LIB} ${ALM_LIB} ${ARPA_LIB} ${PYTHON_LIB} ${ABLM_LIB} ${PROGRESS_LIB} ${TOOLKIT_LIB})
 
 # Создание динамической библиотеки с именем alm
 add_library(lm STATIC ${LIB_LISTS})

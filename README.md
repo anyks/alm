@@ -41,6 +41,10 @@
   - [Training using blacklist](https://github.com/anyks/alm/#training-using-blacklist)
   - [Training with an unknown word](https://github.com/anyks/alm/#training-with-an-unknown-word)
   - [Text tokenization](https://github.com/anyks/alm/#text-tokenization)
+  - [Perplexity calculation](https://github.com/anyks/alm/#perplexity-calculation)
+  - [Checking context in text](https://github.com/anyks/alm/#checking-context-in-text)
+  - [Fix words case](https://github.com/anyks/alm/#fix-words-case)
+  - [Check counts ngrams](https://github.com/anyks/alm/#check-counts-ngrams)
 - [License](https://github.com/anyks/alm/#license)
 - [Contact](https://github.com/anyks/alm/#contact)
 
@@ -779,6 +783,50 @@ $ echo 'Hello World?' | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгде�
 **Generating text string from json**
 ```bash
 $ echo '[["Hello","World","?"]]' | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method tokens
+```
+
+### Perplexity calculation
+```bash
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method ppl -debug 1 -r-arpa ./lm.arpa -confidence
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method ppl -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt
+```
+
+### Checking context in text
+```bash
+$ echo "<s> Сегодня сыграл и в Олега ударил яркий прожектор патрульный трактор с корпоративным сектором </s>" | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./checks.txt
+```
+
+### Fix words case
+```bash
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method fixcase -debug 1 -r-arpa ./lm.arpa -confidence
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method fixcase -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./fix.txt
+```
+
+### Check counts ngrams
+```bash
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -debug 1 -r-arpa ./5.arpa -confidence
+```
+
+```bash
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams bigram -debug 1 -r-arpa ./5.arpa -confidence
+```
+
+```bash
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams trigram -debug 1 -r-arpa ./5.arpa -confidence
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams bigram -debug 1 -r-arpa ./5.arpa -confidence -r-text ./text.txt -w-text ./counts.txt
 ```
 
 * * *

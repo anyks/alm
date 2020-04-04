@@ -233,11 +233,376 @@ const bool anyks::AbLM::write(function <void (const u_short)> status) noexcept {
 	return result;
 }
 /**
- * read Метод чтения данных словаря из файла
+ * readAlm Метод чтения данных словаря из файла в объект toolkit
  * @param status статус расёта
  * @param info   выводить только информацию о словаре
  */
-const bool anyks::AbLM::read(function <void (const u_short)> status, const bool info) noexcept {
+const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bool info) noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Индекс выполнения загрузки и общее количество данных
+	size_t index = 0, count = 5;
+	// Количество основных блоков данных
+	size_t vocabCount = 0, arpaCount = 0;
+	// Выполняем чтение данных словаря
+	if((this->aspl->read() > -1) && (this->alm != nullptr)){
+		// Тип шифрования файла
+		u_short aes = 0;
+		// Извлекаем тип шифрования
+		this->aspl->get("aes", aes);
+		// Считываем дату генерации словаря
+		this->aspl->get("date", this->meta.date);
+		// Считываем название словаря
+		this->aspl->get("name", this->meta.name);
+		// Считываем имя автора словаря
+		this->aspl->get("author", this->meta.author);
+		// Считываем тип лицензии
+		this->aspl->get("lictype", this->meta.lictype);
+		// Считываем текст лицензии
+		this->aspl->get("lictext", this->meta.lictext);
+		// Считываем контактные данные пользователя
+		this->aspl->get("contacts", this->meta.contacts);
+		// Считываем копирайт словаря
+		this->aspl->get("copyright", this->meta.copyright);
+		// Если это метод вывода информации о словаре
+		if((aes > 0) && info){
+			// Устанавливаем неверный пароль
+			this->meta.password = "*";
+			// Если размер шифрования получен
+			switch(aes){
+				// Если это 128-и битное шифрование
+				case 128: this->meta.aes = aspl_t::types_t::aes128; break;
+				// Если это 192-х битное шифрование
+				case 192: this->meta.aes = aspl_t::types_t::aes192; break;
+				// Если это 256-и битное шифрование
+				case 256: this->meta.aes = aspl_t::types_t::aes256; break;
+			}
+		}
+		/**
+		 * Блок извлечения данных алфавита
+		 */
+		{
+			// Данные алфавита
+			string alphabet = "";
+			// Извлекаем данные алфавита
+			this->aspl->get("alphabet", alphabet);
+			// Если алфавит получен, устанавливаем его
+			if(!alphabet.empty()) this->alphabet->set(alphabet);
+			// Иначе выходим с ошибкой
+			else {
+				// Выполняем логирование
+				if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - alphabet is broken");
+				// Выходим из функции
+				return result;
+			}
+		}
+		// Если нужно загрузить все данные
+		if(!info){
+			// Если файл зашифрован и шифрование совпадает
+			if((aes > 0) && !this->meta.password.empty()){
+				// Если размер шифрования получен
+				switch(aes){
+					// Если это 128-и битное шифрование
+					case 128: {
+						// Если это 128 битный режим шифрования
+						if(this->meta.aes == aspl_t::types_t::aes128) this->aspl->setAES(this->meta.aes);
+					} break;
+					// Если это 192-х битное шифрование
+					case 192: {
+						// Если это 192 битный режим шифрования
+						if(this->meta.aes == aspl_t::types_t::aes192) this->aspl->setAES(this->meta.aes);
+					} break;
+					// Если это 256-и битное шифрование
+					case 256: {
+						// Если это 256 битный режим шифрования
+						if(this->meta.aes == aspl_t::types_t::aes256) this->aspl->setAES(this->meta.aes);
+					} break;
+					// Если это что-то другое
+					default: goto stop;
+				}
+			// Если файл зашифрован
+			} else if(aes > 0) {
+				// Метка останова
+				stop:
+				// Сообщаем что файл зашифрован и данные для расшифровки не предоставлены
+				if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - the file dictionary is encrypted and data for decryption is not provided");
+				// Выходим из приложения
+				exit(EXIT_FAILURE);
+			}
+			/**
+			 * Блок получения количество основных данных
+			 */
+			{
+				// Считываем количество записей arpa
+				this->aspl->get("arpaCount", arpaCount);
+				// Считываем количество записей словаря
+				this->aspl->get("vocabCount", vocabCount);
+				// Увеличиваем общее количество данных
+				count += (arpaCount + vocabCount);
+				// Иначе выходим с ошибкой
+				if((arpaCount < 1) || (vocabCount < 1)){
+					// Выполняем логирование
+					if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - arpa or vocab is broken");
+					// Выходим из функции
+					return result;
+				}
+				// Если нужно вывести статистику загрузки
+				if(status != nullptr){
+					// Увеличиваем количество блоков
+					index++;
+					// Выводим результат если необходимо
+					status(u_short(index / float(count) * 100.0f));
+				}
+			}
+			/**
+			 * Блок извлечения списков детектируемых токенов
+			 */
+			{
+				// Список извлекаемых токенов
+				set <token_t> tokens;
+				// Извлекаем список токенов приводимых к <unk>
+				this->aspl->getValues("tokensUnknown", tokens);
+				// Если список токенов получен, устанавливаем его
+				if(!tokens.empty()) this->alm->setTokensUnknown(tokens);
+				// Извлекаем список запрещённых токенов
+				this->aspl->setValues("tokensDisable", tokens);
+				// Если список токенов получен, устанавливаем его
+				if(!tokens.empty()) this->alm->setTokensDisable(tokens);
+				// Если нужно вывести статистику загрузки
+				if(status != nullptr){
+					// Увеличиваем количество блоков
+					index++;
+					// Выводим результат если необходимо
+					status(u_short(index / float(count) * 100.0f));
+				}
+			}
+			/**
+			 * Блок извлечения списка аббревиатур
+			 */
+			{
+				// Список аббревиатур
+				std::set <size_t> abbrs;
+				// Извлекаем список аббревиатур
+				this->aspl->getValues("abbrs", abbrs);
+				// Если список аббревиатур получен, устанавливаем его
+				if(!abbrs.empty()) this->tokenizer->setAbbrs(abbrs);
+			}
+			/**
+			 * Блок извлечения списка доменных зон
+			 */
+			{
+				// Список доменных зон
+				std::set <string> zones;
+				// Извлекаем списко доменных зон
+				this->aspl->getStrings("dzones", zones);
+				// Если список доменных зон получен, устанавливаем его
+				if(!zones.empty()) this->alphabet->setzones(zones);
+			}
+			/**
+			 * Блок извлечения списка букв для восстановления слов состоящих из смешанных словарей
+			 */
+			{
+				// Список букв для восстановления
+				vector <string> letters;
+				// Устанавливаем полученный список букв
+				this->aspl->getStrings("substitutes", letters);
+				// Если список букв получен
+				if(!letters.empty()){
+					// Первое и второе слово
+					string first = "", second = "";
+					// Список букв для восстановления слов
+					map <string, string> substitutes;
+					// Переходим по всему списку
+					for(size_t i = 0; i < letters.size(); i++){
+						// Получаем первое слово
+						if((i % 2) == 0){
+							// Очищаем второе слово
+							second.clear();
+							// Запоминаем первое слово
+							first = move(letters.at(i));
+						// Если это второе слово
+						} else second = move(letters.at(i));
+						// Если второе слово получено
+						if(!first.empty() && !second.empty()) substitutes.emplace(first, second);
+					}
+					// Если список букв получен
+					if(!substitutes.empty()) this->alphabet->setSubstitutes(substitutes);
+				}
+			}
+			/**
+			 * Блок извлечения неизвестного слова и пользовательских токенов
+			 */
+			{
+				// Пользовательские токены
+				vector <string> utokens;
+				// Неизвестное слово и данные скрипта
+				string unknownWord = "", script = "";
+				// Считываем неизвестное слово если есть
+				this->aspl->get("unknown", unknownWord);
+				// Считываем пользовательские токены
+				this->aspl->getStrings("utokens", utokens);
+				// Если неизвестное слово получено
+				if(!unknownWord.empty()) this->alm->setUnknown(unknownWord);
+				// Если пользовательские токены получены
+				if(!utokens.empty()){
+					// Переходим по всему списку токенов
+					for(auto & token : utokens) this->alm->setUserToken(token);
+					// Извлекаем данные скрипта
+					this->aspl->get("utokenScript", script);
+					// Если скрипт получен
+					if(!script.empty()){
+						// Адрес файла скрипта
+						const string filename = "/tmp/almUserTokenScript.py";
+						// Открываем файл на запись
+						ofstream file(filename, ios::binary);
+						// Если файл открыт
+						if(file.is_open()){
+							// Выполняем запись скрипта в файл
+							file.write(script.data(), script.size());
+							// Закрываем файл
+							file.close();
+							// Устанавливаем адрес файла скрипта
+							this->alm->setUserTokenScript(filename);
+						}
+					// Если скрипт не получен
+					} else {
+						// Очищаем пользовательские токены
+						this->alm->clearUserTokens();
+						// Выполняем логирование
+						if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - script user token is broken");
+					}
+				}
+				// Извлекаем данные скрипта предобработки
+				this->aspl->get("wordScript", script);
+				// Если скрипт получен
+				if(!script.empty()){
+					// Адрес файла скрипта
+					const string filename = "/tmp/almWordScript.py";
+					// Открываем файл на запись
+					ofstream file(filename, ios::binary);
+					// Если файл открыт
+					if(file.is_open()){
+						// Выполняем запись скрипта в файл
+						file.write(script.data(), script.size());
+						// Закрываем файл
+						file.close();
+						// Устанавливаем адрес файла скрипта
+						this->alm->setWordScript(filename);
+					}
+				}
+				// Если нужно вывести статистику загрузки
+				if(status != nullptr){
+					// Увеличиваем количество блоков
+					index++;
+					// Выводим результат если необходимо
+					status(u_short(index / float(count) * 100.0f));
+				}
+				// Выполняем инициализацию скриптов языковой модели
+				this->alm->initPython();
+			}
+			/**
+			 * Блок извлечения черного и белого списков
+			 */
+			{
+				// Список идентификаторов слов
+				set <size_t> words;
+				// Выполняем извлечение чёрный список слов
+				this->aspl->getValues("badwords", words);
+				// Если список слов получен
+				if(!words.empty()) this->alm->setBadwords(words);
+				// Выполняем извлечение белого списка слов
+				this->aspl->getValues("goodwords", words);
+				// Если список слов получен
+				if(!words.empty()) this->alm->setGoodwords(words);
+				// Если нужно вывести статистику загрузки
+				if(status != nullptr){
+					// Увеличиваем количество блоков
+					index++;
+					// Выводим результат если необходимо
+					status(u_short(index / float(count) * 100.0f));
+				}
+			}
+			/**
+			 * Блок извлечения списка флагов опций
+			 */
+			{
+				// Список опций
+				u_int options = 0;
+				// Выполняем извлечение списка опций
+				this->aspl->get("options", options);
+				// Устанавливаем опции модуля
+				if(options > 0){
+					// Флаги параметров
+					bitset <9> opt = options;
+					// Устанавливаем все возможные опции языковой модели
+					if(opt.test((u_short) toolkit_t::options_t::debug))      this->alm->setOption(alm_t::options_t::debug);
+					if(opt.test((u_short) toolkit_t::options_t::onlyGood))   this->alm->setOption(alm_t::options_t::onlyGood);
+					if(opt.test((u_short) toolkit_t::options_t::mixdicts))   this->alm->setOption(alm_t::options_t::mixdicts);
+					if(opt.test((u_short) toolkit_t::options_t::confidence)) this->alm->setOption(alm_t::options_t::confidence);
+				}
+				// Если нужно вывести статистику загрузки
+				if(status != nullptr){
+					// Увеличиваем количество блоков
+					index++;
+					// Выводим результат если необходимо
+					status(u_short(index / float(count) * 100.0f));
+				}
+			}
+			/**
+			 * Блок извлечения данных словаря и arpa
+			 */
+			{
+				// Буфер бинарных данных словаря
+				vector <char> buffer;
+				// Флаг содержания в словаре только данных arpa
+				bool onlyArpa = false;
+				// Извлекаем флаг содержания в словаре только данных arpa
+				this->aspl->get("onlyArpa", onlyArpa);
+				// Если флаг установлен, устанавливаем его
+				if(onlyArpa) this->setFlag(flag_t::onlyArpa);
+				// Префиксы словаря и arpa
+				const string prefixVocab = "vocab_", prefixArpa = "arpa_";
+				// Переходим по всему списку слов словаря
+				for(size_t i = 1; i <= vocabCount; i++){
+					// Извлекаем бинарные данные словаря
+					this->aspl->get(prefixVocab + to_string(i), buffer, !this->meta.password.empty());
+					// Если бинарные данные словаря получены
+					if(!buffer.empty()) this->alm->setVocab(buffer);
+					// Если нужно вывести статистику загрузки
+					if(status != nullptr){
+						// Увеличиваем количество блоков
+						index++;
+						// Выводим результат если необходимо
+						status(u_short(index / float(count) * 100.0f));
+					}
+				}
+				// Переходим по всему списку данных arpa
+				for(size_t i = 1; i <= arpaCount; i++){
+					// Извлекаем бинарные данные arpa
+					this->aspl->get(prefixArpa + to_string(i), buffer, !this->meta.password.empty());
+					// Если бинарные данные arpa получены
+					if(!buffer.empty()) this->alm->setBin(buffer);
+					// Если нужно вывести статистику загрузки
+					if(status != nullptr){
+						// Увеличиваем количество блоков
+						index++;
+						// Выводим результат если необходимо
+						status(u_short(index / float(count) * 100.0f));
+					}
+				}
+			}
+		}
+	// Выводим сообщение об ошибке
+	} else if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - dictionary file is wrong");
+	// Выводим результат
+	return result;
+}
+/**
+ * readToolkit Метод чтения данных словаря из файла в объект toolkit
+ * @param status статус расёта
+ * @param info   выводить только информацию о словаре
+ */
+const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, const bool info) noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Индекс выполнения загрузки и общее количество данных
@@ -245,7 +610,7 @@ const bool anyks::AbLM::read(function <void (const u_short)> status, const bool 
 	// Количество основных блоков данных
 	size_t vocabCount = 0, arpaCount = 0;
 	// Выполняем чтение данных словаря
-	if(this->aspl->read() > -1){
+	if((this->aspl->read() > -1) && (this->toolkit != nullptr)){
 		// Тип шифрования файла
 		u_short aes = 0;
 		// Извлекаем тип шифрования
@@ -766,6 +1131,14 @@ void anyks::AbLM::info() const noexcept {
 	}
 }
 /**
+ * setAlm Метод установки объекта языковой модели
+ * @param alm объект языковой модели для установки
+ */
+void anyks::AbLM::setAlm(alm_t * alm) noexcept {
+	// Устанавливаем объект языковой модели
+	this->alm = alm;
+}
+/**
  * setMeta Метод установки метаданных в формате json
  * @param meta метаданные в формате json
  */
@@ -853,6 +1226,26 @@ void anyks::AbLM::setTokenizer(tokenizer_t * tokenizer) noexcept {
 void anyks::AbLM::setFilename(const string & filename) noexcept {
 	// Устанавливаем имя файла
 	if(!filename.empty()) this->filename = filename;
+}
+/**
+ * AbLM Конструктор
+ * @param filename  адрес файла словаря
+ * @param alm       объект языковой модели для установки
+ * @param alphabet  объект словаря для установки
+ * @param tokenizer объект токенизатора
+ * @param logifle   адрес файла для вывода отладочной информации
+ */
+anyks::AbLM::AbLM(const string & filename, alm_t * alm, alphabet_t * alphabet, tokenizer_t * tokenizer, const char * logfile) noexcept {
+	// Устанавливаем объект языковой модели
+	this->setAlm(alm);
+	// Устанавливаем адрес файла логов
+	this->setLogfile(logfile);
+	// Устанавливаем имя файла
+	this->setFilename(filename);
+	// Устанавливаем объект алфавита
+	this->setAlphabet(alphabet);
+	// Устанавливаем объект токенизатора
+	this->setTokenizer(tokenizer);
 }
 /**
  * AbLM Конструктор

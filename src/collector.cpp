@@ -67,27 +67,34 @@ void anyks::Collector::initPython(){
  * @return адрес созданного каталога
  */
 const string & anyks::Collector::createDir() const noexcept {
-	// Создаем буфер для хранения даты
-	char date[80];
 	// Название каталога для собранных файлов
-	static const string dirName = "./alm_";
-	// Добавляем в название каталога штамп времени
-	// Получаем текущее время
-	time_t timeStamp = time(nullptr);
-	// Заполняем его нулями
-	memset(date, 0, sizeof(date));
-	// Получаем структуру локального времени
-	struct tm * timeinfo = localtime(&timeStamp);
-	// Создаем формат полученного времени
-	const string & dateformat = "%m-%d-%Y_%H-%M-%S";
-	// Копируем в буфер полученную дату и время
-	const int length = strftime(date, sizeof(date), dateformat.c_str(), timeinfo);
-	// Если дата создана
-	if(length > 0){
-		// Добавляем дату в адрес каталога
-		const_cast <string *> (&dirName)->append(date, length);
-		// Если каталога не существует, создаём его
-		if(!fsys_t::isdir(dirName)) fsys_t::mkdir(dirName);
+	static const string dirName = "";
+	// Если разрешено сохранять промежуточные результаты
+	if(this->intermed){
+		// Создаем буфер для хранения даты
+		char date[80];
+		// Добавляем в название каталога штамп времени
+		// Получаем текущее время
+		time_t timeStamp = time(nullptr);
+		// Заполняем его нулями
+		memset(date, 0, sizeof(date));
+		// Получаем структуру локального времени
+		struct tm * timeinfo = localtime(&timeStamp);
+		// Создаем формат полученного времени
+		const string & dateformat = "%m-%d-%Y_%H-%M-%S";
+		// Копируем в буфер полученную дату и время
+		const int length = strftime(date, sizeof(date), dateformat.c_str(), timeinfo);
+		// Если дата создана
+		if(length > 0){
+			// Получаем данные строки
+			string * dir = const_cast <string *> (&dirName);
+			// Добавляем префикс каталога
+			dir->append("./alm_");
+			// Добавляем дату в адрес каталога
+			dir->append(date, length);
+			// Если каталога не существует, создаём его
+			if(!fsys_t::isdir(dirName)) fsys_t::mkdir(dirName);
+		}
 	}
 	// Выводим результат
 	return dirName;
@@ -153,6 +160,10 @@ void anyks::Collector::train(const string & filename, const list <string> & text
 	if(!filename.empty() && !text.empty() && (this->tpool != nullptr)){
 		// Добавляем в тредпул новое задание на обработку
 		this->tpool->push([this](const string filename, const list <string> text, const size_t idd){
+			// Общее количество данных собранное этим потоком
+			size_t size = 0;
+			// Получаем максимальное значение общего размера
+			const float maxSize = (this->dataSize + ceil(1 * this->dataSize / 100.0f));
 			// Получаем копию объекта тулкита
 			toolkit_t toolkit(this->alphabet, this->tokenizer, this->order);
 			// Устанавливаем log файл
@@ -192,12 +203,14 @@ void anyks::Collector::train(const string & filename, const list <string> & text
 			for(auto & str : text){
 				// Добавляем полученную строку текста
 				toolkit.addText(str, idd);
+				// Считаем общий размер данных обработанное данным процессом
+				size += str.size();
 				// Если отладка включена, выводим индикатор загрузки
 				if(this->debug > 0){
 					// Общий полученный размер данных
-					this->allSize += str.size();
+					this->allSize.store(this->allSize + str.size(), memory_order_relaxed);
 					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / float(this->dataSize) * 100.0f);
+					this->status = u_short(this->allSize / maxSize * 100.0f);
 					// Если процентное соотношение изменилось
 					if(this->rate != this->status){
 						// Запоминаем текущее процентное соотношение
@@ -210,10 +223,71 @@ void anyks::Collector::train(const string & filename, const list <string> & text
 					}
 				}
 			}
-			// Экспортируем полученные данные карты
-			toolkit.writeMap(filename + to_string(idd) + ".map");
-			// Экспортируем полученные данные словаря
-			toolkit.writeVocab(filename + to_string(idd) + ".vocab");
+			// Блокируем поток
+			this->locker.lock();
+			// Получаем минимальный размер оставшихся данных
+			const float minSize = (1 * size / 100.0f);
+			// Получаем данные статистики словаря
+			const auto & stat1 = toolkit.getStatistic();
+			// Получаем данные статистики основного словаря
+			const auto & stat2 = this->toolkit->getStatistic();
+			// Увеличиваем статистику основного словаря
+			this->toolkit->getStatistic(stat1.first + stat2.first, stat1.second + stat2.second);
+			// Считываем все слова словаря
+			toolkit.words([idd, minSize, maxSize, this](const word_t & word, const size_t idw, const size_t size){
+				// Добавляем слово в словарь
+				this->toolkit->addWord(word, idw, idd);
+				// Если отладка включена, выводим индикатор загрузки
+				if(this->debug > 0){
+					// Общий полученный размер данных
+					this->allSize.store(this->allSize + (size / (minSize / 2)), memory_order_relaxed);
+					// Подсчитываем статус выполнения
+					this->status = u_short(this->allSize / maxSize * 100.0f);
+					// Если процентное соотношение изменилось
+					if(this->rate != this->status){
+						// Запоминаем текущее процентное соотношение
+						this->rate.store(this->status, memory_order_relaxed);
+						// Отображаем ход процесса
+						switch(this->debug){
+							case 1: this->pss.update(this->status); break;
+							case 2: this->pss.status(this->status); break;
+						}
+					}
+				}
+				// Разрешаем перебор остальных слов
+				return true;
+			});
+			// Извлекаем n-граммы
+			toolkit.saveArpa([idd, minSize, maxSize, this](const vector <char> & buffer, const u_short status){
+				// Загружаем данные n-граммы
+				this->toolkit->appendArpa(buffer, idd);
+				// Если отладка включена, выводим индикатор загрузки
+				if(this->debug > 0){
+					// Общий полученный размер данных
+					this->allSize.store(this->allSize + (100 / (minSize / 2)), memory_order_relaxed);
+					// Подсчитываем статус выполнения
+					this->status = u_short(this->allSize / maxSize * 100.0f);
+					// Если процентное соотношение изменилось
+					if(this->rate != this->status){
+						// Запоминаем текущее процентное соотношение
+						this->rate.store(this->status, memory_order_relaxed);
+						// Отображаем ход процесса
+						switch(this->debug){
+							case 1: this->pss.update(this->status); break;
+							case 2: this->pss.status(this->status); break;
+						}
+					}
+				}
+			});
+			// Разблокируем поток
+			this->locker.unlock();
+			// Если нужно вывести промежуточные результаты
+			if(this->intermed){
+				// Экспортируем полученные данные карты
+				toolkit.writeMap(filename + to_string(idd) + ".map");
+				// Экспортируем полученные данные словаря
+				toolkit.writeVocab(filename + to_string(idd) + ".vocab");
+			}
 		}, filename, text, idd);
 		// Получаем объект текста
 		list <string> * obj = const_cast <list <string> *> (&text);
@@ -240,12 +314,12 @@ void anyks::Collector::setDebug(const u_short debug) noexcept {
 	this->debug = debug;
 }
 /**
- * setAutoClean Метод установки флага автоочистки временных данных
+ * setIntermed Метод установки флага вывода промежуточных результатов
  * @param flag значение флага для устаноки
  */
-void anyks::Collector::setAutoClean(const bool flag) noexcept {
-	// Устанавливаем флаг авто-очистки
-	this->cleartmp = flag;
+void anyks::Collector::setIntermed(const bool flag) noexcept {
+	// Устанавливаем флаг вывода промежуточных результатов
+	this->intermed = flag;
 }
 /**
  * setToolkit Метод установки объекта тулкита
@@ -377,76 +451,6 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 			}
 			// Завершаем работу тредпула
 			this->finish();
-			// Если отладка включена, выводим индикатор загрузки
-			if(this->debug > 0){
-				// Сбрасываем общий размер собранных данных
-				this->allSize = 0;
-				// Отображаем ход процесса
-				switch(this->debug){
-					case 1: this->pss.update(100); break;
-					case 2: this->pss.status(100); break;
-				}
-				// Очищаем предыдущий прогресс-бар
-				this->pss.clear();
-				// Устанавливаем заголовки прогресс-бара
-				this->pss.title("Read vocab files", "Read vocab files is done");
-				// Выводим индикатор прогресс-бара
-				switch(this->debug){
-					case 1: this->pss.update(); break;
-					case 2: this->pss.status(); break;
-				}
-			}
-			// Переходим по всему списку словарей в каталоге
-			fsys_t::rdir(dir, "vocab", [this](const string & filename, const uintmax_t dirSize) noexcept {
-				// Выполняем загрузку файла словаря vocab
-				this->toolkit->readVocab(filename);
-				// Если отладка включена, выводим индикатор загрузки
-				if(this->debug > 0){
-					// Устанавливаем название файла
-					this->pss.description(filename);
-					// Общий полученный размер данных
-					this->allSize += fsys_t::fsize(filename);
-					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / float(dirSize) * 100.0f);
-					// Если процентное соотношение изменилось
-					if(this->rate != this->status){
-						// Запоминаем текущее процентное соотношение
-						this->rate.store(this->status, memory_order_relaxed);
-						// Отображаем ход процесса
-						switch(this->debug){
-							case 1: this->pss.update(this->status); break;
-							case 2: this->pss.status(this->status); break;
-						}
-					}
-				}
-			});
-			// Если отладка включена, выводим индикатор загрузки
-			if(this->debug > 0){
-				// Отображаем ход процесса
-				switch(this->debug){
-					case 1: this->pss.update(100); break;
-					case 2: this->pss.status(100); break;
-				}
-				// Очищаем предыдущий прогресс-бар
-				this->pss.clear();
-				// Устанавливаем заголовки прогресс-бара
-				this->pss.title("Read map files", "Read map files is done");
-				// Выводим индикатор прогресс-бара
-				switch(this->debug){
-					case 1: this->pss.update(); break;
-					case 2: this->pss.status(); break;
-				}
-			}
-			// Выполняем загрузку карт последовательностей
-			this->toolkit->readMaps(dir, [this](const u_short status) noexcept {
-				// Отображаем ход процесса
-				switch(this->debug){
-					case 1: this->pss.update(status); break;
-					case 2: this->pss.status(status); break;
-				}
-			});
-			// Если нужно удалить временный каталог, удаляем его
-			if(this->cleartmp) fsys_t::rmdir(dir);
 			// Отображаем ход процесса
 			switch(this->debug){
 				case 1: this->pss.update(100); break;
@@ -540,76 +544,6 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 			}
 			// Завершаем работу тредпула
 			this->finish();
-			// Если отладка включена, выводим индикатор загрузки
-			if(this->debug > 0){
-				// Сбрасываем общий размер собранных данных
-				this->allSize = 0;
-				// Отображаем ход процесса
-				switch(this->debug){
-					case 1: this->pss.update(100); break;
-					case 2: this->pss.status(100); break;
-				}
-				// Очищаем предыдущий прогресс-бар
-				this->pss.clear();
-				// Устанавливаем заголовки прогресс-бара
-				this->pss.title("Read vocab files", "Read vocab files is done");
-				// Выводим индикатор прогресс-бара
-				switch(this->debug){
-					case 1: this->pss.update(); break;
-					case 2: this->pss.status(); break;
-				}
-			}
-			// Переходим по всему списку словарей в каталоге
-			fsys_t::rdir(dir, "vocab", [this](const string & filename, const uintmax_t dirSize) noexcept {
-				// Выполняем загрузку файла словаря vocab
-				this->toolkit->readVocab(filename);
-				// Если отладка включена, выводим индикатор загрузки
-				if(this->debug > 0){
-					// Устанавливаем название файла
-					this->pss.description(filename);
-					// Общий полученный размер данных
-					this->allSize += fsys_t::fsize(filename);
-					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / float(dirSize) * 100.0f);
-					// Если процентное соотношение изменилось
-					if(this->rate != this->status){
-						// Запоминаем текущее процентное соотношение
-						this->rate.store(this->status, memory_order_relaxed);
-						// Отображаем ход процесса
-						switch(this->debug){
-							case 1: this->pss.update(this->status); break;
-							case 2: this->pss.status(this->status); break;
-						}
-					}
-				}
-			});
-			// Если отладка включена, выводим индикатор загрузки
-			if(this->debug > 0){
-				// Отображаем ход процесса
-				switch(this->debug){
-					case 1: this->pss.update(100); break;
-					case 2: this->pss.status(100); break;
-				}
-				// Очищаем предыдущий прогресс-бар
-				this->pss.clear();
-				// Устанавливаем заголовки прогресс-бара
-				this->pss.title("Read map files", "Read map files is done");
-				// Выводим индикатор прогресс-бара
-				switch(this->debug){
-					case 1: this->pss.update(); break;
-					case 2: this->pss.status(); break;
-				}
-			}
-			// Выполняем загрузку карт последовательностей
-			this->toolkit->readMaps(dir, [this](const u_short status) noexcept {
-				// Отображаем ход процесса
-				switch(this->debug){
-					case 1: this->pss.update(status); break;
-					case 2: this->pss.status(status); break;
-				}
-			});
-			// Если нужно удалить временный каталог, удаляем его
-			if(this->cleartmp) fsys_t::rmdir(dir);
 			// Отображаем ход процесса
 			switch(this->debug){
 				case 1: this->pss.update(100); break;

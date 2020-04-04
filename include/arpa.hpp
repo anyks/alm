@@ -97,7 +97,7 @@ namespace anyks {
 				/**
 				 * Seq Конструктор
 				 */
-				Seq() : idw(idw_t::NIDW), oc(0), dc(0), ups(0), weight(log(0)), backoff(0.0f) {}
+				Seq() : weight(log(0)), backoff(0.0f), idw(idw_t::NIDW), oc(0), dc(0), ups(0) {}
 			} __attribute__((packed)) seq_t;
 		private:
 			/**
@@ -126,11 +126,11 @@ namespace anyks {
 			/**
 			 * Структура словаря языковой модели временного словаря
 			 */
-			typedef struct Vocab: std::map <size_t, Vocab> {
+			typedef struct Data: std::map <size_t, Data> {
 				/**
 				 * Родительский объект
 				 */
-				const Vocab * father;
+				const Data * father;
 				/**
 				 * Частота последовательности и
 				 * обратная частота последовательности
@@ -148,29 +148,29 @@ namespace anyks {
 				 */
 				std::map <size_t, size_t> uppers;
 				/**
-				 * Vocab Конструктор
+				 * Data Конструктор
 				 */
-				Vocab() : oc(0), dc(0), idw(idw_t::NIDW), idd(idw_t::NIDW), weight(log(0)), backoff(0.0f), father(nullptr) {}
-			} vocab_t;
+				Data() : father(nullptr), weight(log(0)), backoff(0.0f), oc(0), dc(0), idw(idw_t::NIDW), idd(idw_t::NIDW) {}
+			} data_t;
 		private:
 			// Максимальный размер n-граммы
 			u_short size = DEFNGRAM;
 			// Размер текущей n-граммы
 			mutable u_short gram = 1;
-			// Объект log файла
-			const char * logfile = nullptr;
 		private:
 			// Флаги параметров
 			bitset <6> options;
+			// Словарь языковой модели
+			mutable data_t data;
 			// Параметры расчёта
 			mutable param_t param;
-			// Словарь языковой модели
-			mutable vocab_t vocab;
 			// Блок шагов (список дочерних грамм для текущей n-граммы)
-			mutable std::map <u_short, list <vocab_t *>> ngrams;
+			mutable std::map <u_short, list <data_t *>> ngrams;
 		private:
 			// Функция извлечения слова по его идентификатору
 			words_t getWord = nullptr;
+			// Объект log файла
+			const char * logfile = nullptr;
 			// Объект основного алфавита
 			const alphabet_t * alphabet = nullptr;
 		protected:
@@ -189,14 +189,14 @@ namespace anyks {
 			 * @param context контекст которому принадлежит слово
 			 * @return        идентификатор первого слова в n-грамме
 			 */
-			const size_t midw(const vocab_t * context) const noexcept;
+			const size_t midw(const data_t * context) const noexcept;
 		protected:
 			/**
 			 * uppers Метод извлечения регистра слова
 			 * @param context контекст n-граммы
 			 * @return        регистр слова
 			 */
-			const pair_t uppers(const vocab_t * context) const noexcept;
+			const pair_t uppers(const data_t * context) const noexcept;
 			/**
 			 * uppers Метод извлечения регистра слова
 			 * @param  ups список регистров для выбора
@@ -210,7 +210,7 @@ namespace anyks {
 			 * @param ngram контекст для расчёта
 			 * @return      сумма всех весов дочерних грамм
 			 */
-			const float weights(const vocab_t * ngram) const noexcept;
+			const float weights(const data_t * ngram) const noexcept;
 			/**
 			 * backoff Метод подсчёта обратной частоты n-граммы
 			 * @param idw     идентификатор текущего слова
@@ -218,7 +218,7 @@ namespace anyks {
 			 * @param gram    размер n-граммы для отката
 			 * @return        результат расчёта обратной частоты
 			 */
-			const float backoff(const size_t idw, const vocab_t * context, const u_short gram) const noexcept;
+			const float backoff(const size_t idw, const data_t * context, const u_short gram) const noexcept;
 		protected:
 			/**
 			 * isOption Метод проверки наличия опции
@@ -238,7 +238,7 @@ namespace anyks {
 			 * @param ngram контекст для расчёта
 			 * @return      результат расчёта
 			 */
-			const bool backoffs(const u_short gram, vocab_t * ngram) const noexcept;
+			const bool backoffs(const u_short gram, data_t * ngram) const noexcept;
 			/**
 			 * checkIdw Метод поиска наличия слова в корпусе
 			 * @param idw  идентификатор слова для поиска (кроме юниграммы)
@@ -253,14 +253,14 @@ namespace anyks {
 			 * @param numerator   разность частот n-грамм
 			 * @param denominator разность частот отката n-грамм
 			 */
-			const bool compute(vocab_t * ngram, const u_short gram, double & numerator, double & denominator) const noexcept;
+			const bool compute(data_t * ngram, const u_short gram, double & numerator, double & denominator) const noexcept;
 		protected:
 			/**
 			 * contextFn Метод получения контекста
 			 * @param context контекст n-граммы
 			 * @return        текст контекста n-граммы
 			 */
-			const string context(const vocab_t * context) const noexcept;
+			const string context(const data_t * context) const noexcept;
 			/**
 			 * word Метод извлечения слова по его идентификатору
 			 * @param idw идентификатор слова
@@ -286,17 +286,16 @@ namespace anyks {
 			 */
 			void fixupProbs(const u_short gram) const noexcept;
 			/**
-			 * Метод получения регистров слов для юниграммы
-			 * @param idw    идентификатор слова для которого требуется получить регистры
+			 * Метод получения регистров слов
 			 * @param uppers список регистров слова
 			 */
-			void uniUppers(const size_t idw, std::set <size_t> & uppers) const noexcept;
+			void uniUppers(multimap <size_t, size_t> & uppers) const noexcept;
 			/**
 			 * get Метод извлечения списка n-грамм указанного размера
 			 * @param gram   размер n-граммы список грамм которой нужно извлечь
 			 * @param ngrams указатель на список запрашиваемых n-грамм
 			 */
-			void get(const u_short gram, list <vocab_t *> * ngrams = nullptr) const noexcept;
+			void get(const u_short gram, list <data_t *> * ngrams = nullptr) const noexcept;
 		private:
 			/**
 			 * nodiscount Метод проверки на необходимость расчёта скидки
@@ -374,15 +373,15 @@ namespace anyks {
 			void removeWord(const size_t idw) noexcept;
 		public:
 			/**
-			 * setWordMethod Метод установки функции получения слова
-			 * @param word функция получения слова
-			 */
-			void setWordMethod(words_t word) noexcept;
-			/**
 			 * setSize Метод установки максимального размера n-граммы
 			 * @param size максимальный размер n-граммы
 			 */
 			void setSize(const u_short size) noexcept;
+			/**
+			 * setWordMethod Метод установки функции получения слова
+			 * @param word функция получения слова
+			 */
+			void setWordMethod(words_t word) noexcept;
 			/**
 			 * setLogfile Метод установка файла для вывода логов
 			 * @param logifle адрес файла для вывода отладочной информации
@@ -398,6 +397,7 @@ namespace anyks {
 			 * @param alphabet объект алфавита
 			 */
 			void setAlphabet(const alphabet_t * alphabet) noexcept;
+		public:
 			/**
 			 * del Метод удаления последовательности
 			 * @param seq последовательность слов для удаления
@@ -410,11 +410,42 @@ namespace anyks {
 			 */
 			void inc(const vector <pair_t> & seq, const float value) const noexcept;
 			/**
-			 * load Метод загрузки бинарных данных в словарь
+			 * addBin Метод добавления бинарных данных в словарь
+			 * @param buffer буфер с бинарными данными
+			 * @param idd    идентификатор документа в котором получена n-грамма
+			 */
+			void addBin(const vector <char> & buffer, const size_t idd = 0) const noexcept;
+			/**
+			 * setBin Метод установки бинарных данных в словарь
 			 * @param buffer буфер с бинарными данными
 			 * @param arpa   нужно добавить только данные arpa
 			 */
-			void load(const vector <char> & buffer, const bool arpa = false) const noexcept;
+			void setBin(const vector <char> & buffer, const bool arpa = false) const noexcept;
+			/**
+			 * arpa Метод извлечения данных arpa
+			 * @param gram     размер n-граммы для извлечения
+			 * @param callback функция обратного вызова
+			 */
+			void arpa(const u_short gram, function <void (const string &)> callback) const noexcept;
+			/**
+			 * grams Метод извлечения данных n-грамм в текстовом виде
+			 * @param gram     размер n-граммы для извлечения
+			 * @param callback функция обратного вызова
+			 */
+			void grams(const u_short gram, function <void (const string &)> callback) const noexcept;
+			/**
+			 * getBin Метод извлечения данных arpa в бинарном виде
+			 * @param arpa     флаг извлечения только arpa
+			 * @param callback функция обратного вызова
+			 */
+			void getBin(const bool arpa, function <void (const vector <char> &, const u_short)> callback) const noexcept;
+			/**
+			 * map Метод извлечения карты последовательностей в виде CSV
+			 * @param callback функция обратного вызова
+			 * @param delim    разделитель последовательностей
+			 */
+			void map(function <void (const string &, const u_short)> callback, const string & delim = "|") const noexcept;
+		public:
 			/**
 			 * set Метод установки последовательности в словарь
 			 * @param seq последовательность слов для установки
@@ -434,6 +465,7 @@ namespace anyks {
 			 * @param backoff обратная частота документа из файла arpa
 			 */
 			void set(const vector <pair_t> & seq, const float weight, const float backoff) const noexcept;
+		public:
 			/**
 			 * add Метод добавления последовательности в словарь
 			 * @param seq список идентификаторов слов которые нужно добавить
@@ -454,13 +486,7 @@ namespace anyks {
 			 * @param rest необходимо сделать переоценку встречаемости (необходимо если объединяются две карты с разными размерами n-грамм)
 			 */
 			void add(const vector <seq_t> & seq, const size_t idd = 0, const bool rest = false) const noexcept;
-			/**
-			 * prune Метод прунинга языковой модели
-			 * @param threshold порог частоты прунинга
-			 * @param mingram   значение минимальной n-граммы за которую нельзя прунить
-			 * @param status    функция вывода статуса обучения
-			 */
-			void prune(const double threshold = 0.003, const u_short mingram = 0, function <void (const u_short)> status = nullptr) const noexcept;
+		public:
 			/**
 			 * sweep Метод удаления низкочастотных n-грамм arpa
 			 * @param status статус расёта
@@ -477,29 +503,12 @@ namespace anyks {
 			 */
 			void repair(function <void (const u_short)> status = nullptr) const noexcept;
 			/**
-			 * data Метод извлечения данных arpa
-			 * @param gram     размер n-граммы для извлечения
-			 * @param callback функция обратного вызова
+			 * prune Метод прунинга языковой модели
+			 * @param threshold порог частоты прунинга
+			 * @param mingram   значение минимальной n-граммы за которую нельзя прунить
+			 * @param status    функция вывода статуса обучения
 			 */
-			void data(const u_short gram, function <void (const string &)> callback) const noexcept;
-			/**
-			 * grams Метод извлечения данных n-грамм в текстовом виде
-			 * @param gram     размер n-граммы для извлечения
-			 * @param callback функция обратного вызова
-			 */
-			void grams(const u_short gram, function <void (const string &)> callback) const noexcept;
-			/**
-			 * save Метод извлечения данных arpa в бинарном виде
-			 * @param arpa     флаг извлечения только arpa
-			 * @param callback функция обратного вызова
-			 */
-			void save(const bool arpa, function <void (const vector <char> &, const u_short)> callback) const noexcept;
-			/**
-			 * map Метод извлечения карты последовательностей в виде CSV
-			 * @param callback функция обратного вызова
-			 * @param delim    разделитель последовательностей
-			 */
-			void map(function <void (const string &, const u_short)> callback, const string & delim = "|") const noexcept;
+			void prune(const double threshold = 0.003, const u_short mingram = 0, function <void (const u_short)> status = nullptr) const noexcept;
 		public:
 			/**
 			 * Arpa Конструктор
@@ -524,7 +533,7 @@ namespace anyks {
 			/**
 			 * ~Arpa Деструктор
 			 */
-			~Arpa() noexcept;
+			virtual ~Arpa() noexcept;
 	} arpa_t;
 	/**
 	 * Класс GoodTuring
