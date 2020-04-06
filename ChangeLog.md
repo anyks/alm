@@ -3,7 +3,7 @@
 ## 2.0.1 Optimization and bug fixes
 
 ## 2.0.0 New methods and bug fixes
-### Mthods
+### Methods
 - **ppl** - perplexity calculation method
 - **checktext** - text validation method
 - **fixcase** - words case correction method
