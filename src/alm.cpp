@@ -683,9 +683,14 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 	// Результат работы функции
 	ppl_t result;
 	// Если текст передан
-	if(!this->arpa.empty() && (seq.size() > 2) && (this->size > 0) && (seq.front() == size_t(token_t::start)) && (seq.back() == size_t(token_t::finish))){
+	if(!this->arpa.empty() && (seq.size() > 2) && (this->size > 0) &&
+	(seq.front() == size_t(token_t::start)) && (seq.back() == size_t(token_t::finish))){
+		// Позиция n-граммы в контексте
+		size_t index = 0;
 		// Количество переданных последовательностей
 		const size_t count = seq.size();
+		// Текст данных отладки собранных при расчёте
+		map <size_t, pair <string, string>> debugMessages;
 		// Если последовательность в виде юниграммы
 		if(count == 3){
 			// Получаем идентификатор слова
@@ -717,10 +722,13 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 			 * @param gram   граммность n-граммы для которой был произведён расчёт
 			 * @param weight полученный вес n-граммы при расчёте
 			 * @param delim  проверочный делитель n-граммы
+			 * @param pos    позиция n-граммы в контексте
 			 */
-			auto debugFn = [this](const string & first, const string & second, const bool bigram, const u_short gram, const double weight, const double delim){
+			auto debugFn = [&debugMessages, this](const string & first, const string & second, const bool bigram, const u_short gram, const double weight, const double delim, const size_t pos){
 				// Выводим отладочную информацию
 				if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
+					// Результат работы функции
+					pair <string, string> result;
 					// Граммность n-граммы
 					string numGram = "OOV";
 					// Значение полученного веса
@@ -734,11 +742,9 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 						// Устанавливаем граммность
 						numGram = (to_string(gram) + "gram");
 					}
-					// Выводим сообщение отладки
-					this->alphabet->log(
+					// Формируем информационное сообщение
+					result.first = this->alphabet->format(
 						"p( %s | %s %s) \t= [%s] %4.6f [ %4.6f ] / %4.6f",
-						alphabet_t::log_t::info,
-						this->logfile,
 						second.c_str(),
 						first.c_str(),
 						(bigram ? "..." : ""),
@@ -748,10 +754,13 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 					// Выполняем округление делителя
 					const double value = (ceil((delim * 10000.0) + 0.5) / 10000.0);
 					// Если делитель не сходится к единице, выводим сообщение
-					if(fabs(value - 1.0) > 0.0009){
-						// Выводим сообщение отладки
-						this->alphabet->log("word probs for this context sum to %4.6f != 1", alphabet_t::log_t::warning, this->logfile, delim);
-					}
+					if(fabs(value - 1.0) > 0.0009) result.second = this->alphabet->format("word probs for this context sum to %4.6f != 1", delim);
+					// Блокируем поток
+					this->locker.lock();
+					// Добавляем в список отладки
+					debugMessages.emplace(pos, move(result));
+					// Разблокируем поток
+					this->locker.unlock();
 				}
 			};
 			/**
@@ -820,8 +829,9 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 			 * @param seq    последовательность слов для обработки
 			 * @param gram   граммность n-граммы для которой был произведён расчёт
 			 * @param weight полученный вес n-граммы при расчёте
+			 * @param pos    позиция n-граммы в контексте
 			 */
-			auto putDebugFn = [&debugFn, this](const vector <size_t> & seq, const u_short gram, const double weight) noexcept {
+			auto putDebugFn = [&debugFn, this](const vector <size_t> & seq, const u_short gram, const double weight, const size_t pos) noexcept {
 				// Если последовательность передана
 				if(!seq.empty() && (this->isOption(options_t::debug) || (this->logfile != nullptr))){
 					// Получившийся разделитель
@@ -859,7 +869,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 						}
 					}
 					// Выводим отладочную информацию
-					debugFn(first, second, isBigram, gram, weight, delim);
+					debugFn(first, second, isBigram, gram, weight, delim, pos);
 				}
 			};
 			// Сбрасываем значение результата
@@ -867,8 +877,9 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 			/**
 			 * runFn Функция запуска расчёта перплексии
 			 * @param seq последовательность слов для обработки
+			 * @param pos позиция n-граммы в контексте
 			 */
-			auto runFn = [&result, &calcFn, &putDebugFn, this](const vector <size_t> & seq){
+			auto runFn = [&result, &calcFn, &putDebugFn, this](const vector <size_t> & seq, const size_t pos){
 				// Выполняем проверку существования граммы
 				auto calc = calcFn(seq);
 				// Блокируем поток
@@ -882,7 +893,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 				// Разблокируем поток
 				this->locker.unlock();
 				// Выводим отладочную информацию
-				putDebugFn(seq, calc.first, calc.second);
+				putDebugFn(seq, calc.first, calc.second, pos);
 			};
 			// Выполняем инициализацию тредпула
 			this->tpool.init(this->threads);
@@ -891,7 +902,9 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 				// Получаем первую часть последовательности
 				tmp.assign(seq.begin(), seq.begin() + i);
 				// Добавляем в тредпул новое задание на обработку
-				this->tpool.push(runFn, tmp);
+				this->tpool.push(runFn, tmp, index);
+				// Увеличиваем смещение позиции
+				index++;
 			}
 			// Если есть ещё n-граммы
 			if(count >= this->size){
@@ -900,7 +913,9 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 					// Получаем первую часть последовательности
 					tmp.assign(seq.begin() + offset1, seq.begin() + offset2);
 					// Добавляем в тредпул новое задание на обработку
-					this->tpool.push(runFn, tmp);
+					this->tpool.push(runFn, tmp, index);
+					// Увеличиваем смещение позиции
+					index++;
 					// Увеличиваем смещение
 					offset1++;
 					offset2++;
@@ -930,6 +945,16 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 		result.ppl1 = ppl.second;
 		// Выводим отладочную информацию
 		if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
+			// Если список отладки сформирован
+			if(!debugMessages.empty()){
+				// Переходим по всему списку отладки
+				for(auto & mess : debugMessages){
+					// Выводим основное сообщение отладки
+					this->alphabet->log("%s", alphabet_t::log_t::info, this->logfile, mess.second.first.c_str());
+					// Если второе сообщение существует, выводим и его
+					if(!mess.second.second.empty()) this->alphabet->log("%s", alphabet_t::log_t::warning, this->logfile, mess.second.second.c_str());
+				}
+			}
 			// Выводим разделитель
 			if(this->isOption(options_t::debug)) cout << endl;
 			// Выводим сообщение отладки - количество слов
