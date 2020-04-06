@@ -39,7 +39,7 @@ namespace anyks {
 			progress_t pss;
 		private:
 			// Общий размер считанных данных
-			atomic <float> allSize{0};
+			atomic <double> allSize{0};
 			// Текущий статус прогресс-бара
 			atomic <u_short> status{0};
 			// Прошлый статус прогресс-бара

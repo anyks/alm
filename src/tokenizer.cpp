@@ -60,7 +60,7 @@ const size_t anyks::Tokenizer::fti(const double num, const u_short count) const 
 	// Результат работы функции
 	size_t result = 0;
 	// Если число больше 0
-	if(num > 0.0f){
+	if(num > 0.0){
 		// Если количество знаков после запятой не нулевой
 		if(count > 0) result = (num * pow(10, floor(count)));
 		// Если размер не указан
@@ -70,7 +70,7 @@ const size_t anyks::Tokenizer::fti(const double num, const u_short count) const 
 			// Расчёт текущего числа
 			size_t number = 0;
 			// Получаем текущее число
-			const float tmp = fmod(num, 1);
+			const double tmp = fmod(num, 1);
 			// Выполняем перебор чисел после запятой до нулей
 			for(size_t i = 10;; i *= 10){
 				// Выполняем смещение по числам после запятой

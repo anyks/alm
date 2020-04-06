@@ -130,7 +130,7 @@ const long anyks::Collector::getSize(const string & str) const noexcept {
 		// Размерность скорости
 		double dimension = 1;
 		// Получаем значение скорости
-		const double value = stof(match[1].str());
+		const double value = stod(match[1].str());
 		// Проверяем являются ли переданные данные байтами (8, 16, 32, 64, 128, 256, 512, 1024 ...)
 		const bool isbite = !fmod(value / 8, 2);
 		// Если это байты
@@ -163,7 +163,7 @@ void anyks::Collector::train(const string & filename, const list <string> & text
 			// Общее количество данных собранное этим потоком
 			size_t size = 0;
 			// Получаем максимальное значение общего размера
-			const float maxSize = (this->dataSize + ceil(1 * this->dataSize / 100.0f));
+			const double maxSize = (this->dataSize + ceil(1 * this->dataSize / 100.0));
 			// Получаем копию объекта тулкита
 			toolkit_t toolkit(this->alphabet, this->tokenizer, this->order);
 			// Устанавливаем log файл
@@ -210,7 +210,7 @@ void anyks::Collector::train(const string & filename, const list <string> & text
 					// Общий полученный размер данных
 					this->allSize.store(this->allSize + str.size(), memory_order_relaxed);
 					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / maxSize * 100.0f);
+					this->status = u_short(this->allSize / maxSize * 100.0);
 					// Если процентное соотношение изменилось
 					if(this->rate != this->status){
 						// Запоминаем текущее процентное соотношение
@@ -226,7 +226,7 @@ void anyks::Collector::train(const string & filename, const list <string> & text
 			// Блокируем поток
 			this->locker.lock();
 			// Получаем минимальный размер оставшихся данных
-			const float minSize = (1 * size / 100.0f);
+			const double minSize = (1 * size / 100.0);
 			// Получаем данные статистики словаря
 			const auto & stat1 = toolkit.getStatistic();
 			// Получаем данные статистики основного словаря
@@ -242,7 +242,7 @@ void anyks::Collector::train(const string & filename, const list <string> & text
 					// Общий полученный размер данных
 					this->allSize.store(this->allSize + (size / (minSize / 2)), memory_order_relaxed);
 					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / maxSize * 100.0f);
+					this->status = u_short(this->allSize / maxSize * 100.0);
 					// Если процентное соотношение изменилось
 					if(this->rate != this->status){
 						// Запоминаем текущее процентное соотношение
@@ -266,7 +266,7 @@ void anyks::Collector::train(const string & filename, const list <string> & text
 					// Общий полученный размер данных
 					this->allSize.store(this->allSize + (100 / (minSize / 2)), memory_order_relaxed);
 					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / maxSize * 100.0f);
+					this->status = u_short(this->allSize / maxSize * 100.0);
 					// Если процентное соотношение изменилось
 					if(this->rate != this->status){
 						// Запоминаем текущее процентное соотношение
@@ -417,7 +417,7 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 			// Если нужно произвести сегментацию файла
 			if(this->segments && (this->dataSize > this->segmentSize)){
 				// Если размер сегмента нулевой
-				if(this->segmentSize == 0) this->segmentSize = ceil(this->dataSize / float(this->threads));
+				if(this->segmentSize == 0) this->segmentSize = ceil(this->dataSize / double(this->threads));
 				// Выполняем считывание всех строк текста
 				fsys_t::rfile(filename, [&count, &size, &text, &dir, this](const string & str, const uintmax_t fileSize) noexcept {
 					// Если текст получен
@@ -502,7 +502,7 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 					// Устанавливаем название файла
 					if(this->debug > 0) this->pss.description(filename);
 					// Если размер сегмента нулевой
-					if(this->segmentSize == 0) this->segmentSize = ceil(this->dataSize / float(this->threads));
+					if(this->segmentSize == 0) this->segmentSize = ceil(this->dataSize / double(this->threads));
 					// Выполняем считывание всех строк текста
 					fsys_t::rfile(filename, [&count, &size, &text, &dir, this](const string & str, const uintmax_t fileSize) noexcept {
 						// Если текст получен

@@ -7,7 +7,7 @@
  */
 
 // Версия приложения
-#define ANYKS_VERSION "2.0.0"
+#define ANYKS_VERSION "2.0.1"
 // Версия словаря
 #define ANYKS_DICT_VERSION "1.0.0"
 // Название языковой модели
@@ -47,4 +47,4 @@
 // Длина n-грамм по умолчанию
 #define DEFNGRAM 3
 // Размер чанка буфера для чтения из файла
-#define BUFFER_CHUNK 0x19990// 0x3000
+#define BUFFER_CHUNK 0x19990 // 0x3000

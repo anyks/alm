@@ -192,7 +192,7 @@ const bool anyks::AbLM::write(function <void (const u_short)> status) noexcept {
 				// Увеличиваем количество записей
 				count++;
 				// Если нужно вывести статистику загрузки
-				if(status != nullptr) status(u_short(rate / float(200) * 100.0f));
+				if(status != nullptr) status(u_short(rate / double(200) * 100.0));
 				// Выполняем запись буфера словаря
 				this->aspl->set(prefixVocab + to_string(count), buffer, !this->meta.password.empty());
 			}
@@ -210,7 +210,7 @@ const bool anyks::AbLM::write(function <void (const u_short)> status) noexcept {
 				// Увеличиваем количество записей
 				count++;
 				// Если нужно вывести статистику загрузки
-				if(status != nullptr) status(u_short((rate + 100) / float(200) * 100.0f));
+				if(status != nullptr) status(u_short((rate + 100) / double(200) * 100.0));
 				// Выполняем запись буфера словаря
 				this->aspl->set(prefixArpa + to_string(count), buffer, !this->meta.password.empty());
 			}
@@ -241,7 +241,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 	// Результат работы функции
 	bool result = false;
 	// Индекс выполнения загрузки и общее количество данных
-	size_t index = 0, count = 5;
+	size_t index = 0, count = 6;
 	// Количество основных блоков данных
 	size_t vocabCount = 0, arpaCount = 0;
 	// Выполняем чтение данных словаря
@@ -351,7 +351,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -373,7 +373,32 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
+				}
+			}
+			/**
+			 * Блок извлечения размера n-граммы
+			 */
+			{
+				// Размер n-граммы
+				u_short size = 0;
+				// Выполняем чтение размера n-граммы
+				this->aspl->get("size", size);
+				// Устанавливаем размер n-граммы
+				if(size > 0) this->alm->setSize(size);
+				// Иначе выходим с ошибкой
+				else {
+					// Выполняем логирование
+					if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - size n-gram is wrong");
+					// Выходим из функции
+					return result;
+				}
+				// Если нужно вывести статистику загрузки
+				if(status != nullptr){
+					// Увеличиваем количество блоков
+					index++;
+					// Выводим результат если необходимо
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -495,7 +520,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 				// Выполняем инициализацию скриптов языковой модели
 				this->alm->initPython();
@@ -519,7 +544,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -545,7 +570,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -573,7 +598,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 						// Увеличиваем количество блоков
 						index++;
 						// Выводим результат если необходимо
-						status(u_short(index / float(count) * 100.0f));
+						status(u_short(index / double(count) * 100.0));
 					}
 				}
 				// Переходим по всему списку данных arpa
@@ -587,7 +612,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 						// Увеличиваем количество блоков
 						index++;
 						// Выводим результат если необходимо
-						status(u_short(index / float(count) * 100.0f));
+						status(u_short(index / double(count) * 100.0));
 					}
 				}
 			}
@@ -716,7 +741,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -738,7 +763,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -763,7 +788,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -885,7 +910,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -907,7 +932,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -925,7 +950,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -964,7 +989,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 			}
 			/**
@@ -997,7 +1022,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 					// Увеличиваем количество блоков
 					index++;
 					// Выводим результат если необходимо
-					status(u_short(index / float(count) * 100.0f));
+					status(u_short(index / double(count) * 100.0));
 				}
 				// Переходим по всему списку слов словаря
 				for(size_t i = 1; i <= vocabCount; i++){
@@ -1010,7 +1035,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 						// Увеличиваем количество блоков
 						index++;
 						// Выводим результат если необходимо
-						status(u_short(index / float(count) * 100.0f));
+						status(u_short(index / double(count) * 100.0));
 					}
 				}
 				// Переходим по всему списку данных arpa
@@ -1024,7 +1049,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 						// Увеличиваем количество блоков
 						index++;
 						// Выводим результат если необходимо
-						status(u_short(index / float(count) * 100.0f));
+						status(u_short(index / double(count) * 100.0));
 					}
 				}
 			}

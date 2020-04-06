@@ -328,6 +328,13 @@ int main(int argc, char * argv[]) noexcept {
 				alm_t alm(&alphabet, &tokenizer);
 				// Устанавливаем адрес файла для логирования
 				alm.setLogfile(env.get("log"));
+				// Если количество ядер передано
+				if(((value = env.get("threads")) != nullptr) &&
+				alphabet.isNumber(alphabet.convert(value))){
+					// Устанавливаем количество потоков
+					alm.setThreads(stoi(value));
+				// Иначе устанавливаем 1 поток
+				} else alm.setThreads(1);
 				// Устанавливаем режим отладки
 				if(debug == 2) alm.setOption(alm_t::options_t::debug);
 				// Разрешаем детектировать слова состоящее из смешанных словарей
@@ -573,7 +580,7 @@ int main(int argc, char * argv[]) noexcept {
 									// Общий полученный размер данных
 									size += text.size();
 									// Подсчитываем статус выполнения
-									status = u_short(size / float(fileSize) * 100.0f);
+									status = u_short(size / double(fileSize) * 100.0);
 									// Если процентное соотношение изменилось
 									if(rate != status){
 										// Запоминаем текущее процентное соотношение
@@ -652,7 +659,7 @@ int main(int argc, char * argv[]) noexcept {
 										// Общий полученный размер данных
 										size += text.size();
 										// Подсчитываем статус выполнения
-										status = u_short(size / float(dirSize) * 100.0f);
+										status = u_short(size / double(dirSize) * 100.0);
 										// Если процентное соотношение изменилось
 										if(rate != status){
 											// Запоминаем текущее процентное соотношение
@@ -735,7 +742,7 @@ int main(int argc, char * argv[]) noexcept {
 									// Общий полученный размер данных
 									size += text.size();
 									// Подсчитываем статус выполнения
-									status = u_short(size / float(fileSize) * 100.0f);
+									status = u_short(size / double(fileSize) * 100.0);
 									// Если процентное соотношение изменилось
 									if(rate != status){
 										// Запоминаем текущее процентное соотношение
@@ -807,7 +814,7 @@ int main(int argc, char * argv[]) noexcept {
 										// Общий полученный размер данных
 										size += text.size();
 										// Подсчитываем статус выполнения
-										status = u_short(size / float(dirSize) * 100.0f);
+										status = u_short(size / double(dirSize) * 100.0);
 										// Если процентное соотношение изменилось
 										if(rate != status){
 											// Запоминаем текущее процентное соотношение
@@ -922,7 +929,7 @@ int main(int argc, char * argv[]) noexcept {
 									// Общий полученный размер данных
 									size += text.size();
 									// Подсчитываем статус выполнения
-									status = u_short(size / float(fileSize) * 100.0f);
+									status = u_short(size / double(fileSize) * 100.0);
 									// Если процентное соотношение изменилось
 									if(rate != status){
 										// Запоминаем текущее процентное соотношение
@@ -1029,7 +1036,7 @@ int main(int argc, char * argv[]) noexcept {
 										// Общий полученный размер данных
 										size += text.size();
 										// Подсчитываем статус выполнения
-										status = u_short(size / float(dirSize) * 100.0f);
+										status = u_short(size / double(dirSize) * 100.0);
 										// Если процентное соотношение изменилось
 										if(rate != status){
 											// Запоминаем текущее процентное соотношение
@@ -1243,7 +1250,7 @@ int main(int argc, char * argv[]) noexcept {
 								// Общий полученный размер данных
 								size += text.size();
 								// Подсчитываем статус выполнения
-								status = u_short(size / float(fileSize) * 100.0f);
+								status = u_short(size / double(fileSize) * 100.0);
 								// Если процентное соотношение изменилось
 								if(rate != status){
 									// Запоминаем текущее процентное соотношение
@@ -1297,7 +1304,7 @@ int main(int argc, char * argv[]) noexcept {
 								// Общий полученный размер данных
 								size += text.size();
 								// Подсчитываем статус выполнения
-								status = u_short(size / float(fileSize) * 100.0f);
+								status = u_short(size / double(fileSize) * 100.0);
 								// Если процентное соотношение изменилось
 								if(rate != status){
 									// Запоминаем текущее процентное соотношение
@@ -1393,7 +1400,7 @@ int main(int argc, char * argv[]) noexcept {
 									// Общий полученный размер данных
 									size += text.size();
 									// Подсчитываем статус выполнения
-									status = u_short(size / float(dirSize) * 100.0f);
+									status = u_short(size / double(dirSize) * 100.0);
 									// Если процентное соотношение изменилось
 									if(rate != status){
 										// Запоминаем текущее процентное соотношение
@@ -1533,13 +1540,13 @@ int main(int argc, char * argv[]) noexcept {
 			// Иначе выполняем инициализацию алгоритма сглаживания
 			} else if(env.is("smoothing")) {
 				// Дополнительный коэффициент алгоритма сглаживания
-				float mod = 0.0f;
+				double mod = 0.0;
 				// Если алгоритм сглаживания ConstDiscount или AddSmooth, запрашиваем дополнительные параметры
 				if(env.is("smoothing", "cdiscount") || env.is("smoothing", "addsmooth")){
 					// Считываем флаг дополнительной модификации
 					value = (env.is("smoothing", "cdiscount") ? env.get("discount") : env.get("delta"));
 					// Если значение получено
-					if(value != nullptr) mod = stof(value);
+					if(value != nullptr) mod = stod(value);
 				}
 				// Если это WittenBell
 				if(env.is("smoothing", "wittenbell")) toolkit.init(toolkit_t::algorithm_t::wittenBell, false, false, 0.0);
@@ -1604,7 +1611,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Общий полученный размер данных
 						size += text.size();
 						// Подсчитываем статус выполнения
-						status = u_short(size / float(fileSize) * 100.0f);
+						status = u_short(size / double(fileSize) * 100.0);
 						// Если процентное соотношение изменилось
 						if(rate != status){
 							// Запоминаем текущее процентное соотношение
@@ -1678,7 +1685,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Общий полученный размер данных
 							size += text.size();
 							// Подсчитываем статус выполнения
-							status = u_short(size / float(fileSize) * 100.0f);
+							status = u_short(size / double(fileSize) * 100.0);
 							// Если процентное соотношение изменилось
 							if(rate != status){
 								// Запоминаем текущее процентное соотношение
@@ -1784,7 +1791,7 @@ int main(int argc, char * argv[]) noexcept {
 										// Общий полученный размер данных
 										size += text.size();
 										// Подсчитываем статус выполнения
-										status = u_short(size / float(dirSize) * 100.0f);
+										status = u_short(size / double(dirSize) * 100.0);
 										// Если процентное соотношение изменилось
 										if(rate != status){
 											// Запоминаем текущее процентное соотношение
@@ -1880,7 +1887,7 @@ int main(int argc, char * argv[]) noexcept {
 									// Общий полученный размер данных
 									size += text.size();
 									// Подсчитываем статус выполнения
-									status = u_short(size / float(fileSize) * 100.0f);
+									status = u_short(size / double(fileSize) * 100.0);
 									// Если процентное соотношение изменилось
 									if(rate != status){
 										// Запоминаем текущее процентное соотношение
@@ -2119,7 +2126,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Общий полученный размер данных
 							size += fsys_t::fsize(filename);
 							// Подсчитываем статус выполнения
-							status = u_short(size / float(dirSize) * 100.0f);
+							status = u_short(size / double(dirSize) * 100.0);
 							// Если процентное соотношение изменилось
 							if(rate != status){
 								// Запоминаем текущее процентное соотношение
@@ -2169,7 +2176,7 @@ int main(int argc, char * argv[]) noexcept {
 								// Общий полученный размер данных
 								size += word.size();
 								// Подсчитываем статус выполнения
-								status = u_short(size / float(fileSize) * 100.0f);
+								status = u_short(size / double(fileSize) * 100.0);
 								// Если процентное соотношение изменилось
 								if(rate != status){
 									// Запоминаем текущее процентное соотношение
@@ -2223,7 +2230,7 @@ int main(int argc, char * argv[]) noexcept {
 									// Общий полученный размер данных
 									size += word.size();
 									// Подсчитываем статус выполнения
-									status = u_short(size / float(dirSize) * 100.0f);
+									status = u_short(size / double(dirSize) * 100.0);
 									// Если процентное соотношение изменилось
 									if(rate != status){
 										// Запоминаем текущее процентное соотношение
@@ -2411,7 +2418,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 						// Выполняем прунинг словаря
-						toolkit.pruneVocab(stof(value), [debug, &pss](const u_short status) noexcept {
+						toolkit.pruneVocab(stod(value), [debug, &pss](const u_short status) noexcept {
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -2430,13 +2437,13 @@ int main(int argc, char * argv[]) noexcept {
 					// Максимальный размер n-граммы
 					u_short size = 0;
 					// Коэффициент прунинга
-					float prune = 0.0f;
-					// Если параметр прунинга получен
-					if((value = env.get("aprune-threshold")) != nullptr) prune = stof(value);
+					double prune = 0.0;
 					// Если параметр максимального размера n-граммы для прунинга получен
 					if((value = env.get("aprune-max-gram")) != nullptr) size = stoi(value);
+					// Если параметр прунинга получен
+					if((value = env.get("aprune-threshold")) != nullptr) prune = stod(value);
 					// Если параметры получены
-					if((size > 0) && (prune != 0.0f)){
+					if((size > 0) && (prune != 0.0)){
 						// Если отладка включена, выводим индикатор загрузки
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
@@ -2704,7 +2711,7 @@ int main(int argc, char * argv[]) noexcept {
 			// Если режим отладки включён
 			if(debug > 0){
 				// Формируем строку результата времени работы
-				const string & result = alphabet.format("work time shifting: %u seconds", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+				const string & result = alphabet.format("work time shifting: %u seconds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 				// Выводим результат
 				print(result, env.get("log"), alphabet_t::log_t::info, false);
 			}

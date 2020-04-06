@@ -34,6 +34,7 @@
 #include <general.hpp>
 #include <alphabet.hpp>
 #include <tokenizer.hpp>
+#include <threadpool.hpp>
 
 // Устанавливаем область видимости
 using namespace std;
@@ -80,11 +81,11 @@ namespace anyks {
 				 * Частота последовательности и
 				 * обратная частота последовательности
 				 */
-				float weight, backoff;
+				double weight, backoff;
 				/**
 				 * Arpa Конструктор
 				 */
-				Arpa() : uppers(0), weight(log(0)), backoff(0.0f) {}
+				Arpa() : uppers(0), weight(log(0)), backoff(0.0) {}
 			} arpa_t;
 			/**
 			 * Структура слова для карты последовательности
@@ -93,7 +94,7 @@ namespace anyks {
 				/**
 				 * Частота n-граммы и обратная частота
 				 */
-				float weight, backoff;
+				double weight, backoff;
 				/**
 				 * Идентификатор слова, встречаемость n-граммы,
 				 * количество документов где встретилась n-грамма,
@@ -103,7 +104,7 @@ namespace anyks {
 				/**
 				 * Seq Конструктор
 				 */
-				Seq() : weight(log(0)), backoff(0.0f), idw(idw_t::NIDW), oc(0), dc(0), ups(0) {}
+				Seq() : weight(log(0)), backoff(0.0), idw(idw_t::NIDW), oc(0), dc(0), ups(0) {}
 			} __attribute__((packed)) seq_t;
 		public:
 			// Основные опции
@@ -117,23 +118,23 @@ namespace anyks {
 			 * Perplexity Структура результатов перплексии
 			 */
 			typedef struct Perplexity {
-				size_t oovs;              // Количество неизвестных слов
-				size_t words;             // Количество слов в расчёте
-				size_t sentences;         // Количество предложений
-				size_t zeroprobs;         // Количество нулевых проб
-				float logprob, ppl, ppl1; // Значение перплексии
+				size_t oovs;               // Количество неизвестных слов
+				size_t words;              // Количество слов в расчёте
+				size_t sentences;          // Количество предложений
+				size_t zeroprobs;          // Количество нулевых проб
+				double logprob, ppl, ppl1; // Значение перплексии
 				/**
 				 * Perplexity Конструктор
 				 */
-				Perplexity() : oovs(0), words(0), sentences(0), zeroprobs(0), logprob(0.0f), ppl(idw_t::NIDW), ppl1(idw_t::NIDW) {}
+				Perplexity() : oovs(0), words(0), sentences(0), zeroprobs(0), logprob(0.0), ppl(idw_t::NIDW), ppl1(idw_t::NIDW) {}
 			} ppl_t;
 			// Упрощаем тип функции для получения слова
 			typedef function <const word_t * (const size_t)> words_t;
 		private:
 			// Нулевое значение логорифма
-			const float zero = log(0);
+			const double zero = log(0);
 			// Максимальное значение 10-го логорифма
-			const float mln10 = 2.30258509299404568402;
+			const double mln10 = 2.30258509299404568402;
 		private:
 			// Максимальный размер n-граммы
 			u_short size = 1;
@@ -141,6 +142,8 @@ namespace anyks {
 			size_t unknown = 0;
 			// Флаг запрещающий очистку объект питона
 			bool notCleanPython = false;
+			// Количество потоков для работы
+			size_t threads = thread::hardware_concurrency();
 		private:
 			// Флаги параметров
 			bitset <4> options;
@@ -159,6 +162,8 @@ namespace anyks {
 		private:
 			// Словарь языковой модели
 			mutable arpa_t arpa;
+			// Создаем тредпул
+			mutable tpool_t tpool;
 			// Мютекс блокировки потока
 			mutable recursive_mutex locker;
 			// Словарь всех слов в системе
@@ -168,12 +173,13 @@ namespace anyks {
 			words_t getWord = nullptr;
 			// Объект работы с python
 			python_t * python = nullptr;
-			// Объект log файла
-			const char * logfile = nullptr;
 			// Объект алфавита
 			const alphabet_t * alphabet = nullptr;
 			// Объект токенизатора
 			const tokenizer_t * tokenizer = nullptr;
+		private:
+			// Объект log файла
+			mutable const char * logfile = nullptr;
 		private:
 			/**
 			 * event Метод проверки на спец-слово
@@ -206,7 +212,7 @@ namespace anyks {
 			 * @param weight  вес n-граммы из файла arpa
 			 * @param backoff обратная частота документа из файла arpa
 			 */
-			void set(const vector <pair_t> & seq, const float weight, const float backoff) const noexcept;
+			void set(const vector <pair_t> & seq, const double weight, const double backoff) const noexcept;
 			/**
 			 * clearShielding Функция удаления экранирования
 			 * @param word  слово в котором следует удалить экранирование
@@ -220,13 +226,13 @@ namespace anyks {
 			 * @param seq последовательность для извлечения веса
 			 * @return    вес последовательноси и n-грамма для которой она получена
 			 */
-			const pair <u_short, float> weight(const vector <size_t> & seq) const noexcept;
+			const pair <u_short, double> weight(const vector <size_t> & seq) const noexcept;
 			/**
 			 * frequency Метод извлечения частоты n-граммы
 			 * @param seq список слов последовательности
 			 * @return    частота и обратная частота n-граммы
 			 */
-			const pair <float, float> frequency(const vector <size_t> & seq) const noexcept;
+			const pair <double, double> frequency(const vector <size_t> & seq) const noexcept;
 			/**
 			 * pplCalculate Метод расчёта значения перплексии по весу
 			 * @param logprob вес последовательности n-грамм полученный из расчётов
@@ -234,7 +240,7 @@ namespace anyks {
 			 * @param oovs    список неизвестных слов используемых при расчётах
 			 * @return        значение перплексии полученное при расчётах
 			 */
-			const pair <float, float> pplCalculate(const float logprob, const size_t words, const size_t oovs) const noexcept;
+			const pair <double, double> pplCalculate(const double logprob, const size_t words, const size_t oovs) const noexcept;
 		private:
 			/**
 			 * isOption Метод проверки наличия опции
@@ -247,7 +253,7 @@ namespace anyks {
 			 * @param seq последовательность для извлечения обратной частоты
 			 * @return    обратная частота последовательности
 			 */
-			const float backoff(const vector <size_t> & seq) const noexcept;
+			const double backoff(const vector <size_t> & seq) const noexcept;
 			/**
 			 * getIdw Метод генерирования идентификатора слова
 			 * @param  word  слово для генерации
@@ -386,6 +392,11 @@ namespace anyks {
 			 */
 			void setWordMethod(words_t word) noexcept;
 			/**
+			 * setSize Метод установки размера n-граммы
+			 * @param size размер n-граммы
+			 */
+			void setSize(const u_short size) noexcept;
+			/**
 			 * setUnknown Метод установки неизвестного слова
 			 * @param word слово для добавления
 			 */
@@ -420,6 +431,11 @@ namespace anyks {
 			 * @param option опция для отключения
 			 */
 			void unsetOption(const options_t option) noexcept;
+			/**
+			 * setThreads Метод установки количества потоков
+			 * @param threads количество потоков для работы
+			 */
+			void setThreads(const size_t threads = 0) noexcept;
 			/**
 			 * setWordScript Метод установки скрипта обработки слов
 			 * @param script скрипт python обработки слов

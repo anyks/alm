@@ -1,6 +1,7 @@
 # Change Log
 
-<<<<<<< HEAD
+## 2.0.1 Optimization and bug fixes
+
 ## 2.0.0 New methods and bug fixes
 ### Mthods
 - **ppl** - perplexity calculation method
@@ -13,10 +14,9 @@
 - file address *.txt for texts export
 - file address *.txt or dir path for texts import
 - flag arpa file loading without pre-processing the words
-=======
+
 ## 1.0.4 Performance optimization and bug fixes
 - flag to save intermediate data during training
->>>>>>> 28036d1f6b82be4eca237893fe0c81f7006f6254
 
 ## 1.0.3 Multiprocessor training and bug fixes
 - flag to performing data segmentation during training

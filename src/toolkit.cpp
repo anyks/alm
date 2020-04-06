@@ -1101,7 +1101,7 @@ void anyks::Toolkit::repair(function <void (const u_short)> status) noexcept {
  * @param wltf   пороговый вес слова для прунинга
  * @param status статус прунинга словаря
  */
-void anyks::Toolkit::pruneVocab(const float wltf, function <void (const u_short)> status) noexcept {
+void anyks::Toolkit::pruneVocab(const double wltf, function <void (const u_short)> status) noexcept {
 	// Если словарь не пустой
 	if(!this->vocab.empty()){
 		// Количество извлечённых слов
@@ -1113,7 +1113,7 @@ void anyks::Toolkit::pruneVocab(const float wltf, function <void (const u_short)
 			// Получаем метаданные слова
 			auto meta = it->second.calc(this->info.ad, this->info.cw);
 			// Если вес слова не ниже порогового значения
-			if((wltf != 0.0f) && (meta.wltf <= wltf)){
+			if((wltf != 0.0) && (meta.wltf <= wltf)){
 				// Выполняем удаление слова в arpa
 				this->arpa->removeWord(it->first);
 				// Удаляем слово в алфавите
@@ -1125,7 +1125,7 @@ void anyks::Toolkit::pruneVocab(const float wltf, function <void (const u_short)
 				// Увеличиваем количество записанных слов
 				index++;
 				// Выполняем расчёт текущего статуса
-				actual = u_short(float(index) / float(this->vocab.size()) * 100.0f);
+				actual = u_short(index / double(this->vocab.size()) * 100.0);
 				// Если статус обновился
 				if(actual != past){
 					// Запоминаем текущий статус
@@ -1275,11 +1275,11 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 										// Если это добавления последовательности в arpa
 										if(flag == modify_t::emplace){
 											// Если добавление не выполнено
-											if(!this->arpa->emplace(seq, stof(weight))) cleanAddedFn();
+											if(!this->arpa->emplace(seq, stod(weight))) cleanAddedFn();
 										// Если это изменение частот последовательности
 										} else if(flag == modify_t::change) {
 											// Выполняем инкрементацию частот
-											this->arpa->inc(seq, stof(weight));
+											this->arpa->inc(seq, stod(weight));
 											// Выполняем неверно-добавленных слов
 											cleanAddedFn();
 										}
@@ -1390,7 +1390,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 				// Увеличиваем количество записанных n-грамм
 				index += text.size();
 				// Выполняем расчёт текущего статуса
-				actual = u_short(index / float(fileSize) * 100.0f);
+				actual = u_short(index / double(fileSize) * 100.0);
 				// Если статус обновился
 				if(actual != past){
 					// Запоминаем текущий статус
@@ -1647,7 +1647,7 @@ void anyks::Toolkit::saveVocab(function <void (const vector <char> &, const u_sh
 			// Добавляем в буфер бинарные данные самого слова
 			buffer.insert(buffer.end(), data.begin(), data.end());
 			// Выводим результат
-			callback(buffer, (index / float(this->vocab.size()) * 100.0f));
+			callback(buffer, (index / double(this->vocab.size()) * 100.0));
 			// Очищаем собранный буфер данных
 			buffer.clear();
 			// Увеличиваем индекс слова
@@ -1714,7 +1714,7 @@ void anyks::Toolkit::writeArpa(const string & filename, function <void (const u_
 							// Увеличиваем количество записанных n-грамм
 							index++;
 							// Выполняем расчёт текущего статуса
-							actual = u_short(float(index) / float(counts) * 100.0f);
+							actual = u_short(index / double(counts) * 100.0);
 							// Если статус обновился
 							if(actual != past){
 								// Запоминаем текущий статус
@@ -1786,7 +1786,7 @@ void anyks::Toolkit::writeVocab(const string & filename, function <void (const u
 					// Увеличиваем количество записанных слов
 					index++;
 					// Выполняем расчёт текущего статуса
-					actual = u_short(float(index) / float(this->info.unq) * 100.0f);
+					actual = u_short(index / double(this->info.unq) * 100.0);
 					// Если статус обновился
 					if(actual != past){
 						// Запоминаем текущий статус
@@ -1870,7 +1870,7 @@ void anyks::Toolkit::writeNgrams(const string & filename, function <void (const 
 							// Увеличиваем количество записанных n-грамм
 							index++;
 							// Выполняем расчёт текущего статуса
-							actual = u_short(float(index) / float(counts) * 100.0f);
+							actual = u_short(index / double(counts) * 100.0);
 							// Если статус обновился
 							if(actual != past){
 								// Запоминаем текущий статус
@@ -2092,7 +2092,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 										this->arpa->setSize(this->size);
 									}
 									// Добавляем последовательность в словарь
-									if(!seq.empty()) this->arpa->set(seq, stof(weight), stof(backoff));
+									if(!seq.empty()) this->arpa->set(seq, stod(weight), stod(backoff));
 								}
 							}
 						}
@@ -2104,7 +2104,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 				// Увеличиваем количество записанных n-грамм
 				index += text.size();
 				// Выполняем расчёт текущего статуса
-				actual = u_short(index / float(fileSize) * 100.0f);
+				actual = u_short(index / double(fileSize) * 100.0);
 				// Если статус обновился
 				if(actual != past){
 					// Запоминаем текущий статус
@@ -2216,7 +2216,7 @@ void anyks::Toolkit::readVocab(const string & filename, function <void (const u_
 				// Увеличиваем количество записанных n-грамм
 				index += text.size();
 				// Выполняем расчёт текущего статуса
-				actual = u_short(index / float(fileSize) * 100.0f);
+				actual = u_short(index / double(fileSize) * 100.0);
 				// Если статус обновился
 				if(actual != past){
 					// Запоминаем текущий статус
@@ -2374,7 +2374,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 				// Увеличиваем количество записанных n-грамм
 				index += text.size();
 				// Выполняем расчёт текущего статуса
-				actual = u_short(index / float(fileSize) * 100.0f);
+				actual = u_short(index / double(fileSize) * 100.0);
 				// Если статус обновился
 				if(actual != past){
 					// Запоминаем текущий статус
@@ -2475,7 +2475,7 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const u_sh
 					// Увеличиваем количество общих обработанных байт
 					index += text.size();
 					// Выполняем расчёт текущего статуса
-					actual = u_short(index / float(fileSize) * 100.0f);
+					actual = u_short(index / double(fileSize) * 100.0);
 					// Если статус обновился
 					if(actual != past){
 						// Запоминаем текущий статус
@@ -2605,7 +2605,7 @@ void anyks::Toolkit::readArpas(const string & path, const string & ext, function
 											this->arpa->setSize(this->size);
 										}
 										// Добавляем последовательность в словарь
-										if(!seq.empty()) this->arpa->add(seq, stof(weight), stof(backoff));
+										if(!seq.empty()) this->arpa->add(seq, stod(weight), stod(backoff));
 									}
 								}
 							}
@@ -2617,7 +2617,7 @@ void anyks::Toolkit::readArpas(const string & path, const string & ext, function
 					// Увеличиваем количество записанных n-грамм
 					index += text.size();
 					// Выполняем расчёт текущего статуса
-					actual = u_short(index / float(dirSize) * 100.0f);
+					actual = u_short(index / double(dirSize) * 100.0);
 					// Если статус обновился
 					if(actual != past){
 						// Запоминаем текущий статус
@@ -2795,7 +2795,7 @@ void anyks::Toolkit::readNgrams(const string & path, const string & ext, functio
 						// Увеличиваем количество общих обработанных байт
 						index += text.size();
 						// Выполняем расчёт текущего статуса
-						actual = u_short(index / float(dirSize) * 100.0f);
+						actual = u_short(index / double(dirSize) * 100.0);
 						// Если статус обновился
 						if(actual != past){
 							// Запоминаем текущий статус
@@ -2908,7 +2908,7 @@ void anyks::Toolkit::readMaps(const string & path, const string & ext, function 
 						// Увеличиваем количество общих обработанных байт
 						index += text.size();
 						// Выполняем расчёт текущего статуса
-						actual = u_short(index / float(dirSize) * 100.0f);
+						actual = u_short(index / double(dirSize) * 100.0);
 						// Если статус обновился
 						if(actual != past){
 							// Запоминаем текущий статус

@@ -443,7 +443,7 @@ namespace anyks {
 			 * @param wltf   пороговый вес слова для прунинга
 			 * @param status статус прунинга словаря
 			 */
-			void pruneVocab(const float wltf, function <void (const u_short)> status = nullptr) noexcept;
+			void pruneVocab(const double wltf, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * modify Метод модификации arpa
 			 * @param filename адрес файла для чтения

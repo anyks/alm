@@ -40,7 +40,7 @@ void anyks::Progress::status(const u_short status) noexcept {
 				// Строка индикатора размерности
 				const char * dimension = "s";
 				// Выполняем расчёт оставшихся секунд
-				time_t elapses = ((100 - status) * ((time(nullptr) - this->startTime) / float(status)));
+				time_t elapses = ((100 - status) * ((time(nullptr) - this->startTime) / double(status)));
 				// Если это минуты, переводим секунды в минуты
 				if(elapses >= 60){
 					// Переводим секунды в минуты
@@ -97,7 +97,7 @@ void anyks::Progress::update(const u_short status) noexcept {
 				// Строка индикатора размерности
 				const char * dimension = "s";
 				// Выполняем расчёт оставшихся секунд
-				time_t elapses = ((100 - status) * ((time(nullptr) - this->startTime) / float(status)));
+				time_t elapses = ((100 - status) * ((time(nullptr) - this->startTime) / double(status)));
 				// Если это минуты, переводим секунды в минуты
 				if(elapses >= 60){
 					// Переводим секунды в минуты
@@ -129,7 +129,7 @@ void anyks::Progress::update(const u_short status) noexcept {
 		// Если статус больше 0
 		} else {
 			// Выполняем расчёт текущей позиции
-			const size_t pos = (((status <= 100 ? status * w.ws_col : 100 * w.ws_col) / float(100.0f)) - 2);
+			const size_t pos = (((status <= 100 ? status * w.ws_col : 100 * w.ws_col) / double(100.0)) - 2);
 			// Отображаем индикатор загрузки
 			for(size_t i = 0; i < pos; i++) printf("\e[42m \x1B[0m");
 			// Отображаем оставшиеся знаки загрузки

@@ -159,7 +159,7 @@ void anyks::Alm::set(const vector <seq_t> & seq) const noexcept {
  * @param weight  вес n-граммы из файла arpa
  * @param backoff обратная частота документа из файла arpa
  */
-void anyks::Alm::set(const vector <pair_t> & seq, const float weight, const float backoff) const noexcept {
+void anyks::Alm::set(const vector <pair_t> & seq, const double weight, const double backoff) const noexcept {
 	// Если список последовательностей передан
 	if(!seq.empty() && (this->size > 0)){
 		// Итератор для подсчета длины n-граммы
@@ -177,9 +177,9 @@ void anyks::Alm::set(const vector <pair_t> & seq, const float weight, const floa
 			// Если мы дошли до конца
 			if(i == (seq.size() - 1)){
 				// Запоминаем обратную частоту документа
-				obj->backoff = (backoff == 0.0f ? this->zero : backoff);
+				obj->backoff = (backoff == 0.0 ? this->zero : backoff);
 				// Запоминаем частоту n-граммы
-				obj->weight = ((weight == 0.0f) || (fabs(round(weight)) >= 99.0f) ? this->zero : weight);
+				obj->weight = ((weight == 0.0) || (fabs(round(weight)) >= 99.0) ? this->zero : weight);
 			}
 			// Если количество n-грамм достигло предела, выходим
 			if((++i) > (this->size - 1)) break;
@@ -214,9 +214,9 @@ void anyks::Alm::clearShielding(const string & word, const string & front, const
  * @param seq последовательность для извлечения веса
  * @return    вес последовательноси и n-грамма для которой она получена
  */
-const pair <u_short, float> anyks::Alm::weight(const vector <size_t> & seq) const noexcept {
+const pair <u_short, double> anyks::Alm::weight(const vector <size_t> & seq) const noexcept {
 	// Результат работы функции
-	pair <u_short, float> result = {0, 0.0f};
+	pair <u_short, double> result = {0, 0.0};
 	// Если контекст передан
 	if(!seq.empty() && !this->arpa.empty()){
 		// Флаг полностью собранной последовательности
@@ -254,9 +254,9 @@ const pair <u_short, float> anyks::Alm::weight(const vector <size_t> & seq) cons
  * @param seq список слов последовательности
  * @return    частота и обратная частота n-граммы
  */
-const pair <float, float> anyks::Alm::frequency(const vector <size_t> & seq) const noexcept {
+const pair <double, double> anyks::Alm::frequency(const vector <size_t> & seq) const noexcept {
 	// Результат работы функции
-	pair <float, float> result = {this->zero, this->zero};
+	pair <double, double> result = {this->zero, this->zero};
 	// Если список последовательностей передан
 	if(!seq.empty() && (this->size > 0) && !this->arpa.empty()){
 		// Итератор для подсчета длины n-граммы
@@ -289,14 +289,14 @@ const pair <float, float> anyks::Alm::frequency(const vector <size_t> & seq) con
  * @param oovs    список неизвестных слов используемых при расчётах
  * @return        значение перплексии полученное при расчётах
  */
-const pair <float, float> anyks::Alm::pplCalculate(const float logprob, const size_t words, const size_t oovs) const noexcept {
+const pair <double, double> anyks::Alm::pplCalculate(const double logprob, const size_t words, const size_t oovs) const noexcept {
 	// Результат работы функции
-	pair <float, float> result = {this->zero, this->zero};
+	pair <double, double> result = {this->zero, this->zero};
 	// Если вес переданный верный
-	if((logprob != 0.0f) && (logprob != this->zero) && (words > 0)){
+	if((logprob != 0.0) && (logprob != this->zero) && (words > 0)){
 		// Выполняем расчёт перплексии
-		result.second = exp(- (logprob / float(words - oovs)) * this->mln10);
-		result.first  = exp(- (logprob / float(words - oovs + 1)) * this->mln10);
+		result.second = exp(- (logprob / double(words - oovs)) * this->mln10);
+		result.first  = exp(- (logprob / double(words - oovs + 1)) * this->mln10);
 	}
 	// Выводим результат
 	return result;
@@ -308,16 +308,20 @@ const pair <float, float> anyks::Alm::pplCalculate(const float logprob, const si
  */
 const bool anyks::Alm::isOption(const options_t option) const noexcept {
 	// Выполняем проверку наличия опции
-	return this->options.test((u_short) option);
+	const bool result = this->options.test((u_short) option);
+	// Если флаг дал положительный результат и это режим отладки
+	if(result && (option == options_t::debug)) this->logfile = nullptr;
+	// Выводим результат
+	return result;
 }
 /**
  * backoff Метод извлечения обратной частоты последовательности
  * @param seq последовательность для извлечения обратной частоты
  * @return    обратная частота последовательности
  */
-const float anyks::Alm::backoff(const vector <size_t> & seq) const noexcept {
+const double anyks::Alm::backoff(const vector <size_t> & seq) const noexcept {
 	// Результат работы функции
-	float result = 0.0f;
+	double result = 0.0;
 	// Если контекст передан
 	if(!seq.empty() && !this->arpa.empty()){
 		// Идентификатор текущего слова
@@ -645,7 +649,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 		// Выводим отладочную информацию
 		if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
 			// Выводим разделитель
-			cout << endl;
+			if(this->isOption(options_t::debug)) cout << endl;
 			// Выводим сообщение отладки - количество слов
 			this->alphabet->log(
 				"%u sentences, %u words, %u OOVs",
@@ -714,15 +718,15 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 			 * @param weight полученный вес n-граммы при расчёте
 			 * @param delim  проверочный делитель n-граммы
 			 */
-			auto debugFn = [this](const string & first, const string & second, const bool bigram, const u_short gram, const float weight, const float delim){
+			auto debugFn = [this](const string & first, const string & second, const bool bigram, const u_short gram, const double weight, const double delim){
 				// Выводим отладочную информацию
 				if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
 					// Граммность n-граммы
 					string numGram = "OOV";
 					// Значение полученного веса
-					float prob = 0.0f, lprob = this->zero;
+					double prob = 0.0, lprob = this->zero;
 					// Если вес не нулевой
-					if(weight != 0.0f){
+					if(weight != 0.0){
 						// Запоминаем вес n-граммы
 						lprob = weight;
 						// Избавляемся от логорифма
@@ -751,27 +755,28 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 				}
 			};
 			/**
-			* calcFn Функция расчёта перплексии
-			* @return вес n-граммы
-			*/
-			auto calcFn = [&tmp, isAllowUnk, this]() noexcept {
+			 * calcFn Функция расчёта перплексии
+			 * @param seq последовательность слов для обработки
+			 * @return    вес n-граммы
+			 */
+			auto calcFn = [isAllowUnk, this](const vector <size_t> & seq) noexcept {
 				// Результат работы функции
-				pair <u_short, float> result = {0, 0.0f};
+				pair <u_short, double> result = {0, 0.0};
 				// Если данные не пустые
-				if(!tmp.empty()){
+				if(!seq.empty()){
 					// Получаем нашу последовательность
-					vector <size_t> seq = tmp;
+					vector <size_t> tmp = seq;
 					// Если первый элемент является неизвестным словом, удаляем его
-					if(!isAllowUnk && (seq.front() == size_t(token_t::unk))){
+					if(!isAllowUnk && (tmp.front() == size_t(token_t::unk))){
 						// Удаляем первый элемент в списке
-						seq.assign(seq.begin() + 1, seq.end());
+						tmp.assign(tmp.begin() + 1, tmp.end());
 					}
 					// Если есть еще смысл искать
-					if(!seq.empty()){
+					if(!tmp.empty()){
 						// Копируем основную карту
 						const arpa_t * obj = &this->arpa;
 						// Переходим по всей последовательностив
-						for(auto & idw : seq){
+						for(auto & idw : tmp){
 							// Ищем нашу n-грамму
 							auto it = obj->find(idw);
 							// Если n-грамма найдена
@@ -783,9 +788,9 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 							// Если n-грамма не найдена
 							} else {
 								// Если последнее слово последовательности найдено
-								if(this->arpa.count(seq.back()) > 0){
+								if(this->arpa.count(tmp.back()) > 0){
 									// Получаем вес последовательности
-									const auto wrs = this->weight(seq);
+									const auto wrs = this->weight(tmp);
 									// Получаем грамность
 									result.first = wrs.first;
 									// Запоминаем полученный вес
@@ -793,12 +798,12 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 									// Если вес получен для юниграммы, выполняем поиск частоты отката
 									if(result.first == 1){
 										// Получаем список последовательности для извлечения обратной частоты
-										seq.assign(seq.begin(), seq.end() - 1);
+										tmp.assign(tmp.begin(), tmp.end() - 1);
 										// Выполняем расчёт веса n-граммы
-										result.second += this->backoff(seq);
+										result.second += this->backoff(tmp);
 									}
 								// Если слово не найдено, устанавливаем -inf
-								} else result.second = 0.0f;
+								} else result.second = 0.0;
 								// Выходим из цикла
 								break;
 							}
@@ -812,14 +817,17 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 			};
 			/**
 			 * putDebugFn Функция расчёта отладочной информации
+			 * @param seq    последовательность слов для обработки
 			 * @param gram   граммность n-граммы для которой был произведён расчёт
 			 * @param weight полученный вес n-граммы при расчёте
 			 */
-			auto putDebugFn = [&debugFn, &tmp, this](const u_short gram, const float weight) noexcept {
+			auto putDebugFn = [&debugFn, this](const vector <size_t> & seq, const u_short gram, const double weight) noexcept {
 				// Если последовательность передана
-				if(!tmp.empty() && this->isOption(options_t::debug)){
+				if(!seq.empty() && (this->isOption(options_t::debug) || (this->logfile != nullptr))){
 					// Получившийся разделитель
-					float delim = 0.0f;
+					double delim = 0.0;
+					// Получаем нашу последовательность
+					vector <size_t> tmp = seq;
 					// Получаем количество слов в последовательности
 					const size_t count = tmp.size();
 					// Выполняем првоерку больше ли переданная последовательность биграммы
@@ -833,7 +841,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 					// Удаляем последний элемент в списке
 					tmp.pop_back();
 					// Выполняем расчёт обратной частоты последовательности
-					const float backoff = this->backoff(tmp);
+					const double backoff = this->backoff(tmp);
 					// Переходим по всем словам словаря
 					for(auto & value : this->arpa){
 						// Если веса у n-граммы нету
@@ -855,21 +863,35 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 				}
 			};
 			// Сбрасываем значение результата
-			result.logprob = 0.0f;
-			// Обрабатываем первую часть n-грамм
-			for(u_short i = 2; i < offset2; i++){
-				// Получаем первую часть последовательности
-				tmp.assign(seq.begin(), seq.begin() + i);
+			result.logprob = 0.0;
+			/**
+			 * runFn Функция запуска расчёта перплексии
+			 * @param seq последовательность слов для обработки
+			 */
+			auto runFn = [&result, &calcFn, &putDebugFn, this](const vector <size_t> & seq){
 				// Выполняем проверку существования граммы
-				auto calc = calcFn();
+				auto calc = calcFn(seq);
+				// Блокируем поток
+				this->locker.lock();
 				// Если вес получен
-				if(calc.second != 0.0f)
+				if(calc.second != 0.0)
 					// Увеличиваем общее значение веса
 					result.logprob += calc.second;
 				// Увеличиваем количество нулевых весов
 				else result.zeroprobs++;
+				// Разблокируем поток
+				this->locker.unlock();
 				// Выводим отладочную информацию
-				putDebugFn(calc.first, calc.second);
+				putDebugFn(seq, calc.first, calc.second);
+			};
+			// Выполняем инициализацию тредпула
+			this->tpool.init(this->threads);
+			// Обрабатываем первую часть n-грамм
+			for(u_short i = 2; i < offset2; i++){
+				// Получаем первую часть последовательности
+				tmp.assign(seq.begin(), seq.begin() + i);
+				// Добавляем в тредпул новое задание на обработку
+				this->tpool.push(runFn, tmp);
 			}
 			// Если есть ещё n-граммы
 			if(count >= this->size){
@@ -877,21 +899,15 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 				while(offset2 < (count + 1)){
 					// Получаем первую часть последовательности
 					tmp.assign(seq.begin() + offset1, seq.begin() + offset2);
-					// Выполняем проверку существования граммы
-					auto calc = calcFn();
-					// Если вес получен
-					if(calc.second != 0.0f)
-						// Увеличиваем общее значение веса
-						result.logprob += calc.second;
-					// Увеличиваем количество нулевых весов
-					else result.zeroprobs++;
-					// Выводим отладочную информацию
-					putDebugFn(calc.first, calc.second);
+					// Добавляем в тредпул новое задание на обработку
+					this->tpool.push(runFn, tmp);
 					// Увеличиваем смещение
 					offset1++;
 					offset2++;
 				}
 			}
+			// Ожидаем завершения обработки
+			this->tpool.wait();
 			// Если неизвестное слово не разрешено
 			if(!isAllowUnk){
 				// Считаем количество неизвестных слов
@@ -915,7 +931,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 		// Выводим отладочную информацию
 		if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
 			// Выводим разделитель
-			cout << endl;
+			if(this->isOption(options_t::debug)) cout << endl;
 			// Выводим сообщение отладки - количество слов
 			this->alphabet->log(
 				"%u sentences, %u words, %u OOVs",
@@ -984,21 +1000,21 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 		if(fsys_t::isfile(path)){
 			// Выполняем загрузку данных текстового файла
 			fsys_t::rfile(path, [&](const string & text, const uintmax_t fileSize) noexcept {
-				// Если текст получен
+				// Если текст передан
 				if(!text.empty()){
 					// Выполняем расчёт перплексии нашей текстовой последовательности
 					result = (result.words == 0 ? this->perplexity(text) : this->pplConcatenate(result, this->perplexity(text)));
-				}
-				// Общий полученный размер данных
-				size += text.size();
-				// Подсчитываем статус выполнения
-				actual = u_short(size / float(fileSize) * 100.0f);
-				// Если процентное соотношение изменилось
-				if(rate != actual){
-					// Запоминаем текущее процентное соотношение
-					rate = actual;
-					// Выводим статистику
-					status(actual);
+					// Общий полученный размер данных
+					size += text.size();
+					// Подсчитываем статус выполнения
+					actual = u_short(size / double(fileSize) * 100.0);
+					// Если процентное соотношение изменилось
+					if(rate != actual){
+						// Запоминаем текущее процентное соотношение
+						rate = actual;
+						// Выводим статистику
+						status(actual);
+					}
 				}
 			});
 		// Если это каталог
@@ -1007,21 +1023,21 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 			fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
 				// Выполняем загрузку данных текстового файла
 				fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
-					// Если текст получен
+					// Если текст передан
 					if(!text.empty()){
 						// Выполняем расчёт перплексии нашей текстовой последовательности
 						result = (result.words == 0 ? this->perplexity(text) : this->pplConcatenate(result, this->perplexity(text)));
-					}
-					// Общий полученный размер данных
-					size += text.size();
-					// Подсчитываем статус выполнения
-					actual = u_short(size / float(dirSize) * 100.0f);
-					// Если процентное соотношение изменилось
-					if(rate != actual){
-						// Запоминаем текущее процентное соотношение
-						rate = actual;
-						// Выводим статистику
-						status(actual);
+						// Общий полученный размер данных
+						size += text.size();
+						// Подсчитываем статус выполнения
+						actual = u_short(size / double(dirSize) * 100.0);
+						// Если процентное соотношение изменилось
+						if(rate != actual){
+							// Запоминаем текущее процентное соотношение
+							rate = actual;
+							// Выводим статистику
+							status(actual);
+						}
 					}
 				});
 			});
@@ -1029,7 +1045,7 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 		// Выводим отладочную информацию
 		if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
 			// Выводим разделитель
-			cout << endl;
+			if(this->isOption(options_t::debug)) cout << endl;
 			// Выводим сообщение отладки - количество слов
 			this->alphabet->log(
 				"%u sentences, %u words, %u OOVs",
@@ -1731,6 +1747,14 @@ void anyks::Alm::setWordMethod(words_t word) noexcept {
 	this->getWord = word;
 }
 /**
+ * setSize Метод установки размера n-граммы
+ * @param size размер n-граммы
+ */
+void anyks::Alm::setSize(const u_short size) noexcept {
+	// Устанавливаем размерность n-граммы
+	this->size = (size > 0 ? size : DEFNGRAM);
+}
+/**
  * setUnknown Метод установки неизвестного слова
  * @param word слово для добавления
  */
@@ -1832,6 +1856,14 @@ void anyks::Alm::setOption(const options_t option) noexcept {
 void anyks::Alm::unsetOption(const options_t option) noexcept {
 	// Устанавливаем опции
 	this->options.reset((u_short) option);
+}
+/**
+ * setThreads Метод установки количества потоков
+ * @param threads количество потоков для работы
+ */
+void anyks::Alm::setThreads(const size_t threads) noexcept {
+	// Устанавливаем новое количество потоков
+	this->threads = (threads > 0 ? threads : thread::hardware_concurrency());
 }
 /**
  * setWordScript Метод установки скрипта обработки слов
@@ -2196,7 +2228,7 @@ void anyks::Alm::getBin(function <void (const vector <char> &, const u_short)> c
 				buffer.insert(buffer.end(), bin, bin + sizeof(item));
 			}
 			// Выводим собранную последовательность
-			callback(buffer, u_short(index / float(this->arpa.size()) * 100.0f));
+			callback(buffer, u_short(index / double(this->arpa.size()) * 100.0));
 			// Очищаем полученный буфер n-граммы
 			buffer.clear();
 		};
@@ -2267,7 +2299,7 @@ void anyks::Alm::getVocab(function <void (const vector <char> &, const u_short)>
 			// Добавляем в буфер бинарные данные самого слова
 			buffer.insert(buffer.end(), data.begin(), data.end());
 			// Выводим результат
-			callback(buffer, (index / float(this->vocab.size()) * 100.0f));
+			callback(buffer, (index / double(this->vocab.size()) * 100.0));
 			// Очищаем собранный буфер данных
 			buffer.clear();
 			// Увеличиваем индекс слова
@@ -2371,7 +2403,7 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 									// Если количество собранных n-грамм выше установленных, меняем
 									if(seq.size() > size_t(this->size)) this->size = seq.size();
 									// Добавляем последовательность в словарь
-									if(!seq.empty()) this->set(seq, stof(weight), stof(backoff));
+									if(!seq.empty()) this->set(seq, stod(weight), stod(backoff));
 								}
 							}
 						}
@@ -2383,7 +2415,7 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 				// Увеличиваем количество записанных n-грамм
 				index += text.size();
 				// Выполняем расчёт текущего статуса
-				actual = u_short(index / float(fileSize) * 100.0f);
+				actual = u_short(index / double(fileSize) * 100.0);
 				// Если статус обновился
 				if(actual != past){
 					// Запоминаем текущий статус

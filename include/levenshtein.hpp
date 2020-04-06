@@ -40,9 +40,9 @@ namespace anyks {
 			 * Weighter структура для функций работы с весами
 			 */
 			typedef struct Weighter {
-				float (* ins) (const wchar_t);												// Вставка
-				float (* del) (const wchar_t);												// Удаление
-				float (* rep) (const wchar_t, const wchar_t, const wchar_t, const wchar_t);	// Замена
+				double (* ins) (const wchar_t);                                             // Вставка
+				double (* del) (const wchar_t);                                             // Удаление
+				double (* rep) (const wchar_t, const wchar_t, const wchar_t, const wchar_t); // Замена
 			} weighter_t;
 		private:
 			/**
@@ -52,7 +52,7 @@ namespace anyks {
 			 * @param  z третье число
 			 * @return   самое минимальное значение из 3-х чисел
 			 */
-			const float minimum(const float x, const float y, const float z) const noexcept;
+			const double minimum(const double x, const double y, const double z) const noexcept;
 			/**
 			 * minimum Метод определения минимального значения
 			 * @param  x первое число
@@ -114,7 +114,7 @@ namespace anyks {
 			 * @param  stl    размер подстроки при сравнении двух слов (от 1 до минимального размера слова)
 			 * @return        коэффициент Танимото
 			 */
-			const float tanimoto(const string & first, const string & second, const u_short stl = 2) const noexcept;
+			const double tanimoto(const string & first, const string & second, const u_short stl = 2) const noexcept;
 			/**
 			 * tanimoto Метод определения коэффициента Жаккара (частное — коэф. Танимото)
 			 * @param  first  первое слово
@@ -122,7 +122,7 @@ namespace anyks {
 			 * @param  stl    размер подстроки при сравнении двух слов (от 1 до минимального размера слова)
 			 * @return        коэффициент Танимото
 			 */
-			const float tanimoto(const wstring & first, const wstring & second, const u_short stl = 2) const noexcept;
+			const double tanimoto(const wstring & first, const wstring & second, const u_short stl = 2) const noexcept;
 		public:
 			/**
 			 * weighted Метод определения веса сравниваемого слова
@@ -131,7 +131,7 @@ namespace anyks {
 			 * @param  weighter функции сравнения весов
 			 * @return          вес сравниваемого слова
 			 */
-			const float weighted(const string & first, const string & second, const weighter_t * weighter = nullptr) const noexcept;
+			const double weighted(const string & first, const string & second, const weighter_t * weighter = nullptr) const noexcept;
 			/**
 			 * weighted Метод определения веса сравниваемого слова
 			 * @param  first    первое слово
@@ -139,7 +139,7 @@ namespace anyks {
 			 * @param  weighter функции сравнения весов
 			 * @return          вес сравниваемого слова
 			 */
-			const float weighted(const wstring & first, const wstring & second, const weighter_t * weighter = nullptr) const noexcept;
+			const double weighted(const wstring & first, const wstring & second, const weighter_t * weighter = nullptr) const noexcept;
 		public:
 			/**
 			 * needlemanWunsch Метод натяжения слов

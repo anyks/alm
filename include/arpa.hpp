@@ -72,9 +72,9 @@ namespace anyks {
 			static constexpr double EPSILON = 3e-06;
 		private:
 			// Нулевое значение логорифма
-			const float zero = log(0);
+			const double zero = log(0);
 			// Псевдо ноль в системе
-			const float pseudoZero = log10(1.0893313439140193e-99);
+			const double pseudoZero = log10(1.0893313439140193e-99);
 			// Список минимально-возможных встречаемостей для n-грамм
 			const u_short minCount[MAXSIZE + 1] = {1, 1, 1, 2, 2, 2, 2, 2, 2, 2};
 			// Список максимально-возможных встречаемостей для n-грамм
@@ -87,7 +87,7 @@ namespace anyks {
 				/**
 				 * Частота n-граммы и обратная частота
 				 */
-				float weight, backoff;
+				double weight, backoff;
 				/**
 				 * Идентификатор слова, встречаемость n-граммы,
 				 * количество документов где встретилась n-грамма,
@@ -97,7 +97,7 @@ namespace anyks {
 				/**
 				 * Seq Конструктор
 				 */
-				Seq() : weight(log(0)), backoff(0.0f), idw(idw_t::NIDW), oc(0), dc(0), ups(0) {}
+				Seq() : weight(log(0)), backoff(log(0)), idw(idw_t::NIDW), oc(0), dc(0), ups(0) {}
 			} __attribute__((packed)) seq_t;
 		private:
 			/**
@@ -135,7 +135,7 @@ namespace anyks {
 				 * Частота последовательности и
 				 * обратная частота последовательности
 				 */
-				float weight, backoff;
+				double weight, backoff;
 				/**
 				 * Встречаемость n-граммы,
 				 * количество документов где встретилась n-грамма,
@@ -150,7 +150,7 @@ namespace anyks {
 				/**
 				 * Data Конструктор
 				 */
-				Data() : father(nullptr), weight(log(0)), backoff(0.0f), oc(0), dc(0), idw(idw_t::NIDW), idd(idw_t::NIDW) {}
+				Data() : father(nullptr), weight(log(0)), backoff(log(0)), oc(0), dc(0), idw(idw_t::NIDW), idd(idw_t::NIDW) {}
 			} data_t;
 		private:
 			// Максимальный размер n-граммы
@@ -169,10 +169,10 @@ namespace anyks {
 		private:
 			// Функция извлечения слова по его идентификатору
 			words_t getWord = nullptr;
-			// Объект log файла
-			const char * logfile = nullptr;
 			// Объект основного алфавита
 			const alphabet_t * alphabet = nullptr;
+			// Объект log файла
+			mutable const char * logfile = nullptr;
 		protected:
 			/**
 			 * use Метод получения текущего размеры n-граммы
@@ -206,20 +206,32 @@ namespace anyks {
 			const pair_t uppers(const std::map <size_t, size_t> & ups, const size_t oc = 0) const noexcept;
 		protected:
 			/**
-			 * weights Метод определения суммы весов всех дочерних грамм
-			 * @param ngram контекст для расчёта
-			 * @return      сумма всех весов дочерних грамм
-			 */
-			const float weights(const data_t * ngram) const noexcept;
-			/**
 			 * backoff Метод подсчёта обратной частоты n-граммы
 			 * @param idw     идентификатор текущего слова
 			 * @param context контекст которому принадлежит слово
 			 * @param gram    размер n-граммы для отката
 			 * @return        результат расчёта обратной частоты
 			 */
-			const float backoff(const size_t idw, const data_t * context, const u_short gram) const noexcept;
+			const double backoff(const size_t idw, const data_t * context, const u_short gram) const noexcept;
 		protected:
+			/**
+			 * isUnk Метод проверки неизвестного слова
+			 * @param idw идентификатор слова для проверки
+			 * @return    результат првоерки слова
+			 */
+			const bool isUnk(const size_t idw) const noexcept;
+			/**
+			 * isStart Метод проверки начального слова
+			 * @param idw идентификатор слова для проверки
+			 * @return    результат првоерки слова
+			 */
+			const bool isStart(const size_t idw) const noexcept;
+			/**
+			 * isWeights Метод проверки существования дочерних n-грамм
+			 * @param ngram контекст для проверки
+			 * @return      результат проверки
+			 */
+			const bool isWeights(const data_t * ngram) const noexcept;
 			/**
 			 * isOption Метод проверки наличия опции
 			 * @param option опция для проверки
@@ -296,6 +308,18 @@ namespace anyks {
 			 * @param ngrams указатель на список запрашиваемых n-грамм
 			 */
 			void get(const u_short gram, list <data_t *> * ngrams = nullptr) const noexcept;
+			/**
+			 * sequence Метод извлечения правильной последовательности, игнорирования <unk> токена
+			 * @param seq      последовательность для обработки
+			 * @param callback функция обратного вызова
+			 */
+			void sequence(const vector <seq_t> & seq, function <void (const vector <seq_t> &, const seq_t &)> callback) const noexcept;
+			/**
+			 * sequence Метод извлечения правильной последовательности, игнорирования <unk> токена
+			 * @param seq      последовательность для обработки
+			 * @param callback функция обратного вызова
+			 */
+			void sequence(const vector <pair_t> & seq, function <void (const vector <pair_t> &, const size_t)> callback) const noexcept;
 		private:
 			/**
 			 * nodiscount Метод проверки на необходимость расчёта скидки
@@ -347,7 +371,7 @@ namespace anyks {
 			 * @param seq    список идентификаторов слов которые нужно добавить
 			 * @param weight вес n-граммы из файла arpa
 			 */
-			const bool emplace(const vector <pair_t> & seq, const float weight) const noexcept;
+			const bool emplace(const vector <pair_t> & seq, const double weight) const noexcept;
 			/**
 			 * rep Метод замны одной последовательности на другую
 			 * @param seq1 последовательность которую нужно заменить
@@ -408,7 +432,7 @@ namespace anyks {
 			 * @param seq   список идентификаторов слов которые нужно увеличить
 			 * @param value значение на которое нужно увеличить вес n-граммы
 			 */
-			void inc(const vector <pair_t> & seq, const float value) const noexcept;
+			void inc(const vector <pair_t> & seq, const double value) const noexcept;
 			/**
 			 * addBin Метод добавления бинарных данных в словарь
 			 * @param buffer буфер с бинарными данными
@@ -464,7 +488,7 @@ namespace anyks {
 			 * @param weight  вес n-граммы из файла arpa
 			 * @param backoff обратная частота документа из файла arpa
 			 */
-			void set(const vector <pair_t> & seq, const float weight, const float backoff) const noexcept;
+			void set(const vector <pair_t> & seq, const double weight, const double backoff) const noexcept;
 		public:
 			/**
 			 * add Метод добавления последовательности в словарь
@@ -478,7 +502,7 @@ namespace anyks {
 			 * @param weight  вес n-граммы из файла arpa
 			 * @param backoff обратная частота документа из файла arpa
 			 */
-			void add(const vector <pair_t> & seq, const float weight, const float backoff) const noexcept;
+			void add(const vector <pair_t> & seq, const double weight, const double backoff) const noexcept;
 			/**
 			 * add Метод добавления последовательности в словарь
 			 * @param seq  последовательность слов для установки

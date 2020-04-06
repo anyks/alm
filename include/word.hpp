@@ -45,9 +45,9 @@ namespace anyks {
 	typedef struct Meta {
 		size_t oc;
 		size_t dc;
-		float tf;
-		float idf;
-		float wltf;
+		double tf;
+		double idf;
+		double wltf;
 		/**
 		 * Оператор объединения
 		 * @param meta объект структуры для объединения
@@ -100,7 +100,7 @@ namespace anyks {
 		 * @param idf  обратная частота документа
 		 * @param wltf расчитанный вес слова
 		 */
-		Meta(size_t oc = 0, size_t dc = 0, float tf = -1e+20f, float idf = -1e+20f, float wltf = -1e+20f) noexcept : oc(oc), dc(dc), tf(tf), idf(idf), wltf(wltf) {}
+		Meta(size_t oc = 0, size_t dc = 0, double tf = -1e+20, double idf = -1e+20, double wltf = -1e+20) noexcept : oc(oc), dc(dc), tf(tf), idf(idf), wltf(wltf) {}
 	} __attribute__((packed)) meta_t;
 	/**
 	 * Metrics Класс расчета метрик слова
@@ -124,11 +124,11 @@ namespace anyks {
 				// Встречаемость в текстах
 				const size_t oc = (this->oc > 0 ? this->oc : 1);
 				// Выполняем расчет tf
-				const float tf = (oc / float(cw));
+				const double tf = (oc / double(cw));
 				// Выполняем расчет idf
-				const float idf = log(ad / float(dc));
+				const double idf = log(ad / double(dc));
 				// Считаем вес слова
-				const float wltf = (float(1) + log(tf * float(dc)));
+				const double wltf = (double(1) + log(tf * double(dc)));
 				// Формируем результат расчета
 				return {oc, dc, tf, idf, wltf};
 			}
