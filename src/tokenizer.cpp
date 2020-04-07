@@ -979,7 +979,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 					(lletter == L':') || (lletter == L';') || (lletter == L'/')) {
 						// Получаем символ для проверки
 						wchar_t sumbol = (
-							(lletter == L'.') ? ((type == type_t::space) ? text.at(i + 2) :
+							(lletter == L'.') ? (!nend && (type == type_t::space) ? text.at(i + 2) :
 							((type == type_t::allow) ? text.at(i + 1) : 0)) : 0
 						);
 						// Проверяем является ли слово аббревиатурой
