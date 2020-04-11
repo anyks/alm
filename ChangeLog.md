@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.0.4 Bug fixes and new methods
+### Methods
+- **find** ngrams search method in text
+- **sentences** sentences generation method
+### Params
+- flag to accurate check ngram
+- file address *.txt for export oov words
+- sentences count for generation
+
 ## 2.0.3 Bug fixes
 
 ## 2.0.2 Bug fixes

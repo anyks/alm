@@ -1470,18 +1470,22 @@ void anyks::Alphabet::log(const string & format, log_t flag, const char * filena
 		if(size > 0) str.assign(buffer, size);
 		// Если строка получена
 		if(!str.empty()){
+			// Проверяем является ли это переводом строки
+			const bool isEnd = ((str.compare("\r\n") == 0) || (str.compare("\n") == 0));
 			// Формируем файловый поток
 			ostream * file = (filename == nullptr ? nullptr : new ofstream(filename, ios::app));
 			// Формируем выходной поток
 			ostream & out = (filename != nullptr ? * file : cout);
 			// Определяем тип сообщения
 			switch((u_short) flag){
-				// Выводим информационное сообщение в консоль
-				case (u_short) log_t::info: out << (filename != nullptr ? this->format("info: %s", str.c_str()) : this->format("\x1B[32m\x1B[1minfo:\x1B[0m %s", str.c_str())) << endl; break;
-				// Выводим сообщение об ошибке в консоль
-				case (u_short) log_t::error: out << (filename != nullptr ? this->format("error: %s", str.c_str()) : this->format("\x1B[31m\x1B[1merror:\x1B[0m %s", str.c_str())) << endl; break;
-				// Выводим сообщение предупреждения в консоль
-				case (u_short) log_t::warning: out << (filename != nullptr ? this->format("warning: %s", str.c_str()) : this->format("\x1B[35m\x1B[1mwarning:\x1B[0m %s", str.c_str())) << endl; break;
+				// Выводим сообщение так-как оно есть
+				case (u_short) log_t::null: out << this->format("%s", str.c_str()) << (!isEnd ? "\r\n" : ""); break;
+				// Выводим информационное сообщение
+				case (u_short) log_t::info: out << (filename != nullptr ? this->format("info: %s", str.c_str()) : this->format("\x1B[32m\x1B[1minfo:\x1B[0m %s", str.c_str())) << (!isEnd ? "\r\n" : ""); break;
+				// Выводим сообщение об ошибке
+				case (u_short) log_t::error: out << (filename != nullptr ? this->format("error: %s", str.c_str()) : this->format("\x1B[31m\x1B[1merror:\x1B[0m %s", str.c_str())) << (!isEnd ? "\r\n" : ""); break;
+				// Выводим сообщение предупреждения
+				case (u_short) log_t::warning: out << (filename != nullptr ? this->format("warning: %s", str.c_str()) : this->format("\x1B[35m\x1B[1mwarning:\x1B[0m %s", str.c_str())) << (!isEnd ? "\r\n" : ""); break;
 			}
 			// Если был создан файловый поток, удаляем память
 			if(file != nullptr) delete file;

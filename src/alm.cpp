@@ -542,6 +542,8 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 	ppl_t result;
 	// Если текст передан
 	if(!text.empty() && !this->arpa.empty()){
+		// Список собранных OOV слов
+		unordered_map <wstring, size_t> oovs;
 		// Идентификатор неизвестного слова
 		const size_t uid = (size_t) token_t::unk;
 		// Идентификатор начала предложения
@@ -552,15 +554,23 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 		vector <size_t> seq = {sid};
 		/**
 		 * unkFn Функция установки неизвестного слова в последовательность
-		 * @return нужно ли остановить сбор последовательности
+		 * @param word слово для добавления в список неизвестных слов
+		 * @return     нужно ли остановить сбор последовательности
 		 */
-		auto unkFn = [&seq, uid, this]() noexcept {
-			// Если неизвестное слово не установлено
-			seq.push_back(uid);
+		auto unkFn = [&seq, uid, &oovs, this](const wstring & word) noexcept {
 			// Если неизвестное слово не установлено
 			if(this->unknown == 0) seq.push_back(uid);
 			// Если неизвестное слово установлено
 			else seq.push_back(this->unknown);
+			// Если слово передано
+			if(!word.empty()){
+				// Выполняем поиск слова в списке
+				auto it = oovs.find(word);
+				// Если слово существует
+				if(it != oovs.end()) it->second++;
+				// Если слово не найдено в списке
+				else oovs.emplace(word, 1);
+			}
 		};
 		/**
 		 * resFn Функция вывода результата
@@ -578,7 +588,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 					// Получаем обрабатываемый текст
 					const wstring & text = this->context(seq, true);
 					// Выводим сообщение отладки - количество слов
-					this->alphabet->log("%s\r\n", alphabet_t::log_t::info, this->logfile, this->alphabet->convert(text).c_str());
+					this->alphabet->log("%s\n", alphabet_t::log_t::info, this->logfile, this->alphabet->convert(text).c_str());
 				}
 				// Выполняем расчёт перплексии нашей текстовой последовательности
 				result = (result.words == 0 ? this->perplexity(seq) : this->pplConcatenate(result, this->perplexity(seq)));
@@ -619,23 +629,23 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 					}
 				}
 				// Если слово не разрешено
-				if(tmp.length() >= MAX_WORD_LENGTH) unkFn();
+				if(tmp.length() >= MAX_WORD_LENGTH) unkFn(word);
 				// Если слово разрешено
 				else {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
 					// Если это плохое слово, заменяем его на неизвестное
-					if((idw == 0) || (idw == idw_t::NIDW) || (this->badwords.count(idw) > 0)) unkFn();
+					if((idw == 0) || (idw == idw_t::NIDW) || (this->badwords.count(idw) > 0)) unkFn(word);
 					// Иначе продолжаем дальше
 					else {
 						// Проверяем является ли строка словом
 						const bool isWord = this->event(idw);
 						// Если это неизвестное слово
-						if((idw == uid) || (isWord && (this->findWord(idw) == nullptr))) unkFn(); 
+						if((idw == uid) || (isWord && (this->findWord(idw) == nullptr))) unkFn(word); 
 						// Иначе добавляем слово
 						else if(!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)) seq.push_back(idw);
 						// Отправляем слово как неизвестное
-						else unkFn();
+						else unkFn(word);
 					}
 				}
 			}
@@ -661,7 +671,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 			);
 			// Выводим сообщение отладки - результатов расчёта
 			this->alphabet->log(
-				"%u zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\r\n",
+				"%u zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\n",
 				alphabet_t::log_t::info,
 				this->logfile,
 				result.zeroprobs,
@@ -669,6 +679,20 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 				result.ppl,
 				result.ppl1
 			);
+			// Если список неизвестных слов получен и есть куда его выводить
+			if(!oovs.empty() && (this->oovfile != nullptr)){
+				// Переходим по всему списку неизвестных слов
+				for(auto & item : oovs){
+					// Добавляем слово в файл
+					this->alphabet->log(
+						"%s\t%u",
+						alphabet_t::log_t::null,
+						this->oovfile,
+						this->alphabet->convert(item.first).c_str(),
+						item.second
+					);
+				}
+			}
 		}
 	}
 	// Выводим результат
@@ -882,27 +906,21 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 			auto runFn = [&result, &calcFn, &putDebugFn, this](const vector <size_t> & seq, const size_t pos){
 				// Выполняем проверку существования граммы
 				auto calc = calcFn(seq);
-				// Блокируем поток
-				this->locker.lock();
 				// Если вес получен
 				if(calc.second != 0.0)
 					// Увеличиваем общее значение веса
 					result.logprob += calc.second;
 				// Увеличиваем количество нулевых весов
 				else result.zeroprobs++;
-				// Разблокируем поток
-				this->locker.unlock();
 				// Выводим отладочную информацию
 				putDebugFn(seq, calc.first, calc.second, pos);
 			};
-			// Выполняем инициализацию тредпула
-			this->tpool.init(this->threads);
 			// Обрабатываем первую часть n-грамм
 			for(u_short i = 2; i < offset2; i++){
 				// Получаем первую часть последовательности
 				tmp.assign(seq.begin(), seq.begin() + i);
 				// Добавляем в тредпул новое задание на обработку
-				this->tpool.push(runFn, tmp, index);
+				runFn(tmp, index);
 				// Увеличиваем смещение позиции
 				index++;
 			}
@@ -913,7 +931,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 					// Получаем первую часть последовательности
 					tmp.assign(seq.begin() + offset1, seq.begin() + offset2);
 					// Добавляем в тредпул новое задание на обработку
-					this->tpool.push(runFn, tmp, index);
+					runFn(tmp, index);
 					// Увеличиваем смещение позиции
 					index++;
 					// Увеличиваем смещение
@@ -921,8 +939,6 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 					offset2++;
 				}
 			}
-			// Ожидаем завершения обработки
-			this->tpool.wait();
 			// Если неизвестное слово не разрешено
 			if(!isAllowUnk){
 				// Считаем количество неизвестных слов
@@ -968,7 +984,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 			);
 			// Выводим сообщение отладки - результатов расчёта
 			this->alphabet->log(
-				"%u zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\r\n",
+				"%u zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\n",
 				alphabet_t::log_t::info,
 				this->logfile,
 				result.zeroprobs,
@@ -1019,27 +1035,64 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 	ppl_t result;
 	// Если адрес файла передан
 	if(!path.empty() && !this->arpa.empty()){
+		// Выполняем инициализацию тредпула
+		this->tpool.init(this->threads);
 		// Параметры индикаторы процесса
-		size_t size = 0, actual = 0, rate = 0;
+		size_t csize = 0, actual = 0, rate = 0;
+		/**
+		 * statusFn Функция вывода статуса работы процесса
+		 * @param size размер обрабатываемых данных
+		 * @param max  максимальный размер данных
+		 */
+		auto statusFn = [&csize, &actual, &rate, &status](const size_t size, const double max){
+			// Общий полученный размер данных
+			csize += size;
+			// Подсчитываем статус выполнения
+			actual = u_short(csize / max * 100.0);
+			// Если процентное соотношение изменилось
+			if(rate != actual){
+				// Запоминаем текущее процентное соотношение
+				rate = actual;
+				// Выводим статистику
+				status(actual);
+			}
+		};
+		/**
+		 * runFn Функция расчёта перплексии
+		 * @param text текст для обработки
+		 * @param size общий размер обрабатываемых данных
+		 */
+		auto runFn = [&result, &statusFn, this](const string & text, const size_t size){
+			// Если это не первый этап обработки
+			if(result.words != 0){
+				// Выполняем расчёт перплексии
+				ppl_t res = this->perplexity(text);
+				// Выполняем блокировку потока
+				this->locker.lock();
+				// Выполняем сложение перплексий
+				result = this->pplConcatenate(result, res);
+				// Выводим статус прогресса работы
+				statusFn(text.size(), size);
+				// Выполняем разблокировку потока
+				this->locker.unlock();
+			// Если это первый этап обработки
+			} else {
+				// Выполняем расчёт перплексии
+				result = this->perplexity(text);
+				// Выводим статус прогресса работы
+				statusFn(text.size(), size);
+			}
+		};
 		// Если это файл
 		if(fsys_t::isfile(path)){
 			// Выполняем загрузку данных текстового файла
 			fsys_t::rfile(path, [&](const string & text, const uintmax_t fileSize) noexcept {
 				// Если текст передан
 				if(!text.empty()){
-					// Выполняем расчёт перплексии нашей текстовой последовательности
-					result = (result.words == 0 ? this->perplexity(text) : this->pplConcatenate(result, this->perplexity(text)));
-					// Общий полученный размер данных
-					size += text.size();
-					// Подсчитываем статус выполнения
-					actual = u_short(size / double(fileSize) * 100.0);
-					// Если процентное соотношение изменилось
-					if(rate != actual){
-						// Запоминаем текущее процентное соотношение
-						rate = actual;
-						// Выводим статистику
-						status(actual);
-					}
+					// Если это первый расчёт, считаем его в основном потоке
+					if(result.words == 0) runFn(text, fileSize);
+					// Добавляем в тредпул новое задание на обработку
+					else this->tpool.push(runFn, text, fileSize);
 				}
 			});
 		// Если это каталог
@@ -1050,23 +1103,16 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 				fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 					// Если текст передан
 					if(!text.empty()){
-						// Выполняем расчёт перплексии нашей текстовой последовательности
-						result = (result.words == 0 ? this->perplexity(text) : this->pplConcatenate(result, this->perplexity(text)));
-						// Общий полученный размер данных
-						size += text.size();
-						// Подсчитываем статус выполнения
-						actual = u_short(size / double(dirSize) * 100.0);
-						// Если процентное соотношение изменилось
-						if(rate != actual){
-							// Запоминаем текущее процентное соотношение
-							rate = actual;
-							// Выводим статистику
-							status(actual);
-						}
+						// Если это первый расчёт, считаем его в основном потоке
+						if(result.words == 0) runFn(text, dirSize);
+						// Добавляем в тредпул новое задание на обработку
+						else this->tpool.push(runFn, text, dirSize);
 					}
 				});
 			});
 		}
+		// Ожидаем завершения обработки
+		this->tpool.wait();
 		// Выводим отладочную информацию
 		if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
 			// Выводим разделитель
@@ -1082,7 +1128,7 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 			);
 			// Выводим сообщение отладки - результатов расчёта
 			this->alphabet->log(
-				"%u zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\r\n",
+				"%u zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\n",
 				alphabet_t::log_t::info,
 				this->logfile,
 				result.zeroprobs,
@@ -1097,23 +1143,25 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 }
 /**
  * check Метод проверки существования последовательности
- * @param text текст для проверки существования
- * @return     результат проверки
+ * @param text     текст для проверки существования
+ * @param accurate режим точной проверки
+ * @return         результат проверки
  */
-const pair <bool, size_t> anyks::Alm::check(const string & text) const noexcept {
+const pair <bool, size_t> anyks::Alm::check(const string & text, const bool accurate) const noexcept {
 	// Результат работы функции
 	pair <bool, size_t> result = {false, 0};
 	// Если слово передано
-	if(!text.empty()) result = this->check(this->alphabet->convert(text));
+	if(!text.empty()) result = this->check(this->alphabet->convert(text), accurate);
 	// Выводим результат
 	return result;
 }
 /**
  * check Метод проверки существования последовательности
- * @param text текст для проверки существования
- * @return     результат проверки
+ * @param text     текст для проверки существования
+ * @param accurate режим точной проверки
+ * @return         результат проверки
  */
-const pair <bool, size_t> anyks::Alm::check(const wstring & text) const noexcept {
+const pair <bool, size_t> anyks::Alm::check(const wstring & text, const bool accurate) const noexcept {
 	// Результат работы функции
 	pair <bool, size_t> result = {false, 0};
 	// Если слово передано
@@ -1128,8 +1176,6 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text) const noexcept
 		 */
 		auto unkFn = [&seq, uid, this]() noexcept {
 			// Если неизвестное слово не установлено
-			seq.push_back(uid);
-			// Если неизвестное слово не установлено
 			if(this->unknown == 0) seq.push_back(uid);
 			// Если неизвестное слово установлено
 			else seq.push_back(this->unknown);
@@ -1137,12 +1183,12 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text) const noexcept
 		/**
 		 * resFn Функция вывода результата
 		 */
-		auto resFn = [&result, &seq, this]() noexcept {
+		auto resFn = [&result, &seq, accurate, this]() noexcept {
 			/**
 			 * Если слова всего два, значит это начало и конец предложения
 			 * Нам же нужны только нормальные n-граммы
 			 */
-			if(seq.size() > 2) result = this->check(seq);
+			if(seq.size() > 2) result = this->check(seq, accurate);
 			// Очищаем список последовательностей
 			seq.clear();
 		};
@@ -1210,10 +1256,11 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text) const noexcept
 }
 /**
  * check Метод проверки существования последовательности
- * @param seq список слов последовательности
- * @return    результат проверки
+ * @param seq      список слов последовательности
+ * @param accurate режим точной проверки
+ * @return         результат проверки
  */
-const pair <bool, size_t> anyks::Alm::check(const vector <size_t> & seq) const noexcept {
+const pair <bool, size_t> anyks::Alm::check(const vector <size_t> & seq, const bool accurate) const noexcept {
 	// Результат работы функции
 	pair <bool, size_t> result = {false, 0};
 	// Если последовательность передана
@@ -1237,7 +1284,7 @@ const pair <bool, size_t> anyks::Alm::check(const vector <size_t> & seq) const n
 		 * @param seq список слов последовательности
 		 * @return    результат проверки
 		 */
-		checkFn = [&checkFn, this](const vector <size_t> & seq) noexcept {
+		checkFn = [&checkFn, accurate, this](const vector <size_t> & seq) noexcept {
 			// Регистры слова в последовательности
 			pair <bool, size_t> result = {false, 0};
 			// Если список последовательностей передан
@@ -1264,7 +1311,7 @@ const pair <bool, size_t> anyks::Alm::check(const vector <size_t> & seq) const n
 					if((++i) > (this->size - 1)) break;
 				}
 				// Если последовательность не существует
-				if((i < seq.size()) && (seq.size() > 2)){
+				if(!accurate && !result.first && (seq.size() > 2)){
 					// Получаем новую последовательность
 					vector <size_t> tmp(seq.begin() + 1, seq.end());
 					// Пробуем уменьшить n-грамму
@@ -1830,12 +1877,20 @@ void anyks::Alm::setPythonObj(python_t * python) noexcept {
 	}
 }
 /**
- * setLogfile Метод установка файла для вывода логов
+ * setLogfile Метод установки файла для вывода логов
  * @param logifle адрес файла для вывода отладочной информации
  */
 void anyks::Alm::setLogfile(const char * logfile) noexcept {
 	// Устанавливаем адрес log файла
 	this->logfile = logfile;
+}
+/**
+ * setOOvFile Метом установки файла для сохранения OOV слов
+ * @param oovfile адрес файла для сохранения oov слов
+ */
+void anyks::Alm::setOOvFile(const char * oovfile) noexcept {
+	// Устанавливаем адрес oov файла
+	this->oovfile = oovfile;
 }
 /**
  * setUserToken Метод добавления токена пользователя
@@ -2119,6 +2174,174 @@ void anyks::Alm::setGoodwords(const vector <string> & goodwords) noexcept {
 	}
 }
 /**
+ * sentences Метод генерации предложений
+ * @param callback функция обратного вызова
+ */
+void anyks::Alm::sentences(function <const bool (const wstring &)> callback) const noexcept {
+	// Если языковая модель загружена
+	if(!this->arpa.empty()){
+		/**
+		 * resultFn Функция формирования предложения
+		 * @param data собранный список n-грамм
+		 * @return     флаг продолжения или завершения работы
+		 */
+		auto resultFn = [&callback, this](const list <vector <size_t>> & data){
+			// Если список последовательностей передан
+			if(!data.empty()){
+				// Флаг сборки первой n-граммы
+				bool isStart = false;
+				// Строка результата
+				vector <size_t> result = {size_t(token_t::start)};
+				// Переходим по всему списку n-грамм
+				for(auto & seq : data){
+					// Если это первая итерация
+					if(!isStart && (isStart = !isStart))
+						// Добавляем в список первую n-грамму
+						result.insert(result.end(), seq.begin(), seq.end());
+					// Если это не первая n-грамма
+					else result.push_back(seq.back());
+					// Если последняя грамма является концом предложения
+					if(seq.back() == size_t(token_t::finish)){
+						// Выводим результат
+						if(!callback(this->context(result, true))) return false;
+						// Удаляем последний элемент в списке
+						result.pop_back();
+					}
+				}
+			}
+			// Продолжаем обработку
+			return true;
+		};
+		/**
+		 * estimateFn Прототип функции оценки собранных последовательностей
+		 * @param  список собранной последовательности
+		 * @return список собранных последовательностей
+		 */
+		function <const list <vector <size_t>> (const vector <size_t> &)> estimateFn;
+		/**
+		 * estimateFn Функция оценки собранных последовательностей
+		 * @param seq список собранной последовательности
+		 * @return    список собранных последовательностей
+		 */
+		estimateFn = [&estimateFn, this](const vector <size_t> & seq) noexcept {
+			// Результат работы функции
+			list <vector <size_t>> result;
+			// Если найден - конец предложения
+			if(seq.back() == size_t(token_t::finish)) result.push_back(seq);
+			// Если последовательность передана
+			else if(seq.size() > 1){
+				// Получаем новый список последовательности
+				vector <size_t> tmp(seq.begin() + 1, seq.end());
+				// Если последовательность не пустая
+				if(!tmp.empty()){
+					// Итератор для подсчета длины n-граммы
+					u_short i = 0;
+					// Копируем основную карту
+					const arpa_t * obj = &this->arpa;
+					// Переходим по всему объекту
+					for(auto & idw : seq){
+						// Выполняем поиск нашего слова
+						auto it = obj->find(idw);
+						// Если слово найдено
+						if(it != obj->end()){
+							// Получаем блок структуры
+							obj = &it->second;
+							// Если мы дошли до конца
+							if(i == (seq.size() - 1)){
+								// Если это не конец и следующий блок пустой, выходим
+								if(!it->second.empty()){
+									// Переходим по всему списку следующих n-грамм
+									for(auto & item : it->second){
+										// Добавляем полученную грамму в список последовательности
+										tmp.push_back(item.first);
+										// Если это конец предложения
+										if(item.first == size_t(token_t::finish)){
+											// Если результат пустой, добавляем в него первоначальную последовательность
+											if(result.empty()) result.push_back(seq);
+											// Добавляем в список полученную последовательность
+											result.push_back(tmp);
+										// Если это не конец предложения
+										} else {
+											// Выполняем новый запрос
+											const auto & res = estimateFn(tmp);
+											// Если результат получен
+											if(!res.empty()){
+												// Если результат пустой, добавляем в него первоначальную последовательность
+												if(result.empty()) result.push_back(seq);
+												// Добавляем в список полученную последовательность
+												result.insert(result.end(), res.begin(), res.end());
+											}
+										}
+										// Удаляем последнее добавление
+										tmp.pop_back();
+									}
+								}
+								// Выходим из цикла
+								break;
+							// Если это не конец и следующий блок пустой, выходим
+							} else if(it->second.empty()) break;
+						// Выходим из цикла
+						} else break;
+						// Если количество n-грамм достигло предела, выходим
+						if((++i) > (this->size - 1)) break;
+					}
+				}
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * runFn Прототип функции запуска перебора предложения
+		 * @param  список собранной последовательности
+		 * @param  контекст в котором нужно собирать данные
+		 * @return флаг продолжения или завершения работы
+		 */
+		function <const bool (vector <size_t>, const arpa_t *)> runFn;
+		/**
+		 * runFn Функция запуска перебора предложения
+		 * @param seq     список собранной последовательности
+		 * @param context контекст в котором нужно собирать данные
+		 * @return        флаг продолжения или завершения работы
+		 */
+		runFn = [&runFn, &estimateFn, &resultFn, this](vector <size_t> seq, const arpa_t * context) noexcept {
+			// Если данные переданы
+			if(!seq.empty() && (context != nullptr)){
+				// Последовательность для обработки
+				vector <size_t> tmp;
+				// Переходим по всему списку
+				for(auto & item : * context){
+					// Добавляем в список n-грамму
+					seq.push_back(item.first);
+					// Продолжаем сборку данных
+					if(!item.second.empty()) runFn(seq, &item.second);
+					// Выполняем расчёт собранных данных
+					else if(!resultFn(estimateFn(seq))) return false;
+					// Удаляем данные в последовательности
+					seq.pop_back();
+				}
+			}
+			// Продолжаем работу
+			return true;
+		};
+		// Ищем начало предложения
+		auto it = this->arpa.find(size_t(token_t::start));
+		// Если начало предложения получено
+		if(it != this->arpa.end()){
+			// Собранная последовательность
+			vector <size_t> seq;
+			// Переходим по всем данным
+			for(auto & item : it->second){
+				// Формируем начало последовательности
+				seq.push_back(item.first);
+				// Выполняем обработку данных
+				if(!runFn(seq, &item.second)) return;
+				// Удаляем данные в последовательности
+				seq.pop_back();
+			}
+		}
+	}
+}
+/**
  * getUppers Метод извлечения регистров для каждого слова
  * @param seq  последовательность слов для сборки контекста
  * @param upps список извлечённых последовательностей
@@ -2218,6 +2441,247 @@ void anyks::Alm::getUppers(const vector <size_t> & seq, vector <size_t> & upps) 
 		}
 		// Удаляем лишний элемент регистра
 		if(!isBack) upps.pop_back();
+	}
+}
+/**
+ * find Метод поиска n-грамм в тексте
+ * @param text     текст в котором необходимо найти n-граммы
+ * @param callback функция обратного вызова
+ */
+void anyks::Alm::find(const string & text, function <void (const string &)> callback) const noexcept {
+	// Если текст передан, выполняем обработку
+	if(!text.empty()){
+		// Выполняем поиск n-грамм в тексте
+		this->find(this->alphabet->convert(text), [&callback, this](const wstring & text) noexcept {
+			// Выводим результат
+			if(!text.empty()) callback(this->alphabet->convert(text));
+		});
+	}
+}
+/**
+ * find Метод поиска n-грамм в тексте
+ * @param text     текст в котором необходимо найти n-граммы
+ * @param callback функция обратного вызова
+ */
+void anyks::Alm::find(const wstring & text, function <void (const wstring &)> callback) const noexcept {
+	// Если слово передано
+	if(!text.empty() && !this->arpa.empty()){
+		// Идентификатор неизвестного слова
+		const size_t uid = (size_t) token_t::unk;
+		// Идентификатор начала предложения
+		const size_t sid = (size_t) token_t::start;
+		// Идентификатор конца предложения
+		const size_t fid = (size_t) token_t::finish;
+		// Список последовательностей для обучения
+		vector <size_t> seq = {sid};
+		// Собранная n-грамма для проверки
+		vector <wstring> words = {L"<s>"};
+		// Кэш списка собранных n-грамм
+		unordered_set <wstring> cache = {};
+		/**
+		 * callbackFn Функция вывода результата
+		 * @param words список слов для вывода результата
+		 * @param count количество слов для вывода результата
+		 */
+		auto callbackFn = [&cache, &callback, this](const vector <wstring> & words, const size_t count){
+			// Если список слов передан
+			if(!words.empty() && (count > 1)){
+				// Получившаяся строка текста
+				wstring text = L"";
+				// Переходим по всему списку слов
+				for(size_t i = 0; i < count; i++){
+					// Добавляем в текст слово
+					text.append(words.at(i));
+					// Добавляем пробел
+					text.append(L" ");
+				}
+				// Удаляем последний пробел
+				text.pop_back();
+				// Если текст получен
+				if(!text.empty() && (cache.count(text) < 1)){
+					// Выводим результат
+					callback(text);
+					// Добавляем собранный результат в кэш
+					cache.emplace(text);
+				}
+			}
+		};
+		/**
+		 * unkFn Функция установки неизвестного слова в последовательность
+		 * @return нужно ли остановить сбор последовательности
+		 */
+		auto unkFn = [&seq, &words, uid, this]() noexcept {
+			// Получаем установленное неизвестное слово
+			const word_t & word = (this->unknown > 0 ? this->word(this->unknown) : L"");
+			// Если неизвестное слово не установлено
+			if((this->unknown == 0) || word.empty()){
+				// Добавляем неизвестное слово
+				seq.push_back(uid);
+				// Добавляем в список неизвестное слово
+				words.push_back(L"<unk>");
+			// Если неизвестное слово установлено
+			} else if(!word.empty()) {
+				// Добавляем установленное неизвестное слово
+				seq.push_back(this->unknown);
+				// Добавляем полученное ранее слово
+				words.push_back(word.wreal());
+			}
+		};
+		/**
+		 * checkFn Прототип функции проверки существования последовательности
+		 * @param список слов последовательности
+		 * @param список реальных слов в последовательности
+		 */
+		function <void (const vector <size_t> &, const vector <wstring> &)> checkFn;
+		/**
+		 * checkFn Функция проверки существования последовательности
+		 * @param seq   список слов последовательности
+		 * @param words список реальных слов в последовательности
+		 */
+		checkFn = [&checkFn, &callbackFn, this](const vector <size_t> & seq, const vector <wstring> & words) noexcept {
+			// Если список последовательностей передан
+			if(!seq.empty() && !words.empty() && (this->size > 0)){
+				// Итератор для подсчета длины n-граммы
+				u_short i = 0;
+				// Результат поиска слова
+				bool exist = false;
+				// Копируем основную карту
+				arpa_t * obj = &this->arpa;
+				// Переходим по всему объекту
+				for(auto & idw : seq){
+					// Выполняем поиск нашего слова
+					auto it = obj->find(idw);
+					// Если слово найдено
+					if(it != obj->end()){
+						// Получаем блок структуры
+						obj = &it->second;
+						// Если мы дошли до конца
+						exist = (i == (seq.size() - 1));
+					// Выходим из цикла
+					} else break;
+					// Если количество n-грамм достигло предела, выходим
+					if((++i) > (this->size - 1)) break;
+				}
+				// Выводим результат
+				callbackFn(words, i);
+				// Если последовательность не существует
+				if(!exist && (seq.size() > 2)){
+					// Получаем новую последовательность
+					vector <size_t> tmp1(seq.begin() + 1, seq.end());
+					// Получаем новую последовательность слов
+					vector <wstring> tmp2(words.begin() + 1, words.end());
+					// Пробуем уменьшить n-грамму
+					checkFn(tmp1, tmp2);
+				}
+			}
+		};
+		/**
+		 * resFn Функция вывода результата
+		 */
+		auto resFn = [&]() noexcept {
+			// Добавляем в список конец предложения
+			seq.push_back(fid);
+			// Добавляем конец предложения
+			words.push_back(L"</s>");
+			/**
+			 * Если слова всего два, значит это начало и конец предложения.
+			 * Нам же нужны только нормальные n-граммы.
+			 */
+			if((seq.size() > 2) && (seq.size() == words.size())){
+				// Временная последовательность
+				vector <size_t> tmp1;
+				// Временный список слов
+				vector <wstring> tmp2;
+				// Количество переданных последовательностей
+				const size_t count = seq.size();
+				// Определяем смещение в последовательности
+				size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+				// Выполняем извлечение данных
+				while(offset2 < (count + 1)){
+					// Получаем первую часть последовательности
+					tmp1.assign(seq.begin() + offset1, seq.begin() + offset2);
+					// Получаем первую часть списка слов
+					tmp2.assign(words.begin() + offset1, words.begin() + offset2);
+					// Если последовательность получена
+					if(!tmp1.empty()) checkFn(tmp1, tmp2);
+					// Увеличиваем смещение
+					offset1++;
+					offset2++;
+				}
+				// Выводим разделитель предложений
+				callback(L"\r\n");
+			}
+			// Очищаем список последовательностей
+			seq.clear();
+			// Очищаем список собранных слов
+			words.clear();
+			// Добавляем в список начало предложения
+			seq.push_back(sid);
+			// Добавляем начало предложения
+			words.push_back(L"<s>");
+		};
+		/**
+		 * modeFn Функция обработки разбитого текста
+		 * @param word  слово для обработки
+		 * @param ctx   контекст к которому принадлежит слово
+		 * @param reset флаг сброса контекста
+		 * @param stop  флаг завершения обработки
+		 */
+		auto modeFn = [&](const wstring & word, const vector <string> & ctx, const bool reset, const bool stop) noexcept {
+			// Если это сброс контекста, отправляем результат
+			if(reset) resFn();
+			// Если слово передано
+			if(!word.empty()){
+				// Получаем данные слова
+				word_t tmp = word;
+				// Если модуль питона активирован
+				if(this->python != nullptr){
+					// Ищем скрипт обработки слов
+					auto it = this->scripts.find(1);
+					// Если скрипт обработки слов установлен
+					if(it != this->scripts.end()){
+						// Блокируем поток
+						this->locker.lock();
+						// Выполняем внешний python скрипт
+						tmp = this->python->run(it->second.second, {tmp.real()}, ctx);
+						// Если результат не получен, возвращаем слово
+						if(tmp.empty()) tmp = move(word);
+						// Разблокируем поток
+						this->locker.unlock();
+					}
+				}
+				// Если слово не разрешено
+				if(tmp.length() >= MAX_WORD_LENGTH) unkFn();
+				// Если слово разрешено
+				else {
+					// Получаем идентификатор слова
+					const size_t idw = this->getIdw(tmp);
+					// Если это плохое слово, заменяем его на неизвестное
+					if((idw == 0) || (idw == idw_t::NIDW) || (this->badwords.count(idw) > 0)) unkFn();
+					// Иначе продолжаем дальше
+					else {
+						// Проверяем является ли строка словом
+						const bool isWord = this->event(idw);
+						// Если это неизвестное слово
+						if((idw == uid) || (isWord && (this->findWord(idw) == nullptr))) unkFn();
+						// Иначе добавляем слово
+						else if(!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)){
+							// Добавляем идентификатор в список последовательности
+							seq.push_back(idw);
+							// Добавляем слово в список слов
+							words.push_back(word);
+						// Отправляем слово как неизвестное
+						} else unkFn();
+					}
+				}
+			}
+			// Если это конец, отправляем результат
+			if(stop) resFn();
+			// Выводим результат
+			return true;
+		};
+		// Выполняем разбивку текста на токены
+		this->tokenizer->run(text, modeFn);
 	}
 }
 /**
@@ -2436,7 +2900,7 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 				}
 			}
 			// Если функция вывода статуса передана
-			if(status != nullptr){
+			if((type < 2) && (status != nullptr)){
 				// Увеличиваем количество записанных n-грамм
 				index += text.size();
 				// Выполняем расчёт текущего статуса
@@ -2467,6 +2931,433 @@ void anyks::Alm::setUserTokenMethod(const string & name, function <bool (const s
 		auto it = this->utokens.find(idw);
 		// Если такой токен найден, устанавливаем функци
 		if(it != this->utokens.end()) it->second.test = fn;
+	}
+}
+/**
+ * sentencesToFile Метод сборки указанного количества предложений и записи в файл
+ * @param counts   количество предложений для сборки
+ * @param filename адрес файла для записи результата
+ * @param status   функция вывода статуса чтения
+ */
+void anyks::Alm::sentencesToFile(const u_short counts, const string & filename, function <void (const u_short)> status) const noexcept {
+	// Если данные переданы верные
+	if((counts > 0) && (counts < 65000) && (this->isOption(options_t::debug) || !filename.empty())){
+		// Индекс собранных данных, статус и процентное соотношение
+		u_short index = 0, actual = 0, rate = 100;
+		// Выполняем сборку предложений
+		this->sentences([&](const wstring & text){
+			// Получаем строку текста для вывода
+			const string & str = this->alphabet->convert(text);
+			// Если текст получен
+			if(!str.empty()){
+				// Выполняем запись в файл
+				if(!filename.empty()) this->alphabet->log("%s", alphabet_t::log_t::null, filename.c_str(), str.c_str());
+				// Выводим результат в консоль, если включён режим отладки или файл для записи не передан
+				if(this->isOption(options_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::info, nullptr, str.c_str());
+			}
+			// Если отладка включена
+			if(status != nullptr){
+				// Увеличиваем индекс собранных данных
+				index++;
+				// Подсчитываем статус выполнения
+				actual = u_short(index / double(counts) * 100.0);
+				// Если процентное соотношение изменилось
+				if(rate != actual){
+					// Запоминаем текущее процентное соотношение
+					rate = actual;
+					// Выводим результат
+					status(actual);
+				}
+			}
+			// Продолжаем работу или прекращаем её
+			return (index < counts);
+		});
+	}
+}
+/**
+ * findByFiles Метод поиска n-грамм в текстовом файле
+ * @param path     адрес каталога или файла для обработки
+ * @param filename адрес файла для записи результата
+ * @param status   функция вывода статуса чтения
+ * @param ext      расширение файлов в каталоге (если адрес передан каталога)
+ */
+void anyks::Alm::findByFiles(const string & path, const string & filename, function <void (const string &, const u_short)> status, const string & ext) const noexcept {
+	// Если данные переданы
+	if(!path.empty() && !filename.empty()){
+		// Общий размер полученных данных
+		size_t csize = 0;
+		// Статус и процентное соотношение
+		u_short actual = 0, rate = 100;
+		/**
+		 * runFn Функция запусука проверки n-грамм
+		 * @param text текст для обработки
+		 * @param readfile обрабатываемый в данный момент файл
+		 * @param size     размер обрабатываемого файла
+		 */
+		auto runFn = [&](const string & text, const string & readfile, const size_t size){
+			// Если текст получен
+			if(!text.empty()){
+				// Собранный список n-грамм текста
+				string result = "";
+				// Флаг переноса строки
+				bool isOBreak = false;
+				// Выполняем поиск n-грамм
+				this->find(text, [&result, &isOBreak, this](const string & text){
+					// Выводим список найденных n-рамм
+					if(!text.empty()){
+						// Проверяем, является ли текст переносом строки
+						const bool isBreak = (text.compare("\r\n") == 0);
+						// Если текущий флаг это перенос строки и предыдущий тоже
+						if(isBreak && isOBreak) return;
+						// Собираем все n-граммы
+						result.append(text);
+						// Добавляем перенос строки
+						if(!isBreak) result.append("\r\n");
+						// Запоминаем текущий флаг
+						isOBreak = isBreak;
+					}
+				});
+				// Если результат получен
+				if(!result.empty()){
+					// Выполняем блокировку потока
+					this->locker.lock();
+					// Выполняем запись в файл
+					this->alphabet->log("%s", alphabet_t::log_t::null, filename.c_str(), result.c_str());
+					// Выводим результат
+					if(this->isOption(options_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::info, nullptr, result.c_str());
+					// Выполняем разблокировку потока
+					this->locker.unlock();
+				}
+			}
+			// Если отладка включена
+			if(status != nullptr){
+				// Выполняем блокировку потока
+				this->locker.lock();
+				// Общий полученный размер данных
+				csize += text.size();
+				// Подсчитываем статус выполнения
+				actual = u_short(csize / double(size) * 100.0);
+				// Если процентное соотношение изменилось
+				if(rate != actual){
+					// Запоминаем текущее процентное соотношение
+					rate = actual;
+					// Выводим результат
+					status(readfile, actual);
+				}
+				// Выполняем разблокировку потока
+				this->locker.unlock();
+			}
+		};
+		// Выполняем инициализацию тредпула
+		this->tpool.init(this->threads);
+		// Если это файл
+		if(fsys_t::isfile(path)){
+			// Выполняем считывание всех строк текста
+			fsys_t::rfile(path, [&path, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
+				// Выполняем обработку
+				this->tpool.push(runFn, text, path, fileSize);
+			});
+		// Если это каталог
+		} else if(fsys_t::isdir(path)) {
+			// Переходим по всему списку файлов в каталоге
+			fsys_t::rdir(path, ext, [&runFn, this](const string & filename, const uintmax_t dirSize) noexcept {
+				// Выполняем считывание всех строк текста
+				fsys_t::rfile(filename, [dirSize, &filename, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
+					// Выполняем обработку
+					this->tpool.push(runFn, text, filename, dirSize);
+				});
+			});
+		}
+		// Ожидаем завершения обработки
+		this->tpool.wait();
+	}
+}
+/**
+ * fixUppersByFiles Метод исправления регистров текста в текстовом файле
+ * @param path     адрес каталога или файла для обработки
+ * @param filename адрес файла для записи результата
+ * @param status   функция вывода статуса чтения
+ * @param ext      расширение файлов в каталоге (если адрес передан каталога)
+ */
+void anyks::Alm::fixUppersByFiles(const string & path, const string & filename, function <void (const string &, const u_short)> status, const string & ext) const noexcept {
+	// Если данные переданы
+	if(!path.empty() && !filename.empty()){
+		// Общий размер полученных данных
+		size_t csize = 0;
+		// Статус и процентное соотношение
+		u_short actual = 0, rate = 100;
+		/**
+		 * runFn Функция запусука проверки n-грамм
+		 * @param text текст для обработки
+		 * @param readfile обрабатываемый в данный момент файл
+		 * @param size     размер обрабатываемого файла
+		 */
+		auto runFn = [&](const string & text, const string & readfile, const size_t size){
+			// Если текст получен
+			if(!text.empty()){
+				// Выполняем првоерку текста
+				const string & str = this->fixUppers(text);
+				// Если строка получена
+				if(!str.empty()){
+					// Выполняем блокировку потока
+					this->locker.lock();
+					// Выполняем запись в файл
+					this->alphabet->log("%s\r\n", alphabet_t::log_t::null, filename.c_str(), str.c_str());
+					// Выводим результат
+					if(this->isOption(options_t::debug)) this->alphabet->log("%s\r\n", alphabet_t::log_t::info, nullptr, str.c_str());
+					// Выполняем разблокировку потока
+					this->locker.unlock();
+				}
+			}
+			// Если отладка включена
+			if(status != nullptr){
+				// Выполняем блокировку потока
+				this->locker.lock();
+				// Общий полученный размер данных
+				csize += text.size();
+				// Подсчитываем статус выполнения
+				actual = u_short(csize / double(size) * 100.0);
+				// Если процентное соотношение изменилось
+				if(rate != actual){
+					// Запоминаем текущее процентное соотношение
+					rate = actual;
+					// Выводим результат
+					status(readfile, actual);
+				}
+				// Выполняем разблокировку потока
+				this->locker.unlock();
+			}
+		};
+		// Выполняем инициализацию тредпула
+		this->tpool.init(this->threads);
+		// Если это файл
+		if(fsys_t::isfile(path)){
+			// Выполняем считывание всех строк текста
+			fsys_t::rfile(path, [&path, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
+				// Выполняем обработку
+				this->tpool.push(runFn, text, path, fileSize);
+			});
+		// Если это каталог
+		} else if(fsys_t::isdir(path)) {
+			// Переходим по всему списку файлов в каталоге
+			fsys_t::rdir(path, ext, [&runFn, this](const string & filename, const uintmax_t dirSize) noexcept {
+				// Выполняем считывание всех строк текста
+				fsys_t::rfile(filename, [dirSize, &filename, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
+					// Выполняем обработку
+					this->tpool.push(runFn, text, filename, dirSize);
+				});
+			});
+		}
+		// Ожидаем завершения обработки
+		this->tpool.wait();
+	}
+}
+/**
+ * countsByFiles Метод подсчёта количества n-грамм в текстовом файле
+ * @param path     адрес каталога или файла для обработки
+ * @param filename адрес файла для записи результата
+ * @param ngrams   размер n-граммы для подсчёта
+ * @param status   функция вывода статуса чтения
+ * @param ext      расширение файлов в каталоге (если адрес передан каталога)
+ */
+void anyks::Alm::countsByFiles(const string & path, const string & filename, const u_short ngrams, function <void (const string &, const u_short)> status, const string & ext) const noexcept {
+	// Если данные переданы
+	if(!path.empty() && !filename.empty()){
+		// Общий размер полученных данных
+		size_t csize = 0, count = 0;
+		// Статус и процентное соотношение
+		u_short actual = 0, rate = 100;
+		/**
+		 * runFn Функция запусука проверки n-грамм
+		 * @param text текст для обработки
+		 * @param readfile обрабатываемый в данный момент файл
+		 * @param size     размер обрабатываемого файла
+		 */
+		auto runFn = [&](const string & text, const string & readfile, const size_t size){
+			// Если текст получен
+			if(!text.empty()){
+				// Количество грамм в тексте
+				size_t grams = 0;
+				// Определяем тип размеров n-грамм
+				switch(ngrams){
+					// Если размер n-грамм не определен
+					case 1: {
+						// Выполняем расчёт количества n-грамм
+						grams = this->grams(text);
+						// Выполняем блокировку потока
+						this->locker.lock();
+						// Выводим сообщение в файл
+						this->alphabet->log("%zu | %s\r\n", alphabet_t::log_t::null, filename.c_str(), grams, text.c_str());
+						// Выводим сообщение в консоль
+						if(this->isOption(options_t::debug)) this->alphabet->log("%zu | %s\r\n", alphabet_t::log_t::info, nullptr, grams, text.c_str());
+						// Выполняем разблокировку потока
+						this->locker.unlock();
+					} break;
+					// Если размер n-грамм биграммы
+					case 2: {
+						// Выполняем расчёт количества биграмм
+						grams = this->bigrams(text);
+						// Выполняем блокировку потока
+						this->locker.lock();
+						// Выводим сообщение в файл
+						this->alphabet->log("%zu | %s\r\n", alphabet_t::log_t::null, filename.c_str(), grams, text.c_str());
+						// Выводим сообщение в консоль
+						if(this->isOption(options_t::debug)) this->alphabet->log("%zu | %s\r\n", alphabet_t::log_t::info, nullptr, grams, text.c_str());
+						// Выполняем разблокировку потока
+						this->locker.unlock();
+					} break;
+					// Если размер n-грамм триграммы
+					case 3: {
+						// Выполняем расчёт количества триграмм
+						grams = this->trigrams(text);
+						// Выполняем блокировку потока
+						this->locker.lock();
+						// Выводим сообщение в файл
+						this->alphabet->log("%zu | %s\r\n", alphabet_t::log_t::null, filename.c_str(), grams, text.c_str());
+						// Выводим сообщение в консоль
+						if(this->isOption(options_t::debug)) this->alphabet->log("%zu | %s\r\n", alphabet_t::log_t::info, nullptr, grams, text.c_str());
+						// Выполняем разблокировку потока
+						this->locker.unlock();
+					} break;
+				}
+				// Выполняем блокировку потока
+				this->locker.lock();
+				// Увкличиваем количество собранных n-грамм
+				count += grams;
+				// Выполняем разблокировку потока
+				this->locker.unlock();
+			}
+			// Если отладка включена
+			if(status != nullptr){
+				// Выполняем блокировку потока
+				this->locker.lock();
+				// Общий полученный размер данных
+				csize += text.size();
+				// Подсчитываем статус выполнения
+				actual = u_short(csize / double(size) * 100.0);
+				// Если процентное соотношение изменилось
+				if(rate != actual){
+					// Запоминаем текущее процентное соотношение
+					rate = actual;
+					// Выводим результат
+					status(readfile, actual);
+				}
+				// Выполняем разблокировку потока
+				this->locker.unlock();
+			}
+		};
+		// Выполняем инициализацию тредпула
+		this->tpool.init(this->threads);
+		// Если это файл
+		if(fsys_t::isfile(path)){
+			// Выполняем считывание всех строк текста
+			fsys_t::rfile(path, [&path, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
+				// Выполняем обработку
+				this->tpool.push(runFn, text, path, fileSize);
+			});
+		// Если это каталог
+		} else if(fsys_t::isdir(path)) {
+			// Переходим по всему списку файлов в каталоге
+			fsys_t::rdir(path, ext, [&runFn, this](const string & filename, const uintmax_t dirSize) noexcept {
+				// Выполняем считывание всех строк текста
+				fsys_t::rfile(filename, [dirSize, &filename, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
+					// Выполняем обработку
+					this->tpool.push(runFn, text, filename, dirSize);
+				});
+			});
+		}
+		// Ожидаем завершения обработки
+		this->tpool.wait();
+		// Выводим сообщение об общем количестве обработанных n-грамм в консоль
+		this->alphabet->log("Counts %hugrams: %zu\r\n", alphabet_t::log_t::null, nullptr, (ngrams == 1 ? this->size : ngrams), count);
+		// Выводим сообщение об общем количестве обработанных n-грамм в файл
+		this->alphabet->log("Counts %hugrams: %zu\r\n", alphabet_t::log_t::null, filename.c_str(), (ngrams == 1 ? this->size : ngrams), count);
+	}
+}
+/**
+ * checkByFiles Метод проверки существования последовательности в текстовом файле
+ * @param path     адрес каталога или файла для обработки
+ * @param filename адрес файла для записи результата
+ * @param accurate режим точной проверки
+ * @param status   функция вывода статуса чтения
+ * @param ext      расширение файлов в каталоге (если адрес передан каталога)
+ */
+void anyks::Alm::checkByFiles(const string & path, const string & filename, const bool accurate, function <void (const string &, const u_short)> status, const string & ext) const noexcept {
+	// Если данные переданы
+	if(!path.empty() && !filename.empty()){
+		// Статус и процентное соотношение
+		u_short actual = 0, rate = 100;
+		// Общий размер полученных данных
+		size_t csize = 0, count = 0, exists = 0;
+		/**
+		 * runFn Функция запусука проверки n-грамм
+		 * @param text текст для обработки
+		 * @param readfile обрабатываемый в данный момент файл
+		 * @param size     размер обрабатываемого файла
+		 */
+		auto runFn = [&](const string & text, const string & readfile, const size_t size){
+			// Если текст получен
+			if(!text.empty()){
+				// Выполняем првоерку текста
+				const auto & res = this->check(text, accurate);
+				// Выполняем блокировку потока
+				this->locker.lock();
+				// Считаем количество обработанных предложений
+				count++;
+				// Если слово найдено считаем количество предложений
+				if(res.first) exists++;
+				// Выполняем запись в файл
+				this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::null, filename.c_str(), count, text.c_str(), (res.first ? "YES" : "NO"));
+				// Выводим результат
+				if(this->isOption(options_t::debug)) this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::info, nullptr, count, text.c_str(), (res.first ? "YES" : "NO"));
+				// Выполняем разблокировку потока
+				this->locker.unlock();
+			}
+			// Если отладка включена
+			if(status != nullptr){
+				// Выполняем блокировку потока
+				this->locker.lock();
+				// Общий полученный размер данных
+				csize += text.size();
+				// Подсчитываем статус выполнения
+				actual = u_short(csize / double(size) * 100.0);
+				// Если процентное соотношение изменилось
+				if(rate != actual){
+					// Запоминаем текущее процентное соотношение
+					rate = actual;
+					// Выводим результат
+					status(readfile, actual);
+				}
+				// Выполняем разблокировку потока
+				this->locker.unlock();
+			}
+		};
+		// Выполняем инициализацию тредпула
+		this->tpool.init(this->threads);
+		// Если это файл
+		if(fsys_t::isfile(path)){
+			// Выполняем считывание всех строк текста
+			fsys_t::rfile(path, [&path, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
+				// Выполняем обработку
+				this->tpool.push(runFn, text, path, fileSize);
+			});
+		// Если это каталог
+		} else if(fsys_t::isdir(path)) {
+			// Переходим по всему списку файлов в каталоге
+			fsys_t::rdir(path, ext, [&runFn, this](const string & filename, const uintmax_t dirSize) noexcept {
+				// Выполняем считывание всех строк текста
+				fsys_t::rfile(filename, [dirSize, &filename, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
+					// Выполняем обработку
+					this->tpool.push(runFn, text, filename, dirSize);
+				});
+			});
+		}
+		// Ожидаем завершения обработки
+		this->tpool.wait();
+		// Выводим сообщение об общем количестве обработанных предложений
+		this->alphabet->log("All texts: %zu\r\nExists texts: %zu\r\nNot exists texts: %zu\r\n", alphabet_t::log_t::null, nullptr, count, exists, count - exists);
+		// Выполняем запись в файл
+		this->alphabet->log("All texts: %zu\r\nExists texts: %zu\r\nNot exists texts: %zu\r\n", alphabet_t::log_t::null, filename.c_str(), count, exists, count - exists);
 	}
 }
 /**

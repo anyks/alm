@@ -45,6 +45,8 @@
   - [Checking context in text](https://github.com/anyks/alm/#checking-context-in-text)
   - [Fix words case](https://github.com/anyks/alm/#fix-words-case)
   - [Check counts ngrams](https://github.com/anyks/alm/#check-counts-ngrams)
+  - [Search ngrams by text](https://github.com/anyks/alm/#search-ngrams-by-text)
+  - [Sentences generation](https://github.com/anyks/alm/#sentences-generation)
 - [License](https://github.com/anyks/alm/#license)
 - [Contact](https://github.com/anyks/alm/#contact)
 
@@ -190,8 +192,8 @@ ngram 3=15
  - **〈dimen〉** - Dimensions token (**200x300** | **1920x1080**)
  - **〈fract〉** - Fraction token (**5/20** | **192/864**)
  - **〈punct〉** - Punctuation token (**.** | **...** | **,** | **!** | **?** | **:** | **;**)
+ - **〈specl〉** - Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** )
  - **〈isolat〉** - Isolation/quotation token (**"** | **'** | **«** | **»** | **„** | **“** | **`** | **(** | **)** | **[** | **]** | **{** | **}**)
- - **〈specl〉** - Special character token (**~** | **@** | **#** | **№** | **%** | **&** | **$** | **§** | **©** | **〈** | **〉**)
 
 ---
 
@@ -791,16 +793,23 @@ $ echo "неожиданно из подворотни в Олега удари�
 ```
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method ppl -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method ppl -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -threads 0
 ```
 
 ### Checking context in text
+**Smart checking**
 ```bash
 $ echo "<s> Сегодня сыграл и в Олега ударил яркий прожектор патрульный трактор с корпоративным сектором </s>" | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence
 ```
 
+**Accurate checking**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./checks.txt
+$ echo "<s> в Олега ударил яркий </s>" | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence -accurate
+```
+
+**Checking by file**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./checks.txt -threads 0
 ```
 
 ### Fix words case
@@ -809,24 +818,40 @@ $ echo "неожиданно из подворотни в Олега удари�
 ```
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method fixcase -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./fix.txt
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method fixcase -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./fix.txt -threads 0
 ```
 
 ### Check counts ngrams
 ```bash
-$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -debug 1 -r-arpa ./5.arpa -confidence
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -debug 1 -r-arpa ./lm.arpa -confidence
 ```
 
 ```bash
-$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams bigram -debug 1 -r-arpa ./5.arpa -confidence
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams bigram -debug 1 -r-arpa ./lm.arpa -confidence
 ```
 
 ```bash
-$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams trigram -debug 1 -r-arpa ./5.arpa -confidence
+$ echo "неожиданно из подворотни в Олега ударил яркий прожектор патрульный трактор???с лязгом выкатился и остановился возле мальчика...." | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams trigram -debug 1 -r-arpa ./lm.arpa -confidence
 ```
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams bigram -debug 1 -r-arpa ./5.arpa -confidence -r-text ./text.txt -w-text ./counts.txt
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method counts -ngrams bigram -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./counts.txt -threads 0
+```
+
+### Search ngrams by text
+
+```bash
+$ echo "Особое место занимает чудотворная икона Лобзание Христа Иудою" | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method find -debug 1 -r-arpa ./lm.arpa -confidence
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method find -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./found.txt -threads 0
+```
+
+### Sentences generation
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method sentences -gen 5 -debug 1 -r-arpa ./lm.arpa -confidence -w-text ./sentences.txt
 ```
 
 * * *

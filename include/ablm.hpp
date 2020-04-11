@@ -155,7 +155,7 @@ namespace anyks {
 			 */
 			void unsetFlag(const flag_t flag) noexcept;
 			/**
-			 * setLogfile Метод установка файла для вывода логов
+			 * setLogfile Метод установки файла для вывода логов
 			 * @param logifle адрес файла для вывода отладочной информации
 			 */
 			void setLogfile(const char * logfile) noexcept;

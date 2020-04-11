@@ -1585,7 +1585,7 @@ void anyks::Arpa::setWordMethod(words_t word) noexcept {
 	this->getWord = word;
 }
 /**
- * setLogfile Метод установка файла для вывода логов
+ * setLogfile Метод установки файла для вывода логов
  * @param logifle адрес файла для вывода отладочной информации
  */
 void anyks::Arpa::setLogfile(const char * logfile) noexcept {

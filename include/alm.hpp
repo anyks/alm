@@ -18,11 +18,13 @@
 #include <mutex>
 #include <cmath>
 #include <ctime>
+#include <atomic>
 #include <bitset>
 #include <vector>
 #include <limits>
 #include <fstream>
 #include <functional>
+#include <unordered_set>
 #include <unordered_map>
 #include <sys/stat.h>
 /**
@@ -178,6 +180,8 @@ namespace anyks {
 			// Объект токенизатора
 			const tokenizer_t * tokenizer = nullptr;
 		private:
+			// Объект файла с oov словами
+			const char * oovfile = nullptr;
 			// Объект log файла
 			mutable const char * logfile = nullptr;
 		private:
@@ -298,22 +302,25 @@ namespace anyks {
 		public:
 			/**
 			 * check Метод проверки существования последовательности
-			 * @param text текст для проверки существования
-			 * @return     результат проверки
+			 * @param text     текст для проверки существования
+			 * @param accurate режим точной проверки
+			 * @return         результат проверки
 			 */
-			const pair <bool, size_t> check(const string & text) const noexcept;
+			const pair <bool, size_t> check(const string & text, const bool accurate = false) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности
-			 * @param text текст для проверки существования
-			 * @return     результат проверки
+			 * @param text     текст для проверки существования
+			 * @param accurate режим точной проверки
+			 * @return         результат проверки
 			 */
-			const pair <bool, size_t> check(const wstring & text) const noexcept;
+			const pair <bool, size_t> check(const wstring & text, const bool accurate = false) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности
-			 * @param seq список слов последовательности
-			 * @return    результат проверки
+			 * @param seq      список слов последовательности
+			 * @param accurate режим точной проверки
+			 * @return         результат проверки
 			 */
-			const pair <bool, size_t> check(const vector <size_t> & seq) const noexcept;
+			const pair <bool, size_t> check(const vector <size_t> & seq, const bool accurate = false) const noexcept;
 		public:
 			/**
 			 * fixUppers Метод исправления регистров в тексте
@@ -412,10 +419,15 @@ namespace anyks {
 			 */
 			void setPythonObj(python_t * python) noexcept;
 			/**
-			 * setLogfile Метод установка файла для вывода логов
+			 * setLogfile Метод установки файла для вывода логов
 			 * @param logifle адрес файла для вывода отладочной информации
 			 */
 			void setLogfile(const char * logfile) noexcept;
+			/**
+			 * setOOvFile Метом установки файла для сохранения OOV слов
+			 * @param oovfile адрес файла для сохранения oov слов
+			 */
+			void setOOvFile(const char * oovfile) noexcept;
 			/**
 			 * setUserToken Метод добавления токена пользователя
 			 * @param name слово - обозначение токена
@@ -508,11 +520,28 @@ namespace anyks {
 			 */
 			void setGoodwords(const vector <string> & goodwords) noexcept;
 			/**
+			 * sentences Метод генерации предложений
+			 * @param callback функция обратного вызова
+			 */
+			void sentences(function <const bool (const wstring &)> callback) const noexcept;
+			/**
 			 * getUppers Метод извлечения регистров для каждого слова
 			 * @param seq  последовательность слов для сборки контекста
 			 * @param upps список извлечённых последовательностей
 			 */
 			void getUppers(const vector <size_t> & seq, vector <size_t> & upps) const noexcept;
+			/**
+			 * find Метод поиска n-грамм в тексте
+			 * @param text     текст в котором необходимо найти n-граммы
+			 * @param callback функция обратного вызова
+			 */
+			void find(const string & text, function <void (const string &)> callback) const noexcept;
+			/**
+			 * find Метод поиска n-грамм в тексте
+			 * @param text     текст в котором необходимо найти n-граммы
+			 * @param callback функция обратного вызова
+			 */
+			void find(const wstring & text, function <void (const wstring &)> callback) const noexcept;
 			/**
 			 * getBin Метод извлечения данных arpa в бинарном виде
 			 * @param callback функция обратного вызова
@@ -535,6 +564,48 @@ namespace anyks {
 			 * @param fn   внешняя функция обрабатывающая пользовательский токен
 			 */
 			void setUserTokenMethod(const string & name, function <bool (const string &, const string &)> fn) noexcept;
+		public:
+			/**
+			 * sentencesToFile Метод сборки указанного количества предложений и записи в файл
+			 * @param counts   количество предложений для сборки
+			 * @param filename адрес файла для записи результата
+			 * @param status   функция вывода статуса чтения
+			 */
+			void sentencesToFile(const u_short counts, const string & filename, function <void (const u_short)> status = nullptr) const noexcept;
+			/**
+			 * findByFiles Метод поиска n-грамм в текстовом файле
+			 * @param path     адрес каталога или файла для обработки
+			 * @param filename адрес файла для записи результата
+			 * @param status   функция вывода статуса чтения
+			 * @param ext      расширение файлов в каталоге (если адрес передан каталога)
+			 */
+			void findByFiles(const string & path, const string & filename, function <void (const string &, const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
+			/**
+			 * fixUppersByFiles Метод исправления регистров текста в текстовом файле
+			 * @param path     адрес каталога или файла для обработки
+			 * @param filename адрес файла для записи результата
+			 * @param status   функция вывода статуса чтения
+			 * @param ext      расширение файлов в каталоге (если адрес передан каталога)
+			 */
+			void fixUppersByFiles(const string & path, const string & filename, function <void (const string &, const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
+			/**
+			 * countsByFiles Метод подсчёта количества n-грамм в текстовом файле
+			 * @param path     адрес каталога или файла для обработки
+			 * @param filename адрес файла для записи результата
+			 * @param ngrams   размер n-граммы для подсчёта
+			 * @param status   функция вывода статуса чтения
+			 * @param ext      расширение файлов в каталоге (если адрес передан каталога)
+			 */
+			void countsByFiles(const string & path, const string & filename, const u_short ngrams = 0, function <void (const string &, const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
+			/**
+			 * checkByFiles Метод проверки существования последовательности в текстовом файле
+			 * @param path     адрес каталога или файла для обработки
+			 * @param filename адрес файла для записи результата
+			 * @param accurate режим точной проверки
+			 * @param status   функция вывода статуса чтения
+			 * @param ext      расширение файлов в каталоге (если адрес передан каталога)
+			 */
+			void checkByFiles(const string & path, const string & filename, const bool accurate = false, function <void (const string &, const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
 		public:
 			/**
 			 * getSize Метод получения размера n-грамы

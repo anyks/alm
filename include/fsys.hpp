@@ -443,17 +443,21 @@ namespace anyks {
 								// Получаем значение текущей буквы
 								letter = reinterpret_cast <char *> (buffer)[i];
 								// Если текущая буква является переносом строк
-								if((i > 0) && (letter == '\n')){
+								if((i > 0) && ((letter == '\n') || (i == (size - 1)))){
 									// Если предыдущая буква была возвратом каретки, уменьшаем длину строки
 									length = ((old == '\r' ? i - 1 : i) - offset);
+									// Если это конец файла, корректируем размер последнего байта
+									if(length == 0) length = 1;
 									// Если длина слова получена, выводим полученную строку
-									if(length > 0) callback(string((char *) buffer + offset, length), size);
+									callback(string((char *) buffer + offset, length), size);
 									// Выполняем смещение
 									offset = (i + 1);
 								}
 								// Запоминаем предыдущую букву
 								old = letter;
 							}
+							// Если данные не все прочитаны, выводим как есть
+							if((offset == 0) && (size > 0)) callback(string((char *) buffer, size), size);
 						}
 					}
 					// Если файл открыт, закрываем его

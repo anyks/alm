@@ -93,7 +93,7 @@ namespace anyks {
 			const std::set <wchar_t> punctsSymbols = {L'.', L',', L'?', L'!', L':', L';'};
 		public:
 			// log_t Флаги логирования
-			enum class log_t : u_short {info, warning, error};
+			enum class log_t : u_short {info, warning, error, null};
 		private:
 			// Объект парсинга uri адреса
 			mutable uri_t uri;
