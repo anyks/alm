@@ -4,8 +4,8 @@
 
 ## 2.0.4 Bug fixes and new methods
 ### Methods
-- **find** ngrams search method in text
-- **sentences** sentences generation method
+- **find** - ngrams search method in text
+- **sentences** - sentences generation method
 ### Params
 - flag to accurate check ngram
 - file address *.txt for export oov words
