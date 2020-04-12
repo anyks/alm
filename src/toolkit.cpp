@@ -2010,13 +2010,13 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 				// Определяем тип считываемых данных
 				switch(type){
 					// Если получено обозначение заголовка
-					case 0: if(text.compare("\\data\\") == 0) type++; break;
+					case 0: if(text.find("\\data\\") != string::npos) type++; break;
 					// Если мы дошли до считывания данных слов
 					case 1: if(text.rfind("-grams:") != string::npos) type++; break;
 					// Если это тип считывания данных n-грамм
 					case 2: {
 						// Если мы дошли до конца, выходим
-						if(text.compare("\\end\\") == 0) break;
+						if(text.find("\\end\\") != string::npos) break;
 						// Иначе считываем данные n-граммы
 						else if((pos = text.find("\t")) != string::npos){
 							// Обнуляем локальную позицию
@@ -2140,11 +2140,11 @@ void anyks::Toolkit::readVocab(const string & filename, function <void (const u_
 				// Определяем тип считываемых данных
 				switch(type){
 					// Если получено обозначение заголовка
-					case 0: if(text.compare("\\data\\") == 0) type++; break;
+					case 0: if(text.find("\\data\\") != string::npos) type++; break;
 					// Если это тип считывания статистики
 					case 1: {
 						// Если мы дошли до считывания данных слов
-						if(text.compare("\\words:") == 0) type++;
+						if(text.find("\\words:") != string::npos) type++;
 						// Пытаемся прочитать статистику
 						else if((pos = text.find("=")) != string::npos){
 							// Извлекаем ключ
@@ -2162,7 +2162,7 @@ void anyks::Toolkit::readVocab(const string & filename, function <void (const u_
 					// Если это тип считывания данных слова
 					case 2: {
 						// Если мы дошли до конца, выходим
-						if(text.compare("\\end\\") == 0) break;
+						if(text.find("\\end\\") != string::npos) break;
 						// Иначе считываем данные слова
 						else if((pos = text.find("\t")) != string::npos){
 							// Обнуляем локальную позицию
@@ -2256,7 +2256,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 				// Определяем тип считываемых данных
 				switch(type){
 					// Если получено обозначение заголовка
-					case 0: if(text.compare("\\data\\") == 0) type++; break;
+					case 0: if(text.find("\\data\\") != string::npos) type++; break;
 					// Если это тип считывания статистики
 					case 1: {
 						// Если мы дошли до считывания данных слов
@@ -2278,7 +2278,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 					// Если это тип считывания данных n-грамм
 					case 2: {
 						// Если мы дошли до конца, выходим
-						if(text.compare("\\end\\") == 0) break;
+						if(text.find("\\end\\") != string::npos) break;
 						// Иначе считываем данные слова
 						else if((pos = text.find("\t")) != string::npos){
 							// Обнуляем локальную позицию
@@ -2523,13 +2523,13 @@ void anyks::Toolkit::readArpas(const string & path, const string & ext, function
 					// Определяем тип считываемых данных
 					switch(type){
 						// Если получено обозначение заголовка
-						case 0: if(text.compare("\\data\\") == 0) type++; break;
+						case 0: if(text.find("\\data\\") != string::npos) type++; break;
 						// Если мы дошли до считывания данных слов
 						case 1: if(text.rfind("-grams:") != string::npos) type++; break;
 						// Если это тип считывания данных n-грамм
 						case 2: {
 							// Если мы дошли до конца, выходим
-							if(text.compare("\\end\\") == 0) break;
+							if(text.find("\\end\\") != string::npos) break;
 							// Иначе считываем данные n-граммы
 							else if((pos = text.find("\t")) != string::npos){
 								// Обнуляем локальную позицию
@@ -2671,7 +2671,7 @@ void anyks::Toolkit::readNgrams(const string & path, const string & ext, functio
 					// Определяем тип считываемых данных
 					switch(type){
 						// Если получено обозначение заголовка
-						case 0: if(text.compare("\\data\\") == 0) type++; break;
+						case 0: if(text.find("\\data\\") != string::npos) type++; break;
 						// Если это тип считывания статистики
 						case 1: {
 							// Если мы дошли до считывания данных слов
@@ -2693,7 +2693,7 @@ void anyks::Toolkit::readNgrams(const string & path, const string & ext, functio
 						// Если это тип считывания данных n-грамм
 						case 2: {
 							// Если мы дошли до конца, выходим
-							if(text.compare("\\end\\") == 0) break;
+							if(text.find("\\end\\") != string::npos) break;
 							// Иначе считываем данные слова
 							else if((pos = text.find("\t")) != string::npos){
 								// Обнуляем локальную позицию

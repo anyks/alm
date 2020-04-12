@@ -1,5 +1,7 @@
 # Change Log
 
+## 2.0.6 Bug fixes
+
 ## 2.0.5 Bug fixes
 
 ## 2.0.4 Bug fixes and new methods

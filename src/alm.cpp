@@ -2823,13 +2823,13 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 				// Определяем тип считываемых данных
 				switch(type){
 					// Если получено обозначение заголовка
-					case 0: if(text.compare("\\data\\") == 0) type++; break;
+					case 0: if(text.find("\\data\\") != string::npos) type++; break;
 					// Если мы дошли до считывания данных слов
 					case 1: if(text.rfind("-grams:") != string::npos) type++; break;
 					// Если это тип считывания данных n-грамм
 					case 2: {
 						// Если мы дошли до конца, выходим
-						if(text.compare("\\end\\") == 0) break;
+						if(text.find("\\end\\") != string::npos) break;
 						// Иначе считываем данные n-граммы
 						else if((pos = text.find("\t")) != string::npos){
 							// Обнуляем локальную позицию
