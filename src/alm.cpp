@@ -2900,7 +2900,7 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 				}
 			}
 			// Если функция вывода статуса передана
-			if((type < 2) && (status != nullptr)){
+			if(status != nullptr){
 				// Увеличиваем количество записанных n-грамм
 				index += text.size();
 				// Выполняем расчёт текущего статуса

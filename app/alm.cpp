@@ -332,6 +332,145 @@ int main(int argc, char * argv[]) noexcept {
 			/** Начало работы основных методов **/
 			// Создаём токенизатор
 			tokenizer_t tokenizer(&alphabet);
+			// Замеряем время начала работы
+			auto timeShifting = chrono::system_clock::now();
+			// Если файл с буквами для восстановления слов, передан
+			if(((value = env.get("r-mix-restwords")) != nullptr) && fsys_t::isfile(value)){
+				// Идентификатор документа
+				size_t size = 0;
+				// Статус и процентное соотношение
+				u_short status = 0, rate = 100;
+				// Запоминаем адрес файла
+				const string filename = realpath(value, nullptr);
+				// Если отладка включена, выводим индикатор загрузки
+				if(debug > 0){
+					// Очищаем предыдущий прогресс-бар
+					pss.clear();
+					// Устанавливаем название файла
+					pss.description(filename);
+					// Устанавливаем заголовки прогресс-бара
+					pss.title("Load mixed letters", "Load mixed letters is done");
+					// Выводим индикатор прогресс-бара
+					switch(debug){
+						case 1: pss.update(); break;
+						case 2: pss.status(); break;
+					}
+				}
+				// Список полученных букв
+				map <string, string> letters;
+				// Выполняем считывание всех строк текста
+				fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+					// Если текст получен
+					if(!text.empty()){
+						// Список пар букв
+						vector <wstring> result;
+						// Выполняем сплит текста
+						alphabet.split(text, "\t", result);
+						// Если результат получен
+						if(!result.empty() && (result.size() == 2)){
+							// Формируем список букв
+							letters.emplace(alphabet.convert(result.at(0)), alphabet.convert(result.at(1)));
+						}
+					}
+					// Если отладка включена
+					if(debug > 0){
+						// Общий полученный размер данных
+						size += text.size();
+						// Подсчитываем статус выполнения
+						status = u_short(size / double(fileSize) * 100.0);
+						// Если процентное соотношение изменилось
+						if(rate != status){
+							// Запоминаем текущее процентное соотношение
+							rate = status;
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(status); break;
+								case 2: pss.status(status); break;
+							}
+						}
+					}
+				});
+				// Устанавливаем собранные буквы
+				if(!letters.empty()) alphabet.setSubstitutes(letters);
+				// Отображаем ход процесса
+				switch(debug){
+					case 1: pss.update(100); break;
+					case 2: pss.status(100); break;
+				}
+			}
+			// Если загрузка списка аббревиатур или доменных зон
+			if(env.is("r-abbrs") || env.is("r-domain-zones")){
+				/**
+				 * loadFn Функция загрузки списка доменных зон или аббревиатур
+				 * @param filename адрес файла для загрузки
+				 * @param type     тип файла для загрузки
+				 */
+				auto loadFn = [&](const string & filename, const u_short type){
+					// Если файл передан
+					if(!filename.empty()){
+						// Идентификатор документа
+						size_t size = 0;
+						// Статус и процентное соотношение
+						u_short status = 0, rate = 100;
+						// Если отладка включена, выводим индикатор загрузки
+						if(debug > 0){
+							// Устанавливаем название файла
+							pss.description(filename);
+							// Устанавливаем заголовки прогресс-бара
+							switch(type){
+								// Если это загрузка доменных зон
+								case 1: pss.title("Load domain zones", "Load domain zones is done"); break;
+								// Если это загрузка аббревиатур
+								case 2: pss.title("Load abbreviations", "Load abbreviations is done"); break;
+							}
+							// Выводим индикатор прогресс-бара
+							switch(debug){
+								case 1: pss.update(); break;
+								case 2: pss.status(); break;
+							}
+						}
+						// Выполняем считывание всех строк текста
+						fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+							// Если текст получен
+							if(!text.empty()){
+								// Устанавливаем собранные текстовые данные
+								switch(type){
+									// Добавляем доменную зону
+									case 1: alphabet.setzone(text); break;
+									// Добавляем абреввиатуру
+									case 2: tokenizer.setAbbr(text); break;
+								}
+							}
+							// Если отладка включена
+							if(debug > 0){
+								// Общий полученный размер данных
+								size += text.size();
+								// Подсчитываем статус выполнения
+								status = u_short(size / double(fileSize) * 100.0);
+								// Если процентное соотношение изменилось
+								if(rate != status){
+									// Запоминаем текущее процентное соотношение
+									rate = status;
+									// Отображаем ход процесса
+									switch(debug){
+										case 1: pss.update(status); break;
+										case 2: pss.status(status); break;
+									}
+								}
+							}
+						});
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
+						}
+					}
+				};
+				// Устанавливаем режим считывания файла аббревиатур
+				if(((value = env.get("r-abbrs")) != nullptr) && fsys_t::isfile(value)) loadFn(realpath(value, nullptr), 2);
+				// Устанавливаем режим считывания файла доменных зон
+				if(((value = env.get("r-domain-zones")) != nullptr) && fsys_t::isfile(value)) loadFn(realpath(value, nullptr), 1);
+			}
 			// Если это работа с уже собранной языковой моделью
 			if(env.is("method", "sentences") || env.is("method", "ppl") || env.is("method", "find") ||
 			env.is("method", "counts") || env.is("method", "fixcase") || env.is("method", "checktext")){
@@ -765,6 +904,13 @@ int main(int argc, char * argv[]) noexcept {
 					// Сообщаем что текст не указан
 					} else print("text is empty", env.get("log"));
 				}
+				// Если режим отладки включён
+				if(debug > 0){
+					// Формируем строку результата времени работы
+					const string & result = alphabet.format("work time shifting: %u seconds\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+					// Выводим результат
+					print(result, env.get("log"), alphabet_t::log_t::info, false);
+				}
 				// Выходим из приложения
 				exit(0);
 			}
@@ -885,6 +1031,13 @@ int main(int argc, char * argv[]) noexcept {
 				if(env.is("method", "info")){
 					// Выводим информацию о словаре
 					ablm.info();
+					// Если режим отладки включён
+					if(debug > 0){
+						// Формируем строку результата времени работы
+						const string & result = alphabet.format("work time shifting: %u seconds\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+						// Выводим результат
+						print(result, env.get("log"), alphabet_t::log_t::info, false);
+					}
 					// Выходим из приложения∂
 					exit(0);
 				}
@@ -1233,6 +1386,13 @@ int main(int argc, char * argv[]) noexcept {
 					} else print("context is empty", env.get("log"));
 				// Выходим из приложения и выводим сообщение
 				} else print("text corpus for tokenization is not found", env.get("log"));
+				// Если режим отладки включён
+				if(debug > 0){
+					// Формируем строку результата времени работы
+					const string & result = alphabet.format("work time shifting: %u seconds\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+					// Выводим результат
+					print(result, env.get("log"), alphabet_t::log_t::info, false);
+				}
 				// Выходим из приложения
 				exit(0);
 			// Иначе выполняем инициализацию алгоритма сглаживания
@@ -1264,145 +1424,6 @@ int main(int argc, char * argv[]) noexcept {
 				else print("smoothing is bad", env.get("log"));
 			// Сообщаем что сглаживание выбрано не верно
 			} else print("smoothing is bad", env.get("log"));
-			// Замеряем время начала работы
-			auto timeShifting = chrono::system_clock::now();
-			// Если файл с буквами для восстановления слов, передан
-			if(((value = env.get("r-mix-restwords")) != nullptr) && fsys_t::isfile(value)){
-				// Идентификатор документа
-				size_t size = 0;
-				// Статус и процентное соотношение
-				u_short status = 0, rate = 100;
-				// Запоминаем адрес файла
-				const string filename = realpath(value, nullptr);
-				// Если отладка включена, выводим индикатор загрузки
-				if(debug > 0){
-					// Очищаем предыдущий прогресс-бар
-					pss.clear();
-					// Устанавливаем название файла
-					pss.description(filename);
-					// Устанавливаем заголовки прогресс-бара
-					pss.title("Load mixed letters", "Load mixed letters is done");
-					// Выводим индикатор прогресс-бара
-					switch(debug){
-						case 1: pss.update(); break;
-						case 2: pss.status(); break;
-					}
-				}
-				// Список полученных букв
-				map <string, string> letters;
-				// Выполняем считывание всех строк текста
-				fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
-					// Если текст получен
-					if(!text.empty()){
-						// Список пар букв
-						vector <wstring> result;
-						// Выполняем сплит текста
-						alphabet.split(text, "\t", result);
-						// Если результат получен
-						if(!result.empty() && (result.size() == 2)){
-							// Формируем список букв
-							letters.emplace(alphabet.convert(result.at(0)), alphabet.convert(result.at(1)));
-						}
-					}
-					// Если отладка включена
-					if(debug > 0){
-						// Общий полученный размер данных
-						size += text.size();
-						// Подсчитываем статус выполнения
-						status = u_short(size / double(fileSize) * 100.0);
-						// Если процентное соотношение изменилось
-						if(rate != status){
-							// Запоминаем текущее процентное соотношение
-							rate = status;
-							// Отображаем ход процесса
-							switch(debug){
-								case 1: pss.update(status); break;
-								case 2: pss.status(status); break;
-							}
-						}
-					}
-				});
-				// Устанавливаем собранные буквы
-				if(!letters.empty()) alphabet.setSubstitutes(letters);
-				// Отображаем ход процесса
-				switch(debug){
-					case 1: pss.update(100); break;
-					case 2: pss.status(100); break;
-				}
-			}
-			// Если передан метод обучения, загрузка карт последовательностей или списка n-грамм
-			if((env.is("r-abbrs") || env.is("r-domain-zones")) && (env.is("method", "train") ||
-			(env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) || env.is("r-ngram"))){
-				// Тип считываемого файла
-				u_short type = 0;
-				// Устанавливаем режим считывания файла аббревиатур
-				if(((value = env.get("r-abbrs")) != nullptr) && fsys_t::isfile(value)) type = 2;
-				// Устанавливаем режим считывания файла доменных зон
-				else if(((value = env.get("r-domain-zones")) != nullptr) && fsys_t::isfile(value)) type = 1;
-				// Выводим сообщение, что файл не найден
-				else print(alphabet.format("filename %s is not found", value), env.get("log"), alphabet_t::log_t::warning, false);
-				// Если тип файла определён
-				if(type > 0){
-					// Идентификатор документа
-					size_t size = 0;
-					// Статус и процентное соотношение
-					u_short status = 0, rate = 100;
-					// Запоминаем адрес файла
-					const string filename = realpath(value, nullptr);
-					// Если отладка включена, выводим индикатор загрузки
-					if(debug > 0){
-						// Устанавливаем название файла
-						pss.description(filename);
-						// Устанавливаем заголовки прогресс-бара
-						switch(type){
-							// Если это загрузка доменных зон
-							case 1: pss.title("Load domain zones", "Load domain zones is done"); break;
-							// Если это загрузка аббревиатур
-							case 2: pss.title("Load abbreviations", "Load abbreviations is done"); break;
-						}
-						// Выводим индикатор прогресс-бара
-						switch(debug){
-							case 1: pss.update(); break;
-							case 2: pss.status(); break;
-						}
-					}
-					// Выполняем считывание всех строк текста
-					fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
-						// Если текст получен
-						if(!text.empty()){
-							// Устанавливаем собранные текстовые данные
-							switch(type){
-								// Добавляем доменную зону
-								case 1: alphabet.setzone(text); break;
-								// Добавляем абреввиатуру
-								case 2: tokenizer.setAbbr(text); break;
-							}
-						}
-						// Если отладка включена
-						if(debug > 0){
-							// Общий полученный размер данных
-							size += text.size();
-							// Подсчитываем статус выполнения
-							status = u_short(size / double(fileSize) * 100.0);
-							// Если процентное соотношение изменилось
-							if(rate != status){
-								// Запоминаем текущее процентное соотношение
-								rate = status;
-								// Отображаем ход процесса
-								switch(debug){
-									case 1: pss.update(status); break;
-									case 2: pss.status(status); break;
-								}
-							}
-						}
-					});
-					// Отображаем ход процесса
-					switch(debug){
-						case 1: pss.update(100); break;
-						case 2: pss.status(100); break;
-					}
-				}
-			}
 			// Если передан метод обучения
 			if(env.is("method", "train")){
 				// Если нужно использовать бинарный контейнер

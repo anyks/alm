@@ -1,5 +1,7 @@
 # Change Log
 
+## 2.0.5 Bug fixes
+
 ## 2.0.4 Bug fixes and new methods
 ### Methods
 - **find** ngrams search method in text
