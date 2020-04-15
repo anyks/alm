@@ -206,15 +206,6 @@ namespace anyks {
 			const pair_t uppers(const std::map <size_t, size_t> & ups, const size_t oc = 0) const noexcept;
 		protected:
 			/**
-			 * backoff Метод подсчёта обратной частоты n-граммы
-			 * @param idw     идентификатор текущего слова
-			 * @param context контекст которому принадлежит слово
-			 * @param gram    размер n-граммы для отката
-			 * @return        результат расчёта обратной частоты
-			 */
-			const double backoff(const size_t idw, const data_t * context, const u_short gram) const noexcept;
-		protected:
-			/**
 			 * isUnk Метод проверки неизвестного слова
 			 * @param idw идентификатор слова для проверки
 			 * @return    результат првоерки слова
@@ -258,6 +249,14 @@ namespace anyks {
 			 * @return     результат проверки
 			 */
 			const bool checkIdw(const size_t idw, const u_short gram) const noexcept;
+			/**
+			 * backoff Метод подсчёта обратной частоты n-граммы
+			 * @param idw     идентификатор текущего слова
+			 * @param context контекст которому принадлежит слово
+			 * @param gram    размер n-граммы для отката
+			 * @return        результат расчёта обратной частоты
+			 */
+			const double backoff(const size_t idw, const data_t * context, const u_short gram) const noexcept;
 			/**
 			 * compute Метод расчёта коэффициентов для распределения весов в рамках 1.0
 			 * @param ngram       контекст для расчёта
@@ -360,6 +359,12 @@ namespace anyks {
 			 * @return строка с данными штампа
 			 */
 			const string stamp() const noexcept;
+		public:
+			/**
+			 * empty Метод проверки языковой модели на пустоту
+			 * @return результат проверки
+			 */
+			const bool empty() const noexcept;
 			/**
 			 * event Метод проверки на спец-слово
 			 * @param idw идентификатор слова для проверки
@@ -378,6 +383,7 @@ namespace anyks {
 			 * @param seq2 последовательность на которую нужно зменить
 			 */
 			const bool replace(const vector <size_t> & seq1, const vector <pair_t> & seq2) const noexcept;
+		public:
 			/**
 			 * count Количество грамм для указанного размера n-граммы
 			 * @param  gram размер n-граммы для которой нужно получить количество грамм
@@ -498,13 +504,6 @@ namespace anyks {
 			void add(const vector <pair_t> & seq, const size_t idd = 0) const noexcept;
 			/**
 			 * add Метод добавления последовательности в словарь
-			 * @param seq     список идентификаторов слов которые нужно добавить
-			 * @param weight  вес n-граммы из файла arpa
-			 * @param backoff обратная частота документа из файла arpa
-			 */
-			void add(const vector <pair_t> & seq, const double weight, const double backoff) const noexcept;
-			/**
-			 * add Метод добавления последовательности в словарь
 			 * @param seq  последовательность слов для установки
 			 * @param idd  идентификатор документа в котором получена n-грамма
 			 * @param rest необходимо сделать переоценку встречаемости (необходимо если объединяются две карты с разными размерами n-грамм)
@@ -526,6 +525,20 @@ namespace anyks {
 			 * @param status статус расёта
 			 */
 			void repair(function <void (const u_short)> status = nullptr) const noexcept;
+			/**
+			 * mixForward Метод интерполяции нескольких моделей в прямом направлении
+			 * @param arpa   данные языковой модели для объединения
+			 * @param lambda вес первой модели при интерполяции
+			 * @param status статус расёта
+			 */
+			void mixForward(const Arpa * arpa, const double lambda = 0.5, function <void (const u_short)> status = nullptr) noexcept;
+			/**
+			 * mixBackward Метод интерполяции нескольких моделей в обратном направлении
+			 * @param arpa   данные языковой модели для объединения
+			 * @param lambda вес первой модели при интерполяции
+			 * @param status статус расёта
+			 */
+			void mixBackward(const Arpa * arpa, const double lambda = 0.5, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * prune Метод прунинга языковой модели
 			 * @param threshold порог частоты прунинга

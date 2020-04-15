@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.0.7 Bug fixes and new method
+### Method
+- **mix** - mixing language models method
+### Params
+- file address *.arpa for mixing
+- weight lambda first model for mixing
+- flag to mixing language models in the backward direction
+
 ## 2.0.6 Bug fixes
 
 ## 2.0.5 Bug fixes

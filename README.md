@@ -47,6 +47,7 @@
   - [Check counts ngrams](https://github.com/anyks/alm/#check-counts-ngrams)
   - [Search ngrams by text](https://github.com/anyks/alm/#search-ngrams-by-text)
   - [Sentences generation](https://github.com/anyks/alm/#sentences-generation)
+  - [Mixing language models](https://github.com/anyks/alm/#mixing-language-models)
 - [License](https://github.com/anyks/alm/#license)
 - [Contact](https://github.com/anyks/alm/#contact)
 
@@ -852,6 +853,12 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method sentences -gen 5 -debug 1 -r-arpa ./lm.arpa -confidence -w-text ./sentences.txt
+```
+
+### Mixing language models
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method mix -debug 1 -r-arpa ./lm1.arpa -mix-arpa1 ./lm2.arpa -mix-lambda1 0.5 -w-arpa ./lm.arpa -confidence -mix-backward
 ```
 
 * * *

@@ -7,7 +7,7 @@
  */
 
 // Версия приложения
-#define ANYKS_VERSION "2.0.6"
+#define ANYKS_VERSION "2.0.7"
 // Версия словаря
 #define ANYKS_DICT_VERSION "1.0.0"
 // Название языковой модели

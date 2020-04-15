@@ -47,6 +47,7 @@
   - [Проверка количества n-грамм](https://github.com/anyks/alm/tree/master/site#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D0%BA%D0%BE%D0%BB%D0%B8%D1%87%D0%B5%D1%81%D1%82%D0%B2%D0%B0-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC)
   - [Поиск n-грамм в тексте](https://github.com/anyks/alm/tree/master/site#%D0%BF%D0%BE%D0%B8%D1%81%D0%BA-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D0%B2-%D1%82%D0%B5%D0%BA%D1%81%D1%82%D0%B5)
   - [Генерация предложений](https://github.com/anyks/alm/tree/master/site#%D0%B3%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9)
+  - [Смешивание языковых моделей](https://github.com/anyks/alm/#mixing-language-models)
 - [Лицензия](https://github.com/anyks/alm/blob/master/site#%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F)
 - [Контакты](https://github.com/anyks/alm/blob/master/site#%D0%BA%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D1%8B)
 
@@ -852,6 +853,12 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method sentences -gen 5 -debug 1 -r-arpa ./lm.arpa -confidence -w-text ./sentences.txt
+```
+
+### Смешивание языковых моделей
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method mix -debug 1 -r-arpa ./lm1.arpa -mix-arpa1 ./lm2.arpa -mix-lambda1 0.5 -w-arpa ./lm.arpa -confidence -mix-backward
 ```
 
 * * *

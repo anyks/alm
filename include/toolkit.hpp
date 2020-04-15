@@ -150,6 +150,12 @@ namespace anyks {
 			const tokenizer_t * tokenizer = nullptr;
 		private:
 			/**
+			 * word Метод получения данных слова
+			 * @param idw идентификатор слова
+			 * @return    запрашиваемое слово
+			 */
+			const word_t * word(const size_t idw) const noexcept;
+			/**
 			 * isOption Метод проверки наличия опции
 			 * @param option опция для проверки
 			 * @return       результат проверки
@@ -422,6 +428,14 @@ namespace anyks {
 			 * @param fn   внешняя функция обрабатывающая пользовательский токен
 			 */
 			void setUserTokenMethod(const string & name, function <bool (const string &, const string &)> fn) noexcept;
+			/**
+			 * init Метод инициализации языковой модели
+			 * @param algorithm алгоритм расчёта языковой модели
+			 * @param modified  количество уже изменённых младших заказов
+			 * @param prepares  необходимость изменения счёта, после вычисления
+			 * @param mod       дополнительный параметр дельты
+			 */
+			void init(const algorithm_t algorithm, const bool modified = false, const bool prepares = false, const double mod = 0.0);
 		public:
 			/**
 			 * sweep Метод удаления низкочастотных n-грамм arpa
@@ -459,13 +473,13 @@ namespace anyks {
 			 */
 			void prune(const double threshold, const u_short mingram, function <void (const u_short)> status = nullptr) const noexcept;
 			/**
-			 * init Метод инициализации языковой модели
-			 * @param algorithm алгоритм расчёта языковой модели
-			 * @param modified  количество уже изменённых младших заказов
-			 * @param prepares  необходимость изменения счёта, после вычисления
-			 * @param mod       дополнительный параметр дельты
+			 * mix Метод интерполяции нескольких arpa
+			 * @param filenames список файлов arpa для объединения
+			 * @param lambdas   список весов первой модели при интерполяции
+			 * @param backward  необходимо выполнить интерполяцию в обратном направлении
+			 * @param status    функция вывода статуса чтения
 			 */
-			void init(const algorithm_t algorithm, const bool modified = false, const bool prepares = false, const double mod = 0.0);
+			void mix(const vector <string> & filenames, const vector <double> & lambdas, const bool backward = false, function <void (const string &, const u_short)> status = nullptr) noexcept;
 		public:
 			/**
 			 * loadVocab Метод загрузки бинарных данных в словарь
@@ -570,13 +584,6 @@ namespace anyks {
 			 */
 			void readMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|") noexcept;
 		public:
-			/**
-			 * readArpas Метод чтения данных из каталога файлов arpa
-			 * @param path   адрес где лежат arpa файлы
-			 * @param ext    расширение файлов в каталоге
-			 * @param status функция вывода статуса чтения
-			 */
-			void readArpas(const string & path, const string & ext, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * readNgrams Метод чтения данных из каталога файлов ngrams
 			 * @param path   адрес где лежат ngrams файлы

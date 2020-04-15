@@ -73,6 +73,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mtokens:\x1B[0m text tokenization method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mvprune:\x1B[0m vocabulary pruning method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mfind:\x1B[0m ngrams search method by text\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mmix:\x1B[0m mixing language models method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1maprune:\x1B[0m language model pruning method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mtrain:\x1B[0m language model training method\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mfixcase:\x1B[0m words case correction method\r\n\r\n"
@@ -96,6 +97,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m flag arpa file loading without pre-processing the words:                      [-confidence | --confidence]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing the use of words consisting of mixed dictionaries:              [-mixed-dicts | --mixed-dicts]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag to reset the frequency of an unknown word:                               [-reset-unk | --reset-unk]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m flag to mixing language models in the backward direction:                     [-mix-backward | --mix-backward]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag to save intermediate data during training:                               [-train-intermed | --train-intermed]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag to performing data segmentation during training:                         [-train-segments | --train-segments]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m flag allowing need to change grams, after calculating:                        [-kneserney-prepares | --kneserney-prepares]\r\n\r\n"
@@ -147,8 +149,10 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams or dir path for import:       [-r-ngram <value> | --r-ngram=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa or dir path for import:         [-r-arpa <value> | --r-arpa=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address abbreviations for import:              [-r-abbrs <value> | --r-abbrs=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa for mixing:                     [-mix-arpa[1...N] <value> | --mix-arpa[1...N]=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address domain zones for import:               [-r-domain-zones <value> | --r-domain-zones=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m file address for restore mixed words for import:    [-r-mix-restwords <value> | --r-mix-restwords=<value>]\r\n\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m weight lambda first model for mixing:               [-mix-lambda[1...N] <value> | --mix-lambda[1...N]=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m pruning vocabulary wltf threshold:                  [-vprune-threshold <value> | --vprune-threshold=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m pruning language model frequency threshold:         [-aprune-threshold <value> | --aprune-threshold=<value>]\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m the maximum size of n-grams of pruning:             [-aprune-max-gram <value> | --aprune-max-gram=<value>]\r\n\r\n"
@@ -167,7 +171,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m debug mode:                                         [-debug <value> | --debug=<value>]\r\n"
 	"  \x1B[1m-\x1B[0m (0 - off | 1 - progress | 2 - console)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m method application:                                 [-method <value> | --method=<value>]\r\n"
-	"  \x1B[1m-\x1B[0m (ppl | find | train | repair | modify | sweep | vprune | aprune | tokens | counts | fixcase | checktext | sentences | info)\r\n\r\n"
+	"  \x1B[1m-\x1B[0m (ppl | find | train | mix | repair | modify | sweep | vprune | aprune | tokens | counts | fixcase | checktext | sentences | info)\r\n\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m smoothing algorithm:                                [-smoothing <value> | --smoothing=<value>]\r\n"
 	"  \x1B[1m-\x1B[0m (goodturing | cdiscount | ndiscount | addsmooth | wittenbell | kneserney | mkneserney)\r\n\r\n";
 	// Выводим сообщение справки
@@ -273,6 +277,7 @@ int main(int argc, char * argv[]) noexcept {
 			const bool noSmoothing = (
 				!binDictFile.empty() ||
 				env.is("method", "ppl") ||
+				env.is("method", "mix") ||
 				env.is("method", "find") ||
 				env.is("method", "tokens") ||
 				env.is("method", "counts") ||
@@ -301,6 +306,7 @@ int main(int argc, char * argv[]) noexcept {
 			if(env.is("method") && (string(env.get("method")).compare("-yes-") != 0)){
 				// Проверяем правильность введённого основного метода работы
 				if(!env.is("method", "ppl") &&
+				!env.is("method", "mix") &&
 				!env.is("method", "find") &&
 				!env.is("method", "info") &&
 				!env.is("method", "sweep") &&
@@ -665,7 +671,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Выводим сообщение отладки - количество слов
 							alphabet.log("%zu sentences, %zu words, %zu OOVs", alphabet_t::log_t::null, nullptr, ppl.sentences, ppl.words, ppl.oovs);
 							// Выводим сообщение отладки - результатов расчёта
-							alphabet.log("%zu zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\r\n", alphabet_t::log_t::null, nullptr, ppl.zeroprobs, ppl.logprob, ppl.ppl, ppl.ppl1);
+							alphabet.log("%zu zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\r\n", alphabet_t::log_t::null, nullptr, ppl.zeroprobs, ppl.logprob, ppl.ppl, ppl.ppl1);
 						}
 					// Если адрес текстового файла или каталог передан
 					} else if(((value = env.get("r-text")) != nullptr) && (fsys_t::isfile(value) || fsys_t::isdir(value))){
@@ -705,7 +711,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Выводим сообщение отладки - количество слов
 							alphabet.log("%zu sentences, %zu words, %zu OOVs", alphabet_t::log_t::null, nullptr, ppl.sentences, ppl.words, ppl.oovs);
 							// Выводим сообщение отладки - результатов расчёта
-							alphabet.log("%zu zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\r\n", alphabet_t::log_t::null, nullptr, ppl.zeroprobs, ppl.logprob, ppl.ppl, ppl.ppl1);
+							alphabet.log("%zu zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\r\n", alphabet_t::log_t::null, nullptr, ppl.zeroprobs, ppl.logprob, ppl.ppl, ppl.ppl1);
 						}
 					// Сообщаем что текст не указан
 					} else print("text is empty", env.get("log"));
@@ -1423,7 +1429,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Сообщаем что сглаживание выбрано не верно
 				else print("smoothing is bad", env.get("log"));
 			// Сообщаем что сглаживание выбрано не верно
-			} else print("smoothing is bad", env.get("log"));
+			} else if(!env.is("method", "mix")) print("smoothing is bad", env.get("log"));
 			// Если передан метод обучения
 			if(env.is("method", "train")){
 				// Если нужно использовать бинарный контейнер
@@ -1651,6 +1657,62 @@ int main(int argc, char * argv[]) noexcept {
 					// Если путь не указан
 					} else print("path or file with corpus texts is not specified", env.get("log"));
 				}
+			// Если передан метод интерполяции
+			} else if(env.is("method", "mix") && ((value = env.get("r-arpa")) != nullptr)) {
+				// Если отладка включена, выводим индикатор загрузки
+				if(debug > 0){
+					// Очищаем предыдущий прогресс-бар
+					pss.clear();
+					// Устанавливаем заголовки прогресс-бара
+					pss.title("Mix arpa files", "Mix arpa files is done");
+					// Выводим индикатор прогресс-бара
+					switch(debug){
+						case 1: pss.update(); break;
+						case 2: pss.status(); break;
+					}
+				}
+				// Веса моделей для интерполяции
+				vector <double> lambdas;
+				// Адреса файлов языковых моделей
+				vector <string> filenames = {value};
+				// Загружаем 65000 языковых моделей
+				for(u_short i = 1; i < 65000; i++){
+					// Если языковая модель получена
+					value = env.get(string("mix-arpa") + to_string(i));
+					// Если адрес файла получен
+					if(value != nullptr){
+						// Получаем адрес файла arpa
+						filenames.push_back(realpath(value, nullptr));
+						// Получаем данные лямбды для интерполяции
+						value = env.get(string("mix-lambda") + to_string(i));
+						// Если лямбда передана
+						if(value != nullptr)
+							// Добавляем вес языковой модели для интерполяции
+							lambdas.push_back(stod(value));
+						// Если вес не передан, устанавливаем по умолчанию
+						else lambdas.push_back(0.5);
+					// Иначе выходим из цикла
+					} else break;
+				}
+				// Если адреса файлов языковых моделей получены
+				if(filenames.size() > 1){
+					// Выполняем интерполяцию
+					toolkit.mix(filenames, lambdas, env.is("mix-backward"), [&pss, debug](const string & filename, const u_short status){
+						// Устанавливаем название файла
+						pss.description(filename);
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(status); break;
+							case 2: pss.status(status); break;
+						}
+					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
+				// Если файлы arpa указаны не верно
+				} else print("the arpa files transferred incorrectly specified", env.get("log"));
 			// Проверяем правильно ли указаны адреса файлов
 			} else if((env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) || env.is("r-ngram") || env.is("r-arpa") || !binDictFile.empty()) {
 				// Если требуется загрузить файл n-грамм
@@ -1738,39 +1800,6 @@ int main(int argc, char * argv[]) noexcept {
 					}
 					// Выполняем загрузку файла arpa
 					toolkit.readArpa(filename, [debug, &pss](const u_short status) noexcept {
-						// Отображаем ход процесса
-						switch(debug){
-							case 1: pss.update(status); break;
-							case 2: pss.status(status); break;
-						}
-					});
-					// Отображаем ход процесса
-					switch(debug){
-						case 1: pss.update(100); break;
-						case 2: pss.status(100); break;
-					}
-				// Если нужно загрузить список файлов arpa
-				} else if(((value = env.get("r-arpa")) != nullptr) && fsys_t::isdir(value)) {
-					// Запоминаем каталог для загрузки
-					const string path = realpath(value, nullptr);
-					// Расширение файлов текстового корпуса
-					const string ext = ((value = env.get("ext")) != nullptr ? value : "arpa");
-					// Если отладка включена, выводим индикатор загрузки
-					if(debug > 0){
-						// Очищаем предыдущий прогресс-бар
-						pss.clear();
-						// Устанавливаем название файла
-						pss.description(path);
-						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read arpa files", "Read arpa files is done");
-						// Выводим индикатор прогресс-бара
-						switch(debug){
-							case 1: pss.update(); break;
-							case 2: pss.status(); break;
-						}
-					}
-					// Выполняем загрузку файла arpa
-					toolkit.readArpas(path, ext, [debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;

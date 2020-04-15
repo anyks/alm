@@ -671,7 +671,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 			);
 			// Выводим сообщение отладки - результатов расчёта
 			this->alphabet->log(
-				"%u zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\n",
+				"%u zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\n",
 				alphabet_t::log_t::info,
 				this->logfile,
 				result.zeroprobs,
@@ -768,7 +768,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 					}
 					// Формируем информационное сообщение
 					result.first = this->alphabet->format(
-						"p( %s | %s %s) \t= [%s] %4.6f [ %4.6f ] / %4.6f",
+						"p( %s | %s %s) \t= [%s] %4.8f [ %4.8f ] / %4.8f",
 						second.c_str(),
 						first.c_str(),
 						(bigram ? "..." : ""),
@@ -778,7 +778,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 					// Выполняем округление делителя
 					const double value = (ceil((delim * 10000.0) + 0.5) / 10000.0);
 					// Если делитель не сходится к единице, выводим сообщение
-					if(fabs(value - 1.0) > 0.0009) result.second = this->alphabet->format("word probs for this context sum to %4.6f != 1", delim);
+					if(fabs(value - 1.0) > 0.0009) result.second = this->alphabet->format("word probs for this context sum to %4.8f != 1", delim);
 					// Блокируем поток
 					this->locker.lock();
 					// Добавляем в список отладки
@@ -984,7 +984,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 			);
 			// Выводим сообщение отладки - результатов расчёта
 			this->alphabet->log(
-				"%u zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\n",
+				"%u zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\n",
 				alphabet_t::log_t::info,
 				this->logfile,
 				result.zeroprobs,
@@ -1128,7 +1128,7 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 			);
 			// Выводим сообщение отладки - результатов расчёта
 			this->alphabet->log(
-				"%u zeroprobs, logprob= %4.6f ppl= %4.6f ppl1= %4.6f\n",
+				"%u zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\n",
 				alphabet_t::log_t::info,
 				this->logfile,
 				result.zeroprobs,
