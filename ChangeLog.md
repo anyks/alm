@@ -50,8 +50,10 @@
 - number of threads for data collection
 - file address *.txt or dir path for words import
 
-## 1.0.2 New methods and bug fixes
-- vprune - vocabulary pruning method
+## 1.0.2 Bug fixes and new method
+### Method
+- **vprune** - vocabulary pruning method
+### Params
 - flag allowing the use of words consisting of mixed dictionaries
 - file address for restore mixed words for import
 
