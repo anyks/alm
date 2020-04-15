@@ -1,5 +1,7 @@
 # Change Log
 
+## 2.0.8 Bug fixes
+
 ## 2.0.7 Bug fixes and new method
 ### Method
 - **mix** - mixing language models method

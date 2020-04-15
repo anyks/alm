@@ -218,6 +218,12 @@ namespace anyks {
 			 */
 			const bool isStart(const size_t idw) const noexcept;
 			/**
+			 * isWeight Метод проверки на валидность веса
+			 * @param weight вес для проверки
+			 * @return       результат проверки
+			 */
+			const bool isWeight(const double weight) const noexcept;
+			/**
 			 * isWeights Метод проверки существования дочерних n-грамм
 			 * @param ngram контекст для проверки
 			 * @return      результат проверки
@@ -229,6 +235,12 @@ namespace anyks {
 			 * @return       результат проверки
 			 */
 			const bool isOption(const options_t option) const noexcept;
+			/**
+			 * isContext Метод проверки сущестования контекста
+			 * @param  context контекст для проверки
+			 * @return         результат проверки
+			 */
+			const bool isContext(const data_t * context) const noexcept;
 			/**
 			 * isContext Метод проверки сущестования контекста
 			 * @param  seq последовательность для проверки
