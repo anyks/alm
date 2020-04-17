@@ -125,43 +125,44 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-gen <value> | --gen=<value>]                                               sentences count for generation text\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-text <value> | --text=<value>]                                             text to be processed as a string\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-threads <value> | --threads=<value>]                                       number of threads for data collection\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-text <value> | --w-text=<value>]                                         file address of *.txt for texts export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-bin <value> | --r-bin=<value>]                                           binary file address of *.alm for import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin <value> | --w-bin=<value>]                                           binary file address of *.alm for export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-map <value> | --w-map=<value>]                                           file address of *.map for export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-arpa <value> | --w-arpa=<value>]                                         file address of *.arpa for export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-vocab <value> | --w-vocab=<value>]                                       file address of *.vocab for export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-ngram <value> | --w-ngram=<value>]                                       file address of *.ngrams for export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-meta <value> | --w-bin-meta=<value>]                                 file address of *.json meta for export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-oovfile <value> | --w-oovfile=<value>]                                   file address of *.txt for export oov words\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-text <value> | --r-text=<value>]                                         file address of *.txt or dir path for texts import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-words <value> | --r-words=<value>]                                       file address of *.txt or dir path for words import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-bin-meta <value> | --r-bin-meta=<value>]                                 file address of *.json meta for import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-map <value> | --r-map=<value>]                                           file address of *.map or dir path for import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-arpa <value> | --r-arpa=<value>]                                         file address of *.arpa or dir path for import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-vocab <value> | --r-vocab=<value>]                                       file address of *.vocab or dir path for import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-ngram <value> | --r-ngram=<value>]                                       file address of *.ngrams or dir path for import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-abbrs <value> | --r-abbrs=<value>]                                       file address of abbreviations for import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-text <value> | --w-tokens-text=<value>]                           file address of *.txt text for tokens export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-json <value> | --w-tokens-json=<value>]                           file address of *.json text for tokens export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-text <value> | --r-tokens-text=<value>]                           file address of *.txt text for tokens import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-json <value> | --r-tokens-json=<value>]                           file address of *.json text for tokens import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-mix-arpa[1...N] <value> | --mix-arpa[1...N]=<value>]                       file address of *.arpa for mixing\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-domain-zones <value> | --r-domain-zones=<value>]                         file address of domain zones for import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-mix-restwords <value> | --r-mix-restwords=<value>]                       file address of restore mixed words for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-bin <value> | --r-bin=<value>]                                           binary file address LM of \x1B[1m*.alm\x1B[0m for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin <value> | --w-bin=<value>]                                           binary file address LM of \x1B[1m*.alm\x1B[0m for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-text <value> | --w-text=<value>]                                         file address text of \x1B[1m*.txt\x1B[0m for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-map <value> | --w-map=<value>]                                           file address map of \x1B[1m*.map\x1B[0m for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-arpa <value> | --w-arpa=<value>]                                         file address arpa of \x1B[1m*.arpa\x1B[0m for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-vocab <value> | --w-vocab=<value>]                                       file address vocab of \x1B[1m*.vocab\x1B[0m for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-words <value> | --w-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-ngram <value> | --w-ngram=<value>]                                       file address ngrams of \x1B[1m*.ngrams\x1B[0m for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-meta <value> | --w-bin-meta=<value>]                                 file address meta of \x1B[1m*.json\x1B[0m meta for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-oovfile <value> | --w-oovfile=<value>]                                   file address OOVs of \x1B[1m*.txt\x1B[0m for export oov words\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-text <value> | --r-text=<value>]                                         file address text of \x1B[1m*.txt\x1B[0m or dir path for texts import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-words <value> | --r-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m or dir path for words import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-bin-meta <value> | --r-bin-meta=<value>]                                 file address meta of \x1B[1m*.json\x1B[0m meta for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-map <value> | --r-map=<value>]                                           file address map of \x1B[1m*.map\x1B[0m or dir path for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-arpa <value> | --r-arpa=<value>]                                         file address arpa of \x1B[1m*.arpa\x1B[0m or dir path for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-vocab <value> | --r-vocab=<value>]                                       file address vocab of \x1B[1m*.vocab\x1B[0m or dir path for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-ngram <value> | --r-ngram=<value>]                                       file address ngrams of \x1B[1m*.ngrams\x1B[0m or dir path for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-abbrs <value> | --r-abbrs=<value>]                                       file address abbreviations of \x1B[1m*.txt\x1B[0m for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-text <value> | --w-tokens-text=<value>]                           file address tokens of \x1B[1m*.txt\x1B[0m text for tokens export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-json <value> | --w-tokens-json=<value>]                           file address tokens of \x1B[1m*.json\x1B[0m text for tokens export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-text <value> | --r-tokens-text=<value>]                           file address tokens of \x1B[1m*.txt\x1B[0m text for tokens import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-json <value> | --r-tokens-json=<value>]                           file address tokens of \x1B[1m*.json\x1B[0m text for tokens import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-mix-arpa[1...N] <value> | --mix-arpa[1...N]=<value>]                       file address LM of \x1B[1m*.arpa\x1B[0m for mixing\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-domain-zones <value> | --r-domain-zones=<value>]                         file address domain zones of \x1B[1m*.txt\x1B[0m for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-mix-restwords <value> | --r-mix-restwords=<value>]                       file address restore mixed words of \x1B[1m*.txt\x1B[0m for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-path <value> | --r-tokens-path=<value>]                           directory path with tokens files for read\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-path <value> | --w-tokens-path=<value>]                           directory path with tokens files for write\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mix-bayes-scale <value> | --mix-bayes-scale=<value>]                       log likelihood scale for bayes mixing\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mix-bayes-length <value> | --mix-bayes-length=<value>]                     context length for Bayes mixture LM\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mix-lambda[1...N] <value> | --mix-lambda[1...N]=<value>]                   weight lambda first model for mixing\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-vprune-threshold <value> | --vprune-threshold=<value>]                     \x1B[1mwltf threshold\x1B[0m] of pruning vocabulary\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-vprune-threshold <value> | --vprune-threshold=<value>]                     \x1B[1mwltf threshold\x1B[0m of pruning vocabulary\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-aprune-threshold <value> | --aprune-threshold=<value>]                     frequency threshold of pruning language model\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-aprune-max-gram <value> | --aprune-max-gram=<value>]                       maximum size of n-grams pruning\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-utokens <value> | --utokens=<value>]                                       list of custom attributes\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-modify <value> | --modify=<value>]                                         modification flag for modify method\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-delta <value> | --delta=<value>]                                           delta size for smoothing by addsmooth algorithm\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-discount <value> | --discount=<value>]                                     discount size for smoothing by cdiscount algorithm\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-ngrams <value> | --ngrams=<value>]                                         ngram size for the \x1B[1mcounts method\x1B[0m]\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-ngrams <value> | --ngrams=<value>]                                         ngram size for the \x1B[1mcounts method\x1B[0m\r\n"
 	"  \x1B[1m-\x1B[0m (bigram | trigram)\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mix <value> | --mix=<value>]                                               type of mixing language models\r\n"
 	"  \x1B[1m-\x1B[0m (static | bayes | loglinear)\r\n"
@@ -329,12 +330,12 @@ int main(int argc, char * argv[]) noexcept {
 			} else print("toolkit method is not set", env.get("log"));
 			// Если ни один файл для сохранения не передан, выходим
 			if(!env.is("w-map") && !env.is("w-arpa") &&
-			!env.is("w-vocab") && !env.is("w-ngram") &&
-			!env.is("w-bin") && !env.is("method", "ppl") &&
-			!env.is("method", "find") && !env.is("method", "info") &&
-			!env.is("method", "counts") && !env.is("method", "tokens") &&
-			!env.is("method", "sentences") && !env.is("method", "fixcase") &&
-			!env.is("method", "checktext")){
+			!env.is("w-vocab") && !env.is("w-words") &&
+			!env.is("w-ngram") && !env.is("w-bin") &&
+			!env.is("method", "ppl") && !env.is("method", "find") &&
+			!env.is("method", "info") && !env.is("method", "counts") &&
+			!env.is("method", "tokens") && !env.is("method", "sentences") &&
+			!env.is("method", "fixcase") && !env.is("method", "checktext")){
 				// Выводим сообщение и выходим из приложения
 				print("file address to save is not specified", env.get("log"));
 			}
@@ -2340,6 +2341,36 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			// Выводим сообщение что файлы не переданы
 			} else print("arpa file is not loaded", env.get("log"));
+			// Если файл для сохранения слов передан
+			if((value = env.get("w-words")) != nullptr){
+				// Если отладка включена, выводим индикатор загрузки
+				if(debug > 0){
+					// Очищаем предыдущий прогресс-бар
+					pss.clear();
+					// Устанавливаем название файла
+					pss.description(value);
+					// Устанавливаем заголовки прогресс-бара
+					pss.title("Write words", "Write words is done");
+					// Выводим индикатор прогресс-бара
+					switch(debug){
+						case 1: pss.update(); break;
+						case 2: pss.status(); break;
+					}
+				}
+				// Выполняем извлечение слов в файл
+				toolkit.writeWords(value, [debug, &pss](const u_short status) noexcept {
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(status); break;
+						case 2: pss.status(status); break;
+					}
+				});
+				// Отображаем ход процесса
+				switch(debug){
+					case 1: pss.update(100); break;
+					case 2: pss.status(100); break;
+				}
+			}
 			// Если файл для сохранения vocab передан
 			if((value = env.get("w-vocab")) != nullptr){
 				// Если отладка включена, выводим индикатор загрузки

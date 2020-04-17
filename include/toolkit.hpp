@@ -537,6 +537,12 @@ namespace anyks {
 			 */
 			void writeVocab(const string & filename, function <void (const u_short)> status = nullptr) const noexcept;
 			/**
+			 * writeWords Метод записи данных слов в файл
+			 * @param filename адрес файла для записи
+			 * @param status   функция вывода статуса записи
+			 */
+			void writeWords(const string & filename, function <void (const u_short)> status = nullptr) const noexcept;
+			/**
 			 * writeNgrams Метод записи данных в файлы ngrams
 			 * @param filename адрес файла для записи
 			 * @param status   функция вывода статуса записи

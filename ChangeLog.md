@@ -1,5 +1,7 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
+## [2.1.0](https://github.com/anyks/alm/archive/v2.1.0.tar.gz) Bug fixes
+
 ## [2.0.9](https://github.com/anyks/alm/archive/v2.0.9.tar.gz) Bug fixes and new params
 - type of mixing language models
 - context length for Bayes mixture LM

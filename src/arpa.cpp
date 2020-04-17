@@ -3499,7 +3499,7 @@ void anyks::Arpa::mixBackward(const Arpa * lm, const double lambda, function <vo
 		 * @param ngram контекст для получения последовательности
 		 * @return      полученный список последовательности
 		 */
-		auto seqFn = [this](const data_t * ngram) noexcept {
+		auto seqFn = [](const data_t * ngram) noexcept {
 			// Значение регистров слова
 			size_t uppers = 0;
 			// Последовательность для поиска
@@ -3744,7 +3744,7 @@ void anyks::Arpa::mixLoglinear(const vector <const Arpa *> & lms, const vector <
 		 * @param ngram контекст для получения последовательности
 		 * @return      полученный список последовательности
 		 */
-		auto seqFn = [this](const data_t * ngram) noexcept {
+		auto seqFn = [](const data_t * ngram) noexcept {
 			// Последовательность для поиска
 			vector <size_t> result;
 			// Получаем текущее значение первого контекста
@@ -4048,7 +4048,7 @@ void anyks::Arpa::mixBayes(const vector <const Arpa *> & lms, const vector <doub
 		 * @param ngram контекст для получения последовательности
 		 * @return      полученный список последовательности
 		 */
-		auto seqFn = [this](const data_t * ngram) noexcept {
+		auto seqFn = [](const data_t * ngram) noexcept {
 			// Последовательность для поиска
 			vector <size_t> result;
 			// Получаем текущее значение первого контекста

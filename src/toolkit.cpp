@@ -2303,6 +2303,56 @@ void anyks::Toolkit::writeVocab(const string & filename, function <void (const u
 	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "vocab file is empty");
 }
 /**
+ * writeWords Метод записи данных слов в файл
+ * @param filename адрес файла для записи
+ * @param status   функция вывода статуса записи
+ */
+void anyks::Toolkit::writeWords(const string & filename, function <void (const u_short)> status) const noexcept {
+	// Если адрес файла передан
+	if(!filename.empty()){
+		// Открываем файл на запись
+		ofstream file(filename, ios::binary);
+		// Если файл открыт
+		if(file.is_open()){
+			// Данные данных для записи
+			string data = "";
+			// Количество извлечённых слов
+			size_t index = 0;
+			// Текущий и предыдущий статус
+			u_short actual = 0, past = 100;
+			// Получаем штамп файла
+			const string & stamp = this->arpa->stamp();
+			// Выполняем запись штампа в файл
+			file.write(stamp.data(), stamp.size());
+			// Переходим по всему списку слов
+			for(auto & item : this->vocab){
+				// Получаем данные слова
+				data = this->alphabet->format("%s\n", (this->isOption(options_t::lowerCase) ? item.second.str() : item.second.real()).c_str());
+				// Выполняем запись данных в файл
+				file.write(data.data(), data.size());
+				// Если функция вывода статуса передана
+				if(status != nullptr){
+					// Увеличиваем количество записанных слов
+					index++;
+					// Выполняем расчёт текущего статуса
+					actual = u_short(index / double(this->info.unq) * 100.0);
+					// Если статус обновился
+					if(actual != past){
+						// Запоминаем текущий статус
+						past = actual;
+						// Выводим статус извлечения
+						status(actual);
+					}
+				}
+			}
+			// Закрываем файл
+			file.close();
+		// Выводим сообщение об ошибке
+		} else this->alphabet->log("words file: %s is broken", alphabet_t::log_t::error, this->logfile, filename.c_str());
+	// Выводим сообщение об ошибке
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "words file is empty");
+}
+/**
  * writeNgrams Метод записи данных в файлы ngrams
  * @param filename адрес файла для записи
  * @param status   функция вывода статуса записи

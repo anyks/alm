@@ -903,7 +903,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 			 * @param seq последовательность слов для обработки
 			 * @param pos позиция n-граммы в контексте
 			 */
-			auto runFn = [&result, &calcFn, &putDebugFn, this](const vector <size_t> & seq, const size_t pos){
+			auto runFn = [&result, &calcFn, &putDebugFn](const vector <size_t> & seq, const size_t pos){
 				// Выполняем проверку существования граммы
 				auto calc = calcFn(seq);
 				// Если вес получен
@@ -2303,7 +2303,7 @@ void anyks::Alm::sentences(function <const bool (const wstring &)> callback) con
 		 * @param context контекст в котором нужно собирать данные
 		 * @return        флаг продолжения или завершения работы
 		 */
-		runFn = [&runFn, &estimateFn, &resultFn, this](vector <size_t> seq, const arpa_t * context) noexcept {
+		runFn = [&runFn, &estimateFn, &resultFn](vector <size_t> seq, const arpa_t * context) noexcept {
 			// Если данные переданы
 			if(!seq.empty() && (context != nullptr)){
 				// Последовательность для обработки
@@ -2483,7 +2483,7 @@ void anyks::Alm::find(const wstring & text, function <void (const wstring &)> ca
 		 * @param words список слов для вывода результата
 		 * @param count количество слов для вывода результата
 		 */
-		auto callbackFn = [&cache, &callback, this](const vector <wstring> & words, const size_t count){
+		auto callbackFn = [&cache, &callback](const vector <wstring> & words, const size_t count){
 			// Если список слов передан
 			if(!words.empty() && (count > 1)){
 				// Получившаяся строка текста
@@ -3002,7 +3002,7 @@ void anyks::Alm::findByFiles(const string & path, const string & filename, funct
 				// Флаг переноса строки
 				bool isOBreak = false;
 				// Выполняем поиск n-грамм
-				this->find(text, [&result, &isOBreak, this](const string & text){
+				this->find(text, [&result, &isOBreak](const string & text){
 					// Выводим список найденных n-рамм
 					if(!text.empty()){
 						// Проверяем, является ли текст переносом строки
