@@ -2561,7 +2561,7 @@ void anyks::Arpa::add(const vector <seq_t> & seq, const size_t idd, const bool r
 }
 /**
  * sweep Метод удаления низкочастотных n-грамм arpa
- * @param status статус расёта
+ * @param status статус расчёта
  */
 void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
@@ -2661,8 +2661,8 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 	} else if(debug) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa is empty");
 }
 /**
- * trian Метод расёта частот n-грамм
- * @param status статус расёта
+ * trian Метод расчёта частот n-грамм
+ * @param status статус расчёта
  */
 void anyks::Arpa::train(function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
@@ -2975,8 +2975,8 @@ void anyks::Arpa::train(function <void (const u_short)> status) const noexcept {
 	} else if(debug) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa is empty");
 }
 /**
- * repair Метод ремонта уже расчитанной ранее arpa
- * @param status статус расёта
+ * repair Метод ремонта уже расчитанной ранее языковой модели
+ * @param status статус расчёта
  */
 void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
@@ -3083,439 +3083,6 @@ void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept 
 		this->fixupProbs(1);
 	// Сообщаем что словарь оказался пустым
 	} else if(debug) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa is empty");
-}
-/**
- * mixForward Метод интерполяции нескольких моделей в прямом направлении
- * @param arpa   данные языковой модели для объединения
- * @param lambda вес первой модели при интерполяции
- * @param status статус расёта
- */
-void anyks::Arpa::mixForward(const Arpa * arpa, const double lambda, function <void (const u_short)> status) noexcept {
-	// Если данные arpa переданы
-	if(!this->data.empty() && !arpa->empty()){
-		// Текущий и предыдущий статус
-		u_short actual = 0, past = 100;
-		// Количество данных в двух языковых моделях
-		size_t index = 0, count = (this->data.size() + arpa->data.size());
-		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
-		/**
-		 * mixLogFn Функция сложения частот двух arpa
-		 * @param weight1 частота n-граммы первой arpa
-		 * @param weight2 частоты n-граммы второй arpa
-		 * @return        результирующая частота
-		 */
-		auto mixLogFn = [lambda](const double weight1, const double weight2){
-			// Выводим результат
-			return log10(lambda * pow(10, weight1) + (1 - lambda) * pow(10, weight2));
-		};
-		/**
-		 * runFn Функция запуска статической интерполяции
-		 * @param контекст первой arpa (куда будут добавлены новые n-граммы)
-		 * @param контекст второй arpa (откуда будут добавлены новые n-граммы)
-		 * @param размер n-граммы для обработки
-		 * @param тип этапа интерполяции
-		 */
-		function <void (data_t *, const data_t *, const u_short, const bool)> runFn;
-		/**
-		 * runFn Функция запуска статической интерполяции
-		 * @param arpa1 контекст первой arpa (куда будут добавлены новые n-граммы)
-		 * @param arpa2 контекст второй arpa (откуда будут добавлены новые n-граммы)
-		 * @param size  размер n-граммы для обработки
-		 * @param mode  тип этапа интерполяции
-		 */
-		runFn = [&](data_t * arpa1, const data_t * arpa2, const u_short size, const bool mode) noexcept {
-			// Если это первый этап интерполяции
-			if(mode){
-				// Значение регистров слова n-граммы
-				size_t uppers = 0;
-				// Текущее значение частоты
-				double weight = 0.0;
-				// Переходим по всему списку n-грамм
-				for(auto & item : * arpa1){
-					// Запоминаем текущее значение частоты
-					weight = item.second.weight;
-					// Ещем нашу n-грамму в другой arpa
-					auto it = arpa2->find(item.first);
-					// Если n-гамма найдена
-					if(it != arpa2->end()){
-						// Если регистры слова переданы, считаем их
-						if((uppers = (!it->second.uppers.empty() ? it->second.uppers.begin()->first : 0)) > 0){
-							// Если такого регистра еще нет в списке
-							if(item.second.uppers.count(uppers) == 0)
-								// Добавляем в список регистр слова
-								item.second.uppers.emplace(uppers, 1);
-							// Иначе увеличиваем существующий регистр слова
-							else item.second.uppers.at(uppers)++;
-						}
-						// Выполняем расчёт веса n-граммы
-						item.second.weight = mixLogFn(item.second.weight, it->second.weight);
-						// Если отладка включена
-						if(debug){
-							// Выводим статистику в сообщении
-							this->alphabet->log(
-								"FOUND %s WEIGHT %4.8f => %4.8f",
-								alphabet_t::log_t::info,
-								this->logfile,
-								this->context(&item.second).c_str(),
-								weight,
-								item.second.weight
-							);
-						}
-						// Если есть еще данные, углубляемся
-						if(!item.second.empty()) runFn(&item.second, &it->second, size + 1, mode);
-					// Выполняем расчёт веса n-граммы
-					} else {
-						// Устанавливаем новое значение частоты
-						item.second.weight = mixLogFn(item.second.weight, arpa->backoff(item.first, arpa2->father, size));
-						// Если отладка включена
-						if(debug){
-							// Выводим статистику в сообщении
-							this->alphabet->log(
-								"NOT FOUND %s WEIGHT %4.8f => %4.8f",
-								alphabet_t::log_t::info,
-								this->logfile,
-								this->context(&item.second).c_str(),
-								weight,
-								item.second.weight
-							);
-						}
-					}
-					// Если функция вывода статуса передана
-					if((status != nullptr) && (size == 0)){
-						// Считаем количество обработанных данных
-						index++;
-						// Выполняем расчёт текущего статуса
-						actual = u_short(index / double(count) * 100.0);
-						// Если статус обновился
-						if(actual != past){
-							// Запоминаем текущий статус
-							past = actual;
-							// Выводим статус извлечения
-							status(actual);
-						}
-					}
-				}
-			// Если это второй этап интерполяции
-			} else {
-				// Переходим по всему списку n-грамм
-				for(auto & item : * arpa2){
-					// Ещем нашу n-грамму в другой arpa
-					auto it = arpa1->find(item.first);
-					// Если идентификатор найден
-					if(it != arpa1->end()){
-						// Если еще есть данные, углубляемся
-						if(!item.second.empty()) runFn(&it->second, &item.second, size + 1, mode);
-					// Если идентификатор не найден
-					} else {
-						// Добавляем слово в словарь
-						auto ret = arpa1->emplace(item.first, data_t());
-						// Запоминаем родительский объект
-						ret.first->second.father = arpa1;
-						// Запоминаем идентификатор слова
-						ret.first->second.idw = item.first;
-						// Добавляем в список регистр слова
-						ret.first->second.uppers = item.second.uppers;
-						// Устанавливаем вес n-граммы
-						ret.first->second.weight = mixLogFn(item.second.weight, this->backoff(item.first, arpa1->father, size));
-						// Если отладка включена
-						if(debug){
-							// Выводим статистику в сообщении
-							this->alphabet->log(
-								"NEW %s WEIGHT %4.8f",
-								alphabet_t::log_t::info,
-								this->logfile,
-								this->context(&ret.first->second).c_str(),
-								ret.first->second.weight
-							);
-						}
-						// Если еще есть данные, углубляемся
-						if(!item.second.empty()) runFn(&ret.first->second, &item.second, size + 1, mode);
-					}
-					// Если функция вывода статуса передана
-					if((status != nullptr) && (size == 0)){
-						// Считаем количество обработанных данных
-						index++;
-						// Выполняем расчёт текущего статуса
-						actual = u_short(index / double(count) * 100.0);
-						// Если статус обновился
-						if(actual != past){
-							// Запоминаем текущий статус
-							past = actual;
-							// Выводим статус извлечения
-							status(actual);
-						}
-					}
-				}
-			}
-		};
-		// Запускаем первый этап интерполяции
-		runFn(&this->data, &arpa->data, 0, true);
-		// Запускаем второй этап интерполяции
-		runFn(&this->data, &arpa->data, 0, false);
-		// Выполняем перерасчёт обратных частот
-		this->repair();
-	}
-}
-/**
- * mixBackward Метод интерполяции нескольких моделей в обратном направлении
- * @param arpa   данные языковой модели для объединения
- * @param lambda вес первой модели при интерполяции
- * @param status статус расёта
- */
-void anyks::Arpa::mixBackward(const Arpa * arpa, const double lambda, function <void (const u_short)> status) noexcept {
-	// Если данные arpa переданы
-	if(!this->data.empty() && !arpa->empty()){
-		// Количество данных в двух языковых моделях
-		size_t count = 0, index = 0;
-		// Текущий и предыдущий статус
-		u_short actual = 0, past = 100;
-		// Список n-грамм для работы
-		list <data_t *> ngrams1, ngrams2;
-		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
-		// Переходим по всем n-грамм
-		for(u_short i = max(this->size, arpa->size); i > 0; i--){
-			// Выполняем расчёт количество данных в языковых моделях
-			count += (this->count(i, true) + arpa->count(i, true));
-		}
-		/**
-		 * mixLogFn Функция сложения частот двух arpa
-		 * @param weight1 частота n-граммы первой arpa
-		 * @param weight2 частоты n-граммы второй arpa
-		 * @return        результирующая частота
-		 */
-		auto mixLogFn = [lambda](const double weight1, const double weight2){
-			// Выводим результат
-			return log10(lambda * pow(10, weight1) + (1 - lambda) * pow(10, weight2));
-		};
-		/**
-		 * seqFn Функция получения последовательности
-		 * @param ngram контекст для получения последовательности
-		 * @return      полученный список последовательности
-		 */
-		auto seqFn = [this](const data_t * ngram) noexcept {
-			// Значение регистров слова
-			size_t uppers = 0;
-			// Последовательность для поиска
-			vector <pair_t> result;
-			// Получаем текущее значение первого контекста
-			const data_t * context = ngram;
-			// Извлекаем предшествующую n-грамму
-			while(context->father != nullptr){
-				// Получаем значение регистров
-				uppers = (!context->uppers.empty() ? context->uppers.begin()->first : 0);
-				// Добавляем слово в последовательность
-				result.insert(result.begin(), {context->idw, uppers});
-				// Выполняем смещение
-				context = context->father;
-			}
-			// Выводим результат
-			return result;
-		};
-		/**
-		 * checkFn Функция проверки существования последовательности
-		 * @param seq  список последовательности для обработки
-		 * @param arpa языковая модель из которой нужно получить частоту
-		 * @return     результат проверки
-		 */
-		auto checkFn = [](const vector <pair_t> & seq, const Arpa * arpa) noexcept {
-			// Результат работы функции
-			pair <bool, const data_t *> result = {false, nullptr};
-			// Если последовательность передана
-			if(!seq.empty()){
-				// Получаем объект для поиска
-				result.second = &arpa->data;
-				// Переходим по всему списку n-грамм
-				for(auto & item : seq){
-					// Ещем нашу n-грамму в другой arpa
-					auto it = result.second->find(item.first);
-					// Если n-гамма найдена
-					if((result.first = (it != result.second->end()))) result.second = &it->second;
-					// Если слово не найдено
-					else break;
-				}
-			}
-			// Выводим результат
-			return result;
-		};
-		/**
-		 * weightFn Прототип функции получения частоты для контекста
-		 * @param список последовательности для обработки
-		 * @param языковая модель из которой нужно получить частоту
-		 * @param размер n-граммы для поиска
-		 * @param флаг предписывающий уменьшить длину n-граммы
-		 * @return обратная частота отката
-		 */
-		function <const double (const vector <pair_t> &, const Arpa *, const bool)> weightFn;
-		/**
-		 * weightFn Функция получения частоты для контекста
-		 * @param seq  список последовательности для обработки
-		 * @param arpa языковая модель из которой нужно получить частоту
-		 * @param back флаг предписывающий уменьшить длину n-граммы
-		 * @return     обратная частота отката
-		 */
-		weightFn = [&weightFn, this](const vector <pair_t> & seq, const Arpa * arpa, const bool back) noexcept {
-			// Результат работы функции
-			double result = this->zero;
-			// Если размер запрашиваемых n-грамм больше 0
-			if(((seq.size() > 1) && back) || (!back && !seq.empty())){
-				// Получаем объект для поиска
-				const data_t * obj = &arpa->data;
-				// Формируем последовательность для поиска
-				vector <pair_t> tmp(seq.begin() + u_short(back), seq.end());
-				// Переходим по всему списку n-грамм
-				for(auto & item : tmp){
-					// Ещем нашу n-грамму в другой arpa
-					auto it = obj->find(item.first);
-					// Если n-гамма найдена
-					if(it != obj->end()){
-						// Запоминаем объект
-						obj = &it->second;
-						// Запоминаем вес последовательности
-						result = obj->weight;
-					// Если мы дошли до конца
-					} else {
-						// Продолжаем поиск дальше
-						result = weightFn(tmp, arpa, true);
-						// Выходим из цикла
-						break;
-					}
-				}
-			}
-			// Выводим результат
-			return result;
-		};
-		// Значение регистров слова n-граммы
-		size_t uppers = 0;
-		// Текущее значение частоты
-		double weight = 0.0;
-		// Очищаем загруженный ранее список кэша
-		this->ngrams.clear();
-		// Переходим по всем n-грамм
-		for(u_short i = max(this->size, arpa->size); i > 0; i--){
-			// Выполняем извлечение n-грамм текущей языковой модели
-			this->get(i, &ngrams1);
-			// Выполняем извлечение n-грамм второй языковой модели
-			arpa->get(i, &ngrams2);
-			/**
-			 * Первый этап, поиска одинаковых n-грамм
-			 */
-			// Если список n-грамм получен
-			if(!ngrams1.empty() && !ngrams2.empty()){
-				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams1){
-					// Если в n-грамме есть дочерные граммы
-					if(!item->empty()){
-						// Переходим по всему слов в контексте
-						for(auto & value : * item){
-							// Запоминаем текущее значение частоты
-							weight = value.second.weight;
-							// Получаем список последовательности
-							const auto & seq = seqFn(&value.second);
-							// Выполняем проверку существования n-граммы
-							const auto & check = checkFn(seq, arpa);
-							// Если последовательность найдена
-							if(check.first){
-								// Если регистры слова переданы, считаем их
-								if((uppers = (!check.second->uppers.empty() ? check.second->uppers.begin()->first : 0)) > 0){
-									// Если такого регистра еще нет в списке
-									if(value.second.uppers.count(uppers) == 0)
-										// Добавляем в список регистр слова
-										value.second.uppers.emplace(uppers, 1);
-									// Иначе увеличиваем существующий регистр слова
-									else value.second.uppers.at(uppers)++;
-								}
-							}
-							// Выполняем расчёт веса последовательности
-							value.second.weight = mixLogFn(value.second.weight, weightFn(seq, arpa, false));
-							// Если отладка включена
-							if(debug){
-								// Выводим статистику в сообщении
-								this->alphabet->log(
-									"%s %s WEIGHT %4.8f => %4.8f",
-									alphabet_t::log_t::info,
-									this->logfile,
-									(check.first ? "FOUND" : "NOT FOUND"),
-									this->context(&value.second).c_str(),
-									weight,
-									value.second.weight
-								);
-							}
-							// Если функция вывода статуса передана
-							if(status != nullptr){
-								// Считаем количество обработанных данных
-								index++;
-								// Выполняем расчёт текущего статуса
-								actual = u_short(index / double(count) * 100.0);
-								// Если статус обновился
-								if(actual != past){
-									// Запоминаем текущий статус
-									past = actual;
-									// Выводим статус извлечения
-									status(actual);
-								}
-							}
-						}
-					}
-				}
-			}
-			/**
-			 * Второй этап, поиска не существующих n-грамм
-			 */
-			// Если список n-грамм получен
-			if(!ngrams2.empty()){
-				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams2){
-					// Если в n-грамме есть дочерные граммы
-					if(!item->empty()){
-						// Переходим по всему слов в контексте
-						for(auto & value : * item){
-							// Получаем список последовательности
-							const auto & seq = seqFn(&value.second);
-							// Выполняем расчёт частоты
-							weight = mixLogFn(value.second.weight, weightFn(seq, this, true));
-							// Если список n-грамм получен
-							if(!ngrams1.empty()){
-								// Если n-грамма не соответствует
-								if(!checkFn(seq, this).first) this->set(seq, weight, 0.0);
-							// Просто вставляем новую n-грамму
-							} else this->set(seq, weight, 0.0);
-							// Если отладка включена
-							if(debug){
-								// Выводим статистику в сообщении
-								this->alphabet->log(
-									"NEW %s WEIGHT %4.8f",
-									alphabet_t::log_t::info,
-									this->logfile,
-									this->context(&value.second).c_str(),
-									weight
-								);
-							}
-							// Если функция вывода статуса передана
-							if(status != nullptr){
-								// Считаем количество обработанных данных
-								index++;
-								// Выполняем расчёт текущего статуса
-								actual = u_short(index / double(count) * 100.0);
-								// Если статус обновился
-								if(actual != past){
-									// Запоминаем текущий статус
-									past = actual;
-									// Выводим статус извлечения
-									status(actual);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		// Очищаем загруженный ранее список кэша
-		this->ngrams.clear();
-		// Выполняем перерасчёт обратных частот
-		this->repair();
-	}
 }
 /**
  * prune Метод прунинга языковой модели
@@ -3721,6 +3288,1140 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
 		}
 	// Сообщаем что словарь оказался пустым
 	} else if(debug) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa is empty");
+}
+/**
+ * mixForward Метод интерполяции нескольких моделей в прямом направлении
+ * @param lm     данные языковой модели для объединения
+ * @param lambda вес первой модели при интерполяции
+ * @param status статус расчёта
+ */
+void anyks::Arpa::mixForward(const Arpa * lm, const double lambda, function <void (const u_short)> status) noexcept {
+	// Если языковые модели загружены
+	if(!this->data.empty() && !lm->empty()){
+		// Текущий и предыдущий статус
+		u_short actual = 0, past = 100;
+		// Количество данных в двух языковых моделях
+		size_t index = 0, count = (this->data.size() + lm->data.size());
+		// Проверяем включён ли режим отладки
+		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		/**
+		 * mixLogFn Функция сложения частот двух языковых моделей
+		 * @param weight1 частота n-граммы первой языковой модели
+		 * @param weight2 частоты n-граммы второй языковой модели
+		 * @return        результирующая частота
+		 */
+		auto mixLogFn = [lambda](const double weight1, const double weight2){
+			// Выводим результат
+			return log10(lambda * pow(10, weight1) + (1 - lambda) * pow(10, weight2));
+		};
+		/**
+		 * runFn Функция запуска статической интерполяции
+		 * @param контекст первой языковой модели (куда будут добавлены новые n-граммы)
+		 * @param контекст второй языковой модели (откуда будут добавлены новые n-граммы)
+		 * @param размер n-граммы для обработки
+		 * @param тип этапа интерполяции
+		 */
+		function <void (data_t *, const data_t *, const u_short, const bool)> runFn;
+		/**
+		 * runFn Функция запуска статической интерполяции
+		 * @param lm1  контекст первой языковой модели (куда будут добавлены новые n-граммы)
+		 * @param lm2  контекст второй языковой модели (откуда будут добавлены новые n-граммы)
+		 * @param size размер n-граммы для обработки
+		 * @param mode тип этапа интерполяции
+		 */
+		runFn = [&](data_t * lm1, const data_t * lm2, const u_short size, const bool mode) noexcept {
+			// Если это первый этап интерполяции
+			if(mode){
+				// Значение регистров слова n-граммы
+				size_t uppers = 0;
+				// Текущее значение частоты
+				double weight = 0.0;
+				// Переходим по всему списку n-грамм
+				for(auto & item : * lm1){
+					// Запоминаем текущее значение частоты
+					weight = item.second.weight;
+					// Ещем нашу n-грамму в другой языковой модели
+					auto it = lm2->find(item.first);
+					// Если n-гамма найдена
+					if(it != lm2->end()){
+						// Если регистры слова переданы, считаем их
+						if((uppers = (!it->second.uppers.empty() ? it->second.uppers.begin()->first : 0)) > 0){
+							// Если такого регистра еще нет в списке
+							if(item.second.uppers.count(uppers) == 0)
+								// Добавляем в список регистр слова
+								item.second.uppers.emplace(uppers, 1);
+							// Иначе увеличиваем существующий регистр слова
+							else item.second.uppers.at(uppers)++;
+						}
+						// Выполняем расчёт веса n-граммы
+						item.second.weight = mixLogFn(item.second.weight, it->second.weight);
+						// Если отладка включена
+						if(debug){
+							// Выводим статистику в сообщении
+							this->alphabet->log(
+								"FOUND %s WEIGHT %4.8f => %4.8f",
+								alphabet_t::log_t::info,
+								this->logfile,
+								this->context(&item.second).c_str(),
+								weight,
+								item.second.weight
+							);
+						}
+						// Если есть еще данные, углубляемся
+						if(!item.second.empty()) runFn(&item.second, &it->second, size + 1, mode);
+					// Выполняем расчёт веса n-граммы
+					} else {
+						// Устанавливаем новое значение частоты
+						item.second.weight = mixLogFn(item.second.weight, lm->backoff(item.first, lm2->father, size));
+						// Если отладка включена
+						if(debug){
+							// Выводим статистику в сообщении
+							this->alphabet->log(
+								"NOT FOUND %s WEIGHT %4.8f => %4.8f",
+								alphabet_t::log_t::info,
+								this->logfile,
+								this->context(&item.second).c_str(),
+								weight,
+								item.second.weight
+							);
+						}
+					}
+					// Если функция вывода статуса передана
+					if((status != nullptr) && (size == 0)){
+						// Считаем количество обработанных данных
+						index++;
+						// Выполняем расчёт текущего статуса
+						actual = u_short(index / double(count) * 100.0);
+						// Если статус обновился
+						if(actual != past){
+							// Запоминаем текущий статус
+							past = actual;
+							// Выводим статус извлечения
+							status(actual);
+						}
+					}
+				}
+			// Если это второй этап интерполяции
+			} else {
+				// Переходим по всему списку n-грамм
+				for(auto & item : * lm2){
+					// Ещем нашу n-грамму в другой языковой модели
+					auto it = lm1->find(item.first);
+					// Если идентификатор найден
+					if(it != lm1->end()){
+						// Если еще есть данные, углубляемся
+						if(!item.second.empty()) runFn(&it->second, &item.second, size + 1, mode);
+					// Если идентификатор не найден
+					} else {
+						// Добавляем слово в словарь
+						auto ret = lm1->emplace(item.first, data_t());
+						// Запоминаем родительский объект
+						ret.first->second.father = lm1;
+						// Запоминаем идентификатор слова
+						ret.first->second.idw = item.first;
+						// Добавляем в список регистр слова
+						ret.first->second.uppers = item.second.uppers;
+						// Устанавливаем вес n-граммы
+						ret.first->second.weight = mixLogFn(item.second.weight, this->backoff(item.first, lm1->father, size));
+						// Если отладка включена
+						if(debug){
+							// Выводим статистику в сообщении
+							this->alphabet->log(
+								"NEW %s WEIGHT %4.8f",
+								alphabet_t::log_t::info,
+								this->logfile,
+								this->context(&ret.first->second).c_str(),
+								ret.first->second.weight
+							);
+						}
+						// Если еще есть данные, углубляемся
+						if(!item.second.empty()) runFn(&ret.first->second, &item.second, size + 1, mode);
+					}
+					// Если функция вывода статуса передана
+					if((status != nullptr) && (size == 0)){
+						// Считаем количество обработанных данных
+						index++;
+						// Выполняем расчёт текущего статуса
+						actual = u_short(index / double(count) * 100.0);
+						// Если статус обновился
+						if(actual != past){
+							// Запоминаем текущий статус
+							past = actual;
+							// Выводим статус извлечения
+							status(actual);
+						}
+					}
+				}
+			}
+		};
+		// Запускаем первый этап интерполяции
+		runFn(&this->data, &lm->data, 0, true);
+		// Запускаем второй этап интерполяции
+		runFn(&this->data, &lm->data, 0, false);
+		// Выполняем перерасчёт обратных частот
+		this->repair();
+	}
+}
+/**
+ * mixBackward Метод интерполяции нескольких моделей в обратном направлении
+ * @param lm     данные языковой модели для объединения
+ * @param lambda вес первой модели при интерполяции
+ * @param status статус расчёта
+ */
+void anyks::Arpa::mixBackward(const Arpa * lm, const double lambda, function <void (const u_short)> status) noexcept {
+	// Если языковые модели загружены
+	if(!this->data.empty() && !lm->empty()){
+		// Количество данных в двух языковых моделях
+		size_t count = 0, index = 0;
+		// Текущий и предыдущий статус
+		u_short actual = 0, past = 100;
+		// Список n-грамм для работы
+		list <data_t *> ngrams1, ngrams2;
+		// Проверяем включён ли режим отладки
+		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		// Переходим по всем n-грамм
+		for(u_short i = max(this->size, lm->size); i > 0; i--){
+			// Выполняем расчёт количество данных в языковых моделях
+			count += (this->count(i, true) + lm->count(i, true));
+		}
+		/**
+		 * mixLogFn Функция сложения частот двух языковых моделей
+		 * @param weight1 частота n-граммы первой языковой модели
+		 * @param weight2 частоты n-граммы второй языковой модели
+		 * @return        результирующая частота
+		 */
+		auto mixLogFn = [lambda](const double weight1, const double weight2){
+			// Выводим результат
+			return log10(lambda * pow(10, weight1) + (1 - lambda) * pow(10, weight2));
+		};
+		/**
+		 * seqFn Функция получения последовательности
+		 * @param ngram контекст для получения последовательности
+		 * @return      полученный список последовательности
+		 */
+		auto seqFn = [this](const data_t * ngram) noexcept {
+			// Значение регистров слова
+			size_t uppers = 0;
+			// Последовательность для поиска
+			vector <pair_t> result;
+			// Получаем текущее значение первого контекста
+			const data_t * context = ngram;
+			// Извлекаем предшествующую n-грамму
+			while(context->father != nullptr){
+				// Получаем значение регистров
+				uppers = (!context->uppers.empty() ? context->uppers.begin()->first : 0);
+				// Добавляем слово в последовательность
+				result.insert(result.begin(), {context->idw, uppers});
+				// Выполняем смещение
+				context = context->father;
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * checkFn Функция проверки существования последовательности
+		 * @param seq список последовательности для обработки
+		 * @param lm  языковая модель из которой нужно получить частоту
+		 * @return    результат проверки
+		 */
+		auto checkFn = [](const vector <pair_t> & seq, const Arpa * lm) noexcept {
+			// Результат работы функции
+			pair <bool, const data_t *> result = {false, nullptr};
+			// Если последовательность передана
+			if(!seq.empty()){
+				// Получаем объект для поиска
+				result.second = &lm->data;
+				// Переходим по всему списку n-грамм
+				for(auto & item : seq){
+					// Ещем нашу n-грамму в другой языковой модели
+					auto it = result.second->find(item.first);
+					// Если n-гамма найдена
+					if((result.first = (it != result.second->end()))) result.second = &it->second;
+					// Если слово не найдено
+					else break;
+				}
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * weightFn Прототип функции получения частоты для контекста
+		 * @param список последовательности для обработки
+		 * @param языковая модель из которой нужно получить частоту
+		 * @param размер n-граммы для поиска
+		 * @param флаг предписывающий уменьшить длину n-граммы
+		 * @return обратная частота отката
+		 */
+		function <const double (const vector <pair_t> &, const Arpa *, const bool)> weightFn;
+		/**
+		 * weightFn Функция получения частоты для контекста
+		 * @param seq  список последовательности для обработки
+		 * @param lm   языковая модель из которой нужно получить частоту
+		 * @param back флаг предписывающий уменьшить длину n-граммы
+		 * @return     обратная частота отката
+		 */
+		weightFn = [&weightFn, this](const vector <pair_t> & seq, const Arpa * lm, const bool back) noexcept {
+			// Результат работы функции
+			double result = this->zero;
+			// Если размер запрашиваемых n-грамм больше 0
+			if(((seq.size() > 1) && back) || (!back && !seq.empty())){
+				// Получаем объект для поиска
+				const data_t * obj = &lm->data;
+				// Формируем последовательность для поиска
+				vector <pair_t> tmp(seq.begin() + u_short(back), seq.end());
+				// Переходим по всему списку n-грамм
+				for(auto & item : tmp){
+					// Ещем нашу n-грамму в другой языковой модели
+					auto it = obj->find(item.first);
+					// Если n-гамма найдена
+					if(it != obj->end()){
+						// Запоминаем объект
+						obj = &it->second;
+						// Запоминаем вес последовательности
+						result = obj->weight;
+					// Если мы дошли до конца
+					} else {
+						// Продолжаем поиск дальше
+						result = weightFn(tmp, lm, true);
+						// Выходим из цикла
+						break;
+					}
+				}
+			}
+			// Выводим результат
+			return result;
+		};
+		// Значение регистров слова n-граммы
+		size_t uppers = 0;
+		// Текущее значение частоты
+		double weight = 0.0;
+		// Очищаем загруженный ранее список кэша
+		this->ngrams.clear();
+		// Переходим по всем n-грамм
+		for(u_short i = max(this->size, lm->size); i > 0; i--){
+			// Выполняем извлечение n-грамм текущей языковой модели
+			this->get(i, &ngrams1);
+			// Выполняем извлечение n-грамм второй языковой модели
+			lm->get(i, &ngrams2);
+			/**
+			 * Первый этап, поиска одинаковых n-грамм
+			 */
+			// Если список n-грамм получен
+			if(!ngrams1.empty() && !ngrams2.empty()){
+				// Переходим по всему списку полученных n-грамм
+				for(auto & item : ngrams1){
+					// Если в n-грамме есть дочерные граммы
+					if(!item->empty()){
+						// Переходим по всему слов в контексте
+						for(auto & value : * item){
+							// Запоминаем текущее значение частоты
+							weight = value.second.weight;
+							// Получаем список последовательности
+							const auto & seq = seqFn(&value.second);
+							// Выполняем проверку существования n-граммы
+							const auto & check = checkFn(seq, lm);
+							// Если последовательность найдена
+							if(check.first){
+								// Если регистры слова переданы, считаем их
+								if((uppers = (!check.second->uppers.empty() ? check.second->uppers.begin()->first : 0)) > 0){
+									// Если такого регистра еще нет в списке
+									if(value.second.uppers.count(uppers) == 0)
+										// Добавляем в список регистр слова
+										value.second.uppers.emplace(uppers, 1);
+									// Иначе увеличиваем существующий регистр слова
+									else value.second.uppers.at(uppers)++;
+								}
+							}
+							// Выполняем расчёт веса последовательности
+							value.second.weight = mixLogFn(value.second.weight, weightFn(seq, lm, false));
+							// Если отладка включена
+							if(debug){
+								// Выводим статистику в сообщении
+								this->alphabet->log(
+									"%s %s WEIGHT %4.8f => %4.8f",
+									alphabet_t::log_t::info,
+									this->logfile,
+									(check.first ? "FOUND" : "NOT FOUND"),
+									this->context(&value.second).c_str(),
+									weight,
+									value.second.weight
+								);
+							}
+							// Если функция вывода статуса передана
+							if(status != nullptr){
+								// Считаем количество обработанных данных
+								index++;
+								// Выполняем расчёт текущего статуса
+								actual = u_short(index / double(count) * 100.0);
+								// Если статус обновился
+								if(actual != past){
+									// Запоминаем текущий статус
+									past = actual;
+									// Выводим статус извлечения
+									status(actual);
+								}
+							}
+						}
+					}
+				}
+			}
+			/**
+			 * Второй этап, поиска не существующих n-грамм
+			 */
+			// Если список n-грамм получен
+			if(!ngrams2.empty()){
+				// Переходим по всему списку полученных n-грамм
+				for(auto & item : ngrams2){
+					// Если в n-грамме есть дочерные граммы
+					if(!item->empty()){
+						// Переходим по всему слов в контексте
+						for(auto & value : * item){
+							// Получаем список последовательности
+							const auto & seq = seqFn(&value.second);
+							// Если размер последовательности больше установленной, устанавливаем её
+							if(seq.size() > size_t(this->size)) this->size = seq.size();
+							// Выполняем расчёт частоты
+							weight = mixLogFn(value.second.weight, weightFn(seq, this, true));
+							// Если список n-грамм получен
+							if(!ngrams1.empty()){
+								// Если n-грамма не соответствует
+								if(!checkFn(seq, this).first) this->set(seq, weight, 0.0);
+							// Просто вставляем новую n-грамму
+							} else this->set(seq, weight, 0.0);
+							// Если отладка включена
+							if(debug){
+								// Выводим статистику в сообщении
+								this->alphabet->log(
+									"NEW %s WEIGHT %4.8f",
+									alphabet_t::log_t::info,
+									this->logfile,
+									this->context(&value.second).c_str(),
+									weight
+								);
+							}
+							// Если функция вывода статуса передана
+							if(status != nullptr){
+								// Считаем количество обработанных данных
+								index++;
+								// Выполняем расчёт текущего статуса
+								actual = u_short(index / double(count) * 100.0);
+								// Если статус обновился
+								if(actual != past){
+									// Запоминаем текущий статус
+									past = actual;
+									// Выводим статус извлечения
+									status(actual);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		// Очищаем загруженный ранее список кэша
+		this->ngrams.clear();
+		// Выполняем перерасчёт обратных частот
+		this->repair();
+	}
+}
+/**
+ * mixLoglinear Метод интерполяции нескольких моделей алгоритмом Баеса
+ * @param lms     список данных языковых моделей для объединения
+ * @param lambdas список весов моделей при интерполяции
+ * @param status  статус расчёта
+ */
+void anyks::Arpa::mixLoglinear(const vector <const Arpa *> & lms, const vector <double> & lambdas, function <void (const u_short)> status) noexcept {
+	// Если языковые модели загружены
+	if(!this->data.empty() && !lms.empty() && (lms.size() == (lambdas.size() - 1))){
+		// Индекс обхода всех языковых моделей
+		size_t index = 0, count = 0;
+		// Текущий и предыдущий статус
+		u_short actual = 0, past = 100;
+		// Проверяем включён ли режим отладки
+		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		/**
+		 * seqFn Функция получения последовательности
+		 * @param ngram контекст для получения последовательности
+		 * @return      полученный список последовательности
+		 */
+		auto seqFn = [this](const data_t * ngram) noexcept {
+			// Последовательность для поиска
+			vector <size_t> result;
+			// Получаем текущее значение первого контекста
+			const data_t * context = ngram;
+			// Извлекаем предшествующую n-грамму
+			while(context->father != nullptr){
+				// Добавляем слово в последовательность
+				result.insert(result.begin(), context->idw);
+				// Выполняем смещение
+				context = context->father;
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * weightFn Прототип функции получения частоты для контекста
+		 * @param список последовательности для обработки
+		 * @param языковая модель из которой нужно получить частоту
+		 * @param размер n-граммы для поиска
+		 * @param флаг предписывающий уменьшить длину n-граммы
+		 * @return обратная частота отката
+		 */
+		function <const double (const vector <size_t> &, const Arpa *, const bool)> weightFn;
+		/**
+		 * weightFn Функция получения частоты для контекста
+		 * @param seq  список последовательности для обработки
+		 * @param lm   языковая модель из которой нужно получить частоту
+		 * @param back флаг предписывающий уменьшить длину n-граммы
+		 * @return     обратная частота отката
+		 */
+		weightFn = [&weightFn, this](const vector <size_t> & seq, const Arpa * lm, const bool back) noexcept {
+			// Результат работы функции
+			double result = 0.0;
+			// Если это неизвестное слово, тогда выходим
+			if(this->isUnk(seq.back())) return result;
+			// Если размер запрашиваемых n-грамм больше 0
+			if(((seq.size() > 1) && back) || (!back && !seq.empty())){
+				// Получаем объект для поиска
+				const data_t * obj = &lm->data;
+				// Формируем последовательность для поиска
+				vector <size_t> tmp(seq.begin() + u_short(back), seq.end());
+				// Переходим по всему списку n-грамм
+				for(auto & idw : tmp){
+					// Ещем нашу n-грамму в другой языковой модели
+					auto it = obj->find(idw);
+					// Если n-гамма найдена
+					if(it != obj->end()){
+						// Запоминаем объект
+						obj = &it->second;
+						// Запоминаем вес последовательности
+						result = obj->weight;
+					// Если мы дошли до конца
+					} else {
+						// Продолжаем поиск дальше
+						result = weightFn(tmp, lm, true);
+						// Выходим из цикла
+						break;
+					}
+				}
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * probFn Функция расчёта веса n-граммы
+		 * @param ngram контекст для получения последовательности
+		 * @return      результат расчёта
+		 */
+		auto probFn = [&](const data_t * ngram) noexcept {
+			// Результат работы функции
+			double result = this->zero;
+			// Если идентификатор передан
+			if((ngram->idw > 0) && (ngram->idw < idw_t::NIDW)){
+				// Получаем данные текущей языковой модели
+				const Arpa * lm = this;
+				// Сумма всех весов последовательности
+				double numerator = 0.0;
+				// Получаем количество языковых моделей
+				const size_t count = (lms.size() + 1);
+				// Получаем список последовательности
+				vector <size_t> tmp = seqFn(ngram);
+				// Переходим по всем остальным языковым моделям
+				for(size_t i = 0; i < count; i++){
+					// Если это не нулевая n-грамма
+					if(i > 0) lm = lms[i - 1];
+					// Выполняем расчёт нумератора
+					numerator += (lambdas[i] * weightFn(tmp, lm, true));
+					// Если нумератор больше считать нельзя, выходим
+					if(numerator == this->zero) break;
+				}
+				// Удаляем последнее слово из последовательности
+				tmp.pop_back();
+				// Сумма всех полученных весов
+				double sum = 0.0, probSum = 0.0;
+				// Выполняем переход по всем словам в словаре
+				for(auto & item : this->data){
+					// Пересчитываем число, если оно нормальное
+					if(isnormal(item.second.weight)){
+						// Получаем данные текущей языковой модели
+						lm = this;
+						// Сумма полученных весов
+						probSum = 0.0;
+						// Добавляем в последовательность слово
+						tmp.push_back(item.first);
+						// Переходим по всем остальным языковым моделям
+						for(size_t i = 0; i < count; i++){
+							// Если это не нулевая n-грамма
+							if(i > 0) lm = lms[i - 1];
+							// Выполняем расчёт весов
+							probSum += (lambdas[i] * weightFn(tmp, lm, false));
+						}
+						// Удаляем последнее слово из последовательности
+						tmp.pop_back();
+						// Выполняем расчёт суммы всех весов
+						sum += pow(10, probSum);
+					}
+				}
+				// Выводим результат
+				result = (numerator - log10(sum));
+				// Если результат не получен, скидываем
+				if(!isnormal(result)) result = this->zero;
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * runFn Функция запуска статической интерполяции
+		 * @param контекст первой языковой модели (куда будут добавлены новые n-граммы)
+		 * @param контекст второй языковой модели (откуда будут добавлены новые n-граммы)
+		 * @param размер n-граммы для обработки
+		 * @param тип этапа интерполяции
+		 */
+		function <void (data_t *, const data_t *, const u_short, const bool)> runFn;
+		/**
+		 * runFn Функция запуска статической интерполяции
+		 * @param lm1  контекст первой языковой модели (куда будут добавлены новые n-граммы)
+		 * @param lm2  контекст второй языковой модели (откуда будут добавлены новые n-граммы)
+		 * @param size размер n-граммы для обработки
+		 * @param mode тип этапа интерполяции
+		 */
+		runFn = [&](data_t * lm1, const data_t * lm2, const u_short size, const bool mode) noexcept {
+			// Если это первый этап интерполяции
+			if(mode){
+				// Значение регистров слова n-граммы
+				size_t uppers = 0;
+				// Текущее значение частоты
+				double weight = 0.0;
+				// Переходим по всему списку n-грамм
+				for(auto & item : * lm1){
+					// Если слово имеет нормальный вес
+					if(isnormal(item.second.weight)){
+						// Запоминаем текущее значение частоты
+						weight = item.second.weight;
+						// Ещем нашу n-грамму в другой языковой модели
+						auto it = lm2->find(item.first);
+						// Если n-гамма найдена
+						if(it != lm2->end()){
+							// Если регистры слова переданы, считаем их
+							if((uppers = (!it->second.uppers.empty() ? it->second.uppers.begin()->first : 0)) > 0){
+								// Если такого регистра еще нет в списке
+								if(item.second.uppers.count(uppers) == 0)
+									// Добавляем в список регистр слова
+									item.second.uppers.emplace(uppers, 1);
+								// Иначе увеличиваем существующий регистр слова
+								else item.second.uppers.at(uppers)++;
+							}
+							// Выполняем расчёт веса n-граммы
+							item.second.weight = probFn(&item.second);
+							// Если отладка включена
+							if(debug){
+								// Выводим статистику в сообщении
+								this->alphabet->log(
+									"FOUND %s WEIGHT %4.8f => %4.8f",
+									alphabet_t::log_t::info,
+									this->logfile,
+									this->context(&item.second).c_str(),
+									weight,
+									item.second.weight
+								);
+							}
+							// Если есть еще данные, углубляемся
+							if(!item.second.empty()) runFn(&item.second, &it->second, size + 1, mode);
+						// Выполняем расчёт веса n-граммы
+						} else {
+							// Устанавливаем новое значение частоты
+							item.second.weight = probFn(&item.second);
+							// Если отладка включена
+							if(debug){
+								// Выводим статистику в сообщении
+								this->alphabet->log(
+									"NOT FOUND %s WEIGHT %4.8f => %4.8f",
+									alphabet_t::log_t::info,
+									this->logfile,
+									this->context(&item.second).c_str(),
+									weight,
+									item.second.weight
+								);
+							}
+						}
+					}
+					// Если функция вывода статуса передана
+					if((status != nullptr) && (size == 0)){
+						// Считаем количество обработанных данных
+						index++;
+						// Выполняем расчёт текущего статуса
+						actual = u_short(index / double(count) * 100.0);
+						// Если статус обновился
+						if(actual != past){
+							// Запоминаем текущий статус
+							past = actual;
+							// Выводим статус извлечения
+							status(actual);
+						}
+					}
+				}
+			// Если это второй этап интерполяции
+			} else {
+				// Переходим по всему списку n-грамм
+				for(auto & item : * lm2){
+					// Ещем нашу n-грамму в другой языковой модели
+					auto it = lm1->find(item.first);
+					// Если идентификатор найден
+					if(it != lm1->end()){
+						// Если еще есть данные, углубляемся
+						if(!item.second.empty()) runFn(&it->second, &item.second, size + 1, mode);
+					// Если идентификатор не найден
+					} else {
+						// Добавляем слово в словарь
+						auto ret = lm1->emplace(item.first, data_t());
+						// Запоминаем родительский объект
+						ret.first->second.father = lm1;
+						// Запоминаем идентификатор слова
+						ret.first->second.idw = item.first;
+						// Добавляем в список регистр слова
+						ret.first->second.uppers = item.second.uppers;
+						// Устанавливаем вес n-граммы
+						ret.first->second.weight = (isnormal(item.second.weight) ? probFn(&ret.first->second) : item.second.weight);
+						// Если отладка включена
+						if(debug){
+							// Выводим статистику в сообщении
+							this->alphabet->log(
+								"NEW %s WEIGHT %4.8f",
+								alphabet_t::log_t::info,
+								this->logfile,
+								this->context(&ret.first->second).c_str(),
+								ret.first->second.weight
+							);
+						}
+						// Если еще есть данные, углубляемся
+						if(!item.second.empty()) runFn(&ret.first->second, &item.second, size + 1, mode);
+					}
+					// Если функция вывода статуса передана
+					if((status != nullptr) && (size == 0)){
+						// Считаем количество обработанных данных
+						index++;
+						// Выполняем расчёт текущего статуса
+						actual = u_short(index / double(count) * 100.0);
+						// Если статус обновился
+						if(actual != past){
+							// Запоминаем текущий статус
+							past = actual;
+							// Выводим статус извлечения
+							status(actual);
+						}
+					}
+				}
+			}
+		};
+		// Выполняем расчёт количества итераций
+		for(auto & lm : lms) count += (this->data.size() + lm->data.size());
+		// Переходим по всем языковым моделям
+		for(auto & lm : lms){
+			// Запускаем первый этап интерполяции
+			runFn(&this->data, &lm->data, 0, true);
+			// Запускаем второй этап интерполяции
+			runFn(&this->data, &lm->data, 0, false);
+		}
+		// Выполняем перерасчёт обратных частот
+		this->repair();
+	}
+}
+/**
+ * mixBayes Метод интерполяции нескольких моделей алгоритмом Баеса
+ * @param lms     список данных языковых моделей для объединения
+ * @param lambdas список весов моделей при интерполяции
+ * @param length  длина контекста для расчёта
+ * @param scale   логарифмическая шкала вероятности
+ * @param status  статус расчёта
+ */
+void anyks::Arpa::mixBayes(const vector <const Arpa *> & lms, const vector <double> & lambdas, const size_t length, const double scale, function <void (const u_short)> status) noexcept {
+	// Если языковые модели загружены
+	if(!this->data.empty() && !lms.empty() && (lms.size() == (lambdas.size() - 1))){
+		// Индекс обхода всех языковых моделей
+		size_t index = 0, count = 0;
+		// Текущий и предыдущий статус
+		u_short actual = 0, past = 100;
+		// Проверяем включён ли режим отладки
+		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		/**
+		 * seqFn Функция получения последовательности
+		 * @param ngram контекст для получения последовательности
+		 * @return      полученный список последовательности
+		 */
+		auto seqFn = [this](const data_t * ngram) noexcept {
+			// Последовательность для поиска
+			vector <size_t> result;
+			// Получаем текущее значение первого контекста
+			const data_t * context = ngram;
+			// Извлекаем предшествующую n-грамму
+			while(context->father != nullptr){
+				// Добавляем слово в последовательность
+				result.insert(result.begin(), context->idw);
+				// Выполняем смещение
+				context = context->father;
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * weightFn Прототип функции получения частоты для контекста
+		 * @param список последовательности для обработки
+		 * @param языковая модель из которой нужно получить частоту
+		 * @param размер n-граммы для поиска
+		 * @param флаг предписывающий уменьшить длину n-граммы
+		 * @return обратная частота отката
+		 */
+		function <const double (const vector <size_t> &, const Arpa *, const bool)> weightFn;
+		/**
+		 * weightFn Функция получения частоты для контекста
+		 * @param seq  список последовательности для обработки
+		 * @param lm   языковая модель из которой нужно получить частоту
+		 * @param back флаг предписывающий уменьшить длину n-граммы
+		 * @return     обратная частота отката
+		 */
+		weightFn = [&weightFn, this](const vector <size_t> & seq, const Arpa * lm, const bool back) noexcept {
+			// Результат работы функции
+			double result = this->zero;
+			// Если это неизвестное слово, тогда выходим
+			if(this->isUnk(seq.back())) return result;
+			// Если размер запрашиваемых n-грамм больше 0
+			if(((seq.size() > 1) && back) || (!back && !seq.empty())){
+				// Получаем объект для поиска
+				const data_t * obj = &lm->data;
+				// Формируем последовательность для поиска
+				vector <size_t> tmp(seq.begin() + u_short(back), seq.end());
+				// Переходим по всему списку n-грамм
+				for(auto & idw : tmp){
+					// Ещем нашу n-грамму в другой языковой модели
+					auto it = obj->find(idw);
+					// Если n-гамма найдена
+					if(it != obj->end()){
+						// Запоминаем объект
+						obj = &it->second;
+						// Запоминаем вес последовательности
+						result = obj->weight;
+					// Если мы дошли до конца
+					} else {
+						// Продолжаем поиск дальше
+						result = weightFn(tmp, lm, true);
+						// Выходим из цикла
+						break;
+					}
+				}
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * sumFn Функция подсчёта суммы весов n-граммы
+		 * @param lm   данные языковой модели
+		 * @param gram значение текущей n-граммы
+		 * @param seq  список последовательности
+		 * @return     подсчитанная сумма весов
+		 */
+		auto sumFn = [this](const Arpa * lm, const u_short gram, const vector <size_t> & seq) noexcept {
+			// Результат работы функции
+			double result = 0.0;
+			// Если последовательность получена
+			if(!seq.empty() && !lm->empty()){
+				// Получаем объект для поиска
+				const data_t * obj = &lm->data;
+				// Переходим по всему списку n-грамм
+				for(auto & idw : seq){
+					// Ещем нашу n-грамму в другой языковой модели
+					auto it = obj->find(idw);
+					// Если n-гамма найдена
+					if(it != obj->end()){
+						// Запоминаем объект
+						obj = &it->second;
+						// Запоминаем результат
+						if((obj->weight != this->zero) && !this->isStart(idw) &&
+						((gram > 1) || !this->isUnk(idw) || !this->isOption(options_t::resetUnk))) result += obj->weight;
+						/**
+						 * Если мы вычисляем предельную вероятность контекста униграммы <s>,
+						 * мы должны искать </s> вместо неё, поскольку у начала предложения вес = 0.
+						 */
+						if(this->isStart(idw)) result += lm->data.at((size_t) token_t::finish).weight;
+					}
+				}
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * probFn Функция расчёта веса n-граммы
+		 * @param ngram контекст для получения последовательности
+		 * @return      результат расчёта
+		 */
+		auto probFn = [&](const data_t * ngram) noexcept {
+			// Результат работы функции
+			double result = this->zero;
+			// Если идентификатор передан
+			if((ngram->idw > 0) && (ngram->idw < idw_t::NIDW)){
+				// Получаем данные языковой модели
+				const Arpa * lm = this;
+				// Общее значение всех весов
+				double totalProb = 0.0;
+				// Сумма всех весов языковых моделей
+				double lmWeightSum = 0.0;
+				// Флаг всех нулевых весов
+				bool allZeroWeights = true;
+				// Получаем количество языковых моделей
+				const size_t count = (lms.size() + 1);
+				// Получаем список последовательности
+				vector <size_t> tmp = seqFn(ngram);
+				// Создаём список частот языковых моделей
+				vector <double> lmProbs(count);
+				// Создаём список весов языковых моделей
+				vector <double> lmWeights(count);
+				// Переходим по всем остальным языковым моделям
+				for(size_t i = 0; i < count; i++){
+					// Если это не нулевая n-грамма
+					if(i > 0) lm = lms[i - 1];
+					// Выполняем расчёт веса для текущей последовательности
+					lmProbs[i] = pow(10, weightFn(tmp, lm, false));
+					// Получаем уже расчитанный ранее вес
+					lmWeights[i] = lambdas[i];
+					// Выполняем расчёт весов языковой модели
+					if(scale > 0.0) lmWeights[i] *= pow(10, scale * sumFn(lm, length, tmp));
+					// Если веса не нулевые, сбрасываем флаг всех нулевых весов
+					if(lmWeights[i] != 0.0) allZeroWeights = false;
+					// Увеличиваем сумму всех весов языковых моделей
+					lmWeightSum += lmWeights[i];
+				}
+				/*
+				 * Если ни одна из языковых моделей не знает контекст, возвращаемся обратно
+				 */
+				if(allZeroWeights){
+					// Сбрасываем сумму всех весов языковых моделей
+					lmWeightSum = 0.0;
+					// Переходим по всем остальным языковым моделям
+					for(size_t i = 0; i < count; i++){
+						// Получаем уже расчитанный ранее вес
+						lmWeights[i] = lambdas[i];
+						// Увеличиваем сумму всех весов языковых моделей
+						lmWeightSum += lmWeights[i];
+					}
+				}
+				// Если отладка включена
+				if(debug){
+					// Сообщение отладки
+					string message = "";
+					// Если длина контекста для расчёта не нулевая
+					if(length > 0){
+						// Формируем сообщение отладки
+						message = "[post=";
+						// Добавляем расчёт первоначального веса
+						message.append(to_string(lmWeights[0] / lmWeightSum));
+						// Выполняем вывод остальных весов
+						for(size_t i = 1; i < count; i++){
+							// Добавляем разделитель
+							message.append(",");
+							// Добавляем значение следующего веса
+							message.append(to_string(lmWeights[i] / lmWeightSum));
+						}
+						// Закрываем сообщение
+						message.append("]");
+						// Выводим сообщение отладки
+						this->alphabet->log("%s", alphabet_t::log_t::info, this->logfile, message.c_str());
+						// Очищаем сообщение
+						message.clear();
+					}
+					// Формируем сообщение отладки
+					message = "[probs=";
+					// Добавляем вес текущей последовательности
+					message.append(to_string(lmProbs[0]));
+					// Выполняем вывод остальных весов
+					for(size_t i = 1; i < count; i++){
+						// Добавляем разделитель
+						message.append(",");
+						// Добавляем вес текущей последовательности
+						message.append(to_string(lmProbs[i]));
+					}
+					// Закрываем сообщение
+					message.append("]");
+					// Выводим сообщение отладки
+					this->alphabet->log("%s", alphabet_t::log_t::info, this->logfile, message.c_str());
+				}
+				// Выполняем расчёт общего количества весов
+				for(size_t i = 0; i < count; i++) totalProb += (lmWeights[i] * lmProbs[i]);
+				// Выполняем расчёт финального веса
+				result = log10(totalProb / lmWeightSum);
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * runFn Функция запуска статической интерполяции
+		 * @param контекст первой языковой модели (куда будут добавлены новые n-граммы)
+		 * @param контекст второй языковой модели (откуда будут добавлены новые n-граммы)
+		 * @param размер n-граммы для обработки
+		 * @param тип этапа интерполяции
+		 */
+		function <void (data_t *, const data_t *, const u_short, const bool)> runFn;
+		/**
+		 * runFn Функция запуска статической интерполяции
+		 * @param lm1  контекст первой языковой модели (куда будут добавлены новые n-граммы)
+		 * @param lm2  контекст второй языковой модели (откуда будут добавлены новые n-граммы)
+		 * @param size размер n-граммы для обработки
+		 * @param mode тип этапа интерполяции
+		 */
+		runFn = [&](data_t * lm1, const data_t * lm2, const u_short size, const bool mode) noexcept {
+			// Если это первый этап интерполяции
+			if(mode){
+				// Значение регистров слова n-граммы
+				size_t uppers = 0;
+				// Текущее значение частоты
+				double weight = 0.0;
+				// Переходим по всему списку n-грамм
+				for(auto & item : * lm1){
+					// Если слово имеет нормальный вес
+					if(isnormal(item.second.weight)){
+						// Запоминаем текущее значение частоты
+						weight = item.second.weight;
+						// Ещем нашу n-грамму в другой языковой модели
+						auto it = lm2->find(item.first);
+						// Если n-гамма найдена
+						if(it != lm2->end()){
+							// Если регистры слова переданы, считаем их
+							if((uppers = (!it->second.uppers.empty() ? it->second.uppers.begin()->first : 0)) > 0){
+								// Если такого регистра еще нет в списке
+								if(item.second.uppers.count(uppers) == 0)
+									// Добавляем в список регистр слова
+									item.second.uppers.emplace(uppers, 1);
+								// Иначе увеличиваем существующий регистр слова
+								else item.second.uppers.at(uppers)++;
+							}
+							// Выполняем расчёт веса n-граммы
+							item.second.weight = probFn(&item.second);
+							// Если отладка включена
+							if(debug){
+								// Выводим статистику в сообщении
+								this->alphabet->log(
+									"FOUND %s WEIGHT %4.8f => %4.8f",
+									alphabet_t::log_t::info,
+									this->logfile,
+									this->context(&item.second).c_str(),
+									weight,
+									item.second.weight
+								);
+							}
+							// Если есть еще данные, углубляемся
+							if(!item.second.empty()) runFn(&item.second, &it->second, size + 1, mode);
+						// Выполняем расчёт веса n-граммы
+						} else {
+							// Устанавливаем новое значение частоты
+							item.second.weight = probFn(&item.second);
+							// Если отладка включена
+							if(debug){
+								// Выводим статистику в сообщении
+								this->alphabet->log(
+									"NOT FOUND %s WEIGHT %4.8f => %4.8f",
+									alphabet_t::log_t::info,
+									this->logfile,
+									this->context(&item.second).c_str(),
+									weight,
+									item.second.weight
+								);
+							}
+						}
+					}
+					// Если функция вывода статуса передана
+					if((status != nullptr) && (size == 0)){
+						// Считаем количество обработанных данных
+						index++;
+						// Выполняем расчёт текущего статуса
+						actual = u_short(index / double(count) * 100.0);
+						// Если статус обновился
+						if(actual != past){
+							// Запоминаем текущий статус
+							past = actual;
+							// Выводим статус извлечения
+							status(actual);
+						}
+					}
+				}
+			// Если это второй этап интерполяции
+			} else {
+				// Переходим по всему списку n-грамм
+				for(auto & item : * lm2){
+					// Ещем нашу n-грамму в другой языковой модели
+					auto it = lm1->find(item.first);
+					// Если идентификатор найден
+					if(it != lm1->end()){
+						// Если еще есть данные, углубляемся
+						if(!item.second.empty()) runFn(&it->second, &item.second, size + 1, mode);
+					// Если идентификатор не найден
+					} else {
+						// Добавляем слово в словарь
+						auto ret = lm1->emplace(item.first, data_t());
+						// Запоминаем родительский объект
+						ret.first->second.father = lm1;
+						// Запоминаем идентификатор слова
+						ret.first->second.idw = item.first;
+						// Добавляем в список регистр слова
+						ret.first->second.uppers = item.second.uppers;
+						// Устанавливаем вес n-граммы
+						ret.first->second.weight = (isnormal(item.second.weight) ? probFn(&ret.first->second) : item.second.weight);
+						// Если отладка включена
+						if(debug){
+							// Выводим статистику в сообщении
+							this->alphabet->log(
+								"NEW %s WEIGHT %4.8f",
+								alphabet_t::log_t::info,
+								this->logfile,
+								this->context(&ret.first->second).c_str(),
+								ret.first->second.weight
+							);
+						}
+						// Если еще есть данные, углубляемся
+						if(!item.second.empty()) runFn(&ret.first->second, &item.second, size + 1, mode);
+					}
+					// Если функция вывода статуса передана
+					if((status != nullptr) && (size == 0)){
+						// Считаем количество обработанных данных
+						index++;
+						// Выполняем расчёт текущего статуса
+						actual = u_short(index / double(count) * 100.0);
+						// Если статус обновился
+						if(actual != past){
+							// Запоминаем текущий статус
+							past = actual;
+							// Выводим статус извлечения
+							status(actual);
+						}
+					}
+				}
+			}
+		};
+		// Сумма всех весов моделей
+		double priorSum = 0.0;
+		// Выполняем расчёт количества итераций
+		for(auto & lm : lms) count += (this->data.size() + lm->data.size());
+		// Проверяем все веса моделей для интерполяции
+		for(auto & lambda : lambdas){
+			// Если вес модели не верный, пересчитываем его
+			if((lambda < 0.0) || (lambda > 1.0)){
+				// Выводим сообщение об ошибке
+				if(debug) this->alphabet->log("mixture prior out of range: %4.8f", alphabet_t::log_t::warning, this->logfile, lambda);
+				// Выполняем пересчёт веса
+				(* const_cast <double *> (&lambda)) = (lambda < 0.0 ? 0.0 : 1.0);
+			}
+			// Увеличиваем сумму всех весов
+			priorSum += lambda;
+		}
+		// Выполняем сглаживание всех весов языковых моделей
+		for(auto & lambda : lambdas) (* const_cast <double *> (&lambda)) /= priorSum;
+		// Переходим по всем языковым моделям
+		for(auto & lm : lms){
+			// Запускаем первый этап интерполяции
+			runFn(&this->data, &lm->data, 0, true);
+			// Запускаем второй этап интерполяции
+			runFn(&this->data, &lm->data, 0, false);
+		}
+		// Выполняем перерасчёт обратных частот
+		this->repair();
+	}
 }
 /**
  * Arpa Конструктор

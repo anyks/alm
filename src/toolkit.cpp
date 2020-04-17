@@ -1716,6 +1716,8 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 							this->arpa->setLogfile(this->logfile);
 							// Активируем флаг отладки если необходимо
 							if(this->isOption(options_t::debug)) this->arpa->setOption(arpa_t::options_t::debug);
+							// Активируем сброс веса токена неизвестного слова
+							if(this->isOption(options_t::resetUnk)) this->arpa->setOption(arpa_t::options_t::resetUnk);
 							// Активируем перевод слов в arpa к нижнему регистру
 							if(this->isOption(options_t::lowerCase)) this->arpa->setOption(arpa_t::options_t::lowerCase);
 						}
@@ -1733,6 +1735,8 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 						ret.first->second.second->setLogfile(this->logfile);
 						// Активируем флаг отладки если необходимо
 						if(this->isOption(options_t::debug)) ret.first->second.second->setOption(arpa_t::options_t::debug);
+						// Активируем сброс веса токена неизвестного слова
+						if(this->isOption(options_t::resetUnk)) ret.first->second.second->setOption(arpa_t::options_t::resetUnk);
 						// Активируем перевод слов в arpa к нижнему регистру
 						if(this->isOption(options_t::lowerCase)) ret.first->second.second->setOption(arpa_t::options_t::lowerCase);
 					}
@@ -1749,8 +1753,6 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 		}
 		// Если список языковых моделей получен
 		if(!arpas.empty() && (maxSize > 0)){
-			// Обнуляем тип считываемых данных
-			type = 0;
 			// Обнуляем значение индекса
 			index = 0;
 			// Получаем значение лямбды
@@ -1761,6 +1763,8 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 			double sumLambdas = lambda;
 			// Переходим по всем файлам arpa
 			for(auto & item : arpas){
+				// Обнуляем тип считываемых данных
+				type = 0;
 				// Выполняем считывание всех строк текста
 				fsys_t::rfile(item.second.first, [&](const string & text, const uintmax_t fileSize) noexcept {
 					// Если текст получен, загружаем в языковую модель
@@ -1773,21 +1777,268 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 					// Если нужно производить интерполяцию в прямом направлении
 					if(!backward){
 						// Выполняем объединение языковых моделей
-						this->arpa->mixForward(item.second.second, (1.0 - ((lambda == 0.0) ? 0.0 : lambda / sumLambdas)), [&item, &status](const u_short value){
+						this->arpa->mixForward(item.second.second, (1.0 - ((lambda == 0.0) ? 0.0 : lambda / sumLambdas)), [&item, &status](const u_short actual){
 							// Выводим результат объединения
-							status(item.second.first, value);
+							if(actual < 100) status(item.second.first, actual);
 						});
 					// Если нужно произвести интерполяцию в обратном направлении
 					} else {
 						// Выполняем объединение языковых моделей
-						this->arpa->mixBackward(item.second.second, (1.0 - ((lambda == 0.0) ? 0.0 : lambda / sumLambdas)), [&item, &status](const u_short value){
+						this->arpa->mixBackward(item.second.second, (1.0 - ((lambda == 0.0) ? 0.0 : lambda / sumLambdas)), [&item, &status](const u_short actual){
 							// Выводим результат объединения
-							status(item.second.first, value);
+							if(actual < 100) status(item.second.first, actual);
 						});
 					}
 				}
 				// Увеличиваем индекс обработанных данных
 				index++;
+			}
+			// Обновляем количество уникальных слов
+			this->info.unq = this->vocab.size();
+			// Очищаем выделенную ранее память
+			for(size_t i = 1; i < arpas.size(); i++) delete arpas.at(i).second;
+		}
+	// Выводим сообщение об ошибке
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is not exist");
+}
+/**
+ * mix Метод интерполяции нескольких arpa алгоритмами (Баеса и Логарифмическо-линейным)
+ * @param filenames список файлов arpa для объединения
+ * @param lambdas   список весов первой модели при интерполяции
+ * @param length    байесовская интерполяция с учетом контекста длины length
+ * @param scale     логарифмическая шкала вероятности для алгоритма Баеса
+ * @param status    функция вывода статуса чтения
+ */
+void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double> & lambdas, const size_t length, const double scale, function <void (const string &, const u_short)> status) noexcept {
+	// Если адреса файлов и лямбды переданы
+	if(!filenames.empty() && !lambdas.empty() && (filenames.size() == lambdas.size())){
+		// Тип извлекаемых данных
+		u_short type = 0;
+		// Общий размер данных и количество обработанных данных
+		size_t maxSize = 0, index = 0;
+		// Список языковых моделей
+		map <u_short, pair <string, arpa_t *>> arpas;
+		/**
+		 * getWordFn Функция получения слова по его идентификатору
+		 * @param idw идентификатор слова
+		 * @return    искомое слово
+		 */
+		auto getWordFn = [this](const size_t idw) noexcept {
+			// Выводим результат
+			return this->word(idw);
+		};
+		/**
+		 * loadFn Функция загрузки текстовых данных языковой модели
+		 * @param arpa объект arpa для добавления
+		 * @param text текст для парсинга данных arpa
+		 */
+		auto loadFn = [&type, this](arpa_t * arpa, const string & text) noexcept {
+			// Если слово получено
+			if(!text.empty() && (arpa != nullptr)){
+				// Последовательность для добавления
+				vector <pair_t> seq;
+				// Список полученных слов последовательности
+				vector <wstring> words;
+				// Позиции в текстовых данных
+				size_t pos = 0, loc = 0;
+				// Идентификатор неизвестного слова
+				const size_t uid = (size_t) token_t::unk;
+				// Определяем тип считываемых данных
+				switch(type){
+					// Если получено обозначение заголовка
+					case 0: if(text.find("\\data\\") != string::npos) type++; break;
+					// Если мы дошли до считывания данных слов
+					case 1: if(text.rfind("-grams:") != string::npos) type++; break;
+					// Если это тип считывания данных n-грамм
+					case 2: {
+						// Если мы дошли до конца, выходим
+						if(text.find("\\end\\") != string::npos) break;
+						// Иначе считываем данные n-граммы
+						else if((pos = text.find("\t")) != string::npos){
+							// Обнуляем локальную позицию
+							loc = 0;
+							// Данные n-граммы и обратной частоты документа
+							string ngram = "", backoff = "0.0";
+							// Считываем частоту n-граммы
+							const string & weight = this->alphabet->trim(text.substr(loc, pos));
+							// Запоминаем текущую позицию
+							loc = pos;
+							// Ищем значение n-граммы
+							if((pos = text.find("\t", pos + 1)) != string::npos){
+								// Извлекаем данные n-граммы
+								ngram = this->alphabet->trim(text.substr(loc + 1, pos - (loc + 1)));
+								// Излвлекаем обратную частоту документа
+								backoff = this->alphabet->trim(text.substr(pos + 1, text.length() - (pos + 1)));
+							// Извлекаем данные n-граммы
+							} else ngram = this->alphabet->trim(text.substr(loc + 1, text.length() - (loc + 1)));
+							// Если данные получены
+							if(!ngram.empty() && !weight.empty()){
+								// Выполняем сплит n-грамм
+								this->alphabet->split(ngram, " ", words);
+								// Если список слов получен
+								if(!words.empty()){
+									// Идентификатор слова
+									size_t idw = 0;
+									// Полученное слово
+									word_t word = L"";
+									// Если это биграмма
+									if(words.size() < 3){
+										// Получаем слово
+										word = words.front();
+										// Получаем идентификатор слова
+										idw = this->getIdw(word, !this->isOption(options_t::confidence));
+										// Проверяем отсутствует ли слово в списке запрещённых слов
+										if(this->badwords.count(idw) < 1){
+											// Если это юниграмма и её еще нет в словаре
+											if((idw != (size_t) token_t::start) &&
+											((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal(), idw);
+										}
+									}
+									// Переходим по всему списку слов
+									for(auto & item : words){
+										// Получаем слово
+										word = move(item);
+										// Получаем идентификатор слова
+										idw = this->getIdw(word, !this->isOption(options_t::confidence));
+										// Проверяем отсутствует ли слово в списке запрещённых слов
+										if(this->badwords.count(idw) < 1){
+											// Если это неизвестное слово
+											if(uid == idw){
+												// Если неизвестное слово не установлено
+												if(this->unknown == 0) seq.emplace_back(idw, 0);
+												// Если неизвестное слово установлено
+												else if(this->unknown > 0) seq.emplace_back(this->unknown, this->vocab.at(this->unknown).getUppers());
+											// Добавляем слово в список последовательности
+											} else seq.emplace_back(idw, ((words.size() > 1) && (this->utokens.count(idw) > 0) ? 0 : word.getUppers()));
+										// Если слово найдено в всписке запрещённых
+										} else {
+											// Очищаем последовательность
+											seq.clear();
+											// Выходим из цикла
+											break;
+										}
+									}
+									// Если последовательность получена
+									if(!seq.empty() && !weight.empty()){
+										// Получаем размер n-граммы
+										const size_t size = seq.size();
+										// Устанавливаем новый размер n-грамм для arpa
+										arpa->setSize(size);
+										// Если количество собранных n-грамм выше установленных, меняем
+										if(size > size_t(this->size)) this->size = size;
+										// Добавляем последовательность в словарь
+										arpa->set(seq, stod(weight), stod(backoff));
+									}
+								}
+							}
+						}
+					} break;
+				}
+			}
+		};
+		// Экранируем возможность ошибки памяти
+		try {
+			// Переходим по всем файлам arpa
+			for(auto & filename : filenames){
+				// Если файл существует
+				if(fsys_t::isfile(filename)){
+					// Получаем размер файла
+					maxSize += fsys_t::fsize(filename);
+					// Если список языковых моделей пуст, добавляем текущую языковую модель
+					if(arpas.empty()){
+						// Если языковая модель не создана
+						if(this->arpa == nullptr){
+							// Создаем объект языковой модели
+							this->arpa = new arpa_t(this->alphabet, getWordFn);
+							// Устанавливаем размер n-граммы
+							this->arpa->setSize(this->size);
+							// Устанавливаем файл логирования
+							this->arpa->setLogfile(this->logfile);
+							// Активируем флаг отладки если необходимо
+							if(this->isOption(options_t::debug)) this->arpa->setOption(arpa_t::options_t::debug);
+							// Активируем сброс веса токена неизвестного слова
+							if(this->isOption(options_t::resetUnk)) this->arpa->setOption(arpa_t::options_t::resetUnk);
+							// Активируем перевод слов в arpa к нижнему регистру
+							if(this->isOption(options_t::lowerCase)) this->arpa->setOption(arpa_t::options_t::lowerCase);
+						}
+						// Добавляем основную языковую модель в список
+						arpas.emplace(index, make_pair(filename, this->arpa));
+					// Иначе создаём языковую модель динамически
+					} else {
+						// Создаем объект языковой модели
+						arpa_t * arpa = new arpa_t(this->alphabet, getWordFn);
+						// Добавляем в список новую языковую модель
+						auto ret = arpas.emplace(index, make_pair(filename, arpa));
+						// Устанавливаем размер n-граммы
+						ret.first->second.second->setSize(this->size);
+						// Устанавливаем файл логирования
+						ret.first->second.second->setLogfile(this->logfile);
+						// Активируем флаг отладки если необходимо
+						if(this->isOption(options_t::debug)) ret.first->second.second->setOption(arpa_t::options_t::debug);
+						// Активируем сброс веса токена неизвестного слова
+						if(this->isOption(options_t::resetUnk)) ret.first->second.second->setOption(arpa_t::options_t::resetUnk);
+						// Активируем перевод слов в arpa к нижнему регистру
+						if(this->isOption(options_t::lowerCase)) ret.first->second.second->setOption(arpa_t::options_t::lowerCase);
+					}
+					// Увеличиваем индекс обработанных данных
+					index++;
+				}
+			}
+		// Если происходит ошибка то игнорируем её
+		} catch(const bad_alloc &) {
+			// Выводим сообщение об ошибке, если режим отладки включён
+			if(this->isOption(options_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "bad alloc for mix language models");
+			// Выходим из приложения
+			exit(EXIT_FAILURE);
+		}
+		// Если список языковых моделей получен
+		if(!arpas.empty() && (maxSize > 0)){
+			// Обнуляем значение индекса
+			index = 0;
+			// Список языковых моделей для интерполяции
+			vector <const arpa_t *> lms;
+			// Текущий и предыдущий статус
+			u_short actual = 0, past = 100;
+			// Переходим по всем файлам arpa
+			for(auto & item : arpas){
+				// Обнуляем тип считываемых данных
+				type = 0;
+				// Выполняем считывание всех строк текста
+				fsys_t::rfile(item.second.first, [&](const string & text, const uintmax_t fileSize) noexcept {
+					// Если текст получен, загружаем в языковую модель
+					if(!text.empty()) loadFn(item.second.second, text);
+				});
+				// Добавляем языковую модель в список для интерполяции
+				if(index > 0) lms.push_back(item.second.second);
+				// Увеличиваем индекс обработанных данных
+				index++;
+				// Если функция вывода статуса передана
+				if(status != nullptr){
+					// Выполняем расчёт текущего статуса
+					actual = u_short(index / double(arpas.size()) * 100.0);
+					// Если статус обновился
+					if(actual != past){
+						// Запоминаем текущий статус
+						past = actual;
+						// Выводим статус извлечения
+						if(actual < 100) status(item.second.first, actual);
+					}
+				}
+			}
+			// Если нужно выполнить интерполяцию методом Баеса
+			if(length > 0){
+				// Выполняем интерполяцию алгоритмом Баеса
+				this->arpa->mixBayes(lms, lambdas, length, scale, [&status](const u_short value){
+					// Выводим результат объединения
+					status("", value);
+				});
+			// Если нужно выполнить интерполяцию методом логарифмическо-линейным
+			} else {
+				// Выполняем интерполяцию Логарифмическо-линейным алгоритмом
+				this->arpa->mixLoglinear(lms, lambdas, [&status](const u_short value){
+					// Выводим результат объединения
+					status("", value);
+				});
 			}
 			// Обновляем количество уникальных слов
 			this->info.unq = this->vocab.size();

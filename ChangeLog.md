@@ -1,8 +1,13 @@
-# Change Log
+# [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
-## 2.0.8 Bug fixes
+## [2.0.9](https://github.com/anyks/alm/archive/v2.0.9.tar.gz) Bug fixes and new params
+- type of mixing language models
+- context length for Bayes mixture LM
+- log likelihood scale for bayes mixing
 
-## 2.0.7 Bug fixes and new method
+## [2.0.8](https://github.com/anyks/alm/archive/v2.0.8.tar.gz) Bug fixes
+
+## [2.0.7](https://github.com/anyks/alm/archive/v2.0.7.tar.gz) Bug fixes and new method
 ### Method
 - **mix** - mixing language models method
 ### Params
@@ -10,11 +15,11 @@
 - weight lambda first model for mixing
 - flag to mixing language models in the backward direction
 
-## 2.0.6 Bug fixes
+## [2.0.6](https://github.com/anyks/alm/archive/v2.0.6.tar.gz) Bug fixes
 
-## 2.0.5 Bug fixes
+## [2.0.5](https://github.com/anyks/alm/archive/v2.0.5.tar.gz) Bug fixes
 
-## 2.0.4 Bug fixes and new methods
+## [2.0.4](https://github.com/anyks/alm/archive/v2.0.4.tar.gz) Bug fixes and new methods
 ### Methods
 - **find** - ngrams search method in text
 - **sentences** - sentences generation method
@@ -23,11 +28,11 @@
 - file address *.txt for export oov words
 - sentences count for generation
 
-## 2.0.3 Bug fixes
+## [2.0.3](https://github.com/anyks/alm/archive/v2.0.3.tar.gz) Bug fixes
 
-## 2.0.2 Bug fixes
+## [2.0.2](https://github.com/anyks/alm/archive/v2.0.2.tar.gz) Bug fixes
 
-## 2.0.1 Optimization and bug fixes
+## [2.0.1](https://github.com/anyks/alm/archive/v2.0.1.tar.gz) Optimization and bug fixes
 
 ## 2.0.0 New methods and bug fixes
 ### Methods

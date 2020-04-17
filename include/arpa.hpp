@@ -524,33 +524,19 @@ namespace anyks {
 		public:
 			/**
 			 * sweep Метод удаления низкочастотных n-грамм arpa
-			 * @param status статус расёта
+			 * @param status статус расчёта
 			 */
 			void sweep(function <void (const u_short)> status = nullptr) const noexcept;
 			/**
-			 * trian Метод расёта частот n-грамм
-			 * @param status статус расёта
+			 * trian Метод расчёта частот n-грамм
+			 * @param status статус расчёта
 			 */
 			void train(function <void (const u_short)> status = nullptr) const noexcept;
 			/**
-			 * repair Метод ремонта уже расчитанной ранее arpa
-			 * @param status статус расёта
+			 * repair Метод ремонта уже расчитанной ранее языковой модели
+			 * @param status статус расчёта
 			 */
 			void repair(function <void (const u_short)> status = nullptr) const noexcept;
-			/**
-			 * mixForward Метод интерполяции нескольких моделей в прямом направлении
-			 * @param arpa   данные языковой модели для объединения
-			 * @param lambda вес первой модели при интерполяции
-			 * @param status статус расёта
-			 */
-			void mixForward(const Arpa * arpa, const double lambda = 0.5, function <void (const u_short)> status = nullptr) noexcept;
-			/**
-			 * mixBackward Метод интерполяции нескольких моделей в обратном направлении
-			 * @param arpa   данные языковой модели для объединения
-			 * @param lambda вес первой модели при интерполяции
-			 * @param status статус расёта
-			 */
-			void mixBackward(const Arpa * arpa, const double lambda = 0.5, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * prune Метод прунинга языковой модели
 			 * @param threshold порог частоты прунинга
@@ -558,6 +544,37 @@ namespace anyks {
 			 * @param status    функция вывода статуса обучения
 			 */
 			void prune(const double threshold = 0.003, const u_short mingram = 0, function <void (const u_short)> status = nullptr) const noexcept;
+		public:
+			/**
+			 * mixForward Метод интерполяции нескольких моделей в прямом направлении
+			 * @param lm     данные языковой модели для объединения
+			 * @param lambda вес первой модели при интерполяции
+			 * @param status статус расчёта
+			 */
+			void mixForward(const Arpa * lm, const double lambda = 0.5, function <void (const u_short)> status = nullptr) noexcept;
+			/**
+			 * mixBackward Метод интерполяции нескольких моделей в обратном направлении
+			 * @param lm     данные языковой модели для объединения
+			 * @param lambda вес первой модели при интерполяции
+			 * @param status статус расчёта
+			 */
+			void mixBackward(const Arpa * lm, const double lambda = 0.5, function <void (const u_short)> status = nullptr) noexcept;
+			/**
+			 * mixLoglinear Метод интерполяции нескольких моделей алгоритмом Баеса
+			 * @param lms     список данных языковых моделей для объединения
+			 * @param lambdas список весов моделей при интерполяции
+			 * @param status  статус расчёта
+			 */
+			void mixLoglinear(const vector <const Arpa *> & lms, const vector <double> & lambdas, function <void (const u_short)> status = nullptr) noexcept;
+			/**
+			 * mixBayes Метод интерполяции нескольких моделей алгоритмом Баеса
+			 * @param lms     список данных языковых моделей для объединения
+			 * @param lambdas список весов моделей при интерполяции
+			 * @param length  длина контекста для расчёта
+			 * @param scale   логарифмическая шкала вероятности
+			 * @param status  статус расчёта
+			 */
+			void mixBayes(const vector <const Arpa *> & lms, const vector <double> & lambdas, const size_t length, const double scale = 0.0, function <void (const u_short)> status = nullptr) noexcept;
 		public:
 			/**
 			 * Arpa Конструктор

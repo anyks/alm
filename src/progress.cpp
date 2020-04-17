@@ -160,7 +160,7 @@ void anyks::Progress::update(const u_short status) noexcept {
  */
 void anyks::Progress::description(const string & text) noexcept {
 	// Если текст передан, устанавливаем описание работы
-	if(!text.empty()) this->desc = text;
+	this->desc = text;
 }
 /**
  * title Метод установки заголовка

@@ -480,6 +480,15 @@ namespace anyks {
 			 * @param status    функция вывода статуса чтения
 			 */
 			void mix(const vector <string> & filenames, const vector <double> & lambdas, const bool backward = false, function <void (const string &, const u_short)> status = nullptr) noexcept;
+			/**
+			 * mix Метод интерполяции нескольких arpa алгоритмами (Баеса и Логарифмическо-линейным)
+			 * @param filenames список файлов arpa для объединения
+			 * @param lambdas   список весов первой модели при интерполяции
+			 * @param length    байесовская интерполяция с учетом контекста длины length
+			 * @param scale     логарифмическая шкала вероятности для алгоритма Баеса
+			 * @param status    функция вывода статуса чтения
+			 */
+			void mix(const vector <string> & filenames, const vector <double> & lambdas, const size_t length = 0, const double scale = 0.0, function <void (const string &, const u_short)> status = nullptr) noexcept;
 		public:
 			/**
 			 * loadVocab Метод загрузки бинарных данных в словарь

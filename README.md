@@ -597,22 +597,22 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 
 **Smoothing Algorithm: Absolute discounting, build from a group of files**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing cdiscount -discount 0.3 -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing cdiscount -discount 0.3 -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt
 ```
 
 **Smoothing Algorithm: Additive, build from a group of files**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing addsmooth -delta 0.3 -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing addsmooth -delta 0.3 -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt
 ```
 
 **Smoothing Algorithm: Kneser-Nay, build from a group of files**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing kneserney -kneserney-modified -kneserney-prepares -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing kneserney -kneserney-modified -kneserney-prepares -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt
 ```
 
 **Smoothing Algorithm: Good-Turing, build from a group of files from binary container**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -w-bin ./lm.alm -w-bin-meta ./meta.json -w-bin-arpa -w-bin-utokens -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -w-bin ./lm.alm -w-bin-meta ./meta.json -w-bin-arpa -w-bin-utokens -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
 ```
 
 **Smoothing Algorithm: Witten-Bell, build from binary container**
@@ -682,7 +682,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ### Training with preprocessing of received words
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -word-script ./wordTest.py
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -word-script ./wordTest.py
 ```
 
 > Sometimes it is necessary to change a word before it is added to arpa - this can be done using the script [**wordTest.py**](https://github.com/anyks/alm#the-python-script-format-to-preprocess-the-received-words) the word and its context will be passed into script.
@@ -690,7 +690,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ### Training using your own features
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -utokens "usa|russia" -utoken-script ./utokenTest.py
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -utokens "usa|russia" -utoken-script ./utokenTest.py
 ```
 
 > The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](https://github.com/anyks/alm#the-python-script-format-to-define-the-word-features) marks as feature, will be added to arpa with feature name.
@@ -730,7 +730,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ### Training using whitelist
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -goodwords ./goodwords.txt
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -goodwords ./goodwords.txt
 ```
 
 > If you specify a whitelist during training, all words specified in the white list will be forcibly added to arpa.
@@ -738,7 +738,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ### Training using blacklist
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -badwords ./badwords.txt
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -badwords ./badwords.txt
 ```
 
 > If you specify a black list during training, all the words indicated in the black list will be equated with the token **〈unk〉**.
@@ -746,7 +746,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ### Training with an unknown word
 
 ```bash
-./bin/alm.exe -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -path ./corpus -ext txt -unknown-word goga
+./bin/alm.exe -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -unknown-word goga
 ```
 
 > In this example the token **〈unk〉** in arpa will be replaced by the word specified in the parameter [-unknown-word | --unknown-word=〈value〉], in our case it's word **goga**.
@@ -857,8 +857,14 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 
 ### Mixing language models
 
+**Static mixing**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method mix -debug 1 -r-arpa ./lm1.arpa -mix-arpa1 ./lm2.arpa -mix-lambda1 0.5 -w-arpa ./lm.arpa -confidence -mix-backward
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method mix -mix static -debug 1 -r-arpa ./lm1.arpa -mix-arpa1 ./lm2.arpa -mix-lambda1 0.5 -w-arpa ./lm.arpa -confidence -mix-backward
+```
+
+**Bayes mixing**
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method mix -mix bayes -debug 1 -r-arpa ./lm1.arpa -mix-arpa1 ./lm2.arpa -mix-lambda1 0.5 -w-arpa ./lm.arpa -confidence -mix-bayes-scale 0.5 -mix-bayes-length 3
 ```
 
 * * *

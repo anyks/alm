@@ -68,112 +68,115 @@ void help() noexcept {
 	// Формируем строку справки
 	const string msg = "\r\n\x1B[32m\x1B[1musage:\x1B[0m alm [-V | --version] [-h | --help] "
 	"[-alphabet <value> | --alphabet=<value>] [<args>]\r\n\r\n\r\n"
-	"\x1B[34m\x1B[1mmethods:\x1B[0m\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mppl:\x1B[0m perplexity calculation method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mtokens:\x1B[0m text tokenization method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mvprune:\x1B[0m vocabulary pruning method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mfind:\x1B[0m ngrams search method by text\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mmix:\x1B[0m mixing language models method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1maprune:\x1B[0m language model pruning method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mtrain:\x1B[0m language model training method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mfixcase:\x1B[0m words case correction method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mchecktext:\x1B[0m text validation method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1msentences:\x1B[0m sentences generation method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1msweep:\x1B[0m high backoff n-gram removal method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1minfo:\x1B[0m binary dictionary information method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mcounts:\x1B[0m method counts of ngrams in the text\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mrepair:\x1B[0m broken language model recovery method\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m \x1B[1mmodify:\x1B[0m method for modifying a language model\r\n"
+	"\x1B[34m\x1B[1m[METHODS]\x1B[0m\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mppl\x1B[0m]       perplexity calculation method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mmix\x1B[0m]       mixing language models method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mfind\x1B[0m]      ngrams search method by text\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1minfo\x1B[0m]      binary dictionary information method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mtrain\x1B[0m]     language model training method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1msweep\x1B[0m]     high backoff n-gram removal method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mtokens\x1B[0m]    text tokenization method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mvprune\x1B[0m]    vocabulary pruning method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1maprune\x1B[0m]    language model pruning method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mcounts\x1B[0m]    method counts of ngrams in the text\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mrepair\x1B[0m]    broken language model recovery method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mfixcase\x1B[0m]   words case correction method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mchecktext\x1B[0m] text validation method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1msentences\x1B[0m] sentences generation method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mmodify\x1B[0m]    method for modifying a language model\r\n"
 	"  \x1B[1m-\x1B[0m (emplace | remove | change | replace)\r\n\r\n\r\n"
-	"\x1B[34m\x1B[1mflags:\x1B[0m\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m case-insensitive flag:                                                        [-lower-case | --lower-case]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m unknown word permission flag:                                                 [-allow-unk | --allow-unk]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag to disable all tokens:                                                   [-tokens-all-disable | --tokens-all-disable]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag identifying all tokens as <unk>:                                         [-tokens-all-unknown | --tokens-all-unknown]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag to accurate check ngram:                                                 [-accurate | --accurate]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to consider words from the white list only:                     [-only-good | --only-good]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag allowing to use interpolation in estimating:                             [-interpolate | --interpolate]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag allowing accounting of all collected n-grams:                            [-all-grams | --all-grams]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag arpa file loading without pre-processing the words:                      [-confidence | --confidence]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag allowing the use of words consisting of mixed dictionaries:              [-mixed-dicts | --mixed-dicts]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag to reset the frequency of an unknown word:                               [-reset-unk | --reset-unk]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag to mixing language models in the backward direction:                     [-mix-backward | --mix-backward]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag to save intermediate data during training:                               [-train-intermed | --train-intermed]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag to performing data segmentation during training:                         [-train-segments | --train-segments]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag allowing need to change grams, after calculating:                        [-kneserney-prepares | --kneserney-prepares]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag allowing modification of the number of already changed minor n-grams:    [-kneserney-modified | --kneserney-modified]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of all data:                                 [-w-bin-all | --w-bin-all]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of users tokens:                             [-w-bin-utokens | --w-bin-utokens]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of domain zones:                             [-w-bin-domzones | --w-bin-domzones]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of toolkit options:                          [-w-bin-options | --w-bin-options]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of blacklisted words:                        [-w-bin-badwords | --w-bin-badwords]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of whitelisted words:                        [-w-bin-goodwords | --w-bin-goodwords]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of abbreviations words:                      [-w-bin-abbreviations | --w-bin-abbreviations]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of script python - word preprocessing:       [-w-bin-preword | --w-bin-preword]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m flag export in binary dictionary of only arpa data without n-gram statistics: [-w-bin-arpa | --w-bin-arpa]\r\n\r\n\r\n"
-	"\x1B[34m\x1B[1margs:\x1B[0m\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m alphabet (file or value):                           [-alphabet <value> | --alphabet=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m size n-grams:                                       [-size <value> | --size=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m log file address:                                   [-log <value> | --log=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m blacklisted file address:                           [-badwords <value> | --badwords=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m whitelisted file address:                           [-goodwords <value> | --goodwords=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m unknown word name:                                  [-unknown-word <value> | --unknown-word=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m script python3 - word preprocessing:                [-word-script <value> | --word-script=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m script python3 - custom attribute detector:         [-utoken-script <value> | --utoken-script=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m text file training corpus:                          [-corpus <value> | --corpus=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m extension files corpus:                             [-ext <value> | --ext=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m sentences count for generation:                     [-gen <value> | --gen=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with text corpus:                    [-path <value> | --path=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m text to be processed as a string:                   [-text <value> | --text=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m number of threads for data collection:              [-threads <value> | --threads=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt for texts export:                [-w-text <value> | --w-text=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt text for tokens export:          [-w-tokens-text <value> | --w-tokens-text=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.json text for tokens export:         [-w-tokens-json <value> | --w-tokens-json=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt text for tokens import:          [-r-tokens-text <value> | --r-tokens-text=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.json text for tokens import:         [-r-tokens-json <value> | --r-tokens-json=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with tokens files for read:          [-r-tokens-path <value> | --r-tokens-path=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m directory path with tokens files for write:         [-w-tokens-path <value> | --w-tokens-path=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m binary file address *.alm for export:               [-w-bin <value> | --w-bin=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.json meta for export:                [-w-bin-meta <value> | --w-bin-meta=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.map for export:                      [-w-map <value> | --w-map=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa for export:                     [-w-arpa <value> | --w-arpa=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.vocab for export:                    [-w-vocab <value> | --w-vocab=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams for export:                   [-w-ngram <value> | --w-ngram=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt for export oov words:            [-w-oovfile <value> | --w-oovfile=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt or dir path for texts import:    [-r-text <value> | --r-text=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.txt or dir path for words import:    [-r-words <value> | --r-words=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m binary file address *.alm for import:               [-r-bin <value> | --r-bin=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.json meta for import:                [-r-bin-meta <value> | --r-bin-meta=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.map or dir path for import:          [-r-map <value> | --r-map=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.vocab or dir path for import:        [-r-vocab <value> | --r-vocab=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.ngrams or dir path for import:       [-r-ngram <value> | --r-ngram=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa or dir path for import:         [-r-arpa <value> | --r-arpa=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address abbreviations for import:              [-r-abbrs <value> | --r-abbrs=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address *.arpa for mixing:                     [-mix-arpa[1...N] <value> | --mix-arpa[1...N]=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address domain zones for import:               [-r-domain-zones <value> | --r-domain-zones=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m file address for restore mixed words for import:    [-r-mix-restwords <value> | --r-mix-restwords=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m weight lambda first model for mixing:               [-mix-lambda[1...N] <value> | --mix-lambda[1...N]=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m pruning vocabulary wltf threshold:                  [-vprune-threshold <value> | --vprune-threshold=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m pruning language model frequency threshold:         [-aprune-threshold <value> | --aprune-threshold=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m the maximum size of n-grams of pruning:             [-aprune-max-gram <value> | --aprune-max-gram=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m list of custom attributes:                          [-utokens <value> | --utokens=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m modification flag for modify method:                [-modify <value> | --modify=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m delta size for smoothing by addsmooth algorithm:    [-delta <value> | --delta=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m discount size for smoothing by cdiscount algorithm: [-discount <value> | --discount=<value>]\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m ngram size for the counts method:                   [-ngrams <value> | --ngrams=<value>]\r\n"
-	"  \x1B[1m-\x1B[0m (bigram | trigram)\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m list of tokens to disable:                          [-tokens-disable <value1|value2|...> | --tokens-disable=<value1|value2|...>]\r\n"
-	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m list of tokens for identification as <unk>:         [-tokens-unknown <value1|value2|...> | --tokens-unknown=<value1|value2|...>]\r\n"
-	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m segment size for training data segmentation:        [-train-segment-size <value> | --train-segment-size=<value>]\r\n"
-	"  \x1B[1m-\x1B[0m (nb | nkb | nMb | nGb), example: --train-segment-size=4096Mb\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m debug mode:                                         [-debug <value> | --debug=<value>]\r\n"
-	"  \x1B[1m-\x1B[0m (0 - off | 1 - progress | 2 - console)\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m method application:                                 [-method <value> | --method=<value>]\r\n"
-	"  \x1B[1m-\x1B[0m (ppl | find | train | mix | repair | modify | sweep | vprune | aprune | tokens | counts | fixcase | checktext | sentences | info)\r\n\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m smoothing algorithm:                                [-smoothing <value> | --smoothing=<value>]\r\n"
-	"  \x1B[1m-\x1B[0m (goodturing | cdiscount | ndiscount | addsmooth | wittenbell | kneserney | mkneserney)\r\n\r\n";
+	"\x1B[34m\x1B[1m[FLAGS]\x1B[0m\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-accurate | --accurate]                       flag to accurate check ngram\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-allow-unk | --allow-unk]                     flag allowing to unknown word\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-only-good | --only-good]                     flag allowing to consider words from the white list only\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-all-grams | --all-grams]                     flag allowing accounting of all collected n-grams\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-reset-unk | --reset-unk]                     flag to reset the frequency of an unknown word\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-all | --w-bin-all]                     flag export in binary dictionary of all data\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-lower-case | --lower-case]                   flag allowing to case-insensitive\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-confidence | --confidence]                   flag arpa file loading without pre-processing the words\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-arpa | --w-bin-arpa]                   flag export in binary dictionary of only arpa data without n-gram statistics\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-interpolate | --interpolate]                 flag allowing to use interpolation in estimating\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-mixed-dicts | --mixed-dicts]                 flag allowing the use of words consisting of mixed dictionaries\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-mix-backward | --mix-backward]               flag to mixing language models in the backward direction\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-utokens | --w-bin-utokens]             flag export in binary dictionary of users tokens\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-options | --w-bin-options]             flag export in binary dictionary of toolkit options\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-preword | --w-bin-preword]             flag export in binary dictionary of script python - word preprocessing\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-train-intermed | --train-intermed]           flag to save intermediate data during training\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-train-segments | --train-segments]           flag to performing data segmentation during training\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-domzones | --w-bin-domzones]           flag export in binary dictionary of domain zones\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-badwords | --w-bin-badwords]           flag export in binary dictionary of blacklisted words\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-goodwords | --w-bin-goodwords]         flag export in binary dictionary of whitelisted words\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-tokens-all-disable | --tokens-all-disable]   flag to disable all tokens\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-tokens-all-unknown | --tokens-all-unknown]   flag identifying all tokens as <unk>\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-kneserney-prepares | --kneserney-prepares]   flag allowing need to change grams, after calculating\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-kneserney-modified | --kneserney-modified]   flag allowing modification of the number of already changed minor n-grams\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-abbreviations | --w-bin-abbreviations] flag export in binary dictionary of abbreviations words\r\n\r\n"
+	"\x1B[34m\x1B[1m[ARGS]\x1B[0m\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-log <value> | --log=<value>]                                               address of log file\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-size <value> | --size=<value>]                                             size n-grams of language model\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-alphabet <value> | --alphabet=<value>]                                     list letters alphabet (file or value)\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-badwords <value> | --badwords=<value>]                                     file address of blacklist words\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-goodwords <value> | --goodwords=<value>]                                   file address of whitelist words\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-unknown-word <value> | --unknown-word=<value>]                             name of token unknown word\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-word-script <value> | --word-script=<value>]                               address of script python3 - word preprocessing\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-utoken-script <value> | --utoken-script=<value>]                           address of script python3 - custom attribute detector\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-corpus <value> | --corpus=<value>]                                         address of text file training corpus\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-ext <value> | --ext=<value>]                                               extension of files in directory\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-gen <value> | --gen=<value>]                                               sentences count for generation text\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-text <value> | --text=<value>]                                             text to be processed as a string\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-threads <value> | --threads=<value>]                                       number of threads for data collection\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-text <value> | --w-text=<value>]                                         file address of *.txt for texts export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-bin <value> | --r-bin=<value>]                                           binary file address of *.alm for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin <value> | --w-bin=<value>]                                           binary file address of *.alm for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-map <value> | --w-map=<value>]                                           file address of *.map for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-arpa <value> | --w-arpa=<value>]                                         file address of *.arpa for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-vocab <value> | --w-vocab=<value>]                                       file address of *.vocab for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-ngram <value> | --w-ngram=<value>]                                       file address of *.ngrams for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-meta <value> | --w-bin-meta=<value>]                                 file address of *.json meta for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-oovfile <value> | --w-oovfile=<value>]                                   file address of *.txt for export oov words\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-text <value> | --r-text=<value>]                                         file address of *.txt or dir path for texts import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-words <value> | --r-words=<value>]                                       file address of *.txt or dir path for words import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-bin-meta <value> | --r-bin-meta=<value>]                                 file address of *.json meta for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-map <value> | --r-map=<value>]                                           file address of *.map or dir path for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-arpa <value> | --r-arpa=<value>]                                         file address of *.arpa or dir path for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-vocab <value> | --r-vocab=<value>]                                       file address of *.vocab or dir path for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-ngram <value> | --r-ngram=<value>]                                       file address of *.ngrams or dir path for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-abbrs <value> | --r-abbrs=<value>]                                       file address of abbreviations for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-text <value> | --w-tokens-text=<value>]                           file address of *.txt text for tokens export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-json <value> | --w-tokens-json=<value>]                           file address of *.json text for tokens export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-text <value> | --r-tokens-text=<value>]                           file address of *.txt text for tokens import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-json <value> | --r-tokens-json=<value>]                           file address of *.json text for tokens import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-mix-arpa[1...N] <value> | --mix-arpa[1...N]=<value>]                       file address of *.arpa for mixing\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-domain-zones <value> | --r-domain-zones=<value>]                         file address of domain zones for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-mix-restwords <value> | --r-mix-restwords=<value>]                       file address of restore mixed words for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-path <value> | --r-tokens-path=<value>]                           directory path with tokens files for read\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-path <value> | --w-tokens-path=<value>]                           directory path with tokens files for write\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-mix-bayes-scale <value> | --mix-bayes-scale=<value>]                       log likelihood scale for bayes mixing\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-mix-bayes-length <value> | --mix-bayes-length=<value>]                     context length for Bayes mixture LM\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-mix-lambda[1...N] <value> | --mix-lambda[1...N]=<value>]                   weight lambda first model for mixing\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-vprune-threshold <value> | --vprune-threshold=<value>]                     \x1B[1mwltf threshold\x1B[0m] of pruning vocabulary\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-aprune-threshold <value> | --aprune-threshold=<value>]                     frequency threshold of pruning language model\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-aprune-max-gram <value> | --aprune-max-gram=<value>]                       maximum size of n-grams pruning\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-utokens <value> | --utokens=<value>]                                       list of custom attributes\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-modify <value> | --modify=<value>]                                         modification flag for modify method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-delta <value> | --delta=<value>]                                           delta size for smoothing by addsmooth algorithm\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-discount <value> | --discount=<value>]                                     discount size for smoothing by cdiscount algorithm\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-ngrams <value> | --ngrams=<value>]                                         ngram size for the \x1B[1mcounts method\x1B[0m]\r\n"
+	"  \x1B[1m-\x1B[0m (bigram | trigram)\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-mix <value> | --mix=<value>]                                               type of mixing language models\r\n"
+	"  \x1B[1m-\x1B[0m (static | bayes | loglinear)\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-debug <value> | --debug=<value>]                                           set debug mode\r\n"
+	"  \x1B[1m-\x1B[0m (0 - off | 1 - progress | 2 - console)\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-tokens-disable <value1|value2|...> | --tokens-disable=<value1|value2|...>] list of tokens to disable\r\n"
+	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-tokens-unknown <value1|value2|...> | --tokens-unknown=<value1|value2|...>] list of tokens for identification as <unk>\r\n"
+	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-train-segment-size <value> | --train-segment-size=<value>]                 segment size for training data segmentation\r\n"
+	"  \x1B[1m-\x1B[0m (nb | nkb | nMb | nGb), example: --train-segment-size=4096Mb\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-smoothing <value> | --smoothing=<value>]                                   smoothing algorithm for \x1B[1mtrain method\x1B[0m]\r\n"
+	"  \x1B[1m-\x1B[0m (goodturing | cdiscount | ndiscount | addsmooth | wittenbell | kneserney | mkneserney)\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-method <value> | --method=<value>]                                         method application\r\n"
+	"  \x1B[1m-\x1B[0m (ppl | find | train | mix | repair | modify | sweep | vprune | aprune | tokens | counts | fixcase | checktext | sentences | info)\r\n\r\n";
 	// Выводим сообщение справки
 	printf("%s", msg.c_str());
 }
@@ -770,7 +773,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Выполняем првоерку текста
 						auto res = alm.check(value, env.is("accurate"));
 						// Выводим результат
-						alphabet.log("%s | %s\r\n", alphabet_t::log_t::null, nullptr, value, (res.first ? "YES" : "NO"));
+						alphabet.log("%s | %s\r\n", alphabet_t::log_t::null, nullptr, (res.first ? "YES" : "NO"), value);
 					// Если адрес текстового файла или каталог передан
 					} else if(((value = env.get("r-text")) != nullptr) && (fsys_t::isfile(value) || fsys_t::isdir(value)) && env.is("w-text")){
 						// Запоминаем файл для записи данных
@@ -1462,7 +1465,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Иначе продолжаем стандартное обучение
 				} else {
 					// Если путь получен
-					if(((value = env.get("path")) != nullptr) && fsys_t::isdir(value)){
+					if(((value = env.get("corpus")) != nullptr) && fsys_t::isdir(value)){
 						// Запоминаем путь к файлам
 						const string path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
@@ -1659,6 +1662,10 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			// Если передан метод интерполяции
 			} else if(env.is("method", "mix") && ((value = env.get("r-arpa")) != nullptr)) {
+				// Веса моделей для интерполяции
+				vector <double> lambdas;
+				// Адреса файлов языковых моделей
+				vector <string> filenames = {value};
 				// Если отладка включена, выводим индикатор загрузки
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар
@@ -1671,48 +1678,109 @@ int main(int argc, char * argv[]) noexcept {
 						case 2: pss.status(); break;
 					}
 				}
-				// Веса моделей для интерполяции
-				vector <double> lambdas;
-				// Адреса файлов языковых моделей
-				vector <string> filenames = {value};
-				// Загружаем 65000 языковых моделей
-				for(u_short i = 1; i < 65000; i++){
-					// Если языковая модель получена
-					value = env.get(string("mix-arpa") + to_string(i));
-					// Если адрес файла получен
-					if(value != nullptr){
-						// Получаем адрес файла arpa
-						filenames.push_back(realpath(value, nullptr));
+				// Если это методы интерполяции - Баес или Логарифмическо-линейный
+				if(env.is("mix", "bayes") || env.is("mix", "loglinear")){
+					// Загружаем 65000 языковых моделей
+					for(u_short i = 1; i < 65000; i++){
+						// Если языковая модель получена
+						value = env.get(string("mix-arpa") + to_string(i));
+						// Если адрес файла получен
+						if(value != nullptr)
+							// Получаем адрес файла arpa
+							filenames.push_back(realpath(value, nullptr));
+						// Иначе выходим из цикла
+						else break;
+					}
+					// Выполняем сбор весов для интерполяции
+					for(u_short i = 0; i < filenames.size(); i++){
 						// Получаем данные лямбды для интерполяции
-						value = env.get(string("mix-lambda") + to_string(i));
+						value = env.get(string("mix-lambda") + to_string(i + 1));
 						// Если лямбда передана
 						if(value != nullptr)
 							// Добавляем вес языковой модели для интерполяции
 							lambdas.push_back(stod(value));
 						// Если вес не передан, устанавливаем по умолчанию
 						else lambdas.push_back(0.5);
-					// Иначе выходим из цикла
-					} else break;
-				}
-				// Если адреса файлов языковых моделей получены
-				if(filenames.size() > 1){
-					// Выполняем интерполяцию
-					toolkit.mix(filenames, lambdas, env.is("mix-backward"), [&pss, debug](const string & filename, const u_short status){
-						// Устанавливаем название файла
-						pss.description(filename);
-						// Отображаем ход процесса
-						switch(debug){
-							case 1: pss.update(status); break;
-							case 2: pss.status(status); break;
-						}
-					});
-					// Отображаем ход процесса
-					switch(debug){
-						case 1: pss.update(100); break;
-						case 2: pss.status(100); break;
 					}
-				// Если файлы arpa указаны не верно
-				} else print("the arpa files transferred incorrectly specified", env.get("log"));
+				}
+				// Если это алгоритм интерполяции Баес
+				if(env.is("mix", "bayes")){
+					// Если адреса файлов языковых моделей получены
+					if(filenames.size() > 1){
+						// Логарифмическая шкала вероятности для алгоритма Баеса
+						const double scale = ((value = env.get("mix-bayes-scale")) != nullptr ? stod(value) : 0.0);
+						// Байесовская интерполяция с учетом контекста длины
+						const size_t length = ((value = env.get("mix-bayes-length")) != nullptr ? stoi(value) : 0);
+						// Выполняем интерполяцию
+						toolkit.mix(filenames, lambdas, length, scale, [&pss, debug](const string & filename, const u_short status){
+							// Устанавливаем название файла
+							pss.description(filename);
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(status); break;
+								case 2: pss.status(status); break;
+							}
+						});
+					// Если файлы arpa указаны не верно
+					} else print("the arpa files transferred incorrectly specified", env.get("log"));
+				// Если это алгоритм интерполяции Логарифмическо-линейная
+				} else if(env.is("mix", "loglinear")) {
+					// Если адреса файлов языковых моделей получены
+					if(filenames.size() > 1){
+						// Выполняем интерполяцию
+						toolkit.mix(filenames, lambdas, 0, 0.0, [&pss, debug](const string & filename, const u_short status){
+							// Устанавливаем название файла
+							pss.description(filename);
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(status); break;
+								case 2: pss.status(status); break;
+							}
+						});
+					// Если файлы arpa указаны не верно
+					} else print("the arpa files transferred incorrectly specified", env.get("log"));
+				// Если это интерполяция статическая
+				} else if(env.is("mix", "static")) {
+					// Загружаем 65000 языковых моделей
+					for(u_short i = 1; i < 65000; i++){
+						// Если языковая модель получена
+						value = env.get(string("mix-arpa") + to_string(i));
+						// Если адрес файла получен
+						if(value != nullptr){
+							// Получаем адрес файла arpa
+							filenames.push_back(realpath(value, nullptr));
+							// Получаем данные лямбды для интерполяции
+							value = env.get(string("mix-lambda") + to_string(i));
+							// Если лямбда передана
+							if(value != nullptr)
+								// Добавляем вес языковой модели для интерполяции
+								lambdas.push_back(stod(value));
+							// Если вес не передан, устанавливаем по умолчанию
+							else lambdas.push_back(0.5);
+						// Иначе выходим из цикла
+						} else break;
+					}
+					// Если адреса файлов языковых моделей получены
+					if(filenames.size() > 1){
+						// Выполняем интерполяцию
+						toolkit.mix(filenames, lambdas, env.is("mix-backward"), [&pss, debug](const string & filename, const u_short status){
+							// Устанавливаем название файла
+							pss.description(filename);
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(status); break;
+								case 2: pss.status(status); break;
+							}
+						});
+					// Если файлы arpa указаны не верно
+					} else print("the arpa files transferred incorrectly specified", env.get("log"));
+				// Выводим сообщение об ошибке
+				} else print("the mixing method is not defined", env.get("log"));
+				// Отображаем ход процесса
+				switch(debug){
+					case 1: pss.update(100); break;
+					case 2: pss.status(100); break;
+				}
 			// Проверяем правильно ли указаны адреса файлов
 			} else if((env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) || env.is("r-ngram") || env.is("r-arpa") || !binDictFile.empty()) {
 				// Если требуется загрузить файл n-грамм

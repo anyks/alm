@@ -3307,9 +3307,9 @@ void anyks::Alm::checkByFiles(const string & path, const string & filename, cons
 				// Если слово найдено считаем количество предложений
 				if(res.first) exists++;
 				// Выполняем запись в файл
-				this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::null, filename.c_str(), count, text.c_str(), (res.first ? "YES" : "NO"));
+				this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::null, filename.c_str(), count, (res.first ? "YES" : "NO"), text.c_str());
 				// Выводим результат
-				if(this->isOption(options_t::debug)) this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::info, nullptr, count, text.c_str(), (res.first ? "YES" : "NO"));
+				if(this->isOption(options_t::debug)) this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::info, nullptr, count, (res.first ? "YES" : "NO"), text.c_str());
 				// Выполняем разблокировку потока
 				this->locker.unlock();
 			}
