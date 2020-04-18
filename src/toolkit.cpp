@@ -2269,7 +2269,7 @@ void anyks::Toolkit::writeVocab(const string & filename, function <void (const u
 			// Переходим по всему списку слов
 			for(auto & item : this->vocab){
 				// Получаем метаданные слова
-				auto meta = item.second.calc(this->info.ad, this->info.cw);
+				const auto & meta = item.second.calc(this->info.ad, this->info.cw);
 				// Получаем слово для экспорта
 				const string & word = (this->isOption(options_t::lowerCase) ? item.second.str() : item.second.real());
 				// Получаем данные слова
@@ -2309,33 +2309,54 @@ void anyks::Toolkit::writeVocab(const string & filename, function <void (const u
  */
 void anyks::Toolkit::writeWords(const string & filename, function <void (const u_short)> status) const noexcept {
 	// Если адрес файла передан
-	if(!filename.empty()){
+	if(!filename.empty() && !this->vocab.empty()){
 		// Открываем файл на запись
 		ofstream file(filename, ios::binary);
 		// Если файл открыт
 		if(file.is_open()){
-			// Данные данных для записи
-			string data = "";
 			// Количество извлечённых слов
 			size_t index = 0;
 			// Текущий и предыдущий статус
 			u_short actual = 0, past = 100;
-			// Получаем штамп файла
-			const string & stamp = this->arpa->stamp();
-			// Выполняем запись штампа в файл
-			file.write(stamp.data(), stamp.size());
+			// Список отсортированных слов
+			multimap <double, string> words;
 			// Переходим по всему списку слов
 			for(auto & item : this->vocab){
-				// Получаем данные слова
-				data = this->alphabet->format("%s\n", (this->isOption(options_t::lowerCase) ? item.second.str() : item.second.real()).c_str());
-				// Выполняем запись данных в файл
-				file.write(data.data(), data.size());
+				// Получаем метаданные слова
+				const auto & meta = item.second.calc(this->info.ad, this->info.cw);
+				// Добавляем в список слов полученное слово
+				words.emplace(meta.wltf, (this->isOption(options_t::lowerCase) ? item.second.str() : item.second.real()));
 				// Если функция вывода статуса передана
 				if(status != nullptr){
 					// Увеличиваем количество записанных слов
 					index++;
 					// Выполняем расчёт текущего статуса
-					actual = u_short(index / double(this->info.unq) * 100.0);
+					actual = u_short(index / double(this->info.unq * 2) * 100.0);
+					// Если статус обновился
+					if(actual != past){
+						// Запоминаем текущий статус
+						past = actual;
+						// Выводим статус извлечения
+						status(actual);
+					}
+				}
+			}
+			// Получаем штамп файла
+			const string & stamp = this->arpa->stamp();
+			// Выполняем запись штампа в файл
+			file.write(stamp.data(), stamp.size());
+			// Переходим по всему списку слов
+			for(auto it = words.crbegin(); it != words.crend(); ++it){
+				// Получаем данные слова
+				const string & word = this->alphabet->format("%s\n", it->second.c_str());
+				// Выполняем запись данных в файл
+				file.write(word.data(), word.size());
+				// Если функция вывода статуса передана
+				if(status != nullptr){
+					// Увеличиваем количество записанных слов
+					index++;
+					// Выполняем расчёт текущего статуса
+					actual = u_short(index / double(this->info.unq * 2) * 100.0);
 					// Если статус обновился
 					if(actual != past){
 						// Запоминаем текущий статус
