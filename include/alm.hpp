@@ -132,6 +132,8 @@ namespace anyks {
 			} ppl_t;
 			// Упрощаем тип функции для получения слова
 			typedef function <const word_t * (const size_t)> words_t;
+			// Упрощаем тип функции для добавления слова
+			typedef function <void (const size_t, const word_t &)> addw_t;
 		private:
 			// Нулевое значение логорифма
 			const double zero = log(0);
@@ -171,6 +173,8 @@ namespace anyks {
 			// Словарь всех слов в системе
 			mutable std::map <size_t, word_t> vocab;
 		private:
+			// Функция добавления слова в словарь
+			addw_t addWord = nullptr;
 			// Функция извлечения слова по его идентификатору
 			words_t getWord = nullptr;
 			// Объект работы с python
@@ -191,12 +195,6 @@ namespace anyks {
 			 * @return    результат проверки
 			 */
 			const bool event(const size_t idw) const noexcept;
-			/**
-			 * findWord Метод поиска слова в словаре
-			 * @param idw идентификатор слова
-			 * @return    найденное слово в словаре
-			 */
-			const word_t * findWord(const size_t idw) const noexcept;
 			/**
 			 * word Метод извлечения слова по его идентификатору
 			 * @param idw идентификатор слова
@@ -394,11 +392,6 @@ namespace anyks {
 			void addGoodword(const string & word) noexcept;
 		public:
 			/**
-			 * setWordMethod Метод установки функции получения слова
-			 * @param word функция получения слова
-			 */
-			void setWordMethod(words_t word) noexcept;
-			/**
 			 * setSize Метод установки размера n-граммы
 			 * @param size размер n-граммы
 			 */
@@ -438,6 +431,12 @@ namespace anyks {
 			 * @param option опция для установки
 			 */
 			void setOption(const options_t option) noexcept;
+			/**
+			 * setWordFn Метод установки функций получения и добавления слов
+			 * @param fn1 функция получения слова
+			 * @param fn2 функция добавления слова
+			 */
+			void setWordFn(words_t fn1, addw_t fn2) noexcept;
 			/**
 			 * unsetOption Метод отключения опции модуля
 			 * @param option опция для отключения
@@ -709,7 +708,7 @@ namespace anyks {
 			/**
 			 * Alm Конструктор
 			 */
-			Alm() noexcept {};
+			Alm() noexcept;
 			/**
 			 * Alm Конструктор
 			 * @param alphabet объект алфавита

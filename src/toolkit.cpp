@@ -1641,19 +1641,6 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 									size_t idw = 0;
 									// Полученное слово
 									word_t word = L"";
-									// Если это биграмма
-									if(words.size() < 3){
-										// Получаем слово
-										word = words.front();
-										// Получаем идентификатор слова
-										idw = this->getIdw(word, !this->isOption(options_t::confidence));
-										// Проверяем отсутствует ли слово в списке запрещённых слов
-										if(this->badwords.count(idw) < 1){
-											// Если это юниграмма и её еще нет в словаре
-											if((idw != (size_t) token_t::start) &&
-											((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal(), idw);
-										}
-									}
 									// Переходим по всему списку слов
 									for(auto & item : words){
 										// Получаем слово
@@ -1686,6 +1673,11 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 										arpa->setSize(size);
 										// Если количество собранных n-грамм выше установленных, меняем
 										if(size > size_t(this->size)) this->size = size;
+										// Проверяем отсутствует ли слово в списке запрещённых слов
+										if(arpa->event(idw) && (this->badwords.count(idw) < 1)){
+											// Добавляем слово в словарь
+											this->addWord(word.wreal(), idw);
+										}
 										// Добавляем последовательность в словарь
 										arpa->set(seq, stod(weight), stod(backoff));
 									}
@@ -1881,19 +1873,6 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 									size_t idw = 0;
 									// Полученное слово
 									word_t word = L"";
-									// Если это биграмма
-									if(words.size() < 3){
-										// Получаем слово
-										word = words.front();
-										// Получаем идентификатор слова
-										idw = this->getIdw(word, !this->isOption(options_t::confidence));
-										// Проверяем отсутствует ли слово в списке запрещённых слов
-										if(this->badwords.count(idw) < 1){
-											// Если это юниграмма и её еще нет в словаре
-											if((idw != (size_t) token_t::start) &&
-											((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal(), idw);
-										}
-									}
 									// Переходим по всему списку слов
 									for(auto & item : words){
 										// Получаем слово
@@ -1926,6 +1905,11 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 										arpa->setSize(size);
 										// Если количество собранных n-грамм выше установленных, меняем
 										if(size > size_t(this->size)) this->size = size;
+										// Проверяем отсутствует ли слово в списке запрещённых слов
+										if(arpa->event(idw) && (this->badwords.count(idw) < 1)){
+											// Добавляем слово в словарь
+											this->addWord(word.wreal(), idw);
+										}
 										// Добавляем последовательность в словарь
 										arpa->set(seq, stod(weight), stod(backoff));
 									}
@@ -2613,19 +2597,6 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 									size_t idw = 0;
 									// Полученное слово
 									word_t word = L"";
-									// Если это биграмма
-									if(words.size() < 3){
-										// Получаем слово
-										word = words.front();
-										// Получаем идентификатор слова
-										idw = this->getIdw(word, !this->isOption(options_t::confidence));
-										// Проверяем отсутствует ли слово в списке запрещённых слов
-										if(this->badwords.count(idw) < 1){
-											// Если это юниграмма и её еще нет в словаре
-											if((idw != (size_t) token_t::start) &&
-											((words.size() > 1) || (this->vocab.count(idw) < 1))) this->addWord(word.wreal(), idw);
-										}
-									}
 									// Переходим по всему списку слов
 									for(auto & item : words){
 										// Получаем слово
@@ -2658,7 +2629,15 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 										this->arpa->setSize(this->size);
 									}
 									// Добавляем последовательность в словарь
-									if(!seq.empty()) this->arpa->set(seq, stod(weight), stod(backoff));
+									if(!seq.empty()){
+										// Проверяем отсутствует ли слово в списке запрещённых слов
+										if(this->arpa->event(idw) && (this->badwords.count(idw) < 1)){
+											// Добавляем слово в словарь
+											this->addWord(word.wreal(), idw);
+										}
+										// Добавляем последовательность в языковую модель
+										this->arpa->set(seq, stod(weight), stod(backoff));
+									}
 								}
 							}
 						}
@@ -2864,7 +2843,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const u_
 								// Выполняем сплит n-грамм
 								this->alphabet->split(ngram, " ", words);
 								// Если список слов получен
-								if(!words.empty()){
+								if(!words.empty() && !oc.empty() && !dc.empty()){
 									// Полученное слово
 									word_t word = L"";
 									// Если это юниграмма

@@ -37,29 +37,6 @@ const bool anyks::Alm::event(const size_t idw) const noexcept {
 	);
 }
 /**
- * findWord Метод поиска слова в словаре
- * @param idw идентификатор слова
- * @return    найденное слово в словаре
- */
-const anyks::word_t * anyks::Alm::findWord(const size_t idw) const noexcept {
-	// Результат работы функции
-	const word_t * result = nullptr;
-	// Если идентификатор передан
-	if(idw > 0){
-		// Если функция внешнего словаря установлена, используем её
-		if(this->getWord != nullptr) result = this->getWord(idw);
-		// Если же функция не указана используем внутренний словарь
-		else if(!this->vocab.empty()) {
-			// Получаем слово по его идентификатору
-			auto it = this->vocab.find(idw);
-			// Если слово получено
-			if(it != this->vocab.end()) result = &it->second;
-		}
-	}
-	// Выводим результат
-	return result;
-}
-/**
  * word Метод извлечения слова по его идентификатору
  * @param idw идентификатор слова
  * @param ups регистры слова
@@ -109,7 +86,7 @@ const anyks::word_t anyks::Alm::word(const size_t idw, const size_t ups) const n
 		// Если это нормальное слово
 		default: {
 			// Получаем слово по его идентификатору
-			const word_t * word = this->findWord(idw);
+			const word_t * word = this->getWord(idw);
 			// Если слово получено
 			if(word != nullptr){
 				// Получаем данные слова
@@ -582,17 +559,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 			 * Если слова всего два, значит это начало и конец предложения
 			 * Нам же нужны только нормальные n-граммы
 			 */
-			if(seq.size() > 2){
-				// Выводим отладочную информацию
-				if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
-					// Получаем обрабатываемый текст
-					const wstring & text = this->context(seq, true);
-					// Выводим сообщение отладки - количество слов
-					this->alphabet->log("%s\n", alphabet_t::log_t::info, this->logfile, this->alphabet->convert(text).c_str());
-				}
-				// Выполняем расчёт перплексии нашей текстовой последовательности
-				result = (result.words == 0 ? this->perplexity(seq) : this->pplConcatenate(result, this->perplexity(seq)));
-			}
+			if(seq.size() > 2) result = (result.words == 0 ? this->perplexity(seq) : this->pplConcatenate(result, this->perplexity(seq)));
 			// Очищаем список последовательностей
 			seq.clear();
 			// Добавляем в список начало предложения
@@ -641,7 +608,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 						// Проверяем является ли строка словом
 						const bool isWord = this->event(idw);
 						// Если это неизвестное слово
-						if((idw == uid) || (isWord && (this->findWord(idw) == nullptr))) unkFn(word); 
+						if((idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn(word); 
 						// Иначе добавляем слово
 						else if(!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)) seq.push_back(idw);
 						// Отправляем слово как неизвестное
@@ -657,9 +624,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 		// Выполняем разбивку текста на токены
 		this->tokenizer->run(text, modeFn);
 		// Выводим отладочную информацию
-		if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
-			// Выводим разделитель
-			if(this->isOption(options_t::debug)) cout << endl;
+		if((this->isOption(options_t::debug) || (this->logfile != nullptr)) && (this->threads == 1)){
 			// Выводим сообщение отладки - количество слов
 			this->alphabet->log(
 				"%u sentences, %u words, %u OOVs",
@@ -671,7 +636,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 			);
 			// Выводим сообщение отладки - результатов расчёта
 			this->alphabet->log(
-				"%u zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\n",
+				"%u zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\r\n",
 				alphabet_t::log_t::info,
 				this->logfile,
 				result.zeroprobs,
@@ -679,20 +644,24 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 				result.ppl,
 				result.ppl1
 			);
-			// Если список неизвестных слов получен и есть куда его выводить
-			if(!oovs.empty() && (this->oovfile != nullptr)){
-				// Переходим по всему списку неизвестных слов
-				for(auto & item : oovs){
-					// Добавляем слово в файл
-					this->alphabet->log(
-						"%s\t%u",
-						alphabet_t::log_t::null,
-						this->oovfile,
-						this->alphabet->convert(item.first).c_str(),
-						item.second
-					);
-				}
+		}
+		// Если список неизвестных слов получен и есть куда его выводить
+		if(!oovs.empty() && (this->oovfile != nullptr)){
+			// Блокируем поток
+			this->locker.lock();
+			// Переходим по всему списку неизвестных слов
+			for(auto & item : oovs){
+				// Добавляем слово в файл
+				this->alphabet->log(
+					"%s\t%u",
+					alphabet_t::log_t::null,
+					this->oovfile,
+					this->alphabet->convert(item.first).c_str(),
+					item.second
+				);
 			}
+			// Разблокируем поток
+			this->locker.unlock();
 		}
 	}
 	// Выводим результат
@@ -961,8 +930,14 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 		result.ppl1 = ppl.second;
 		// Выводим отладочную информацию
 		if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
+			// Блокируем поток
+			this->locker.lock();
 			// Если список отладки сформирован
 			if(!debugMessages.empty()){
+				// Получаем обрабатываемый текст
+				const wstring & text = this->context(seq, true);
+				// Выводим сообщение отладки - количество слов
+				this->alphabet->log("%s\n", alphabet_t::log_t::info, this->logfile, this->alphabet->convert(text).c_str());
 				// Переходим по всему списку отладки
 				for(auto & mess : debugMessages){
 					// Выводим основное сообщение отладки
@@ -972,7 +947,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 				}
 			}
 			// Выводим разделитель
-			if(this->isOption(options_t::debug)) cout << endl;
+			this->alphabet->log("%s", alphabet_t::log_t::null, this->logfile, "\r\n");
 			// Выводим сообщение отладки - количество слов
 			this->alphabet->log(
 				"%u sentences, %u words, %u OOVs",
@@ -984,7 +959,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 			);
 			// Выводим сообщение отладки - результатов расчёта
 			this->alphabet->log(
-				"%u zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\n",
+				"%u zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\r\n",
 				alphabet_t::log_t::info,
 				this->logfile,
 				result.zeroprobs,
@@ -992,6 +967,8 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 				result.ppl,
 				result.ppl1
 			);
+			// Разблокируем поток
+			this->locker.unlock();
 		}
 	}
 	// Выводим результат
@@ -1116,7 +1093,7 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 		// Выводим отладочную информацию
 		if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
 			// Выводим разделитель
-			if(this->isOption(options_t::debug)) cout << endl;
+			this->alphabet->log("%s", alphabet_t::log_t::null, this->logfile, "\r\n");
 			// Выводим сообщение отладки - количество слов
 			this->alphabet->log(
 				"%u sentences, %u words, %u OOVs",
@@ -1128,7 +1105,7 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 			);
 			// Выводим сообщение отладки - результатов расчёта
 			this->alphabet->log(
-				"%u zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\n",
+				"%u zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\r\n",
 				alphabet_t::log_t::info,
 				this->logfile,
 				result.zeroprobs,
@@ -1235,7 +1212,7 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text, const bool acc
 						// Проверяем является ли строка словом
 						const bool isWord = this->event(idw);
 						// Если это неизвестное слово
-						if((idw == uid) || (isWord && (this->findWord(idw) == nullptr))) unkFn();
+						if((idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn();
 						// Иначе добавляем слово
 						else if(!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)) seq.push_back(idw);
 						// Отправляем слово как неизвестное
@@ -1458,7 +1435,7 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 						// Проверяем является ли строка словом
 						const bool isWord = this->event(idw);
 						// Если это неизвестное слово
-						if((idw == uid) || (isWord && (this->findWord(idw) == nullptr))) resFn(tmp, idw);
+						if((idw == uid) || (isWord && (this->getWord(idw) == nullptr))) resFn(tmp, idw);
 						// Иначе добавляем слово
 						else if(isWord && this->alphabet->isAllowed(tmp)) seq.push_back(idw);
 						// Отправляем слово как неизвестное
@@ -1811,14 +1788,6 @@ void anyks::Alm::addGoodword(const string & word) noexcept {
 	}
 }
 /**
- * setWordMethod Метод установки функции получения слова
- * @param word функция получения слова
- */
-void anyks::Alm::setWordMethod(words_t word) noexcept {
-	// Устанавливаем функцию получения слова
-	this->getWord = word;
-}
-/**
  * setSize Метод установки размера n-граммы
  * @param size размер n-граммы
  */
@@ -1930,6 +1899,41 @@ void anyks::Alm::setOption(const options_t option) noexcept {
 	this->options.set((u_short) option);
 }
 /**
+ * setWordFn Метод установки функций получения и добавления слов
+ * @param fn1 функция получения слова
+ * @param fn2 функция добавления слова
+ */
+void anyks::Alm::setWordFn(words_t fn1, addw_t fn2) noexcept {
+	// Если функции переданы
+	if((fn1 != nullptr) && (fn2 != nullptr)){
+		// Устанавливаем функцию получения слова
+		this->getWord = fn1;
+		// Устанавливаем функцию добавления слова
+		this->addWord = fn2;
+	// Если функции не переданы
+	} else if((fn1 == nullptr) && (fn2 == nullptr)) {
+		// Устанавливаем функцию получения слова
+		this->getWord = [this](const size_t idw) noexcept {
+			// Результат работы функции
+			const word_t * result = nullptr;
+			// Если же функция не указана используем внутренний словарь
+			if(!this->vocab.empty()) {
+				// Получаем слово по его идентификатору
+				auto it = this->vocab.find(idw);
+				// Если слово получено
+				if(it != this->vocab.end()) result = &it->second;
+			}
+			// Выводим результат
+			return result;
+		};
+		// Устанавливаем функцию добавления слова
+		this->addWord = [this](const size_t idw, const word_t & word) noexcept {
+			// Проверяем отсутствует ли слово в списке запрещённых слов
+			this->vocab.emplace(idw, word);
+		};
+	}
+}
+/**
  * unsetOption Метод отключения опции модуля
  * @param option опция для отключения
  */
@@ -1976,7 +1980,7 @@ void anyks::Alm::setVocab(const vector <char> & buffer) noexcept {
 			// Добавляем бинарные данные слова
 			word.set(data + offset, buffer.size() - offset);
 			// Добавляем слово в словарь
-			if(!word.empty()) this->vocab.emplace(idw, move(word));
+			if(!word.empty()) this->addWord(idw, move(word));
 		}
 	}
 }
@@ -2663,7 +2667,7 @@ void anyks::Alm::find(const wstring & text, function <void (const wstring &)> ca
 						// Проверяем является ли строка словом
 						const bool isWord = this->event(idw);
 						// Если это неизвестное слово
-						if((idw == uid) || (isWord && (this->findWord(idw) == nullptr))) unkFn();
+						if((idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn();
 						// Иначе добавляем слово
 						else if(!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)){
 							// Добавляем идентификатор в список последовательности
@@ -2866,11 +2870,6 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 										word = move(item);
 										// Получаем идентификатор слова
 										idw = this->getIdw(word, !this->isOption(options_t::confidence));
-										// Если это биграмма
-										if((words.size() == 1) && (this->getWord == nullptr)){
-											// Проверяем отсутствует ли слово в списке запрещённых слов
-											if(this->event(idw) && (this->badwords.count(idw) < 1)) this->vocab.emplace(idw, word);
-										}
 										// Проверяем отсутствует ли слово в списке запрещённых слов
 										if(this->badwords.count(idw) < 1){
 											// Если это неизвестное слово
@@ -2892,7 +2891,12 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 									// Если количество собранных n-грамм выше установленных, меняем
 									if(seq.size() > size_t(this->size)) this->size = seq.size();
 									// Добавляем последовательность в словарь
-									if(!seq.empty()) this->set(seq, stod(weight), stod(backoff));
+									if(!seq.empty()){
+										// Проверяем отсутствует ли слово в списке запрещённых слов
+										if(this->event(idw) && (this->badwords.count(idw) < 1)) this->addWord(idw, word);
+										// Добавляем последовательность в языковую модель
+										this->set(seq, stod(weight), stod(backoff));
+									}
 								}
 							}
 						}
@@ -3820,11 +3824,20 @@ const size_t anyks::Alm::getUserTokenId(const string & name) const noexcept {
 }
 /**
  * Alm Конструктор
+ */
+anyks::Alm::Alm() noexcept {
+	// Устанавливаем функции работы со словами
+	this->setWordFn(nullptr, nullptr);
+}
+/**
+ * Alm Конструктор
  * @param alphabet объект алфавита
  */
 anyks::Alm::Alm(const alphabet_t * alphabet) noexcept {
 	// Устанавливаем алфавит
 	this->setAlphabet(alphabet);
+	// Устанавливаем функции работы со словами
+	this->setWordFn(nullptr, nullptr);
 }
 /**
  * Alm Конструктор
@@ -3833,6 +3846,8 @@ anyks::Alm::Alm(const alphabet_t * alphabet) noexcept {
 anyks::Alm::Alm(const tokenizer_t * tokenizer) noexcept {
 	// Устанавливаем токенизатор
 	this->setTokenizer(tokenizer);
+	// Устанавливаем функции работы со словами
+	this->setWordFn(nullptr, nullptr);
 }
 /**
  * Alm Конструктор
@@ -3844,6 +3859,8 @@ anyks::Alm::Alm(const alphabet_t * alphabet, const tokenizer_t * tokenizer) noex
 	this->setAlphabet(alphabet);
 	// Устанавливаем токенизатор
 	this->setTokenizer(tokenizer);
+	// Устанавливаем функции работы со словами
+	this->setWordFn(nullptr, nullptr);
 }
 /**
  * ~Alm Деструктор
