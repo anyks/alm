@@ -188,7 +188,7 @@ ngram 3=15
  - **〈anum〉** - Pseudo-number token (combination of numbers and other symbols) **(T34 | 895-M-86 | 39km)**
  - **〈math〉** - Mathematical operation token **(+ | - | = | / | * | ^)**
  - **〈range〉** - Range of numbers token **(1-2 | 100-200 | 300-400)**
- - **〈aprox〉** - Approximate number token **(~93 | **~95.86** | **10~20**)**
+ - **〈aprox〉** - Approximate number token (**~93** | **~95.86** | **10~20**)
  - **〈score〉** - Score count token **(4:3 | 01:04)**
  - **〈dimen〉** - Dimensions token **(200x300 | 1920x1080)**
  - **〈fract〉** - Fraction token **(5/20 | 192/864)**
