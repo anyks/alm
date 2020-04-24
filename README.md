@@ -480,7 +480,7 @@ m  м
 ...
 ```
 
-> All words from this list will be identificate as an unknown word **〈unk〉**.
+> All words from this list will be identificate as an unknown word **〈abbr〉**.
 
 ---
 
