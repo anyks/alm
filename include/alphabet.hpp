@@ -74,7 +74,7 @@ namespace anyks {
 			// Список спец-символом
 			const std::set <wchar_t> specialSymbols = {
 				L'~', L'_', L'@', L'#', L'№', L'©',
-				L'%', L'&', L'$', L'|', L'§', L'\\'
+				L'%', L'&', L'$', L'|', L'§', L'\\', L'±'
 			};
 			// Список символов изоляции
 			const std::set <wchar_t> isolationSymbols = {
