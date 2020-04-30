@@ -537,11 +537,6 @@ namespace anyks {
 			 */
 			void setzone(const wstring & zone) noexcept;
 			/**
-			 * setlocale Метод установки локали
-			 * @param locale локализация приложения
-			 */
-			void setlocale(const string & locale) noexcept;
-			/**
 			 * setzones Метод установки списка пользовательских зон
 			 * @param zones список доменных зон интернета
 			 */
@@ -558,6 +553,11 @@ namespace anyks {
 			 */
 			void setalt(const wchar_t lid, const wchar_t alt) noexcept;
 			/**
+			 * setlocale Метод установки локали
+			 * @param locale локализация приложения
+			 */
+			void setlocale(const string & locale = "en_US.UTF-8") noexcept;
+			/**
 			 * setSubstitutes Метод установки букв для исправления слов из смешанных алфавитов
 			 * @param letters список букв разных алфавитов соответствующих друг-другу
 			 */
@@ -566,13 +566,18 @@ namespace anyks {
 			/**
 			 * Alphabet Конструктор
 			 */
-			Alphabet(const string & locale = "en_US.UTF-8") noexcept;
+			Alphabet() noexcept;
+			/**
+			 * Alphabet Конструктор
+			 * @param locale локализация приложения
+			 */
+			Alphabet(const string & locale) noexcept;
 			/**
 			 * Alphabet Конструктор
 			 * @param alphabet алфавит символов для текущего языка
 			 * @param locale   локализация приложения
 			 */
-			Alphabet(const string & alphabet, const string & locale = "en_US.UTF-8") noexcept;
+			Alphabet(const string & alphabet, const string & locale) noexcept;
 	} alphabet_t;
 	/**
 	 * Оператор чтения из потока

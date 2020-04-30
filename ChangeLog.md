@@ -1,5 +1,11 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
+## [2.1.4](https://github.com/anyks/alm/archive/v2.1.4.tar.gz) Bug fixes and new method
+### Method
+- Bridge to Python3 by [swig](https://github.com/swig/swig)
+### Params
+- flag allowing the use of a hyphen as part of the word
+
 ## [2.1.3](https://github.com/anyks/alm/archive/v2.1.3.tar.gz) Other optimization
 
 ## [2.1.2](https://github.com/anyks/alm/archive/v2.1.2.tar.gz) Other optimization

@@ -62,6 +62,8 @@ const bool anyks::AbLM::write(function <void (const u_short)> status) noexcept {
 			case (u_short) aspl_t::types_t::aes256: this->aspl->set("aes", (u_short) 256); break;
 		}
 	}
+	// Устанавливаем значение апострофа
+	this->aspl->set("allowApostrophe", this->tokenizer->isAllowApostrophe());
 	// Если нужно сохранить список аббревиатур
 	if(this->isFlag(flag_t::expAbbrevs) || this->isFlag(flag_t::expAllData)){
 		// Устанавливаем список аббревиатур
@@ -407,10 +409,16 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 			{
 				// Список аббревиатур
 				std::set <size_t> abbrs;
+				// Флаг значения апострофа
+				bool allowApostrophe = false;
 				// Извлекаем список аббревиатур
 				this->aspl->getValues("abbrs", abbrs);
+				// Считываем значение апострофа
+				this->aspl->get("allowApostrophe", allowApostrophe);
 				// Если список аббревиатур получен, устанавливаем его
 				if(!abbrs.empty()) this->tokenizer->setAbbrs(abbrs);
+				// Если апостроф разрешён, активируем его
+				if(allowApostrophe) this->tokenizer->switchAllowApostrophe();
 			}
 			/**
 			 * Блок извлечения списка доменных зон
@@ -797,10 +805,16 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 			{
 				// Список аббревиатур
 				std::set <size_t> abbrs;
+				// Флаг значения апострофа
+				bool allowApostrophe = false;
 				// Извлекаем список аббревиатур
 				this->aspl->getValues("abbrs", abbrs);
+				// Считываем значение апострофа
+				this->aspl->get("allowApostrophe", allowApostrophe);
 				// Если список аббревиатур получен, устанавливаем его
 				if(!abbrs.empty()) this->tokenizer->setAbbrs(abbrs);
+				// Если апостроф разрешён, активируем его
+				if(allowApostrophe) this->tokenizer->switchAllowApostrophe();
 			}
 			/**
 			 * Блок извлечения списка доменных зон

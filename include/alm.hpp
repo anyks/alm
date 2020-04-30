@@ -107,7 +107,7 @@ namespace anyks {
 				 * Seq Конструктор
 				 */
 				Seq() : weight(log(0)), backoff(0.0), idw(idw_t::NIDW), oc(0), dc(0), ups(0) {}
-			} __attribute__((packed)) seq_t;
+			} seq_t;
 		public:
 			// Основные опции
 			enum class options_t : u_short {

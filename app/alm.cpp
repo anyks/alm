@@ -106,6 +106,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-domzones | --w-bin-domzones]           flag export in binary dictionary of domain zones\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-badwords | --w-bin-badwords]           flag export in binary dictionary of blacklisted words\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-goodwords | --w-bin-goodwords]         flag export in binary dictionary of whitelisted words\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-allow-apostrophe | --allow-apostrophe]       flag allowing the use of a hyphen as part of the word\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-tokens-all-disable | --tokens-all-disable]   flag to disable all tokens\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-tokens-all-unknown | --tokens-all-unknown]   flag identifying all tokens as <unk>\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-kneserney-prepares | --kneserney-prepares]   flag allowing need to change grams, after calculating\r\n"
@@ -344,6 +345,8 @@ int main(int argc, char * argv[]) noexcept {
 			tokenizer_t tokenizer(&alphabet);
 			// Замеряем время начала работы
 			auto timeShifting = chrono::system_clock::now();
+			// Если апостроф разрешён в токенизаторе, активируем его
+			if(env.is("allow-apostrophe")) tokenizer.switchAllowApostrophe();
 			// Если файл с буквами для восстановления слов, передан
 			if(((value = env.get("r-mix-restwords")) != nullptr) && fsys_t::isfile(value)){
 				// Идентификатор документа

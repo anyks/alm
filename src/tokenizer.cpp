@@ -9,6 +9,13 @@
 #include <tokenizer.hpp>
 
 /**
+ * switchAllowApostrophe Метод разрешения или запрещения апострофа как части слова
+ */
+void anyks::Tokenizer::switchAllowApostrophe() noexcept {
+	// Выполняем переключение разрешения использования апострофа
+	this->apostrophe = !this->apostrophe;
+}
+/**
  * setAbbr Метод добавления аббревиатуры
  * @param word слово для добавления
  */
@@ -86,6 +93,14 @@ const size_t anyks::Tokenizer::fti(const double num, const u_short count) const 
 	}
 	// Выводим результат
 	return result;
+}
+/**
+ * isAllowApostrophe Метод проверки разрешения апострофа
+ * @return результат проверки
+ */
+const bool anyks::Tokenizer::isAllowApostrophe() const noexcept {
+	// Выводим результат проверки апострофа
+	return this->apostrophe;
 }
 /**
  * idw Метод извлечения идентификатора слова
@@ -1077,7 +1092,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 						}
 					}
 				// Если это изоляционный символ
-				} else if(this->alphabet->isIsolation(lletter)) {
+				} else if(this->alphabet->isIsolation(lletter) && (!this->isAllowApostrophe() || (lletter != L'\''))) {
 					// Выводим результат как он есть
 					if(end){
 						// Если слово не пустое

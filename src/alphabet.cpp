@@ -1598,18 +1598,6 @@ void anyks::Alphabet::rmalt(const wchar_t letter) noexcept {
 	} else this->alters.clear();
 }
 /**
- * setlocale Метод установки локали
- * @param locale локализация приложения
- */
-void anyks::Alphabet::setlocale(const string & locale) noexcept {
-	// Устанавливаем локаль
-	if(!locale.empty()){
-		// Устанавливапм локализацию приложения
-		::setlocale(LC_CTYPE, locale.c_str());
-		::setlocale(LC_COLLATE, locale.c_str());
-	}
-}
-/**
  * setzone Метод установки пользовательской зоны
  * @param zone пользовательская зона
  */
@@ -1657,6 +1645,18 @@ void anyks::Alphabet::setalt(const wchar_t lid, const wchar_t alt) noexcept {
 	}
 }
 /**
+ * setlocale Метод установки локали
+ * @param locale локализация приложения
+ */
+void anyks::Alphabet::setlocale(const string & locale) noexcept {
+	// Устанавливаем локаль
+	if(!locale.empty()){
+		// Устанавливапм локализацию приложения
+		::setlocale(LC_CTYPE, locale.c_str());
+		::setlocale(LC_COLLATE, locale.c_str());
+	}
+}
+/**
  * setSubstitutes Метод установки букв для исправления слов из смешанных алфавитов
  * @param letters список букв разных алфавитов соответствующих друг-другу
  */
@@ -1677,6 +1677,14 @@ void anyks::Alphabet::setSubstitutes(const std::map <string, string> & letters) 
 }
 /**
  * Alphabet Конструктор
+ */
+anyks::Alphabet::Alphabet() noexcept {
+	// Устанавливаем локализацию системы
+	this->setlocale();
+}
+/**
+ * Alphabet Конструктор
+ * @param locale локализация приложения
  */
 anyks::Alphabet::Alphabet(const string & locale) noexcept {
 	// Устанавливаем локализацию системы

@@ -70,10 +70,16 @@ namespace anyks {
 			idw_t idWord;
 			// Список аббревиатур
 			set <size_t> abbrs;
+			// Разрешить апостроф как часть слова
+			bool apostrophe = false;
 		private:
 			// Объект алфавита
 			const alphabet_t * alphabet = nullptr;
 		public:
+			/**
+			 * switchAllowApostrophe Метод разрешения или запрещения апострофа как части слова
+			 */
+			void switchAllowApostrophe() noexcept;
 			/**
 			 * setAbbr Метод добавления аббревиатуры
 			 * @param word слово для добавления
@@ -109,6 +115,11 @@ namespace anyks {
 			 */
 			const size_t fti(const double num, const u_short count = 0) const noexcept;
 		public:
+			/**
+			 * isAllowApostrophe Метод проверки разрешения апострофа
+			 * @return результат проверки
+			 */
+			const bool isAllowApostrophe() const noexcept;
 			/**
 			 * idw Метод извлечения идентификатора слова
 			 * @param  word слово для получения идентификатора

@@ -238,6 +238,32 @@ static:
 	$(CC) $(BUILD)/main.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
 	rm -rf $(BUILD)
 
+pip:
+	mkdir -p $(BIN) && \
+	mkdir -p $(BUILD) && \
+	cp -rf ./python/* $(BUILD)/ && \
+	swig -c++ -python $(BUILD)/alm.i && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c $(BUILD)/alm.cpp -o $(BUILD)/palm.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c $(BUILD)/alm_wrap.cxx -o $(BUILD)/main.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/alm.cpp -o $(BUILD)/alm.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/idw.cpp -o $(BUILD)/idw.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/nwt.cpp -o $(BUILD)/nwt.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/env.cpp -o $(BUILD)/env.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/arpa.cpp -o $(BUILD)/arpa.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/ablm.cpp -o $(BUILD)/ablm.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/python.cpp -o $(BUILD)/python.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/toolkit.cpp -o $(BUILD)/toolkit.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/alphabet.cpp -o $(BUILD)/alphabet.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/progress.cpp -o $(BUILD)/progress.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
+	$(CC) $(LIBS) -ltcl -shared -fPIC -o $(BIN)/_$(NAME).so $(BUILD)/main.o $(BUILD)/palm.o $(BUILD)/idw.o \
+	$(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/alm.o \
+	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/collector.o $(BUILD)/progress.o && \
+	cp $(BUILD)/$(NAME).py $(BIN)/$(NAME).py && \
+	rm -rf $(BUILD)
+
 # Правило очистки
 clean:
 	rm -rf $(BIN) && rm -rf $(BUILD)
