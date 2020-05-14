@@ -21,14 +21,12 @@ ifeq ($(OS), Darwin)
 		-lm \
 		-lz \
 		-lssl \
-		-lbint \
 		-lstdc++ \
 		-lcrypto \
 		-lpthread \
 		-ljemalloc \
 		-l$(PYTHON) \
 		-L$(PYPATH)/lib \
-		-L./lib/BigInt/mac \
 		-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib
 
 	# Расширение библиотеки
@@ -45,7 +43,6 @@ ifeq ($(OS), Darwin)
 		-I./json/include \
 		-I/usr/include \
 		-I/usr/local/include \
-		-I./lib/BigInt/include \
 		-I./gtest/include \
 		-I$(PYPATH)/include/$(PYTHON) \
 		-I/usr/local/Cellar/openssl@1.1/1.1.1d/include
@@ -71,14 +68,12 @@ ifeq ($(OS), FreeBSD)
 		-lm \
 		-lz \
 		-lssl \
-		-lbint \
 		-lstdc++ \
 		-lcrypto \
 		-lpthread \
 		-l$(PYTHON) \
 		-ljemalloc \
-		-L/usr/local/lib \
-		-L./lib/BigInt/freebsd
+		-L/usr/local/lib
 
 	# Расширение библиотеки
 	EXT = so
@@ -94,7 +89,6 @@ ifeq ($(OS), FreeBSD)
 		-I./json/include \
 		-I/usr/include \
 		-I/usr/local/include \
-		-I./lib/BigInt/include \
 		-I./gtest/include \
 		-I/usr/local/include/$(PYTHON)
 
@@ -119,13 +113,11 @@ ifeq ($(OS), Linux)
 		-lm \
 		-lz \
 		-lssl \
-		-lbint \
 		-lstdc++ \
 		-lcrypto \
 		-lpthread \
 		-ljemalloc \
-		-l$(PYTHON) \
-		-L./lib/BigInt/linux
+		-l$(PYTHON)
 
 	# Расширение библиотеки
 	EXT = so
@@ -141,7 +133,6 @@ ifeq ($(OS), Linux)
 		-I./json/include \
 		-I/usr/include \
 		-I/usr/local/include \
-		-I./lib/BigInt/include \
 		-I./gtest/include \
 		-I/usr/include/$(PYTHON)
 
@@ -181,13 +172,20 @@ all:
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
-	$(CC) $(LIBS) -shared -fPIC -o $(BIN)/libs/liblm.$(EXT) $(BUILD)/idw.o $(BUILD)/nwt.o \
-	$(BUILD)/env.o $(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/alm.o \
-	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/collector.o $(BUILD)/progress.o && \
-	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/alm.o \
-	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o \
-	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/progress.o && \
-	$(CC) $(BUILD)/main.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigInteger.cc -o $(BUILD)/BigInteger.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigUnsigned.cc -o $(BUILD)/BigUnsigned.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigIntegerUtils.cc -o $(BUILD)/BigIntegerUtils.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigUnsignedInABase.cc -o $(BUILD)/BigUnsignedInABase.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigIntegerAlgorithms.cc -o $(BUILD)/BigIntegerAlgorithms.o && \
+	$(CC) $(LIBS) -shared -fPIC -o $(BIN)/libs/liblm.$(EXT) $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o \
+	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/alm.o $(BUILD)/tokenizer.o \
+	$(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/collector.o $(BUILD)/progress.o $(BUILD)/BigInteger.o \
+	$(BUILD)/BigUnsigned.o $(BUILD)/BigIntegerUtils.o $(BUILD)/BigUnsignedInABase.o $(BUILD)/BigIntegerAlgorithms.o && \
+	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/alm.o $(BUILD)/arpa.o \
+	$(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o $(BUILD)/tokenizer.o $(BUILD)/alphabet.o \
+	$(BUILD)/levenshtein.o $(BUILD)/progress.o $(BUILD)/BigInteger.o $(BUILD)/BigUnsigned.o $(BUILD)/BigIntegerUtils.o \
+	$(BUILD)/BigUnsignedInABase.o $(BUILD)/BigIntegerAlgorithms.o && \
+	$(CC) $(BUILD)/main.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -llm $(LIBS) -o $(BIN)/$(NAME) && \
 	rm -rf $(BUILD)
 
 # Правила сборки под Dev
@@ -208,9 +206,15 @@ dev:
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
 	$(CC) $(CONFDEV) $(DEBUG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
-	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/alm.o \
-	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o \
-	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/progress.o $(BUILD)/levenshtein.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigInteger.cc -o $(BUILD)/BigInteger.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigUnsigned.cc -o $(BUILD)/BigUnsigned.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigIntegerUtils.cc -o $(BUILD)/BigIntegerUtils.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigUnsignedInABase.cc -o $(BUILD)/BigUnsignedInABase.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigIntegerAlgorithms.cc -o $(BUILD)/BigIntegerAlgorithms.o && \
+	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/alm.o $(BUILD)/arpa.o \
+	$(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o $(BUILD)/tokenizer.o $(BUILD)/alphabet.o \
+	$(BUILD)/levenshtein.o $(BUILD)/progress.o $(BUILD)/BigInteger.o $(BUILD)/BigUnsigned.o $(BUILD)/BigIntegerUtils.o \
+	$(BUILD)/BigUnsignedInABase.o $(BUILD)/BigIntegerAlgorithms.o && \
 	$(CC) $(DEBUG) $(BUILD)/main.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
 	rm -rf $(BUILD)
 
@@ -232,36 +236,16 @@ static:
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
 	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
-	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/alm.o \
-	$(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o \
-	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/progress.o $(BUILD)/levenshtein.o && \
-	$(CC) $(BUILD)/main.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -L/usr/lib -L/usr/local/lib -llm $(LIBS) -o $(BIN)/$(NAME) && \
-	rm -rf $(BUILD)
-
-pip:
-	mkdir -p $(BIN) && \
-	mkdir -p $(BUILD) && \
-	cp -rf ./python/* $(BUILD)/ && \
-	swig -c++ -python $(BUILD)/alm.i && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c $(BUILD)/alm.cpp -o $(BUILD)/palm.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c $(BUILD)/alm_wrap.cxx -o $(BUILD)/main.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/alm.cpp -o $(BUILD)/alm.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/idw.cpp -o $(BUILD)/idw.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/nwt.cpp -o $(BUILD)/nwt.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/env.cpp -o $(BUILD)/env.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/arpa.cpp -o $(BUILD)/arpa.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/ablm.cpp -o $(BUILD)/ablm.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/python.cpp -o $(BUILD)/python.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/toolkit.cpp -o $(BUILD)/toolkit.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/alphabet.cpp -o $(BUILD)/alphabet.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/progress.cpp -o $(BUILD)/progress.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/tokenizer.cpp -o $(BUILD)/tokenizer.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/collector.cpp -o $(BUILD)/collector.o && \
-	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./src/levenshtein.cpp -o $(BUILD)/levenshtein.o && \
-	$(CC) $(LIBS) -ltcl -shared -fPIC -o $(BIN)/_$(NAME).so $(BUILD)/main.o $(BUILD)/palm.o $(BUILD)/idw.o \
-	$(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/arpa.o $(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/alm.o \
-	$(BUILD)/tokenizer.o $(BUILD)/alphabet.o $(BUILD)/levenshtein.o $(BUILD)/collector.o $(BUILD)/progress.o && \
-	cp $(BUILD)/$(NAME).py $(BIN)/$(NAME).py && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigInteger.cc -o $(BUILD)/BigInteger.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigUnsigned.cc -o $(BUILD)/BigUnsigned.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigIntegerUtils.cc -o $(BUILD)/BigIntegerUtils.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigUnsignedInABase.cc -o $(BUILD)/BigUnsignedInABase.o && \
+	$(CC) $(CONFIG) $(INCLUDE) -fPIC -c ./contrib/src/bigint/BigIntegerAlgorithms.cc -o $(BUILD)/BigIntegerAlgorithms.o && \
+	ar rcs $(BIN)/libs/liblm.a $(BUILD)/idw.o $(BUILD)/nwt.o $(BUILD)/env.o $(BUILD)/alm.o $(BUILD)/arpa.o \
+	$(BUILD)/ablm.o $(BUILD)/python.o $(BUILD)/toolkit.o $(BUILD)/collector.o $(BUILD)/tokenizer.o $(BUILD)/alphabet.o \
+	$(BUILD)/levenshtein.o $(BUILD)/progress.o $(BUILD)/BigInteger.o $(BUILD)/BigUnsigned.o $(BUILD)/BigIntegerUtils.o \
+	$(BUILD)/BigUnsignedInABase.o $(BUILD)/BigIntegerAlgorithms.o && \
+	$(CC) $(BUILD)/main.o -L$(BIN)/libs -Wl,-rpath,$(BIN)/libs -llm $(LIBS) -o $(BIN)/$(NAME) && \
 	rm -rf $(BUILD)
 
 # Правило очистки

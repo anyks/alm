@@ -116,7 +116,7 @@ list(APPEND LIB_LIST ${OPENSSL_LIBRARIES})
 # Устанавливаем каталог заголовков
 include_directories(${PROJECT_BINARY_DIR}/../include)
 include_directories(${PROJECT_BINARY_DIR}/../json/include)
-include_directories(${PROJECT_BINARY_DIR}/../lib/BigInt/include)
+include_directories(${PROJECT_BINARY_DIR}/../contrib/include)
 
 # Установка переменной со списком исходников для исполняемого файла
 set(ALM_EXE ${PROJECT_BINARY_DIR}/../app/alm.cpp)
@@ -135,6 +135,11 @@ set(ALPHABET_LIB ${PROJECT_BINARY_DIR}/../src/alphabet.cpp)
 set(COLLECTOR_LIB ${PROJECT_BINARY_DIR}/../src/collector.cpp)
 set(TOKENIZER_LIB ${PROJECT_BINARY_DIR}/../src/tokenizer.cpp)
 set(LEVENSHTEIN_LIB ${PROJECT_BINARY_DIR}/../src/levenshtein.cpp)
+set(BIGINTEGER_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigInteger.cc)
+set(BIGUNSIGNED_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigUnsigned.cc)
+set(BIGINTEGERUTILS_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigIntegerUtils.cc)
+set(BIGUNSIGNEDINBASE_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigUnsignedInABase.cc)
+set(BIGINTEGERALGORITHMS_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigIntegerAlgorithms.cc)
 
 # Определяем операционную систему
 if(APPLE)
@@ -142,8 +147,6 @@ if(APPLE)
 	message("Select MacOS X")
 	# Добавляем библиотеку Gperftools
 	set(GPERFTOOLS_LIB /usr/local/lib/libtcmalloc.a)
-	# Добавляем исходник
-	set(BIGINT_LIB ${PROJECT_BINARY_DIR}/../lib/BigInt/mac/libbint.a)
 elseif(UNIX)
 	# Если это Linux
 	if(CMAKE_SYSTEM_NAME STREQUAL Linux)
@@ -151,8 +154,6 @@ elseif(UNIX)
 		message("Select Linux")
 		# Добавляем библиотеку Gperftools
 		set(GPERFTOOLS_LIB tcmalloc)
-		# Добавляем исходник
-		set(BIGINT_LIB ${PROJECT_BINARY_DIR}/../lib/BigInt/linux/libbint.a)
 	endif()
 	# Если это FreeBSD
 	if(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
@@ -160,13 +161,11 @@ elseif(UNIX)
 		message("Select FreeBSD")
 		# Добавляем библиотеку Gperftools
 		set(GPERFTOOLS_LIB /usr/local/lib/libtcmalloc.a)
-		# Добавляем исходник
-		set(BIGINT_LIB ${PROJECT_BINARY_DIR}/../lib/BigInt/freebsd/libbint.a)
 	endif()
 endif()
 
 # Создаем список модулей
-list(APPEND LIB_LISTS ${IDW_LIB} ${NWT_LIB} ${ALPHABET_LIB} ${ENV_LIB} ${LEVENSHTEIN_LIB} ${COLLECTOR_LIB} ${TOKENIZER_LIB} ${ALM_LIB} ${ARPA_LIB} ${PYTHON_LIB} ${ABLM_LIB} ${PROGRESS_LIB} ${TOOLKIT_LIB})
+list(APPEND LIB_LISTS ${IDW_LIB} ${NWT_LIB} ${ALPHABET_LIB} ${ENV_LIB} ${LEVENSHTEIN_LIB} ${COLLECTOR_LIB} ${TOKENIZER_LIB} ${ALM_LIB} ${ARPA_LIB} ${PYTHON_LIB} ${ABLM_LIB} ${PROGRESS_LIB} ${TOOLKIT_LIB} ${BIGINTEGER_LIB} ${BIGUNSIGNED_LIB} ${BIGINTEGERUTILS_LIB} ${BIGUNSIGNEDINBASE_LIB} ${BIGINTEGERALGORITHMS_LIB})
 
 # Создание динамической библиотеки с именем alm
 add_library(lm STATIC ${LIB_LISTS})
