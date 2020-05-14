@@ -5,6 +5,7 @@
 - [Project goals and features](https://github.com/anyks/alm/#project-goals-and-features)
 - [Requirements](https://github.com/anyks/alm/#requirements)
 - [To build and launch the project](https://github.com/anyks/alm/#to-build-and-launch-the-project)
+  - [Python version ALM](https://github.com/anyks/alm/#python-version-alm)
   - [To clone the project](https://github.com/anyks/alm/#to-clone-the-project)
   - [Build on Linux and FreeBSD](https://github.com/anyks/alm/#build-on-linux-and-freebsd)
   - [Build on MacOS X](https://github.com/anyks/alm/#build-on-macos-x)
@@ -56,52 +57,40 @@
 The are many toolkits capable of creating language models: ([KenLM](https://github.com/kpu/kenlm), [SriLM](https://github.com/BitMindLab/SRILM), [IRSTLM](https://github.com/irstlm-team/irstlm)), and each of those toolkits may have a reason to exist. But our language model creation toolkit has the following goals and features:
 
 - **UTF-8 support**: Full UTF-8 support without third-party dependencies.
-
 - **Support of many data formats**: Arpa, Vocab, Map Sequence, N-grams, Binary alm dictionary.
-
 - **Smoothing algorithms**: Kneser-Nay, Modified Kneser-Nay, Witten-Bell, Additive, Good-Turing, Absolute discounting.
-
 - **Normalisation and preprocessing for corpora**: Transferring corpus to lowercase, smart tokenization, ability to create black - and white - lists for n-grams.
-
 - **Arpa modification**: Frequencies and n-grams replacing, adding new n-grams with frequencies, removing n-grams.
-
 - **Pruning**: N-gram removal based on specified criteria.
-
 - **Removal of low-probability n-grams**: Removal of n-grams which backoff probability is higher than standard probability.
-
 - **Arpa recovery**: Recovery of damaged n-grams in arpa with subsequent recalculation of their backoff probabilities.
-
 - **Support of additional word features**: Feature extraction: (numbers, roman numbers, ranges of numbers, numeric abbreviations, any other custom attributes) using scripts written in Python3.
-
 - **Text preprocessing**: Unlike all other language model toolkits, ALM can extract correct context from files with unnormalized texts.
-
 - **Unknown word token accounting**: Accounting of 〈unk〉 token as full n-gram.
-
 - **Redefinition of 〈unk〉 token**: Ability to redefine an attribute of an unknown token.
-
 - **N-grams preprocessing**: Ability to pre-process n-grams before adding them to arpa using custom Python3 scripts.
-
 - **Binary container for Language Models**: The binary container supports compression, encryption and installation of copyrights.
-
 - **Convenient visualization of the Language model assembly process**: ALM implements several types of visualizations: textual, graphic, process indicator, and logging to files or console.
-
 - **Collection of all n-grams**: Unlike other language model toolkits, ALM is guaranteed to extract all possible n-grams from the corpus, regardless of their length (except for Modified Kneser-Nay); you can also force all n-grams to be taken into account even if they occured only once.
 
 ## Requirements
 
 - [Zlib](http://www.zlib.net)
-
 - [OpenSSL](https://www.openssl.org)
-
 - [GperfTools](https://github.com/gperftools/gperftools)
-
 - [Python3](https://www.python.org/download/releases/3.0)
-
 - [NLohmann::json](https://github.com/nlohmann/json)
-
 - [BigInteger](http://mattmccutchen.net/bigint)
 
 ## To build and launch the project
+
+### Python version ALM
+```bash
+$ python3 -m pip install pybind11
+$ python3 -m pip install anyks-lm
+```
+
+[Documentation pip](https://pypi.org/project/anyks-lm)
 
 ### To clone the project
 

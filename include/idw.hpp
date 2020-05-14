@@ -22,7 +22,7 @@
  */
 #include <general.hpp>
 #include <alphabet.hpp>
-#include <BigIntegerLibrary.hh>
+#include <bigint/BigIntegerLibrary.hh>
 
 // Устанавливаем область видимости
 using namespace std;

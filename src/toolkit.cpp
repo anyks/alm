@@ -935,16 +935,15 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 						this->locker.lock();
 						// Выполняем внешний python скрипт
 						tmp = this->python->run(it->second.second, {tmp.real()}, ctx);
-						// Если результат не получен, возвращаем слово
-						if(tmp.empty()) tmp = move(word);
 						// Разблокируем поток
 						this->locker.unlock();
 					}
-				}
+				// Если модуль предобработки слов, существует
+				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
 				if((tmp.length() >= MAX_WORD_LENGTH) && !unkFn()) return true;
 				// Если слово разрешено
-				else {
+				else if(!tmp.empty()) {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
 					// Если это плохое слово, заменяем его на неизвестное
@@ -1079,7 +1078,15 @@ void anyks::Toolkit::addWord(const wstring & word, const size_t idw, const size_
 	}
 }
 /**
- * setUserTokenMethod Метод добавления функции обработки пользовательского токена
+ * setWordPreprocessingMethod Метод установки функции препроцессинга слова
+ * @param fn внешняя функция препроцессинга слова
+ */
+void anyks::Toolkit::setWordPreprocessingMethod(wpres_t fn) noexcept {
+	// Устанавливаем функцию
+	this->wordPress = fn;
+}
+/**
+ * setUserTokenMethod Метод установки функции обработки пользовательского токена
  * @param name слово - обозначение токена
  * @param fn   внешняя функция обрабатывающая пользовательский токен
  */

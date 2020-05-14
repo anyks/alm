@@ -81,6 +81,8 @@ namespace anyks {
 				 */
 				Params() : mod(0.0), prepares(false), modified(false), algorithm(0) {}
 			} params_t;
+			// Упрощаем тип функции предобработки слов
+			typedef function <const string (const string &, const vector <string> &)> wpres_t;
 		private:
 			/**
 			 * Info Структура общей статистики
@@ -142,6 +144,8 @@ namespace anyks {
 			arpa_t * arpa = nullptr;
 			// Объект работы с python
 			python_t * python = nullptr;
+			// Функция предобработки слов
+			wpres_t wordPress = nullptr;
 			// Объект log файла
 			const char * logfile = nullptr;
 			// Объект алфавита
@@ -422,8 +426,14 @@ namespace anyks {
 			 * @param idd  идентификатор документа
 			 */
 			void addWord(const wstring & word, const size_t idw = 0, const size_t idd = 0) noexcept;
+		public:
 			/**
-			 * setUserTokenMethod Метод добавления функции обработки пользовательского токена
+			 * setWordPreprocessingMethod Метод установки функции препроцессинга слова
+			 * @param fn внешняя функция препроцессинга слова
+			 */
+			void setWordPreprocessingMethod(wpres_t fn) noexcept;
+			/**
+			 * setUserTokenMethod Метод установки функции обработки пользовательского токена
 			 * @param name слово - обозначение токена
 			 * @param fn   внешняя функция обрабатывающая пользовательский токен
 			 */

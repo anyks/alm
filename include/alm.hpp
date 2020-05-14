@@ -65,7 +65,7 @@ namespace anyks {
 				/*
 				 * Функция проверки
 				 */
-				function <bool (const string &, const string &)> test;
+				function <const bool (const string &, const string &)> test;
 				/**
 				 * UserToken Конструктор
 				 */
@@ -134,6 +134,8 @@ namespace anyks {
 			typedef function <const word_t * (const size_t)> words_t;
 			// Упрощаем тип функции для добавления слова
 			typedef function <void (const size_t, const word_t &)> addw_t;
+			// Упрощаем тип функции предобработки слов
+			typedef function <const string (const string &, const vector <string> &)> wpres_t;
 		private:
 			// Нулевое значение логорифма
 			const double zero = log(0);
@@ -177,6 +179,8 @@ namespace anyks {
 			addw_t addWord = nullptr;
 			// Функция извлечения слова по его идентификатору
 			words_t getWord = nullptr;
+			// Функция предобработки слов
+			wpres_t wordPress = nullptr;
 			// Объект работы с python
 			python_t * python = nullptr;
 			// Объект алфавита
@@ -256,6 +260,7 @@ namespace anyks {
 			 * @return    обратная частота последовательности
 			 */
 			const double backoff(const vector <size_t> & seq) const noexcept;
+		public:
 			/**
 			 * getIdw Метод генерирования идентификатора слова
 			 * @param  word  слово для генерации
@@ -292,7 +297,7 @@ namespace anyks {
 			/**
 			 * pplByFiles Метод чтения расчёта перплексии по файлу или группе файлов
 			 * @param path   адрес каталога или файла для расчёта перплексии
-			 * @param status функция вывода статуса чтения
+			 * @param status функция вывода статуса
 			 * @param ext    расширение файлов в каталоге (если адрес передан каталога)
 			 * @return       результат расчёта
 			 */
@@ -417,7 +422,7 @@ namespace anyks {
 			 */
 			void setLogfile(const char * logfile) noexcept;
 			/**
-			 * setOOvFile Метом установки файла для сохранения OOV слов
+			 * setOOvFile Метод установки файла для сохранения OOV слов
 			 * @param oovfile адрес файла для сохранения oov слов
 			 */
 			void setOOvFile(const char * oovfile) noexcept;
@@ -554,28 +559,34 @@ namespace anyks {
 			/**
 			 * read Метод чтения данных из файла arpa
 			 * @param filename адрес файла для чтения
-			 * @param status   функция вывода статуса чтения
+			 * @param status   функция вывода статуса
 			 */
 			void read(const string & filename, function <void (const u_short)> status = nullptr) noexcept;
+		public:
 			/**
-			 * setUserTokenMethod Метод добавления функции обработки пользовательского токена
+			 * setWordPreprocessingMethod Метод установки функции препроцессинга слова
+			 * @param fn внешняя функция препроцессинга слова
+			 */
+			void setWordPreprocessingMethod(wpres_t fn) noexcept;
+			/**
+			 * setUserTokenMethod Метод установки функции обработки пользовательского токена
 			 * @param name слово - обозначение токена
 			 * @param fn   внешняя функция обрабатывающая пользовательский токен
 			 */
-			void setUserTokenMethod(const string & name, function <bool (const string &, const string &)> fn) noexcept;
+			void setUserTokenMethod(const string & name, function <const bool (const string &, const string &)> fn) noexcept;
 		public:
 			/**
 			 * sentencesToFile Метод сборки указанного количества предложений и записи в файл
 			 * @param counts   количество предложений для сборки
 			 * @param filename адрес файла для записи результата
-			 * @param status   функция вывода статуса чтения
+			 * @param status   функция вывода статуса
 			 */
 			void sentencesToFile(const u_short counts, const string & filename, function <void (const u_short)> status = nullptr) const noexcept;
 			/**
 			 * findByFiles Метод поиска n-грамм в текстовом файле
 			 * @param path     адрес каталога или файла для обработки
 			 * @param filename адрес файла для записи результата
-			 * @param status   функция вывода статуса чтения
+			 * @param status   функция вывода статуса
 			 * @param ext      расширение файлов в каталоге (если адрес передан каталога)
 			 */
 			void findByFiles(const string & path, const string & filename, function <void (const string &, const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
@@ -583,7 +594,7 @@ namespace anyks {
 			 * fixUppersByFiles Метод исправления регистров текста в текстовом файле
 			 * @param path     адрес каталога или файла для обработки
 			 * @param filename адрес файла для записи результата
-			 * @param status   функция вывода статуса чтения
+			 * @param status   функция вывода статуса
 			 * @param ext      расширение файлов в каталоге (если адрес передан каталога)
 			 */
 			void fixUppersByFiles(const string & path, const string & filename, function <void (const string &, const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
@@ -592,7 +603,7 @@ namespace anyks {
 			 * @param path     адрес каталога или файла для обработки
 			 * @param filename адрес файла для записи результата
 			 * @param ngrams   размер n-граммы для подсчёта
-			 * @param status   функция вывода статуса чтения
+			 * @param status   функция вывода статуса
 			 * @param ext      расширение файлов в каталоге (если адрес передан каталога)
 			 */
 			void countsByFiles(const string & path, const string & filename, const u_short ngrams = 0, function <void (const string &, const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
@@ -601,7 +612,7 @@ namespace anyks {
 			 * @param path     адрес каталога или файла для обработки
 			 * @param filename адрес файла для записи результата
 			 * @param accurate режим точной проверки
-			 * @param status   функция вывода статуса чтения
+			 * @param status   функция вывода статуса
 			 * @param ext      расширение файлов в каталоге (если адрес передан каталога)
 			 */
 			void checkByFiles(const string & path, const string & filename, const bool accurate = false, function <void (const string &, const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
@@ -610,7 +621,7 @@ namespace anyks {
 			 * getSize Метод получения размера n-грамы
 			 * @return длина n-граммы в языковой моделе
 			 */
-			const u_short getSize() const;
+			const u_short getSize() const noexcept;
 			/**
 			 * getOptions Метод извлечения установленных опций
 			 * @return установленные опции

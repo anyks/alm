@@ -30,7 +30,7 @@
 /**
  * Наши модули
  */
-#include <BigIntegerLibrary.hh>
+#include <bigint/BigIntegerLibrary.hh>
 
 // Параметры Zlib
 #define MOD_GZIP_ZLIB_CFACTOR 9

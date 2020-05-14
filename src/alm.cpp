@@ -589,16 +589,15 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 						this->locker.lock();
 						// Выполняем внешний python скрипт
 						tmp = this->python->run(it->second.second, {tmp.real()}, ctx);
-						// Если результат не получен, возвращаем слово
-						if(tmp.empty()) tmp = move(word);
 						// Разблокируем поток
 						this->locker.unlock();
 					}
-				}
+				// Если модуль предобработки слов, существует
+				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
 				if(tmp.length() >= MAX_WORD_LENGTH) unkFn(word);
 				// Если слово разрешено
-				else {
+				else if(!tmp.empty()) {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
 					// Если это плохое слово, заменяем его на неизвестное
@@ -1027,7 +1026,7 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 			// Подсчитываем статус выполнения
 			actual = u_short(csize / max * 100.0);
 			// Если процентное соотношение изменилось
-			if(rate != actual){
+			if((status != nullptr) && (rate != actual)){
 				// Запоминаем текущее процентное соотношение
 				rate = actual;
 				// Выводим статистику
@@ -1193,16 +1192,15 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text, const bool acc
 						this->locker.lock();
 						// Выполняем внешний python скрипт
 						tmp = this->python->run(it->second.second, {tmp.real()}, ctx);
-						// Если результат не получен, возвращаем слово
-						if(tmp.empty()) tmp = move(word);
 						// Разблокируем поток
 						this->locker.unlock();
 					}
-				}
+				// Если модуль предобработки слов, существует
+				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
 				if(tmp.length() >= MAX_WORD_LENGTH) unkFn();
 				// Если слово разрешено
-				else {
+				else if(!tmp.empty()) {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
 					// Если это плохое слово, заменяем его на неизвестное
@@ -1416,16 +1414,15 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 						this->locker.lock();
 						// Выполняем внешний python скрипт
 						tmp = this->python->run(it->second.second, {tmp.real()}, ctx);
-						// Если результат не получен, возвращаем слово
-						if(tmp.empty()) tmp = move(word);
 						// Разблокируем поток
 						this->locker.unlock();
 					}
-				}
+				// Если модуль предобработки слов, существует
+				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
 				if(tmp.length() >= MAX_WORD_LENGTH) resFn(tmp);
 				// Если слово разрешено
-				else {
+				else if(!tmp.empty()) {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
 					// Если это плохое слово, заменяем его на неизвестное
@@ -1854,7 +1851,7 @@ void anyks::Alm::setLogfile(const char * logfile) noexcept {
 	this->logfile = logfile;
 }
 /**
- * setOOvFile Метом установки файла для сохранения OOV слов
+ * setOOvFile Метод установки файла для сохранения OOV слов
  * @param oovfile адрес файла для сохранения oov слов
  */
 void anyks::Alm::setOOvFile(const char * oovfile) noexcept {
@@ -2648,16 +2645,15 @@ void anyks::Alm::find(const wstring & text, function <void (const wstring &)> ca
 						this->locker.lock();
 						// Выполняем внешний python скрипт
 						tmp = this->python->run(it->second.second, {tmp.real()}, ctx);
-						// Если результат не получен, возвращаем слово
-						if(tmp.empty()) tmp = move(word);
 						// Разблокируем поток
 						this->locker.unlock();
 					}
-				}
+				// Если модуль предобработки слов, существует
+				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
 				if(tmp.length() >= MAX_WORD_LENGTH) unkFn();
 				// Если слово разрешено
-				else {
+				else if(!tmp.empty()) {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
 					// Если это плохое слово, заменяем его на неизвестное
@@ -2922,11 +2918,19 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 	} else if(this->isOption(options_t::debug) || (this->logfile != nullptr)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is not exist");
 }
 /**
- * setUserTokenMethod Метод добавления функции обработки пользовательского токена
+ * setWordPreprocessingMethod Метод установки функции препроцессинга слова
+ * @param fn внешняя функция препроцессинга слова
+ */
+void anyks::Alm::setWordPreprocessingMethod(wpres_t fn) noexcept {
+	// Устанавливаем функцию
+	this->wordPress = fn;
+}
+/**
+ * setUserTokenMethod Метод установки функции обработки пользовательского токена
  * @param name слово - обозначение токена
  * @param fn   внешняя функция обрабатывающая пользовательский токен
  */
-void anyks::Alm::setUserTokenMethod(const string & name, function <bool (const string &, const string &)> fn) noexcept {
+void anyks::Alm::setUserTokenMethod(const string & name, function <const bool (const string &, const string &)> fn) noexcept {
 	// Если название токена передано
 	if(!name.empty()){
 		// Получаем идентификатор токена
@@ -2950,6 +2954,8 @@ void anyks::Alm::sentencesToFile(const u_short counts, const string & filename, 
 		u_short index = 0, actual = 0, rate = 100;
 		// Выполняем сборку предложений
 		this->sentences([&](const wstring & text){
+			// Увеличиваем индекс собранных данных
+			index++;
 			// Получаем строку текста для вывода
 			const string & str = this->alphabet->convert(text);
 			// Если текст получен
@@ -2961,8 +2967,6 @@ void anyks::Alm::sentencesToFile(const u_short counts, const string & filename, 
 			}
 			// Если отладка включена
 			if(status != nullptr){
-				// Увеличиваем индекс собранных данных
-				index++;
 				// Подсчитываем статус выполнения
 				actual = u_short(index / double(counts) * 100.0);
 				// Если процентное соотношение изменилось
@@ -3368,7 +3372,7 @@ void anyks::Alm::checkByFiles(const string & path, const string & filename, cons
  * getSize Метод получения размера n-грамы
  * @return длина n-граммы в языковой моделе
  */
-const u_short anyks::Alm::getSize() const {
+const u_short anyks::Alm::getSize() const noexcept {
 	// Выводим размер n-граммы
 	return this->size;
 }

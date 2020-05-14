@@ -499,8 +499,14 @@ const wstring anyks::Alphabet::delBrokenInWord(const wstring & word) const noexc
 		result.assign(word);
 		// Выполняем удаление всех знаков препинания
 		result.erase(remove_if(result.begin(), result.end(), [this](const wchar_t c) noexcept {
+			// Выполняем конвертацию символа
+			const wchar_t letter = towlower(c);
 			// Если это буква или цифра или дефис
-			return ((this->allowedSymbols.count(c) < 1) && (c != L'\r') && (c != L'\n') && !iswspace(c) && !this->check(c) && !this->isNumber({c}));
+			return (
+				(this->allowedSymbols.count(letter) < 1) &&
+				(letter != L'\r') && (letter != L'\n') &&
+				!iswspace(letter) && !this->check(letter) && !this->isNumber({letter})
+			);
 		}), result.end());
 	}
 	// Выводим результат
@@ -793,34 +799,88 @@ const bool anyks::Alphabet::isAbbr(const wstring & word) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если слово передано
-	if(!word.empty() && (word.length() > 1) && this->check(word.front())){
-		// Флаг найденой точки
-		bool point = false;
-		// Длина слова до точки
-		u_short length = 1;
-		// Текущая буква в слове
-		wchar_t letter = 0;
-		// Выполняем переход по всему слову
-		for(size_t i = 1; i < word.length(); i++){
-			// Получаем текущую букву слова
-			letter = word.at(i);
-			// Если это не точка
-			if((result = (letter == L'.'))){
-				// Сбрасываем длину слова
-				length = 0;
-				// Запоминаем что точка найдена
-				point = true;
-			// Если слово не прошло проверку
-			} else if((length > 3) || !this->check(letter)) {
-				// Запоминаем, что результат не получен
-				result = false;
-				// Выходим из цикла
-				break;
-			// Увеличиваем количество обработанных букв
-			} else if((result = true)) length++;
+	if(!word.empty() && (word.length() > 1) && (word.back() != L'-') && this->check(word.front())){
+		// Позиция пробела
+		size_t pos = wstring::npos;
+		// Ищем дефис в слове
+		if((pos = word.find(L'-')) != wstring::npos){
+			// Если первая часть является числом
+			if(this->isNumber(word.substr(0, pos))){
+				/**
+				 * isAllowedFn Метод проверки соответствия слова словарю
+				 * @param  word слово для проверки
+				 * @return      результат проверки
+				 */
+				auto isAllowedFn = [this](const wstring & word) noexcept {
+					// Результат работы функции
+					bool result = false;
+					// Если слово передано
+					if(!word.empty()){
+						// Длина слова
+						const size_t length = word.length();
+						// Переводим слово в нижний регистр
+						const wstring & tmp = this->toLower(word);
+						// Если строка длиннее 1-го символа
+						if(length > 1){
+							// Текущая буква
+							wchar_t letter = 0;
+							// Выполняем переход по всем буквам слова
+							for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
+								// Получаем текущую букву
+								letter = tmp.at(i);
+								// Проверяем соответствует ли буква
+								result = this->check(letter);
+								// Проверяем вторую букву в слове
+								if(result && (i != j)){
+									// Получаем текущую букву
+									letter = tmp.at(j);
+									// Проверяем соответствует ли буква
+									result = this->check(letter);
+								}
+								// Если буква не соответствует, выходим
+								if(!result) break;
+							}
+						// Если строка всего из одного символа
+						} else result = this->check(tmp.front());
+					}
+					// Выводим результат
+					return result;
+				};
+				// Получаем суффикс
+				const wstring & suffix = word.substr(pos + 1);
+				// Если суффикс не является числом
+				result = (!this->isNumber(suffix) && isAllowedFn(suffix));
+			}
+		// Если это не дефис
+		} else {
+			// Флаг найденой точки
+			bool point = false;
+			// Длина слова до точки
+			u_short length = 1;
+			// Текущая буква в слове
+			wchar_t letter = 0;
+			// Выполняем переход по всему слову
+			for(size_t i = 1; i < word.length(); i++){
+				// Получаем текущую букву слова
+				letter = word.at(i);
+				// Если это не точка
+				if((result = (letter == L'.'))){
+					// Сбрасываем длину слова
+					length = 0;
+					// Запоминаем что точка найдена
+					point = true;
+				// Если слово не прошло проверку
+				} else if((length > 3) || !this->check(letter)) {
+					// Запоминаем, что результат не получен
+					result = false;
+					// Выходим из цикла
+					break;
+				// Увеличиваем количество обработанных букв
+				} else if((result = true)) length++;
+			}
+			// Если точка не найдена, сбрасываем результат
+			if(!point) result = false;
 		}
-		// Если точка не найдена, сбрасываем результат
-		if(!point) result = false;
 	}
 	// Выводим результат
 	return result;
@@ -1203,19 +1263,10 @@ const bool anyks::Alphabet::checkLatian(const wstring & str) const noexcept {
 		const size_t length = str.length();
 		// Если длина слова больше 1-го символа
 		if(length > 1){
-			/**
-			 * checkFn Метод проверки соответствия буквы
-			 * @param letter буква для проверки
-			 * @return       результат проверки
-			 */
-			auto checkFn = [this](const wchar_t letter) noexcept {
-				// Результат проверки
-				return ((letter == L'-') || (letter == L'\'') || (this->latian.count(letter) > 0));
-			};
 			// Переходим по всем буквам слова
 			for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
 				// Проверяем является ли слово латинским
-				result = (i == j ? checkFn(str.at(i)) : checkFn(str.at(i)) || checkFn(str.at(j)));
+				result = (i == j ? (this->latian.count(str.at(i)) > 0) : (this->latian.count(str.at(i)) > 0) || (this->latian.count(str.at(j)) > 0));
 				// Если найдена хотя бы одна латинская буква тогда выходим
 				if(result) break;
 			}
@@ -1681,6 +1732,13 @@ void anyks::Alphabet::setSubstitutes(const std::map <string, string> & letters) 
 anyks::Alphabet::Alphabet() noexcept {
 	// Устанавливаем локализацию системы
 	this->setlocale();
+	// Переходим по всем буквам алфавита
+	for(auto & letter : this->alphabet){
+		// Добавляем буквы в латинский алфавит
+		this->latian.emplace(letter);
+	}
+	// Устанавливаем алфавит по умолчанию
+	this->set();
 }
 /**
  * Alphabet Конструктор
@@ -1689,6 +1747,13 @@ anyks::Alphabet::Alphabet() noexcept {
 anyks::Alphabet::Alphabet(const string & locale) noexcept {
 	// Устанавливаем локализацию системы
 	this->setlocale(locale);
+	// Переходим по всем буквам алфавита
+	for(auto & letter : this->alphabet){
+		// Добавляем буквы в латинский алфавит
+		this->latian.emplace(letter);
+	}
+	// Устанавливаем алфавит по умолчанию
+	this->set();
 }
 /**
  * Alphabet Конструктор

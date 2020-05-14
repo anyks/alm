@@ -5,6 +5,7 @@
 - [Цели проекта](https://github.com/anyks/alm/blob/master/site#%D1%86%D0%B5%D0%BB%D0%B8-%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0)
 - [Внешние зависимости](https://github.com/anyks/alm/blob/master/site#%D0%B2%D0%BD%D0%B5%D1%88%D0%BD%D0%B8%D0%B5-%D0%B7%D0%B0%D0%B2%D0%B8%D1%81%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D0%B8)
 - [Сборка проекта](https://github.com/anyks/alm/blob/master/site#%D1%81%D0%B1%D0%BE%D1%80%D0%BA%D0%B0-%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0)
+  - [Python версия ALM](https://github.com/anyks/alm/blob/master/site#%D0%BA%D0%BB%D0%BE%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0-%D1%84%D0%BB%D0%B0%D0%B3---recursive-%D0%BE%D0%B1%D1%8F%D0%B7%D0%B0%D1%82%D0%B5%D0%BB%D0%B5%D0%BD)
   - [Клонирование проекта](https://github.com/anyks/alm/blob/master/site#%D0%BA%D0%BB%D0%BE%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0-%D1%84%D0%BB%D0%B0%D0%B3---recursive-%D0%BE%D0%B1%D1%8F%D0%B7%D0%B0%D1%82%D0%B5%D0%BB%D0%B5%D0%BD)
   - [Linux и FreeBSD](https://github.com/anyks/alm/blob/master/site#linux-%D0%B8-freebsd)
   - [MacOS X](https://github.com/anyks/alm/blob/master/site#macos-x)
@@ -56,52 +57,40 @@
 Существует множество библиотек языковых моделей ([KenLM](https://github.com/kpu/kenlm), [SriLM](https://github.com/BitMindLab/SRILM), [IRSTLM](https://github.com/irstlm-team/irstlm)), и у каждой из них может быть причина для существования. Наша языковая модель преследовала следующие цели:
 
 - **Поддержка UTF-8**: Полная поддержка UTF-8 без сторонних зависимостей.
-
 - **Поддержка форматов данных**: Arpa, Vocab, Map Sequence, N-grams, Binary alm dictionary.
-
 - **Поддержка алгоритмов сглаживания**: Kneser-Nay, Modified Kneser-Nay, Witten-Bell, Additive, Good-Turing, Absolute discounting.
-
 - **Нормализация входных корпусов**: Приведение слов к нижнему регистру, умная токенизация, поддержка чёрного и белого списков.
-
 - **Модификация arpa**: Замена частот, замена n-грамм, добавление новых n-грамм с частотами, удаление n-грамм.
-
 - **Прунинг**: Сокращение числа n-грамм которые не соответствуют указанным критериям качества.
-
 - **Чистка плохих n-грамм**: Удаление n-грамм у которых обратная частота backoff выше основной частоты.
-
 - **Восстановление arpa**: Восстановление повреждённых n-грамм в arpa с последующим перерасчётом их backoff частот.
-
 - **Поддержка дополнительных токенов слов**: Определение в тексте токенов: (чисел, римских чисел, диапазонов чисел, аббривиатур, любых других пользовательских токенов с помощью скриптов написанных на языке Python3).
-
 - **Обработка грязных текстов**: В отличие от всех остальных языковых моделей, здесь мы умеем извлекать правильный контекст из текстовых файлов с грязными текстами.
-
 - **Полноценный учёт 〈unk〉 токена**: Учёт 〈unk〉 токена как полноценной n-граммы.
-
 - **Переопределение 〈unk〉 токена**: Возможность переопределения токена неизвестного слова.
-
 - **Препроцессинг обрабатываемых n-грамм**: Возможность предобрабатывать n-граммы перед добавлением в arpa с помощью пользовательских скриптов на языке Python3.
-
 - **Бинарный контейнер языковой модели**: Бинарный контейнер поддерживает сжатие, шифрование и установку копирайтов.
-
 - **Удобная визуализация хода процесса**: В ALM реализовано несколько видов визуализаций: текстовая, графическая в виде индикатора процесса, логирование в файлы или консоль.
-
 - **Гарантированная сборка всех n-грамм**: В отличие от остальных языковых моделей, ALM гарантированно собирает все n-граммы из текста в независимости от их длины (кроме Modified Kneser-Nay), также возможно принудительно учитывать все n-граммы даже если они встретились всего 1 раз.
 
 ## Внешние зависимости
 
 - [Zlib](http://www.zlib.net)
-
 - [OpenSSL](https://www.openssl.org)
-
 - [GperfTools](https://github.com/gperftools/gperftools)
-
 - [Python3](https://www.python.org/download/releases/3.0)
-
 - [NLohmann::json](https://github.com/nlohmann/json)
-
 - [BigInteger](http://mattmccutchen.net/bigint)
 
 ## Сборка проекта
+
+### Python версия ALM
+```bash
+$ python3 -m pip install pybind11
+$ python3 -m pip install anyks-lm
+```
+
+[Документация pip](https://pypi.org/project/anyks-lm)
 
 ### Клонирование проекта, флаг [--recursive] обязателен
 
