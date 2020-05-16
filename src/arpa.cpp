@@ -971,12 +971,12 @@ const string anyks::Arpa::stamp() const noexcept {
 		"#  email:     %s\n"
 		"#  site:      %s\n"
 		"#  built:     %s\n#\n\n",
-		ANYKS_VERSION,
-		ANYKS_AUTHOR,
-		ANYKS_CONTACT,
-		ANYKS_PHONE,
-		ANYKS_EMAIL,
-		ANYKS_SITE,
+		ANYKS_LM_VERSION,
+		ANYKS_LM_AUTHOR,
+		ANYKS_LM_CONTACT,
+		ANYKS_LM_PHONE,
+		ANYKS_LM_EMAIL,
+		ANYKS_LM_SITE,
 		date
 	);
 }

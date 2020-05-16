@@ -39,8 +39,10 @@ ifeq ($(OS), Darwin)
 
 	# Заголовочные файлы
 	INCLUDE = \
+		-I./ \
 		-I./include \
 		-I./json/include \
+		-I./contrib/include \
 		-I/usr/include \
 		-I/usr/local/include \
 		-I./gtest/include \
@@ -85,8 +87,10 @@ ifeq ($(OS), FreeBSD)
 
 	# Заголовочные файлы
 	INCLUDE = \
+		-I./ \
 		-I./include \
 		-I./json/include \
+		-I./contrib/include \
 		-I/usr/include \
 		-I/usr/local/include \
 		-I./gtest/include \
@@ -129,8 +133,10 @@ ifeq ($(OS), Linux)
 
 	# Заголовочные файлы
 	INCLUDE = \
+		-I./ \
 		-I./include \
 		-I./json/include \
+		-I./contrib/include \
 		-I/usr/include \
 		-I/usr/local/include \
 		-I./gtest/include \

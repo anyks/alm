@@ -28,9 +28,9 @@
  * Наши модули
  */
 #include <word.hpp>
-#include <general.hpp>
 #include <alphabet.hpp>
 #include <tokenizer.hpp>
+#include <app/alm.hpp>
 
 // Устанавливаем область видимости
 using namespace std;

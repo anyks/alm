@@ -33,10 +33,10 @@
 #include <fsys.hpp>
 #include <word.hpp>
 #include <python.hpp>
-#include <general.hpp>
 #include <alphabet.hpp>
 #include <tokenizer.hpp>
 #include <threadpool.hpp>
+#include <app/alm.hpp>
 
 // Устанавливаем область видимости
 using namespace std;

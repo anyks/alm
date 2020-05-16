@@ -50,15 +50,15 @@ void version(const char * address) noexcept {
 		"* email:    %s\r\n"
 		"* site:     %s\r\n*\r\n\r\n",
 		ANYKS_LM_NAME,
-		ANYKS_VERSION,
+		ANYKS_LM_VERSION,
 		__DATE__,
 		__TIME__,
 		osname,
 		appname.c_str(),
-		ANYKS_AUTHOR,
-		ANYKS_CONTACT,
-		ANYKS_EMAIL,
-		ANYKS_SITE
+		ANYKS_LM_AUTHOR,
+		ANYKS_LM_CONTACT,
+		ANYKS_LM_EMAIL,
+		ANYKS_LM_SITE
 	);
 }
 /**

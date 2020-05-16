@@ -29,8 +29,8 @@
 #include <arpa.hpp>
 #include <word.hpp>
 #include <python.hpp>
-#include <general.hpp>
 #include <alphabet.hpp>
+#include <app/alm.hpp>
 
 // Устанавливаем область видимости
 using namespace std;

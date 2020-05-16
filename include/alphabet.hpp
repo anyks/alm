@@ -30,7 +30,7 @@
  */
 #include <nwt.hpp>
 #include <word.hpp>
-#include <general.hpp>
+#include <app/alm.hpp>
 
 using namespace std;
 

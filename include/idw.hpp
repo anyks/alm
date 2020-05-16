@@ -20,8 +20,8 @@
 /**
  * Наши модули
  */
-#include <general.hpp>
 #include <alphabet.hpp>
+#include <app/alm.hpp>
 #include <bigint/BigIntegerLibrary.hh>
 
 // Устанавливаем область видимости
