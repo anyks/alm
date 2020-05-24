@@ -121,11 +121,12 @@ namespace anyks {
 			 */
 			const bool isAllowApostrophe() const noexcept;
 			/**
-			 * idw Метод извлечения идентификатора слова
-			 * @param  word слово для получения идентификатора
-			 * @return      идентификатор слова
+			 * isAbbr Метод проверки слова на соответствие аббревиатуры
+			 * @param  word слово для проверки
+			 * @return      результат проверки
 			 */
-			const size_t idw(const wstring & word) const noexcept;
+			const bool isAbbr(const wstring & word) const noexcept;
+		public:
 			/**
 			 * idt Метод извлечения идентификатора токена
 			 * @param  word слово для получения идентификатора
@@ -133,11 +134,17 @@ namespace anyks {
 			 */
 			const token_t idt(const wstring & word) const noexcept;
 			/**
-			 * isAbbr Метод проверки слова на соответствие аббревиатуры
-			 * @param  word слово для проверки
-			 * @return      результат проверки
+			 * idw Метод извлечения идентификатора слова
+			 * @param  word слово для получения идентификатора
+			 * @return      идентификатор слова
 			 */
-			const bool isAbbr(const wstring & word) const noexcept;
+			const size_t idw(const wstring & word) const noexcept;
+			/**
+			 * idw Метод извлечения идентификатора последовательности
+			 * @param  seq последовательность для получения идентификатора
+			 * @return     идентификатор последовательности
+			 */
+			const size_t idw(const vector <size_t> & seq) const noexcept;
 		public:
 			/**
 			 * readline Метод извлечения строки из текста

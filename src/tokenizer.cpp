@@ -103,13 +103,35 @@ const bool anyks::Tokenizer::isAllowApostrophe() const noexcept {
 	return this->apostrophe;
 }
 /**
- * idw Метод извлечения идентификатора слова
- * @param  word слово для получения идентификатора
- * @return      идентификатор слова
+ * isAbbr Метод проверки слова на соответствие аббревиатуры
+ * @param  word слово для проверки
+ * @return      результат проверки
  */
-const size_t anyks::Tokenizer::idw(const wstring & word) const noexcept {
-	// Формируем идентификатор слова
-	return this->idWord.get(word);
+const bool anyks::Tokenizer::isAbbr(const wstring & word) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(!word.empty() && !this->abbrs.empty()){
+		// Позиция точки в слове
+		size_t pos = 0;
+		// Слово для проверки
+		wstring tmp = L"";
+		// Выполняем поиск точки
+		if((pos = word.find(L'.')) != wstring::npos){
+			// Обрезаем слово до точки
+			tmp = word.substr(0, pos);
+		// Иначе запоминаем слово как оно есть
+		} else tmp = move(word);
+		// Если слово не пустое
+		if(!tmp.empty()){
+			// Получаем идентификатор слова
+			const size_t idw = this->idw(tmp);
+			// Выполняем проверку сущестования аббревиатуры
+			result = (this->abbrs.count(idw) > 0);
+		}
+	}
+	// Выводим результат
+	return result;
 }
 /**
  * idt Метод извлечения идентификатора токена
@@ -278,35 +300,22 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 	return result;
 }
 /**
- * isAbbr Метод проверки слова на соответствие аббревиатуры
- * @param  word слово для проверки
- * @return      результат проверки
+ * idw Метод извлечения идентификатора слова
+ * @param  word слово для получения идентификатора
+ * @return      идентификатор слова
  */
-const bool anyks::Tokenizer::isAbbr(const wstring & word) const noexcept {
-	// Результат работы функции
-	bool result = false;
-	// Если слово передано
-	if(!word.empty() && !this->abbrs.empty()){
-		// Позиция точки в слове
-		size_t pos = 0;
-		// Слово для проверки
-		wstring tmp = L"";
-		// Выполняем поиск точки
-		if((pos = word.find(L'.')) != wstring::npos){
-			// Обрезаем слово до точки
-			tmp = word.substr(0, pos);
-		// Иначе запоминаем слово как оно есть
-		} else tmp = move(word);
-		// Если слово не пустое
-		if(!tmp.empty()){
-			// Получаем идентификатор слова
-			const size_t idw = this->idw(tmp);
-			// Выполняем проверку сущестования аббревиатуры
-			result = (this->abbrs.count(idw) > 0);
-		}
-	}
-	// Выводим результат
-	return result;
+const size_t anyks::Tokenizer::idw(const wstring & word) const noexcept {
+	// Формируем идентификатор слова
+	return this->idWord.get(word);
+}
+/**
+ * idw Метод извлечения идентификатора последовательности
+ * @param  seq последовательность для получения идентификатора
+ * @return     идентификатор последовательности
+ */
+const size_t anyks::Tokenizer::idw(const vector <size_t> & seq) const noexcept {
+	// Формируем идентификатор последовательности
+	return this->idWord.get(seq);
 }
 /**
  * readline Метод извлечения строки из текста

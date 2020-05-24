@@ -20,8 +20,9 @@
 /**
  * Наши модули
  */
-#include <alphabet.hpp>
 #include <app/alm.hpp>
+#include <alphabet.hpp>
+#include <cityhash/city.h>
 #include <bigint/BigIntegerLibrary.hh>
 
 // Устанавливаем область видимости
@@ -36,26 +37,19 @@ namespace anyks {
 	 */
 	typedef class Idw {
 		private:
-			// Смещение в алфавите
-			u_short offset = 0;
 			// Модули векторов
-			size_t mod1 = 0, mod2 = 0;
-		private:
-			// Список модулей для каждой буквы алфавита
-			vector <size_t> xs1, xs2;
-		private:
+			size_t mod;
+			// Смещение в алфавите
+			u_short offset;
 			// Список букв разрешенных в последовательности
-			wstring letters = L"¶";
+			wstring letters;
+			// Список модулей для каждой буквы алфавита
+			vector <size_t> xs;
 			// Объект основного алфавита
-			const alphabet_t * alphabet = nullptr;
+			const alphabet_t * alphabet;
 		public:
 			// Получаем максимальное значение идентификатора
 			static constexpr size_t NIDW = numeric_limits <size_t>::max();
-		private:
-			/**
-			 * initSequence Метод инициализации параметров последовательности
-			 */
-			void initSequence() noexcept;
 		public:
 			/**
 			 * setOffset Метод установки смещения в алфавите
