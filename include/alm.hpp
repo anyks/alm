@@ -108,6 +108,25 @@ namespace anyks {
 				 */
 				Seq() : weight(log(0)), backoff(0.0), idw(idw_t::NIDW), oc(0), dc(0), ups(0) {}
 			} seq_t;
+
+
+			typedef struct Param {
+				/**
+				 * Регистры слова
+				 */
+				size_t uppers;
+				/**
+				 * Частота последовательности и
+				 * обратная частота последовательности
+				 */
+				double weight, backoff;
+				/**
+				 * Param Конструктор
+				 */
+				Param() : uppers(0), weight(log(0)), backoff(0.0) {}
+			} param_t;
+
+			typedef std::map <u_short, std::map <size_t, param_t>> arpa2_t;
 		public:
 			// Основные опции
 			enum class options_t : u_short {

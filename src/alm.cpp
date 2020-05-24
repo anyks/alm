@@ -683,237 +683,225 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <size_t> & seq) cons
 		const size_t count = seq.size();
 		// Текст данных отладки собранных при расчёте
 		map <size_t, pair <string, string>> debugMessages;
-		// Если последовательность в виде юниграммы
-		if(count == 3){
-			// Получаем идентификатор слова
-			const size_t idw = seq.at(1);
-			// Выполняем поиск нашего слова
-			auto it = this->arpa.find(idw);
-			// Если слово найдено
-			if(it != this->arpa.end()){
-				// Извлекаем вес слова
-				result.logprob = it->second.weight;
-			// Устанавливаем количество неизвестных слов
-			} else if(idw == size_t(token_t::unk)) result.oovs++;
-		// Если это не юниграмма
-		} else {
-			// Временная последовательность
-			vector <size_t> tmp;
-			// Определяем смещение в последовательности
-			size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
-			// Проверяем разрешено ли неизвестное слово
-			const bool isAllowUnk = (
-				(this->arpa.count(size_t(token_t::unk)) > 0) &&
-				(this->arpa.at(size_t(token_t::unk)).weight != this->zero)
-			);
-			/**
-			 * debugFn Функция вывода отладочной информации
-			 * @param first  первое слово
-			 * @param second второе слово
-			 * @param bigram является ли n-грамма длиннее биграммы
-			 * @param gram   граммность n-граммы для которой был произведён расчёт
-			 * @param weight полученный вес n-граммы при расчёте
-			 * @param delim  проверочный делитель n-граммы
-			 * @param pos    позиция n-граммы в контексте
-			 */
-			auto debugFn = [&debugMessages, this](const string & first, const string & second, const bool bigram, const u_short gram, const double weight, const double delim, const size_t pos){
-				// Выводим отладочную информацию
-				if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
-					// Результат работы функции
-					pair <string, string> result;
-					// Граммность n-граммы
-					string numGram = "OOV";
-					// Значение полученного веса
-					double prob = 0.0, lprob = this->zero;
-					// Если вес не нулевой
-					if(weight != 0.0){
-						// Запоминаем вес n-граммы
-						lprob = weight;
-						// Избавляемся от логорифма
-						prob = pow(10, weight);
-						// Устанавливаем граммность
-						numGram = (to_string(gram) + "gram");
-					}
-					// Формируем информационное сообщение
-					result.first = this->alphabet->format(
-						"p( %s | %s %s) \t= [%s] %4.8f [ %4.8f ] / %4.8f",
-						second.c_str(),
-						first.c_str(),
-						(bigram ? "..." : ""),
-						numGram.c_str(),
-						prob, lprob, delim
-					);
-					// Выполняем округление делителя
-					const double value = (ceil((delim * 10000.0) + 0.5) / 10000.0);
-					// Если делитель не сходится к единице, выводим сообщение
-					if(fabs(value - 1.0) > 0.0009) result.second = this->alphabet->format("word probs for this context sum to %4.8f != 1", delim);
-					// Блокируем поток
-					this->locker.lock();
-					// Добавляем в список отладки
-					debugMessages.emplace(pos, move(result));
-					// Разблокируем поток
-					this->locker.unlock();
-				}
-			};
-			/**
-			 * calcFn Функция расчёта перплексии
-			 * @param seq последовательность слов для обработки
-			 * @return    вес n-граммы
-			 */
-			auto calcFn = [isAllowUnk, this](const vector <size_t> & seq) noexcept {
+		// Временная последовательность
+		vector <size_t> tmp;
+		// Определяем смещение в последовательности
+		size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+		// Проверяем разрешено ли неизвестное слово
+		const bool isAllowUnk = (
+			(this->arpa.count(size_t(token_t::unk)) > 0) &&
+			(this->arpa.at(size_t(token_t::unk)).weight != this->zero)
+		);
+		/**
+		 * debugFn Функция вывода отладочной информации
+		 * @param first  первое слово
+		 * @param second второе слово
+		 * @param bigram является ли n-грамма длиннее биграммы
+		 * @param gram   граммность n-граммы для которой был произведён расчёт
+		 * @param weight полученный вес n-граммы при расчёте
+		 * @param delim  проверочный делитель n-граммы
+		 * @param pos    позиция n-граммы в контексте
+		 */
+		auto debugFn = [&debugMessages, this](const string & first, const string & second, const bool bigram, const u_short gram, const double weight, const double delim, const size_t pos){
+			// Выводим отладочную информацию
+			if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
 				// Результат работы функции
-				pair <u_short, double> result = {0, 0.0};
-				// Если данные не пустые
-				if(!seq.empty()){
-					// Получаем нашу последовательность
-					vector <size_t> tmp = seq;
-					// Если первый элемент является неизвестным словом, удаляем его
-					if(!isAllowUnk && (tmp.front() == size_t(token_t::unk))){
+				pair <string, string> result;
+				// Граммность n-граммы
+				string numGram = "OOV";
+				// Значение полученного веса
+				double prob = 0.0, lprob = this->zero;
+				// Если вес не нулевой
+				if(weight != 0.0){
+					// Запоминаем вес n-граммы
+					lprob = weight;
+					// Избавляемся от логорифма
+					prob = pow(10, weight);
+					// Устанавливаем граммность
+					numGram = (to_string(gram) + "gram");
+				}
+				// Формируем информационное сообщение
+				result.first = this->alphabet->format(
+					"p( %s | %s %s) \t= [%s] %4.8f [ %4.8f ] / %4.8f",
+					second.c_str(),
+					first.c_str(),
+					(bigram ? "..." : ""),
+					numGram.c_str(),
+					prob, lprob, delim
+				);
+				// Выполняем округление делителя
+				const double value = (ceil((delim * 10000.0) + 0.5) / 10000.0);
+				// Если делитель не сходится к единице, выводим сообщение
+				if(fabs(value - 1.0) > 0.0009) result.second = this->alphabet->format("word probs for this context sum to %4.8f != 1", delim);
+				// Блокируем поток
+				this->locker.lock();
+				// Добавляем в список отладки
+				debugMessages.emplace(pos, move(result));
+				// Разблокируем поток
+				this->locker.unlock();
+			}
+		};
+		/**
+		 * calcFn Функция расчёта перплексии
+		 * @param seq последовательность слов для обработки
+		 * @return    вес n-граммы
+		 */
+		auto calcFn = [isAllowUnk, this](const vector <size_t> & seq) noexcept {
+			// Результат работы функции
+			pair <u_short, double> result = {0, 0.0};
+			// Если данные не пустые
+			if(!seq.empty()){
+				// Получаем нашу последовательность
+				vector <size_t> tmp = seq;
+				// Если первый элемент является неизвестным словом, удаляем его
+				if(!isAllowUnk){
+					// Удаляем все первые неизвестные слова
+					while(!tmp.empty() && (tmp.front() == size_t(token_t::unk))){
 						// Удаляем первый элемент в списке
 						tmp.assign(tmp.begin() + 1, tmp.end());
 					}
-					// Если есть еще смысл искать
-					if(!tmp.empty()){
-						// Копируем основную карту
-						const arpa_t * obj = &this->arpa;
-						// Переходим по всей последовательностив
-						for(auto & idw : tmp){
-							// Ищем нашу n-грамму
-							auto it = obj->find(idw);
-							// Если n-грамма найдена
-							if(it != obj->end()){
-								// Запоминаем следующую n-грамму
-								obj = &it->second;
-								// Запоминаем вес n-граммы
-								if(obj->weight != this->zero) result.second = obj->weight;
-							// Если n-грамма не найдена
-							} else {
-								// Если последнее слово последовательности найдено
-								if(this->arpa.count(tmp.back()) > 0){
-									// Получаем вес последовательности
-									const auto wrs = this->weight(tmp);
-									// Получаем грамность
-									result.first = wrs.first;
-									// Запоминаем полученный вес
-									result.second = wrs.second;
-									// Если вес получен для юниграммы, выполняем поиск частоты отката
-									if(result.first == 1){
-										// Получаем список последовательности для извлечения обратной частоты
-										tmp.assign(tmp.begin(), tmp.end() - 1);
-										// Выполняем расчёт веса n-граммы
-										result.second += this->backoff(tmp);
-									}
-								// Если слово не найдено, устанавливаем -inf
-								} else result.second = 0.0;
-								// Выходим из цикла
-								break;
-							}
-							// Увеличиваем граммность
-							result.first++;
+				}
+				// Если есть еще смысл искать
+				if(!tmp.empty()){
+					// Копируем основную карту
+					const arpa_t * obj = &this->arpa;
+					// Переходим по всей последовательностив
+					for(auto & idw : tmp){
+						// Ищем нашу n-грамму
+						auto it = obj->find(idw);
+						// Если n-грамма найдена
+						if(it != obj->end()){
+							// Запоминаем следующую n-грамму
+							obj = &it->second;
+							// Запоминаем вес n-граммы
+							if(obj->weight != this->zero) result.second = obj->weight;
+						// Если n-грамма не найдена
+						} else {
+							// Если последнее слово последовательности найдено
+							if(this->arpa.count(tmp.back()) > 0){
+								// Получаем вес последовательности
+								const auto wrs = this->weight(tmp);
+								// Получаем грамность
+								result.first = wrs.first;
+								// Запоминаем полученный вес
+								result.second = wrs.second;
+								// Если вес получен для юниграммы, выполняем поиск частоты отката
+								if(result.first == 1){
+									// Получаем список последовательности для извлечения обратной частоты
+									tmp.assign(tmp.begin(), tmp.end() - 1);
+									// Выполняем расчёт веса n-граммы
+									result.second += this->backoff(tmp);
+								}
+							// Если слово не найдено, устанавливаем -inf
+							} else result.second = 0.0;
+							// Выходим из цикла
+							break;
 						}
+						// Увеличиваем граммность
+						result.first++;
 					}
 				}
-				// Выводим результат
-				return result;
-			};
-			/**
-			 * putDebugFn Функция расчёта отладочной информации
-			 * @param seq    последовательность слов для обработки
-			 * @param gram   граммность n-граммы для которой был произведён расчёт
-			 * @param weight полученный вес n-граммы при расчёте
-			 * @param pos    позиция n-граммы в контексте
-			 */
-			auto putDebugFn = [&debugFn, this](const vector <size_t> & seq, const u_short gram, const double weight, const size_t pos) noexcept {
-				// Если последовательность передана
-				if(!seq.empty() && (this->isOption(options_t::debug) || (this->logfile != nullptr))){
-					// Получившийся разделитель
-					double delim = 0.0;
-					// Получаем нашу последовательность
-					vector <size_t> tmp = seq;
-					// Получаем количество слов в последовательности
-					const size_t count = tmp.size();
-					// Выполняем првоерку больше ли переданная последовательность биграммы
-					const bool isBigram = (count > 2);
-					// Получаем второе слово
-					const string & second = this->word(tmp.back()).real();
-					// Получаем первое слово
-					const string & first = this->word(tmp.at(count - 2)).real();
-					// Укорачиваем последовательность до 2-х слов
-					if(count > 2) tmp.assign(tmp.begin() + (count - 2), tmp.end());
-					// Удаляем последний элемент в списке
-					tmp.pop_back();
-					// Выполняем расчёт обратной частоты последовательности
-					const double backoff = this->backoff(tmp);
-					// Переходим по всем словам словаря
-					for(auto & value : this->arpa){
-						// Если веса у n-граммы нету
-						if((value.second.weight != this->zero)){
-							// Формируем нашу последовательность
-							tmp.push_back(value.first);
-							// Получаем частоту последовательности
-							auto calc = this->frequency(tmp);
-							// Если частота последовательности получена
-							if(calc.first != this->zero) delim += exp(calc.first * this->mln10);
-							// Если последовательность не существует, считаем частоту иначе
-							else delim += exp((this->weight(tmp).second + backoff) * this->mln10);
-							// Удаляем последний элемент в списке
-							tmp.pop_back();
-						}
+			}
+			// Выводим результат
+			return result;
+		};
+		/**
+		 * putDebugFn Функция расчёта отладочной информации
+		 * @param seq    последовательность слов для обработки
+		 * @param gram   граммность n-граммы для которой был произведён расчёт
+		 * @param weight полученный вес n-граммы при расчёте
+		 * @param pos    позиция n-граммы в контексте
+		 */
+		auto putDebugFn = [&debugFn, this](const vector <size_t> & seq, const u_short gram, const double weight, const size_t pos) noexcept {
+			// Если последовательность передана
+			if(!seq.empty() && (this->isOption(options_t::debug) || (this->logfile != nullptr))){
+				// Получившийся разделитель
+				double delim = 0.0;
+				// Получаем нашу последовательность
+				vector <size_t> tmp = seq;
+				// Получаем количество слов в последовательности
+				const size_t count = tmp.size();
+				// Выполняем првоерку больше ли переданная последовательность биграммы
+				const bool isBigram = (count > 2);
+				// Получаем второе слово
+				const string & second = this->word(tmp.back()).real();
+				// Получаем первое слово
+				const string & first = this->word(tmp.at(count - 2)).real();
+				// Укорачиваем последовательность до 2-х слов
+				if(count > 2) tmp.assign(tmp.begin() + (count - 2), tmp.end());
+				// Удаляем последний элемент в списке
+				tmp.pop_back();
+				// Выполняем расчёт обратной частоты последовательности
+				const double backoff = this->backoff(tmp);
+				// Переходим по всем словам словаря
+				for(auto & value : this->arpa){
+					// Если веса у n-граммы нету
+					if((value.second.weight != this->zero)){
+						// Формируем нашу последовательность
+						tmp.push_back(value.first);
+						// Получаем частоту последовательности
+						auto calc = this->frequency(tmp);
+						// Если частота последовательности получена
+						if(calc.first != this->zero) delim += exp(calc.first * this->mln10);
+						// Если последовательность не существует, считаем частоту иначе
+						else delim += exp((this->weight(tmp).second + backoff) * this->mln10);
+						// Удаляем последний элемент в списке
+						tmp.pop_back();
 					}
-					// Выводим отладочную информацию
-					debugFn(first, second, isBigram, gram, weight, delim, pos);
 				}
-			};
-			// Сбрасываем значение результата
-			result.logprob = 0.0;
-			/**
-			 * runFn Функция запуска расчёта перплексии
-			 * @param seq последовательность слов для обработки
-			 * @param pos позиция n-граммы в контексте
-			 */
-			auto runFn = [&result, &calcFn, &putDebugFn](const vector <size_t> & seq, const size_t pos){
-				// Выполняем проверку существования граммы
-				auto calc = calcFn(seq);
-				// Если вес получен
-				if(calc.second != 0.0)
-					// Увеличиваем общее значение веса
-					result.logprob += calc.second;
-				// Увеличиваем количество нулевых весов
-				else result.zeroprobs++;
 				// Выводим отладочную информацию
-				putDebugFn(seq, calc.first, calc.second, pos);
-			};
-			// Обрабатываем первую часть n-грамм
-			for(u_short i = 2; i < offset2; i++){
+				debugFn(first, second, isBigram, gram, weight, delim, pos);
+			}
+		};
+		// Сбрасываем значение результата
+		result.logprob = 0.0;
+		/**
+		 * runFn Функция запуска расчёта перплексии
+		 * @param seq последовательность слов для обработки
+		 * @param pos позиция n-граммы в контексте
+		 */
+		auto runFn = [&result, &calcFn, &putDebugFn](const vector <size_t> & seq, const size_t pos){
+			// Выполняем проверку существования граммы
+			auto calc = calcFn(seq);
+			// Если вес получен
+			if(calc.second != 0.0)
+				// Увеличиваем общее значение веса
+				result.logprob += calc.second;
+			// Увеличиваем количество нулевых весов
+			else result.zeroprobs++;
+			// Выводим отладочную информацию
+			putDebugFn(seq, calc.first, calc.second, pos);
+		};
+		// Обрабатываем первую часть n-грамм
+		for(u_short i = 2; i < offset2; i++){
+			// Получаем первую часть последовательности
+			tmp.assign(seq.begin(), seq.begin() + i);
+			// Добавляем в тредпул новое задание на обработку
+			runFn(tmp, index);
+			// Увеличиваем смещение позиции
+			index++;
+		}
+		// Если есть ещё n-граммы
+		if(count >= this->size){
+			// Выполняем извлечение данных
+			while(offset2 < (count + 1)){
 				// Получаем первую часть последовательности
-				tmp.assign(seq.begin(), seq.begin() + i);
+				tmp.assign(seq.begin() + offset1, seq.begin() + offset2);
 				// Добавляем в тредпул новое задание на обработку
 				runFn(tmp, index);
 				// Увеличиваем смещение позиции
 				index++;
+				// Увеличиваем смещение
+				offset1++;
+				offset2++;
 			}
-			// Если есть ещё n-граммы
-			if(count >= this->size){
-				// Выполняем извлечение данных
-				while(offset2 < (count + 1)){
-					// Получаем первую часть последовательности
-					tmp.assign(seq.begin() + offset1, seq.begin() + offset2);
-					// Добавляем в тредпул новое задание на обработку
-					runFn(tmp, index);
-					// Увеличиваем смещение позиции
-					index++;
-					// Увеличиваем смещение
-					offset1++;
-					offset2++;
-				}
-			}
-			// Если неизвестное слово не разрешено
-			if(!isAllowUnk){
+		}
+		// Если неизвестное слово не разрешено
+		if(!isAllowUnk){
+			// Считаем количество неизвестных слов
+			for(auto & idw : seq){
 				// Считаем количество неизвестных слов
-				for(auto & idw : seq){
-					// Считаем количество неизвестных слов
-					if(idw == size_t(token_t::unk)) result.oovs++;
-				}
+				if(idw == size_t(token_t::unk)) result.oovs++;
 			}
 		}
 		// Устанавливаем предложение

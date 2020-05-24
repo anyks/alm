@@ -140,11 +140,11 @@ namespace anyks {
 			 */
 			const size_t idw(const wstring & word) const noexcept;
 			/**
-			 * idw Метод извлечения идентификатора последовательности
+			 * ids Метод извлечения идентификатора последовательности
 			 * @param  seq последовательность для получения идентификатора
 			 * @return     идентификатор последовательности
 			 */
-			const size_t idw(const vector <size_t> & seq) const noexcept;
+			const size_t ids(const vector <size_t> & seq) const noexcept;
 		public:
 			/**
 			 * readline Метод извлечения строки из текста

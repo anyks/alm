@@ -309,11 +309,11 @@ const size_t anyks::Tokenizer::idw(const wstring & word) const noexcept {
 	return this->idWord.get(word);
 }
 /**
- * idw Метод извлечения идентификатора последовательности
+ * ids Метод извлечения идентификатора последовательности
  * @param  seq последовательность для получения идентификатора
  * @return     идентификатор последовательности
  */
-const size_t anyks::Tokenizer::idw(const vector <size_t> & seq) const noexcept {
+const size_t anyks::Tokenizer::ids(const vector <size_t> & seq) const noexcept {
 	// Формируем идентификатор последовательности
 	return this->idWord.get(seq);
 }
