@@ -12,6 +12,7 @@
  * Стандартная библиотека
  */
 #include <cmath>
+#include <locale>
 #include <string>
 #include <vector>
 #include <codecvt>
