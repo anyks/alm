@@ -80,7 +80,7 @@ namespace anyks {
 				 * StateAES Конструктор
 				 */
 				StateAES() : num(0) {}
-			} __attribute__((packed)) stateAES;
+			} stateAES;
 		private:
 			// Файловый поток для чтения
 			ifstream ifs;
