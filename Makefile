@@ -105,7 +105,7 @@ endif
 # Если это Linux
 ifeq ($(OS), Linux)
 	# Компилятор
-	CC = clang++
+	CC = gcc
 
 	# Версия
 	PYVER = 7
