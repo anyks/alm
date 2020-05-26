@@ -112,8 +112,8 @@ const string anyks::Alphabet::trim(const string & text) const noexcept {
 	// Получаем временный текст
 	string tmp = text;
 	// Выполняем удаление пробелов по краям
-	tmp.erase(tmp.begin(), find_if_not(tmp.begin(), tmp.end(), [this](char c){ return this->isSpace(c); }));
-	tmp.erase(find_if_not(tmp.rbegin(), tmp.rend(), [this](char c){ return this->isSpace(c); }).base(), tmp.end());
+	tmp.erase(tmp.begin(), find_if_not(tmp.begin(), tmp.end(), [](char c){ return isspace(c); }));
+	tmp.erase(find_if_not(tmp.rbegin(), tmp.rend(), [](char c){ return isspace(c); }).base(), tmp.end());
 	// Выводим результат
 	return tmp;
 }
