@@ -14,7 +14,6 @@
 #include <cmath>
 #include <string>
 #include <vector>
-#include <locale>
 #include <codecvt>
 #include <cstring>
 #include <iostream>
@@ -31,29 +30,6 @@ namespace anyks {
 	 * Word2 Класс слова в словаре
 	 */
 	typedef class Word2 : public wstring {
-		private:
-			/**
-			 * trim Метод удаления начальных и конечных пробелов
-			 * @param str строка для обработки
-			 * @param loc локаль
-			 * @return    результат работы функции
-			 */
-			static const Word2 trim(const wstring & str, const locale & loc = locale::classic()) noexcept {
-				// Запоминаем итератор на первый левый символ
-				auto begin = str.begin();
-				// Переходим по всем символам в слове и проверяем является ли символ - символом пробела, если нашли то смещаем итератор
-				while((begin != str.end()) && isspace(* begin, loc)) ++begin;
-				// Если прошли все слово целиком значит пробелов нет и мы выходим
-				if(begin == str.end()) return {};
-				// Запоминаем итератор на первый правый символ
-				auto rbegin = str.rbegin();
-				// Переходим по всем символам в слове и проверяем является ли символ - символом пробела, если нашли то смещаем итератор
-				while(rbegin != str.rend() && isspace(* rbegin, loc)) ++rbegin;
-				// Создаем результирующую строку
-				Word2 result(wstring{begin, rbegin.base()});
-				// Выводим результат
-				return result;
-			}
 		private:
 			// Строка в обычных байтах
 			mutable string current = "";
@@ -1693,33 +1669,14 @@ namespace anyks {
 			 * trim Метод удаления пробелов вначале и конце слова
 			 * @return получившаяся строка
 			 */
-			Word2 trim() const noexcept {
+			Word2 & trim() noexcept {
+				// Очищаем полученную строку
+				wstring * str = reinterpret_cast <wstring *> (this);
+				// Выполняем удаление пробелов по краям
+				str->erase(str->begin(), find_if_not(str->begin(), str->end(), [](wchar_t c){ return iswspace(c); }));
+				str->erase(find_if_not(str->rbegin(), str->rend(), [](wchar_t c){ return iswspace(c); }).base(), str->end());
 				// Выводим результат
-				return trim(this->wstr());
-			}
-			/**
-			 * lower Метод приведения в нижний регистр
-			 * @return получившаяся строка
-			 */
-			string lower() const noexcept {
-				// Получаем строку из текущего слова
-				wstring word = this->wstr();
-				// Переходим по всем символам
-				for(auto & c : word) c = towlower(c);
-				// Выводим результат
-				return this->str(word);
-			}
-			/**
-			 * upper Метод приведения в верхний регистр
-			 * @return получившаяся строка
-			 */
-			string upper() const noexcept {
-				// Получаем строку из текущего слова
-				wstring word = this->wstr();
-				// Переходим по всем символам
-				for(auto & c : word) c = towupper(c);
-				// Выводим результат
-				return this->str(word);
+				return (* this);
 			}
 			/**
 			 * substr Метод обрезки сроки

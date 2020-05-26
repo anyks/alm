@@ -8,51 +8,44 @@
 
 #include <alphabet.hpp>
 
+
 // Устанавливаем шаблон функции
-template <typename C, typename T, typename A>
-/**
- * strim Функция удаления начальных и конечных пробелов
- * @param str строка для обработки
- * @param loc локаль
- * @return    результат работы функции
- */
-basic_string <C, T, A> strim(const basic_string <C, T, A> & str, const locale & loc = locale::classic()) noexcept {
-	// Запоминаем итератор на первый левый символ
-	auto begin = str.begin();
-	// Переходим по всем символам в слове и проверяем является ли символ - символом пробела, если нашли то смещаем итератор
-	while((begin != str.end()) && isspace(* begin, loc)) ++begin;
-	// Если прошли все слово целиком значит пробелов нет и мы выходим
-	if(begin == str.end()) return {};
-	// Запоминаем итератор на первый правый символ
-	auto rbegin = str.rbegin();
-	// Переходим по всем символам в слове и проверяем является ли символ - символом пробела, если нашли то смещаем итератор
-	while(rbegin != str.rend() && isspace(* rbegin, loc)) ++rbegin;
-	// Выводим результат
-	return {begin, rbegin.base()};
-}
-// Устанавливаем шаблон функции
-template <typename A, typename B>
+template <typename T>
 /**
  * split Метод разделения строк на составляющие
  * @param str   строка для поиска
  * @param delim разделитель
  * @param v     результирующий вектор
  */
-void split(const A & str, const A & delim, B & v) noexcept {
+void split(const wstring & str, const wstring & delim, T & v) noexcept {
+	/**
+	 * trimFn Метод удаления пробелов вначале и конце текста
+	 * @param text текст для удаления пробелов
+	 * @return     результат работы функции
+	 */
+	function <const wstring (const wstring &)> trimFn = [](const wstring & text) noexcept {
+		// Получаем временный текст
+		wstring tmp = text;
+		// Выполняем удаление пробелов по краям
+		tmp.erase(tmp.begin(), find_if_not(tmp.begin(), tmp.end(), [](wchar_t c){ return iswspace(c); }));
+		tmp.erase(find_if_not(tmp.rbegin(), tmp.rend(), [](wchar_t c){ return iswspace(c); }).base(), tmp.end());
+		// Выводим результат
+		return tmp;
+	};
 	// Очищаем словарь
 	v.clear();
 	// Получаем счётчики перебора
 	size_t i = 0, j = str.find(delim);
 	const size_t len = delim.length();
 	// Выполняем разбиение строк
-	while(j != A::npos){
-		v.push_back(strim(str.substr(i, j - i)));
+	while(j != wstring::npos){
+		v.push_back(trimFn(str.substr(i, j - i)));
 		i = ++j + (len - 1);
 		j = str.find(delim, j);
-		if(j == A::npos) v.push_back(strim(str.substr(i, str.length())));
+		if(j == wstring::npos) v.push_back(trimFn(str.substr(i, str.length())));
 	}
 	// Если слово передано а вектор пустой, тогда создаем вектори из 1-го элемента
-	if(!str.empty() && v.empty()) v.push_back(strim(str));
+	if(!str.empty() && v.empty()) v.push_back(trimFn(str));
 }
 /**
  * cbegin Метод итератор начала списка
@@ -103,13 +96,26 @@ const string anyks::Alphabet::get() const noexcept {
 	return this->convert(this->alphabet);
 }
 /**
+ * get Метод получения алфавита языка
+ * @return алфавит языка
+ */
+const wstring & anyks::Alphabet::wget() const noexcept {
+	// Выводим результат
+	return this->alphabet;
+}
+/**
  * trim Метод удаления пробелов вначале и конце текста
- * @param  text текст для удаления пробелов
- * @return      текст без пробелов
+ * @param text текст для удаления пробелов
+ * @return     результат работы функции
  */
 const string anyks::Alphabet::trim(const string & text) const noexcept {
+	// Получаем временный текст
+	string tmp = text;
+	// Выполняем удаление пробелов по краям
+	tmp.erase(tmp.begin(), find_if_not(tmp.begin(), tmp.end(), [this](char c){ return this->isSpace(c); }));
+	tmp.erase(find_if_not(tmp.rbegin(), tmp.rend(), [this](char c){ return this->isSpace(c); }).base(), tmp.end());
 	// Выводим результат
-	return (!text.empty() ? strim(text) : "");
+	return tmp;
 }
 /**
  * toLower Метод перевода русских букв в нижний регистр
@@ -316,12 +322,17 @@ const wchar_t anyks::Alphabet::toUpper(const wchar_t letter) const noexcept {
 }
 /**
  * trim Метод удаления пробелов вначале и конце текста
- * @param  text текст для удаления пробелов
- * @return      текст без пробелов
+ * @param text текст для удаления пробелов
+ * @return     результат работы функции
  */
 const wstring anyks::Alphabet::trim(const wstring & text) const noexcept {
+	// Получаем временный текст
+	wstring tmp = text;
+	// Выполняем удаление пробелов по краям
+	tmp.erase(tmp.begin(), find_if_not(tmp.begin(), tmp.end(), [this](wchar_t c){ return this->isSpace(c); }));
+	tmp.erase(find_if_not(tmp.rbegin(), tmp.rend(), [this](wchar_t c){ return this->isSpace(c); }).base(), tmp.end());
 	// Выводим результат
-	return (!text.empty() ? strim(text) : L"");
+	return tmp;
 }
 /**
  * convert Метод конвертирования строки в строку utf-8

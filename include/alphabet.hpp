@@ -23,7 +23,8 @@
 #include <chrono>
 #include <cstdarg>
 #include <fstream>
-#include <string.h>
+#include <cstring>
+#include <algorithm>
 #include <sys/types.h>
 /**
  * Наши модули
@@ -139,9 +140,14 @@ namespace anyks {
 			 */
 			const string get() const noexcept;
 			/**
+			 * get Метод получения алфавита языка
+			 * @return алфавит языка
+			 */
+			const wstring & wget() const noexcept;
+			/**
 			 * trim Метод удаления пробелов вначале и конце текста
 			 * @param  text текст для удаления пробелов
-			 * @return      текст без пробелов
+			 * @return      результат работы функции
 			 */
 			const string trim(const string & text) const noexcept;
 			/**
@@ -210,7 +216,7 @@ namespace anyks {
 			/**
 			 * trim Метод удаления пробелов вначале и конце текста
 			 * @param  text текст для удаления пробелов
-			 * @return      текст без пробелов
+			 * @return      результат работы функции
 			 */
 			const wstring trim(const wstring & text) const noexcept;
 			/**
