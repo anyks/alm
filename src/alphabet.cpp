@@ -516,7 +516,7 @@ const wstring anyks::Alphabet::delBrokenInWord(const wstring & word) const noexc
 			return (
 				(this->allowedSymbols.count(letter) < 1) &&
 				(letter != L'\r') && (letter != L'\n') &&
-				!iswspace(letter) && !this->check(letter) && !this->isNumber({letter})
+				!iswspace(letter) && !this->check(letter)
 			);
 		}), result.end());
 	}
@@ -818,7 +818,7 @@ const bool anyks::Alphabet::isAbbr(const wstring & word) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если слово передано
-	if(!word.empty() && (word.length() > 1) && (word.back() != L'-') && this->check(word.front())){
+	if(!word.empty() && (word.length() > 1) && (word.front() != L'-') && (word.back() != L'-')){
 		// Позиция пробела
 		size_t pos = wstring::npos;
 		// Ищем дефис в слове
@@ -848,57 +848,62 @@ const bool anyks::Alphabet::isAbbr(const wstring & word) const noexcept {
 								// Получаем текущую букву
 								letter = tmp.at(i);
 								// Проверяем соответствует ли буква
-								result = this->check(letter);
+								result = (this->letters.count(letter) > 0);
 								// Проверяем вторую букву в слове
 								if(result && (i != j)){
 									// Получаем текущую букву
 									letter = tmp.at(j);
 									// Проверяем соответствует ли буква
-									result = this->check(letter);
+									result = (this->letters.count(letter) > 0);
 								}
 								// Если буква не соответствует, выходим
 								if(!result) break;
 							}
 						// Если строка всего из одного символа
-						} else result = this->check(tmp.front());
+						} else result = (this->letters.count(tmp.front()) > 0);
 					}
 					// Выводим результат
 					return result;
 				};
 				// Получаем суффикс
-				const wstring & suffix = word.substr(pos + 1);
+				const wstring & suffix = this->toLower(word.substr(pos + 1));
 				// Если суффикс не является числом
 				result = (!this->isNumber(suffix) && isAllowedFn(suffix));
 			}
 		// Если это не дефис
 		} else {
-			// Флаг найденой точки
-			bool point = false;
-			// Длина слова до точки
-			u_short length = 1;
-			// Текущая буква в слове
-			wchar_t letter = 0;
-			// Выполняем переход по всему слову
-			for(size_t i = 1; i < word.length(); i++){
-				// Получаем текущую букву слова
-				letter = word.at(i);
-				// Если это не точка
-				if((result = (letter == L'.'))){
-					// Сбрасываем длину слова
-					length = 0;
-					// Запоминаем что точка найдена
-					point = true;
-				// Если слово не прошло проверку
-				} else if((length > 3) || !this->check(letter)) {
-					// Запоминаем, что результат не получен
-					result = false;
-					// Выходим из цикла
-					break;
-				// Увеличиваем количество обработанных букв
-				} else if((result = true)) length++;
+			// Переводим слово в нижний регистр
+			const wstring & tmp = this->toLower(word);
+			// Если первый символ является разрешённым
+			if(this->letters.count(tmp.front()) > 0){
+				// Флаг найденой точки
+				bool point = false;
+				// Длина слова до точки
+				u_short length = 1;
+				// Текущая буква в слове
+				wchar_t letter = 0;
+				// Выполняем переход по всему слову
+				for(size_t i = 1; i < tmp.length(); i++){
+					// Получаем текущую букву слова
+					letter = tmp.at(i);
+					// Если это не точка
+					if((result = (letter == L'.'))){
+						// Сбрасываем длину слова
+						length = 0;
+						// Запоминаем что точка найдена
+						point = true;
+					// Если слово не прошло проверку
+					} else if((length > 3) || (this->letters.count(letter) < 1)) {
+						// Запоминаем, что результат не получен
+						result = false;
+						// Выходим из цикла
+						break;
+					// Увеличиваем количество обработанных букв
+					} else if((result = true)) length++;
+				}
+				// Если точка не найдена, сбрасываем результат
+				if(!point) result = false;
 			}
-			// Если точка не найдена, сбрасываем результат
-			if(!point) result = false;
 		}
 	}
 	// Выводим результат
@@ -955,8 +960,14 @@ const bool anyks::Alphabet::isLatian(const wstring & str) const noexcept {
 					const wchar_t second = text.at(index + 1);
 					// Если это дефис
 					result = ((letter == L'-') && (first != L'-') && (second != L'-'));
-					// Если проверка не пройдена, проверяем да апостроф
-					if(!result) result = ((letter == L'\'') && (this->isAllowApostrophe() || ((this->latian.count(first) > 0) && (this->latian.count(second) > 0))));
+					// Если проверка не пройдена, проверяем на апостроф
+					if(!result){
+						// Выполняем проверку на апостроф
+						result = (
+							(letter == L'\'') && ((this->isAllowApostrophe() && ((first != L'\'') && (second != L'\''))) ||
+							((this->latian.count(first) > 0) && (this->latian.count(second) > 0)))
+						);
+					}
 					// Если результат не получен
 					if(!result) result = (this->latian.count(letter) > 0);
 				// Выводим проверку как она есть
@@ -1135,8 +1146,14 @@ const bool anyks::Alphabet::isAllowed(const wstring & word) const noexcept {
 					const wchar_t second = text.at(index + 1);
 					// Если это дефис
 					result = ((letter == L'-') && (first != L'-') && (second != L'-'));
-					// Если проверка не пройдена, проверяем да апостроф
-					if(!result) result = ((letter == L'\'') && (this->isAllowApostrophe() || ((this->latian.count(first) > 0) && (this->latian.count(second) > 0))));
+					// Если проверка не пройдена, проверяем на апостроф
+					if(!result){
+						// Выполняем проверку на апостроф
+						result = (
+							(letter == L'\'') && ((this->isAllowApostrophe() && ((first != L'\'') && (second != L'\''))) ||
+							((this->latian.count(first) > 0) && (this->latian.count(second) > 0)))
+						);
+					}
 					// Если результат не получен
 					if(!result) result = this->check(letter);
 				// Выводим проверку как она есть
@@ -1208,7 +1225,7 @@ const bool anyks::Alphabet::rest(wstring & word) const noexcept {
 			// Если это латинский алфавит
 			if(this->checkLatian({letter})) latian.emplace(letter, pos);
 			// Если это нормальная буква
-			else if(!this->typeLatian && this->check(letter)) normal.emplace(letter, pos);
+			else if(!this->typeLatian && (this->letters.count(letter) > 0)) normal.emplace(letter, pos);
 			// Иначе это другие символы
 			else other.emplace(letter, pos);
 		};
@@ -1389,7 +1406,7 @@ const bool anyks::Alphabet::checkSimilars(const wstring & str) const noexcept {
 						(letter != L'-') &&
 						!this->isNumber({letter}) &&
 						!this->isLatian({letter}) &&
-						this->check(letter)
+						(this->letters.count(letter) > 0)
 					);
 				}
 				// Выводим результат
