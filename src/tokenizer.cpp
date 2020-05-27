@@ -9,13 +9,6 @@
 #include <tokenizer.hpp>
 
 /**
- * switchAllowApostrophe Метод разрешения или запрещения апострофа как части слова
- */
-void anyks::Tokenizer::switchAllowApostrophe() noexcept {
-	// Выполняем переключение разрешения использования апострофа
-	this->apostrophe = !this->apostrophe;
-}
-/**
  * setAbbr Метод добавления аббревиатуры
  * @param word слово для добавления
  */
@@ -93,14 +86,6 @@ const size_t anyks::Tokenizer::fti(const double num, const u_short count) const 
 	}
 	// Выводим результат
 	return result;
-}
-/**
- * isAllowApostrophe Метод проверки разрешения апострофа
- * @return результат проверки
- */
-const bool anyks::Tokenizer::isAllowApostrophe() const noexcept {
-	// Выводим результат проверки апострофа
-	return this->apostrophe;
 }
 /**
  * isAbbr Метод проверки слова на соответствие аббревиатуры
@@ -470,7 +455,7 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 						// Если предыдущий символ не является открытым изоляционнмы символом
 						if((typeContext.empty() ||
 						(typeContext.top() != type_t::open)) &&
-						(text.back() != L' ') &&
+						(!this->alphabet->isSpace(text.back())) &&
 						(!this->alphabet->isNumber(token.substr(0, 1)) ||
 						!this->alphabet->isMath(text.back()) ||
 						(text.back() == L'='))) text.append(1, L' ');
@@ -489,7 +474,7 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 						(typeContext.top() != type_t::math) &&
 						(typeContext.top() != type_t::open) &&
 						(typeContext.top() != type_t::space))) &&
-						(text.back() != L' ')) text.append(1, L' ');
+						(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
 						// Добавляем слово
 						text.append(token);
 					} break;
@@ -500,7 +485,7 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 						((typeContext.top() != type_t::specl) &&
 						(typeContext.top() != type_t::open) &&
 						(typeContext.top() != type_t::space))) &&
-						(text.back() != L' ')) text.append(1, L' ');
+						(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
 						// Добавляем слово
 						text.append(token);
 					} break;
@@ -525,7 +510,7 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 						// Если предыдущий символ не является изоляционным символом
 						if((typeContext.empty() ||
 						(typeContext.top() != type_t::space)) &&
-						(text.back() != L' ')) text.append(1, L' ');
+						(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
 						// Добавляем слово
 						text.append(token);
 						// Если следующий символ является любым из слов кроме изоляционного символа и конца текста
@@ -655,7 +640,7 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 						// Если предыдущий символ не является открытым изоляционнмы символом
 						if((typeContext.empty() ||
 						(typeContext.top() != type_t::open)) &&
-						(result.back() != L' ') &&
+						(!this->alphabet->isSpace(result.back())) &&
 						(!this->alphabet->isNumber(token.substr(0, 1)) ||
 						!this->alphabet->isMath(result.back()) ||
 						(result.back() == L'='))) result.append(1, L' ');
@@ -674,7 +659,7 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 						(typeContext.top() != type_t::math) &&
 						(typeContext.top() != type_t::open) &&
 						(typeContext.top() != type_t::space))) &&
-						(result.back() != L' ')) result.append(1, L' ');
+						(!this->alphabet->isSpace(result.back()))) result.append(1, L' ');
 						// Добавляем слово
 						result.append(token);
 					} break;
@@ -685,7 +670,7 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 						((typeContext.top() != type_t::specl) &&
 						(typeContext.top() != type_t::open) &&
 						(typeContext.top() != type_t::space))) &&
-						(result.back() != L' ')) result.append(1, L' ');
+						(!this->alphabet->isSpace(result.back()))) result.append(1, L' ');
 						// Добавляем слово
 						result.append(token);
 					} break;
@@ -710,7 +695,7 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 						// Если предыдущий символ не является изоляционным символом
 						if((typeContext.empty() ||
 						(typeContext.top() != type_t::space)) &&
-						(result.back() != L' ')) result.append(1, L' ');
+						(!this->alphabet->isSpace(result.back()))) result.append(1, L' ');
 						// Добавляем слово
 						result.append(token);
 						// Если следующий символ является любым из слов кроме изоляционного символа и конца текста
@@ -1101,7 +1086,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 						}
 					}
 				// Если это изоляционный символ
-				} else if(this->alphabet->isIsolation(lletter) && (!this->isAllowApostrophe() || (lletter != L'\''))) {
+				} else if(this->alphabet->isIsolation(lletter) && (!this->alphabet->isAllowApostrophe() || (lletter != L'\''))) {
 					// Выводим результат как он есть
 					if(end){
 						// Если слово не пустое

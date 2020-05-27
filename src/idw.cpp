@@ -101,7 +101,7 @@ void anyks::Idw::set(const alphabet_t * alphabet, const u_short offset) noexcept
 		// Получаем алфавит
 		this->letters.append(this->alphabet->convert(this->alphabet->get()));
 		// Добавляем стандартные символы в список
-		this->letters.append(L"<>~-+=*/:%|^&#\\0123456789");
+		this->letters.append(L"<>~-+=*/:%|^'&#\\0123456789");
 		// Получаем длину алфавита
 		const size_t length = this->letters.length();
 		// Формируем диапазон значений

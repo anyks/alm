@@ -63,7 +63,7 @@ const bool anyks::AbLM::write(function <void (const u_short)> status) noexcept {
 		}
 	}
 	// Устанавливаем значение апострофа
-	this->aspl->set("allowApostrophe", this->tokenizer->isAllowApostrophe());
+	this->aspl->set("allowApostrophe", this->alphabet->isAllowApostrophe());
 	// Если нужно сохранить список аббревиатур
 	if(this->isFlag(flag_t::expAbbrevs) || this->isFlag(flag_t::expAllData)){
 		// Устанавливаем список аббревиатур
@@ -418,7 +418,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 				// Если список аббревиатур получен, устанавливаем его
 				if(!abbrs.empty()) this->tokenizer->setAbbrs(abbrs);
 				// Если апостроф разрешён, активируем его
-				if(allowApostrophe) this->tokenizer->switchAllowApostrophe();
+				if(allowApostrophe) this->alphabet->switchAllowApostrophe();
 			}
 			/**
 			 * Блок извлечения списка доменных зон
@@ -814,7 +814,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 				// Если список аббревиатур получен, устанавливаем его
 				if(!abbrs.empty()) this->tokenizer->setAbbrs(abbrs);
 				// Если апостроф разрешён, активируем его
-				if(allowApostrophe) this->tokenizer->switchAllowApostrophe();
+				if(allowApostrophe) this->alphabet->switchAllowApostrophe();
 			}
 			/**
 			 * Блок извлечения списка доменных зон

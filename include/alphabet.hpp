@@ -61,6 +61,8 @@ namespace anyks {
 		private:
 			// Латинский тип алфавита
 			bool typeLatian = true;
+			// Разрешить апостроф как часть слова
+			bool apostrophe = false;
 			// Алфавит словаря
 			wstring alphabet = L"abcdefghijklmnopqrstuvwxyz";
 		private:
@@ -321,6 +323,11 @@ namespace anyks {
 			 */
 			const bool altemp() const noexcept;
 			/**
+			 * isAllowApostrophe Метод проверки разрешения апострофа
+			 * @return результат проверки
+			 */
+			const bool isAllowApostrophe() const noexcept;
+			/**
 			 * isUrl Метод проверки соответствия слова url адресу
 			 * @param word слово для проверки
 			 * @return     результат проверки
@@ -468,6 +475,10 @@ namespace anyks {
 			 * clear Метод очистки собранных данных
 			 */
 			void clear() noexcept;
+			/**
+			 * switchAllowApostrophe Метод разрешения или запрещения апострофа как части слова
+			 */
+			void switchAllowApostrophe() noexcept;
 			/**
 			 * log Метод вывода текстовой информации в консоль или файл
 			 * @param format   формат строки вывода

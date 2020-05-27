@@ -346,7 +346,7 @@ int main(int argc, char * argv[]) noexcept {
 			// Замеряем время начала работы
 			auto timeShifting = chrono::system_clock::now();
 			// Если апостроф разрешён в токенизаторе, активируем его
-			if(env.is("allow-apostrophe")) tokenizer.switchAllowApostrophe();
+			if(env.is("allow-apostrophe")) alphabet.switchAllowApostrophe();
 			// Если файл с буквами для восстановления слов, передан
 			if(((value = env.get("r-mix-restwords")) != nullptr) && fsys_t::isfile(value)){
 				// Идентификатор документа

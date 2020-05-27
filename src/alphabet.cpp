@@ -753,6 +753,14 @@ const bool anyks::Alphabet::altemp() const noexcept {
 	return this->alters.empty();
 }
 /**
+ * isAllowApostrophe Метод проверки разрешения апострофа
+ * @return результат проверки
+ */
+const bool anyks::Alphabet::isAllowApostrophe() const noexcept {
+	// Выводим результат проверки апострофа
+	return this->apostrophe;
+}
+/**
  * isUrl Метод проверки соответствия слова url адресу
  * @param word слово для проверки
  * @return     результат проверки
@@ -924,26 +932,47 @@ const bool anyks::Alphabet::isLatian(const wstring & str) const noexcept {
 	if(!str.empty()){
 		// Длина слова
 		const size_t length = str.length();
+		// Переводим слово в нижний регистр
+		const wstring & tmp = this->toLower(str);
 		// Если длина слова больше 1-го символа
 		if(length > 1){
 			/**
-			 * checkFn Метод проверки соответствия буквы
-			 * @param letter буква для проверки
-			 * @return       результат проверки
+			 * checkFn Функция проверки на валидность символа
+			 * @param text  текст для проверки
+			 * @param index индекс буквы в слове
+			 * @return      результат проверки
 			 */
-			auto checkFn = [this](const wchar_t letter) noexcept {
-				// Результат проверки
-				return ((letter == L'-') || (letter == L'\'') || (this->latian.count(letter) > 0));
+			auto checkFn = [this](const wstring & text, const size_t index) noexcept {
+				// Результат работы функции
+				bool result = false;
+				// Получаем текущую букву
+				const wchar_t letter = text.at(index);
+				// Если буква не первая и не последняя
+				if((index > 0) && (index < (text.length() - 1))){
+					// Получаем предыдущую букву
+					const wchar_t first = text.at(index - 1);
+					// Получаем следующую букву
+					const wchar_t second = text.at(index + 1);
+					// Если это дефис
+					result = ((letter == L'-') && (first != L'-') && (second != L'-'));
+					// Если проверка не пройдена, проверяем да апостроф
+					if(!result) result = ((letter == L'\'') && (this->isAllowApostrophe() || ((this->latian.count(first) > 0) && (this->latian.count(second) > 0))));
+					// Если результат не получен
+					if(!result) result = (this->latian.count(letter) > 0);
+				// Выводим проверку как она есть
+				} else result = (this->latian.count(letter) > 0);
+				// Выводим результат
+				return result;
 			};
 			// Переходим по всем буквам слова
 			for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
 				// Проверяем является ли слово латинским
-				result = (i == j ? checkFn(str.at(i)) : checkFn(str.at(i)) && checkFn(str.at(j)));
+				result = (i == j ? checkFn(tmp, i) : checkFn(tmp, i) && checkFn(tmp, j));
 				// Если слово не соответствует тогда выходим
 				if(!result) break;
 			}
 		// Если символ всего один, проверяем его так
-		} else result = (this->latian.count(str.front()) > 0);
+		} else result = (this->latian.count(tmp.front()) > 0);
 	}
 	// Выводим результат
 	return result;
@@ -1087,26 +1116,43 @@ const bool anyks::Alphabet::isAllowed(const wstring & word) const noexcept {
 		const wstring & tmp = this->toLower(word);
 		// Если строка длиннее 1-го символа
 		if(length > 1){
-			// Текущая буква
-			wchar_t letter = 0;
+			/**
+			 * checkFn Функция проверки на валидность символа
+			 * @param text  текст для проверки
+			 * @param index индекс буквы в слове
+			 * @return      результат проверки
+			 */
+			auto checkFn = [this](const wstring & text, const size_t index) noexcept {
+				// Результат работы функции
+				bool result = false;
+				// Получаем текущую букву
+				const wchar_t letter = text.at(index);
+				// Если буква не первая и не последняя
+				if((index > 0) && (index < (text.length() - 1))){
+					// Получаем предыдущую букву
+					const wchar_t first = text.at(index - 1);
+					// Получаем следующую букву
+					const wchar_t second = text.at(index + 1);
+					// Если это дефис
+					result = ((letter == L'-') && (first != L'-') && (second != L'-'));
+					// Если проверка не пройдена, проверяем да апостроф
+					if(!result) result = ((letter == L'\'') && (this->isAllowApostrophe() || ((this->latian.count(first) > 0) && (this->latian.count(second) > 0))));
+					// Если результат не получен
+					if(!result) result = this->check(letter);
+				// Выводим проверку как она есть
+				} else result = this->check(letter);
+				// Выводим результат
+				return result;
+			};
 			// Выполняем переход по всем буквам слова
 			for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
-				// Получаем текущую букву
-				letter = tmp.at(i);
-				// Проверяем соответствует ли буква
-				result = ((letter == L'-') || this->check(letter));
-				// Проверяем вторую букву в слове
-				if(result && (i != j)){
-					// Получаем текущую букву
-					letter = tmp.at(j);
-					// Проверяем соответствует ли буква
-					result = ((letter == L'-') || this->check(letter));
-				}
-				// Если буква не соответствует, выходим
+				// Проверяем является ли слово разрешённым
+				result = (i == j ? checkFn(tmp, i) : checkFn(tmp, i) && checkFn(tmp, j));
+				// Если слово не соответствует тогда выходим
 				if(!result) break;
 			}
 		// Если строка всего из одного символа
-		} else result = ((tmp.front() == L'-') || this->check(tmp.front()));
+		} else result = this->check(tmp.front());
 	}
 	// Выводим результат
 	return result;
@@ -1504,6 +1550,13 @@ void anyks::Alphabet::clear() noexcept {
 	this->substitutes.clear();
 	// Формируем алфавит
 	this->set(this->convert(alphabet));
+}
+/**
+ * switchAllowApostrophe Метод разрешения или запрещения апострофа как части слова
+ */
+void anyks::Alphabet::switchAllowApostrophe() noexcept {
+	// Выполняем переключение разрешения использования апострофа
+	this->apostrophe = !this->apostrophe;
 }
 /**
  * log Метод вывода текстовой информации в консоль или файл
