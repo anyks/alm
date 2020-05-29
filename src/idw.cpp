@@ -74,8 +74,8 @@ const size_t anyks::Idw::get(const vector <size_t> & seq) const noexcept {
 			// Добавляем в буфер бинарные данные разделителя слов в n-грамме
 			buffer.insert(buffer.end(), data, data + separator.size());
 		}
-		// Если буфер данных получен, формируем на его основе 32-й кеш
-		if(!buffer.empty()) result = CityHash32(buffer.data(), buffer.size());
+		// Если буфер данных получен, формируем на его основе 64-битный хеш
+		if(!buffer.empty()) result = CityHash64(buffer.data(), buffer.size());
 	}
 	// Выводим результат
 	return result;
