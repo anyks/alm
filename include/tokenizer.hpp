@@ -70,8 +70,6 @@ namespace anyks {
 			idw_t idWord;
 			// Список аббревиатур
 			set <size_t> abbrs;
-			// Разрешить апостроф как часть слова
-			bool apostrophe = false;
 		private:
 			// Объект алфавита
 			const alphabet_t * alphabet = nullptr;

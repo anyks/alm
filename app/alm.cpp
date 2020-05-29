@@ -86,6 +86,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mmodify\x1B[0m]    method for modifying a language model\r\n"
 	"  \x1B[1m-\x1B[0m (emplace | remove | change | replace)\r\n\r\n\r\n"
 	"\x1B[34m\x1B[1m[FLAGS]\x1B[0m\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-alm2 | --alm2]                               flag to set ALM type 2\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-accurate | --accurate]                       flag to accurate check ngram\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-allow-unk | --allow-unk]                     flag allowing to unknown word\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-only-good | --only-good]                     flag allowing to consider words from the white list only\r\n"
@@ -488,36 +489,36 @@ int main(int argc, char * argv[]) noexcept {
 			if(env.is("method", "sentences") || env.is("method", "ppl") || env.is("method", "find") ||
 			env.is("method", "counts") || env.is("method", "fixcase") || env.is("method", "checktext")){
 				// Создаём обхъект языковой модели
-				alm_t alm(&alphabet, &tokenizer);
+				unique_ptr <alm_t> alm(env.is("alm2") ? new alm2_t(&alphabet, &tokenizer) : new alm1_t(&alphabet, &tokenizer));
 				// Устанавливаем адрес файла для логирования
-				alm.setLogfile(env.get("log"));
+				alm->setLogfile(env.get("log"));
 				// Если количество ядер передано
 				if(((value = env.get("threads")) != nullptr) &&
 				alphabet.isNumber(alphabet.convert(value))){
 					// Устанавливаем количество потоков
-					alm.setThreads(stoi(value));
+					alm->setThreads(stoi(value));
 				// Иначе устанавливаем 1 поток
-				} else alm.setThreads(1);
+				} else alm->setThreads(1);
 				// Устанавливаем режим отладки
-				if(debug == 2) alm.setOption(alm_t::options_t::debug);
+				if(debug == 2) alm->setOption(alm_t::options_t::debug);
 				// Устанавливаем адрес файла oov слов
-				if(env.is("method", "ppl")) alm.setOOvFile(env.get("w-oovfile"));
+				if(env.is("method", "ppl")) alm->setOOvFile(env.get("w-oovfile"));
 				// Разрешаем детектировать слова состоящее из смешанных словарей
-				if(env.is("mixed-dicts")) alm.setOption(alm_t::options_t::mixdicts);
+				if(env.is("mixed-dicts")) alm->setOption(alm_t::options_t::mixdicts);
 				// Разрешаем выполнять загрузку содержимого arpa, в том виде, в каком она есть. Без перетокенизации содержимого.
-				if(env.is("confidence")) alm.setOption(alm_t::options_t::confidence);
+				if(env.is("confidence")) alm->setOption(alm_t::options_t::confidence);
 				// Если нужно установить все токены для идентифицирования как <unk>
-				if(env.is("tokens-all-unknown")) alm.setAllTokenUnknown();
+				if(env.is("tokens-all-unknown")) alm->setAllTokenUnknown();
 				// Если нужно установить все токены как не идентифицируемые
-				if(env.is("tokens-all-disable")) alm.setAllTokenDisable();
+				if(env.is("tokens-all-disable")) alm->setAllTokenDisable();
 				// Если неизвестное слово получено
-				if((value = env.get("unknown-word")) != nullptr) alm.setUnknown(value);
+				if((value = env.get("unknown-word")) != nullptr) alm->setUnknown(value);
 				// Если адрес скрипта получен
-				if((value = env.get("word-script")) != nullptr) alm.setWordScript(value);
+				if((value = env.get("word-script")) != nullptr) alm->setWordScript(value);
 				// Если нужно установить список токенов которые нужно идентифицировать как <unk>
-				if((value = env.get("tokens-unknown")) != nullptr) alm.setTokenUnknown(value);
+				if((value = env.get("tokens-unknown")) != nullptr) alm->setTokenUnknown(value);
 				// Если нужно установить список не идентифицируемых токенов
-				if((value = env.get("tokens-disable")) != nullptr) alm.setTokenDisable(value);
+				if((value = env.get("tokens-disable")) != nullptr) alm->setTokenDisable(value);
 				// Если адрес файла чёрного списка получен
 				if((value = env.get("badwords")) != nullptr){
 					// Чёрный список слов
@@ -528,7 +529,7 @@ int main(int argc, char * argv[]) noexcept {
 						if(!line.empty()) badwords.push_back(line);
 					});
 					// Если чёрный список получен, устанавливаем его
-					if(!badwords.empty()) alm.setBadwords(badwords);
+					if(!badwords.empty()) alm->setBadwords(badwords);
 				}
 				// Если адрес файла белого списка получен
 				if((value = env.get("goodwords")) != nullptr){
@@ -540,7 +541,7 @@ int main(int argc, char * argv[]) noexcept {
 						if(!line.empty()) goodwords.push_back(line);
 					});
 					// Если белый список получен, устанавливаем его
-					if(!goodwords.empty()) alm.setGoodwords(goodwords);
+					if(!goodwords.empty()) alm->setGoodwords(goodwords);
 				}
 				// Если пользовательские токены получены
 				if(((value = env.get("utokens")) != nullptr) && (string(value).compare("-yes-") != 0)){
@@ -553,18 +554,18 @@ int main(int argc, char * argv[]) noexcept {
 						// Если адрес скрипта получен
 						if((value = env.get("utoken-script")) != nullptr){
 							// Устанавливаем адрес скрипта
-							alm.setUserTokenScript(value);
+							alm->setUserTokenScript(value);
 							// Переходим по всему списку токенов
-							for(auto & item : tokens) alm.setUserToken(alphabet.convert(item));
+							for(auto & item : tokens) alm->setUserToken(alphabet.convert(item));
 						}
 					}
 				}
 				// Активируем питоновские скрипты
-				alm.initPython();
+				alm->initPython();
 				// Если нужно использовать бинарный контейнер
 				if(!binDictFile.empty()){
 					// Создаём бинарный контейнер
-					ablm_t ablm(binDictFile, &alm, &alphabet, &tokenizer, env.get("log"));
+					ablm_t ablm(binDictFile, alm.get(), &alphabet, &tokenizer, env.get("log"));
 					// Если метаданные переданы
 					if(((value = env.get("r-bin-meta")) != nullptr) && fsys_t::isfile(value)){
 						// Данные в формате json
@@ -618,7 +619,7 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Выполняем чтение arpa
-					alm.read(filename, [debug, &pss](const u_short status) noexcept {
+					alm->read(filename, [debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -653,7 +654,7 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Выполняем генерацию предложений с записью их в файл
-					alm.sentencesToFile(counts, writefile, [debug, &pss](const u_short status){
+					alm->sentencesToFile(counts, writefile, [debug, &pss](const u_short status){
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -670,7 +671,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если текст передан
 					if((value = env.get("text")) != nullptr){
 						// Выполняем расчёт перплексии
-						auto ppl = alm.perplexity(value);
+						auto ppl = alm->perplexity(value);
 						// Если отладка отключена
 						if(debug < 2){
 							// Выводим текст перплексии
@@ -701,7 +702,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 						// Выполняем расчёт перплексии
-						auto ppl = alm.pplByFiles(path, [debug, &pss](const u_short status){
+						auto ppl = alm->pplByFiles(path, [debug, &pss](const u_short status){
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -727,7 +728,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если текст передан
 					if((value = env.get("text")) != nullptr){
 						// Выполняем поиск n-грамм
-						alm.find(value, [&alphabet](const string & text){
+						alm->find(value, [&alphabet](const string & text){
 							// Выводим список найденных n-рамм
 							if(!text.empty()) alphabet.log("%s", alphabet_t::log_t::null, nullptr, text.c_str());
 						});
@@ -754,7 +755,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 						// Выполняем поиск n-грамм в текстовом файле
-						alm.findByFiles(path, writefile, [debug, &pss, &writefile](const string & filename, const u_short status){
+						alm->findByFiles(path, writefile, [debug, &pss, &writefile](const string & filename, const u_short status){
 							// Устанавливаем название файла
 							if(debug > 0) pss.description(filename + string(" -> ") + writefile);
 							// Отображаем ход процесса
@@ -775,7 +776,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если текст передан
 					if((value = env.get("text")) != nullptr){
 						// Выполняем првоерку текста
-						auto res = alm.check(value, env.is("accurate"));
+						auto res = alm->check(value, env.is("accurate"));
 						// Выводим результат
 						alphabet.log("%s | %s\r\n", alphabet_t::log_t::null, nullptr, (res.first ? "YES" : "NO"), value);
 					// Если адрес текстового файла или каталог передан
@@ -801,7 +802,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 						// Выполняем обработку текстовых данных
-						alm.checkByFiles(path, writefile, env.is("accurate"), [debug, &pss, &writefile](const string & filename, const u_short status){
+						alm->checkByFiles(path, writefile, env.is("accurate"), [debug, &pss, &writefile](const string & filename, const u_short status){
 							// Устанавливаем название файла
 							if(debug > 0) pss.description(filename + string(" -> ") + writefile);
 							// Отображаем ход процесса
@@ -822,7 +823,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если текст передан
 					if((value = env.get("text")) != nullptr){
 						// Выводим результат
-						alphabet.log("%s\r\n", alphabet_t::log_t::null, nullptr, alm.fixUppers(value).c_str());
+						alphabet.log("%s\r\n", alphabet_t::log_t::null, nullptr, alm->fixUppers(value).c_str());
 					// Если адрес текстового файла или каталог передан
 					} else if(((value = env.get("r-text")) != nullptr) && (fsys_t::isfile(value) || fsys_t::isdir(value)) && env.is("w-text")){
 						// Запоминаем файл для записи данных
@@ -846,7 +847,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 						// Выполняем исправление регистра в текстовом файле
-						alm.fixUppersByFiles(path, writefile, [debug, &pss, &writefile](const string & filename, const u_short status){
+						alm->fixUppersByFiles(path, writefile, [debug, &pss, &writefile](const string & filename, const u_short status){
 							// Устанавливаем название файла
 							if(debug > 0) pss.description(filename + string(" -> ") + writefile);
 							// Отображаем ход процесса
@@ -871,11 +872,11 @@ int main(int argc, char * argv[]) noexcept {
 						// Определяем тип размеров n-грамм
 						switch(ngrams){
 							// Если размер n-грамм не определен
-							case 1: alphabet.log("%zu [%hugram] | %s\r\n", alphabet_t::log_t::null, nullptr, alm.grams(value), alm.getSize(), value); break;
+							case 1: alphabet.log("%zu [%hugram] | %s\r\n", alphabet_t::log_t::null, nullptr, alm->grams(value), alm->getSize(), value); break;
 							// Если размер n-грамм биграммы
-							case 2: alphabet.log("%zu [%hugram] | %s\r\n", alphabet_t::log_t::null, nullptr, alm.bigrams(value), ngrams, value); break;
+							case 2: alphabet.log("%zu [%hugram] | %s\r\n", alphabet_t::log_t::null, nullptr, alm->bigrams(value), ngrams, value); break;
 							// Если размер n-грамм триграммы
-							case 3: alphabet.log("%zu [%hugram] | %s\r\n", alphabet_t::log_t::null, nullptr, alm.trigrams(value), ngrams, value); break;
+							case 3: alphabet.log("%zu [%hugram] | %s\r\n", alphabet_t::log_t::null, nullptr, alm->trigrams(value), ngrams, value); break;
 						}
 					// Если адрес текстового файла или каталог передан
 					} else if(((value = env.get("r-text")) != nullptr) && (fsys_t::isfile(value) || fsys_t::isdir(value)) && env.is("w-text")){
@@ -900,7 +901,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 						// Выполняем подсчёт количества n-грамм
-						alm.countsByFiles(path, writefile, ngrams, [debug, &pss, &writefile](const string & filename, const u_short status){
+						alm->countsByFiles(path, writefile, ngrams, [debug, &pss, &writefile](const string & filename, const u_short status){
 							// Устанавливаем название файла
 							if(debug > 0) pss.description(filename + string(" -> ") + writefile);
 							// Отображаем ход процесса
