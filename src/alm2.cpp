@@ -1229,3 +1229,10 @@ const wstring anyks::Alm2::context(const vector <size_t> & seq, const bool nwrd)
 	// Выводим результат
 	return result;
 }
+/**
+ * ~Alm2 Деструктор
+ */
+anyks::Alm2::~Alm2() noexcept {
+	// Очищаем языковую модель
+	this->clear();
+}

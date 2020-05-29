@@ -883,6 +883,10 @@ namespace anyks {
 			 * @param tokenizer объект токенизатора
 			 */
 			Alm1(const alphabet_t * alphabet, const tokenizer_t * tokenizer) noexcept : alm_t(alphabet, tokenizer) {};
+			/**
+			 * ~Alm1 Деструктор
+			 */
+			virtual ~Alm1() noexcept;
 	} alm1_t;
 	/**
 	 * Alm2 Класс alm второго типа
@@ -1032,6 +1036,10 @@ namespace anyks {
 			 * @param tokenizer объект токенизатора
 			 */
 			Alm2(const alphabet_t * alphabet, const tokenizer_t * tokenizer) noexcept : Alm1(alphabet, tokenizer) {};
+			/**
+			 * ~Alm2 Деструктор
+			 */
+			~Alm2() noexcept;
 	} alm2_t;
 };
 

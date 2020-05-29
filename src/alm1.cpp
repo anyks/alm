@@ -1331,3 +1331,10 @@ const wstring anyks::Alm1::context(const vector <size_t> & seq, const bool nwrd)
 	// Выводим результат
 	return result;
 }
+/**
+ * ~Alm1 Деструктор
+ */
+anyks::Alm1::~Alm1() noexcept {
+	// Очищаем языковую модель
+	this->clear();
+}
