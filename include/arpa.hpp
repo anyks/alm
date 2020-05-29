@@ -126,7 +126,7 @@ namespace anyks {
 			/**
 			 * Структура словаря языковой модели временного словаря
 			 */
-			typedef struct Data: std::map <size_t, Data> {
+			typedef struct Data : std::map <size_t, Data> {
 				/**
 				 * Родительский объект
 				 */
@@ -604,7 +604,7 @@ namespace anyks {
 	/**
 	 * Класс GoodTuring
 	 */
-	class GoodTuring: public Arpa {
+	class GoodTuring : public Arpa {
 		private:
 			// Размер минимальной встречаемости
 			mutable unordered_map <u_short, size_t> minCountTuring;
@@ -657,7 +657,7 @@ namespace anyks {
 	/**
 	 * Класс ConstDiscount
 	 */
-	class ConstDiscount: public Arpa {
+	class ConstDiscount : public Arpa {
 		private:
 			// Значение дисконтирования
 			mutable unordered_map <u_short, double> cdiscount;
@@ -718,7 +718,7 @@ namespace anyks {
 	/**
 	 * Класс NaturalDiscount
 	 */
-	class NaturalDiscount: public Arpa {
+	class NaturalDiscount : public Arpa {
 		private:
 			/**
 			 * discount Метод расчёта скидки
@@ -749,7 +749,7 @@ namespace anyks {
 	/**
 	 * Класс AddSmooth
 	 */
-	class AddSmooth: public Arpa {
+	class AddSmooth : public Arpa {
 		private:
 			// Значение дельты
 			mutable unordered_map <u_short, double> delta;
@@ -801,7 +801,7 @@ namespace anyks {
 	/**
 	 * Класс AddSmooth
 	 */
-	class WittenBell: public Arpa {
+	class WittenBell : public Arpa {
 		private:
 			/**
 			 * discount Метод расчёта скидки
@@ -841,7 +841,7 @@ namespace anyks {
 	/**
 	 * Класс KneserNey
 	 */
-	class KneserNey: public Arpa {
+	class KneserNey : public Arpa {
 		private:
 			// Объявляем дружественный класс
 			friend class ModKneserNey;
@@ -921,7 +921,7 @@ namespace anyks {
 	/**
 	 * Класс ModKneserNey
 	 */
-	class ModKneserNey: public KneserNey {
+	class ModKneserNey : public KneserNey {
 		private:
 			// Прибавочное значение скидки
 			mutable unordered_map <u_short, double> discountplus;

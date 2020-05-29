@@ -750,7 +750,7 @@ namespace anyks {
 			/**
 			 * Структура словаря языковой модели
 			 */
-			typedef struct Arpa: std::map <size_t, Arpa> {
+			typedef struct Arpa : std::map <size_t, Arpa> {
 				/**
 				 * Регистры слова
 				 */
