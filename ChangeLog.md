@@ -1,6 +1,6 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
-## [3.0.1](https://github.com/anyks/alm/archive/v3.0.1.tar.gz) Optimization and new ALM type
+## [3.0.1](https://github.com/anyks/alm/archive/v3.0.1.tar.gz) Bub fixes and new ALM type 2
 ### Params
 - flag to set ALM type 2
 
