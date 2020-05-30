@@ -135,11 +135,10 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-vocab <value> | --w-vocab=<value>]                                       file address vocab of \x1B[1m*.vocab\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-words <value> | --w-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-ngram <value> | --w-ngram=<value>]                                       file address ngrams of \x1B[1m*.ngrams\x1B[0m for export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-meta <value> | --w-bin-meta=<value>]                                 file address meta of \x1B[1m*.json\x1B[0m meta for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-oovfile <value> | --w-oovfile=<value>]                                   file address OOVs of \x1B[1m*.txt\x1B[0m for export oov words\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-bin-meta <value> | --bin-meta=<value>]                                     file address meta of \x1B[1m*.json\x1B[0m for binary container\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-text <value> | --r-text=<value>]                                         file address text of \x1B[1m*.txt\x1B[0m or dir path for texts import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-words <value> | --r-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m or dir path for words import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-bin-meta <value> | --r-bin-meta=<value>]                                 file address meta of \x1B[1m*.json\x1B[0m meta for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-map <value> | --r-map=<value>]                                           file address map of \x1B[1m*.map\x1B[0m or dir path for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-arpa <value> | --r-arpa=<value>]                                         file address arpa of \x1B[1m*.arpa\x1B[0m or dir path for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-vocab <value> | --r-vocab=<value>]                                       file address vocab of \x1B[1m*.vocab\x1B[0m or dir path for import\r\n"
@@ -567,7 +566,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Создаём бинарный контейнер
 					ablm_t ablm(binDictFile, alm.get(), &alphabet, &tokenizer, env.get("log"));
 					// Если метаданные переданы
-					if(((value = env.get("r-bin-meta")) != nullptr) && fsys_t::isfile(value)){
+					if(((value = env.get("bin-meta")) != nullptr) && fsys_t::isfile(value)){
 						// Данные в формате json
 						string data = "";
 						// Выполняем считывание всех строк текста
@@ -1008,7 +1007,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Создаём бинарный контейнер
 				ablm_t ablm(binDictFile, &toolkit, &alphabet, &tokenizer, env.get("log"));
 				// Если метаданные переданы
-				if(((value = env.get("r-bin-meta")) != nullptr) && fsys_t::isfile(value)){
+				if(((value = env.get("bin-meta")) != nullptr) && fsys_t::isfile(value)){
 					// Данные в формате json
 					string data = "";
 					// Выполняем считывание всех строк текста
@@ -2502,7 +2501,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Создаём бинарный контейнер
 				ablm_t ablm(value, &toolkit, &alphabet, &tokenizer, env.get("log"));
 				// Если метаданные переданы
-				if(((value = env.get("w-bin-meta")) != nullptr) && fsys_t::isfile(value)){
+				if(((value = env.get("bin-meta")) != nullptr) && fsys_t::isfile(value)){
 					// Данные в формате json
 					string data = "";
 					// Выполняем считывание всех строк текста

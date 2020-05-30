@@ -289,9 +289,13 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 			// Извлекаем данные алфавита
 			this->aspl->get("alphabet", alphabet);
 			// Если алфавит получен, устанавливаем его
-			if(!alphabet.empty()) this->alphabet->set(alphabet);
+			if(!alphabet.empty()){
+				// Устанавливаем алфавит
+				this->alphabet->set(alphabet);
+				// Выполняем обновление токенизатора
+				this->tokenizer->update();
 			// Иначе выходим с ошибкой
-			else {
+			} else {
 				// Выполняем логирование
 				if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - alphabet is broken");
 				// Выходим из функции
@@ -685,9 +689,13 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 			// Извлекаем данные алфавита
 			this->aspl->get("alphabet", alphabet);
 			// Если алфавит получен, устанавливаем его
-			if(!alphabet.empty()) this->alphabet->set(alphabet);
+			if(!alphabet.empty()){
+				// Устанавливаем алфавит
+				this->alphabet->set(alphabet);
+				// Выполняем обновление токенизатора
+				this->tokenizer->update();
 			// Иначе выходим с ошибкой
-			else {
+			} else {
 				// Выполняем логирование
 				if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - alphabet is broken");
 				// Выходим из функции
