@@ -50,11 +50,11 @@ const bool anyks::Alm::isOption(const options_t option) const noexcept {
 	return result;
 }
 /**
- * isExist Метод проверки существования последовательности
+ * exist Метод проверки существования последовательности
  * @param seq список слов последовательности
  * @return    результат проверки
  */
-const bool anyks::Alm::isExist(const vector <size_t> & seq) const noexcept {
+const bool anyks::Alm::exist(const vector <size_t> & seq) const noexcept {
 	// Блокируем варнинг
 	(void) seq;
 	// Выводим результат
@@ -2434,7 +2434,7 @@ const size_t anyks::Alm::grams(const vector <size_t> & seq) const noexcept {
 			// Получаем первую часть последовательности
 			tmp.assign(seq.begin() + offset1, seq.begin() + offset2);
 			// Если последовательность получена
-			if(!tmp.empty() && this->isExist(tmp)) result++;
+			if(!tmp.empty() && this->exist(tmp)) result++;
 			// Увеличиваем смещение
 			offset1++;
 			offset2++;
@@ -2498,7 +2498,7 @@ const size_t anyks::Alm::bigrams(const vector <size_t> & seq) const noexcept {
 			// Получаем первую часть последовательности
 			tmp.assign(seq.begin() + offset1, seq.begin() + offset2);
 			// Если последовательность получена
-			if(!tmp.empty() && this->isExist(tmp)) result++;
+			if(!tmp.empty() && this->exist(tmp)) result++;
 			// Увеличиваем смещение
 			offset1++;
 			offset2++;
@@ -2562,7 +2562,7 @@ const size_t anyks::Alm::trigrams(const vector <size_t> & seq) const noexcept {
 			// Получаем первую часть последовательности
 			tmp.assign(seq.begin() + offset1, seq.begin() + offset2);
 			// Если последовательность получена
-			if(!tmp.empty() && this->isExist(tmp)) result++;
+			if(!tmp.empty() && this->exist(tmp)) result++;
 			// Увеличиваем смещение
 			offset1++;
 			offset2++;

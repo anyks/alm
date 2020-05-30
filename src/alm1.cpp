@@ -9,11 +9,11 @@
 #include <alm.hpp>
 
 /**
- * isExist Метод проверки существования последовательности
+ * exist Метод проверки существования последовательности
  * @param seq список слов последовательности
  * @return    результат проверки
  */
-const bool anyks::Alm1::isExist(const vector <size_t> & seq) const noexcept {
+const bool anyks::Alm1::exist(const vector <size_t> & seq) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если список последовательностей передан

@@ -191,11 +191,11 @@ namespace anyks {
 			 */
 			const bool isOption(const options_t option) const noexcept;
 			/**
-			 * isExist Метод проверки существования последовательности
+			 * exist Метод проверки существования последовательности
 			 * @param seq список слов последовательности
 			 * @return    результат проверки
 			 */
-			virtual const bool isExist(const vector <size_t> & seq) const noexcept;
+			virtual const bool exist(const vector <size_t> & seq) const noexcept;
 		private:
 			/**
 			 * backoff Метод извлечения обратной частоты последовательности
@@ -769,11 +769,11 @@ namespace anyks {
 			mutable arpa_t arpa;
 		private:
 			/**
-			 * isExist Метод проверки существования последовательности
+			 * exist Метод проверки существования последовательности
 			 * @param seq список слов последовательности
 			 * @return    результат проверки
 			 */
-			virtual const bool isExist(const vector <size_t> & seq) const noexcept;
+			virtual const bool exist(const vector <size_t> & seq) const noexcept;
 			/**
 			 * backoff Метод извлечения обратной частоты последовательности
 			 * @param seq последовательность для извлечения обратной частоты
@@ -917,11 +917,11 @@ namespace anyks {
 			mutable arpa_t arpa;
 		private:
 			/**
-			 * isExist Метод проверки существования последовательности
+			 * exist Метод проверки существования последовательности
 			 * @param seq список слов последовательности
 			 * @return    результат проверки
 			 */
-			const bool isExist(const vector <size_t> & seq) const noexcept;
+			const bool exist(const vector <size_t> & seq) const noexcept;
 			/**
 			 * backoff Метод извлечения обратной частоты последовательности
 			 * @param seq последовательность для извлечения обратной частоты

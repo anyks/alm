@@ -9,11 +9,11 @@
 #include <alm.hpp>
 
 /**
- * isExist Метод проверки существования последовательности
+ * exist Метод проверки существования последовательности
  * @param seq список слов последовательности
  * @return    результат проверки
  */
-const bool anyks::Alm2::isExist(const vector <size_t> & seq) const noexcept {
+const bool anyks::Alm2::exist(const vector <size_t> & seq) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если список последовательностей передан
@@ -295,7 +295,7 @@ const anyks::Alm::ppl_t anyks::Alm2::perplexity(const vector <size_t> & seq) con
 						// Если последовательность не существует
 						if((idw != size_t(token_t::start)) && (idw != size_t(token_t::unk)) && (result.second == this->zero)){
 							// Если последнее слово последовательности существует
-							if(this->isExist({tmp.back()})){
+							if(this->exist({tmp.back()})){
 								// Получаем вес последовательности
 								const auto & wrs = this->weight(tmp);
 								// Получаем грамность
@@ -981,7 +981,7 @@ void anyks::Alm2::find(const wstring & text, function <void (const wstring &)> c
 					// Добавляем слово в последовательность
 					tmp.push_back(idw);
 					// Выполняем проверку последовательности
-					exist = this->isExist(tmp);
+					exist = this->exist(tmp);
 					// Если проверка не пройдена
 					if(!exist && (tmp.size() > 1)){
 						// Удаляем последний элемент из слов
