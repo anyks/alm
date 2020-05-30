@@ -724,7 +724,7 @@ void anyks::Alm2::sentences(function <const bool (const wstring &)> callback) co
 		 * runFn Прототип функции генерации предложений
 		 * @param список собранной последовательности
 		 */
-		function <void (const vector <size_t> &)> runFn;
+		function <const bool (const vector <size_t> &)> runFn;
 		/**
 		 * runFn Функция генерации предложений
 		 * @param seq список собранной последовательности
@@ -749,7 +749,7 @@ void anyks::Alm2::sentences(function <const bool (const wstring &)> callback) co
 								// Добавляем юниграмму в последовательность
 								seq.push_back(item.first);
 								// Если последовательность существует
-								if(jt->second.count(this->tokenizer->ids(seq)) > 0) runFn(seq);
+								if((jt->second.count(this->tokenizer->ids(seq)) > 0) && !runFn(seq)) return false;
 								// Удаляем добавленную юниграмму из последовательности
 								seq.pop_back();
 							}
@@ -759,12 +759,12 @@ void anyks::Alm2::sentences(function <const bool (const wstring &)> callback) co
 				} else {
 					// Получаем размер N-граммы
 					const size_t size = (seq.size() - (seq.size() >= this->size ? this->size - 1 : seq.size()));
+					// Создаём временную последовательность
+					vector <size_t> tmp(seq.begin() + size, seq.end());
 					// Получаем базу N-грамм
-					auto jt = this->arpa.find(size + 1);
+					auto jt = this->arpa.find(tmp.size() + 1);
 					// Если база с последовательностями существует
 					if(jt != this->arpa.end()){
-						// Создаём временную последовательность
-						vector <size_t> tmp(seq.begin() + size, seq.end());
 						// Переходим по всему списку последовательности
 						for(auto & item : it->second){
 							// Если это не начало предложения и не конец предложения и не неизвестное слово
@@ -776,9 +776,11 @@ void anyks::Alm2::sentences(function <const bool (const wstring &)> callback) co
 									// Добавляем в последовательность полученное слово
 									seq.push_back(item.first);
 									// Если это не конец предложения
-									if(item.first != size_t(token_t::finish)) runFn(seq);
+									if(item.first != size_t(token_t::finish)){
+										// Выполняем дальнейшую обработку, если нужно завершить, завершаем
+										if(!runFn(seq)) return false;
 									// Выводим результат
-									else if(!callback(this->context(seq, true))) return;
+									} else if(!callback(this->context(seq, true))) return false;
 									// Удаляем последнее слово из последовательности
 									seq.pop_back();
 								}
@@ -789,6 +791,8 @@ void anyks::Alm2::sentences(function <const bool (const wstring &)> callback) co
 					}
 				}
 			}
+			// Выводим результат
+			return true;
 		};
 		// Выволняем генерацию предложений
 		runFn({});
@@ -914,15 +918,15 @@ void anyks::Alm2::find(const wstring & text, function <void (const wstring &)> c
 		 * @param words список слов для вывода результата
 		 * @param count количество слов для вывода результата
 		 */
-		auto callbackFn = [&cache, &callback](const vector <wstring> & words){
+		auto callbackFn = [&cache, &callback](const vector <wstring> & words, const size_t count){
 			// Если список слов передан
-			if(!words.empty()){
+			if(!words.empty() && (count > 1)){
 				// Получившаяся строка текста
 				wstring text = L"";
 				// Переходим по всему списку слов
-				for(auto & word : words){
+				for(size_t i = 0; i < count; i++){
 					// Добавляем в текст слово
-					text.append(word);
+					text.append(words.at(i));
 					// Добавляем пробел
 					text.append(L" ");
 				}
@@ -972,6 +976,8 @@ void anyks::Alm2::find(const wstring & text, function <void (const wstring &)> c
 		checkFn = [&checkFn, &callbackFn, this](const vector <size_t> & seq, const vector <wstring> & words) noexcept {
 			// Если список последовательностей передан
 			if(!seq.empty() && !words.empty() && (this->size > 0)){
+				// Итератор для подсчета длины n-граммы
+				u_short index = 0;
 				// Результат поиска слова
 				bool exist = false;
 				// Временный список последовательности
@@ -982,16 +988,13 @@ void anyks::Alm2::find(const wstring & text, function <void (const wstring &)> c
 					tmp.push_back(idw);
 					// Выполняем проверку последовательности
 					exist = this->exist(tmp);
-					// Если проверка не пройдена
-					if(!exist && (tmp.size() > 1)){
-						// Удаляем последний элемент из слов
-						vector <wstring> wordsTmp(words.begin(), words.begin() + (tmp.size() - 1));
-						// Выводим результат
-						callbackFn(wordsTmp);
-					}
 					// Если последовательность не получена, выходим из цикла
 					if(!exist) break;
+					// Увеличиваем индекс найденных элементов
+					++index;
 				}
+				// Выводим результат
+				callbackFn(words, index);
 				// Если последовательность не существует
 				if(!exist && (seq.size() > 2)){
 					// Получаем новую последовательность
