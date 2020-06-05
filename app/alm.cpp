@@ -354,7 +354,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Статус и процентное соотношение
 				u_short status = 0, rate = 100;
 				// Запоминаем адрес файла
-				const string filename = realpath(value, nullptr);
+				const string & filename = realpath(value, nullptr);
 				// Если отладка включена, выводим индикатор загрузки
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар
@@ -602,7 +602,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если требуется загрузить arpa
 				} else if(((value = env.get("r-arpa")) != nullptr) && fsys_t::isfile(value)){
 					// Запоминаем адрес файла
-					const string filename = realpath(value, nullptr);
+					const string & filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -683,7 +683,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если адрес текстового файла или каталог передан
 					} else if(((value = env.get("r-text")) != nullptr) && (fsys_t::isfile(value) || fsys_t::isdir(value))){
 						// Запоминаем адрес файла
-						const string path = realpath(value, nullptr);
+						const string & path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
 						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
 						// Если отладка включена, выводим индикатор загрузки
@@ -736,7 +736,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Запоминаем файл для записи данных
 						const string writefile = env.get("w-text");
 						// Запоминаем каталога с файлами
-						const string path = realpath(value, nullptr);
+						const string & path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
 						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
 						// Если отладка включена, выводим индикатор загрузки
@@ -783,7 +783,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Запоминаем файл для записи данных
 						const string writefile = env.get("w-text");
 						// Запоминаем каталога с файлами
-						const string path = realpath(value, nullptr);
+						const string & path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
 						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
 						// Если отладка включена, выводим индикатор загрузки
@@ -828,7 +828,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Запоминаем файл для записи данных
 						const string writefile = env.get("w-text");
 						// Запоминаем каталога с файлами
-						const string path = realpath(value, nullptr);
+						const string & path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
 						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
 						// Если отладка включена, выводим индикатор загрузки
@@ -882,7 +882,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Запоминаем файл для записи данных
 						const string writefile = env.get("w-text");
 						// Запоминаем каталога с файлами
-						const string path = realpath(value, nullptr);
+						const string & path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
 						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
 						// Если отладка включена, выводим индикатор загрузки
@@ -1079,7 +1079,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если файл текстового корпуса для токенизации получен
 				if(((value = env.get("r-tokens-text")) != nullptr) && fsys_t::isfile(value)){
 					// Получаем адрес текстового файла для чтения
-					const string readfile = realpath(value, nullptr);
+					const string & readfile = realpath(value, nullptr);
 					// Если адрес текстового или json файла для записи, получен
 					if((((value = env.get("w-tokens-text")) != nullptr) ||
 					((value = env.get("w-tokens-json")) != nullptr)) &&
@@ -1152,7 +1152,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если файл json с токенами получен
 				} else if(((value = env.get("r-tokens-json")) != nullptr) && fsys_t::isfile(value)){
 					// Получаем адрес json файла для чтения
-					const string readfile = realpath(value, nullptr);
+					const string & readfile = realpath(value, nullptr);
 					// Если адрес текстового файла для записи, получен
 					if(((value = env.get("w-tokens-text")) != nullptr) && (string(value).compare("-yes-") != 0)){
 						// Получаем адрес файла для записи
@@ -1227,7 +1227,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если каталог с текстовымы файлами корпуса получен
 				} else if(((value = env.get("r-tokens-path")) != nullptr) && fsys_t::isdir(value)) {
 					// Получаем адрес каталога с текстовыми файлами для чтения
-					const string readpath = realpath(value, nullptr);
+					const string & readpath = realpath(value, nullptr);
 					// Если адрес каталога для записи, получен
 					if((value = env.get("w-tokens-path")) != nullptr){
 						// Получаем адрес каталога для записи
@@ -1471,7 +1471,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если путь получен
 					if(((value = env.get("corpus")) != nullptr) && fsys_t::isdir(value)){
 						// Запоминаем путь к файлам
-						const string path = realpath(value, nullptr);
+						const string & path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
 						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
 						// Если количество ядер передано
@@ -1571,7 +1571,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если файл корпуса получен
 					} else if(((value = env.get("corpus")) != nullptr) && fsys_t::isfile(value)){
 						// Запоминаем адрес файла
-						const string filename = realpath(value, nullptr);
+						const string & filename = realpath(value, nullptr);
 						// Если количество ядер передано
 						if(((value = env.get("threads")) != nullptr) &&
 						alphabet.isNumber(alphabet.convert(value))){
@@ -1790,7 +1790,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если требуется загрузить файл n-грамм
 				if(((value = env.get("r-ngram")) != nullptr) && fsys_t::isfile(value)){
 					// Запоминаем адрес файла
-					const string filename = realpath(value, nullptr);
+					const string & filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -1821,7 +1821,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если требуется загрузить список файлов n-грамм
 				} else if(((value = env.get("r-ngram")) != nullptr) && fsys_t::isdir(value)) {
 					// Запоминаем каталог для загрузки
-					const string path = realpath(value, nullptr);
+					const string & path = realpath(value, nullptr);
 					// Расширение файлов текстового корпуса
 					const string ext = ((value = env.get("ext")) != nullptr ? value : "ngrams");
 					// Если отладка включена, выводим индикатор загрузки
@@ -1855,7 +1855,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если требуется загрузить arpa
 				if(((value = env.get("r-arpa")) != nullptr) && fsys_t::isfile(value)){
 					// Запоминаем адрес файла
-					const string filename = realpath(value, nullptr);
+					const string & filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -1887,7 +1887,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если требуется загрузить файл словаря vocab
 				if(((value = env.get("r-vocab")) != nullptr) && fsys_t::isfile(value)){
 					// Запоминаем адрес файла
-					const string filename = realpath(value, nullptr);
+					const string & filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -1920,7 +1920,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Параметры индикаторы процесса
 					size_t size = 0, status = 0, rate = 0;
 					// Запоминаем каталог для загрузки
-					const string path = realpath(value, nullptr);
+					const string & path = realpath(value, nullptr);
 					// Расширение файлов текстового корпуса
 					const string ext = ((value = env.get("ext")) != nullptr ? value : "vocab");
 					// Если отладка включена, выводим индикатор загрузки
@@ -1970,7 +1970,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Параметры индикаторы процесса
 					size_t size = 0, status = 0, rate = 0;
 					// Запоминаем адрес файла
-					const string filename = realpath(value, nullptr);
+					const string & filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -2020,7 +2020,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Параметры индикаторы процесса
 					size_t size = 0, status = 0, rate = 0;
 					// Запоминаем каталог для загрузки
-					const string path = realpath(value, nullptr);
+					const string & path = realpath(value, nullptr);
 					// Расширение файлов текстового корпуса
 					const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
 					// Если отладка включена, выводим индикатор загрузки
@@ -2076,7 +2076,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если нужно загрузить карту последовательности
 					if(((value = env.get("r-map")) != nullptr) && fsys_t::isfile(value)){
 						// Запоминаем адрес файла
-						const string filename = realpath(value, nullptr);
+						const string & filename = realpath(value, nullptr);
 						// Если отладка включена, выводим индикатор загрузки
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
@@ -2107,7 +2107,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если нужно загрузить список карт последовательностей
 					} else if(((value = env.get("r-map")) != nullptr) && fsys_t::isdir(value)){
 						// Запоминаем каталог для загрузки
-						const string path = realpath(value, nullptr);
+						const string & path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
 						const string ext = ((value = env.get("ext")) != nullptr ? value : "map");
 						// Если отладка включена, выводим индикатор загрузки
@@ -2311,7 +2311,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если файл передан
 					if(((value = env.get("modify-file")) != nullptr) && fsys_t::isfile(value)){
 						// Запоминаем адрес файла
-						const string filename = realpath(value, nullptr);
+						const string & filename = realpath(value, nullptr);
 						// Если отладка включена, выводим индикатор загрузки
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
