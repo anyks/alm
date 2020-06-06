@@ -80,14 +80,6 @@ const std::set <wchar_t>::const_reverse_iterator anyks::Alphabet::crend() const 
 	return this->letters.crend();
 }
 /**
- * alts Метод получения списка альтернативных букв
- * return список альтернативных букв
- */
-const std::map <wchar_t, wchar_t> & anyks::Alphabet::alts() const noexcept {
-	// Выводим результат
-	return this->alters;
-}
-/**
  * get Метод получения алфавита языка
  * @return алфавит языка
  */
@@ -253,48 +245,6 @@ const char anyks::Alphabet::toUpper(const char letter) const noexcept {
 	return result;
 }
 /**
- * alt Метод получения альтернативной буквы
- * @param  lid буква для проверки
- * @return     альтернативная буква
- */
-const wchar_t anyks::Alphabet::alt(const wchar_t lid) const noexcept {
-	// Резузльтат работы функции
-	wchar_t result = 0;
-	// Если буква передана
-	if(lid > 0){
-		// Ищем букву в списке
-		auto it = this->alters.find(lid);
-		// Выводим результат
-		result = (it != this->alters.end() ? it->second : result);
-	}
-	// Выводим в результат
-	return result;
-}
-/**
- * rel Метод получения реальной буквы из альтернативной
- * @param  lid альтернативная буква
- * @return     реальная буква
- */
-const wchar_t anyks::Alphabet::rel(const wchar_t lid) const noexcept {
-	// Резузльтат работы функции
-	wchar_t result = 0;
-	// Если альтернативная буква передана
-	if((lid > 0) && !this->alters.empty()){
-		// Переходим по всему списку альтернативных букв
-		for(auto & item : this->alters){
-			// Если буква найдена
-			if(lid == item.second){
-				// Запоминаем результат
-				result = item.first;
-				// Выходим из цикла
-				break;
-			}
-		}
-	}
-	// Выводим в результат
-	return result;
-}
-/**
  * toLower Метод перевода русских букв в нижний регистр
  * @param str строка для перевода
  * @return    строка в нижнем регистре
@@ -428,49 +378,6 @@ const wstring anyks::Alphabet::arabic2Roman(const wstring & word) const noexcept
 		const u_int number = stoi(word);
 		// Выполняем расчет
 		result.assign(this->arabic2Roman(number));
-	}
-	// Выводим результат
-	return result;
-}
-/**
- * delAltInWord Метод удаления альтернативных букв в слове
- * @param word слово в котором нужно удалить альтернативную букву
- * @return     слово без альтернативной буквы
- */
-const wstring anyks::Alphabet::delAltInWord(const wstring & word) const noexcept {
-	// Результат работы функции
-	wstring result = L"";
-	// Если слово передано
-	if(!word.empty()){
-		// Полученная буква в слове
-		wchar_t letter = 0;
-		// Копируем слово
-		result.assign(word);
-		// Получаем длину слова
-		const size_t length = word.length();
-		// Если слово длиннее одной буквы
-		if(length > 1){
-			// Переходим по всем буквам слова
-			for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
-				// Получаем реальную букву
-				letter = this->rel(result.at(i));
-				// Если реальная буква получена то заменяем её на альтернативную
-				if(letter > 0) result.replace(i, 1, 1, letter);
-				// Если это разные буквы
-				if(i != j){
-					// Получаем вторую реальную букву
-					letter = this->rel(result.at(j));
-					// Если вторая реальная буква получена то заменяем её на альтернативную
-					if(letter > 0) result.replace(j, 1, 1, letter);
-				}
-			}
-		// Если слово состоит всего из одной буквы
-		} else {
-			// Получаем реальную букву
-			letter = this->rel(result.front());
-			// Если реальная буква получена то заменяем её на альтернативную
-			if(letter > 0) result.replace(0, 1, 1, letter);
-		}
 	}
 	// Выводим результат
 	return result;
@@ -745,14 +652,6 @@ const size_t anyks::Alphabet::countLetter(const wstring & word, const wchar_t le
 	return result;
 }
 /**
- * altemp Метод проверки на сущестования альтернативных букв
- * @return результат проверки
- */
-const bool anyks::Alphabet::altemp() const noexcept {
-	// Выводим результат проверки
-	return this->alters.empty();
-}
-/**
  * isAllowApostrophe Метод проверки разрешения апострофа
  * @return результат проверки
  */
@@ -776,22 +675,6 @@ const bool anyks::Alphabet::isUrl(const wstring & word) const noexcept {
 		auto resUri = this->uri.get();
 		// Если ссылка найдена
 		result = ((resUri.type != uri_t::types_t::null) && (resUri.type != uri_t::types_t::wrong));
-	}
-	// Выводим результат
-	return result;
-}
-/**
- * isAlt Метод проверки существования альтернативной буквы
- * @param  letter буква для проверки
- * @return        результат проверки
- */
-const bool anyks::Alphabet::isAlt(const wchar_t letter) const noexcept {
-	// Результат работы функции
-	bool result = false;
-	// Если буква передана
-	if((letter > 0) && !this->alters.empty()){
-		// Выполняем проверку
-		result = (this->alters.count(letter) > 0);
 	}
 	// Выводим результат
 	return result;
@@ -1561,8 +1444,6 @@ void anyks::Alphabet::clear() noexcept {
 		// Формируем алфавит латинских символов
 		alphabet.append(1, letter);
 	}
-	// Очищаем список альтернативных букв
-	this->alters.clear();
 	// Очищаем список похожих букв в разных алфавитах
 	this->substitutes.clear();
 	// Формируем алфавит
@@ -1686,13 +1567,13 @@ void anyks::Alphabet::split(const string & str, const string & delim, vector <ws
 }
 /**
  * add Метод добавления буквы в алфавит
- * @param lid идентификатор буквы для добавления
+ * @param letter буква для добавления
  */
-void anyks::Alphabet::add(const wchar_t lid) noexcept {
+void anyks::Alphabet::add(const wchar_t letter) noexcept {
 	// Если буква передана и такой буквы еще нет
-	if((lid > 0) && (this->letters.count(lid) < 1)){
+	if((letter > 0) && (this->letters.count(letter) < 1)){
 		// Добавляем букву в список
-		if(!this->isNumber({lid}) && (this->allowedSymbols.count(lid) < 1)) this->letters.emplace(lid);
+		if(!this->isNumber({letter}) && (this->allowedSymbols.count(letter) < 1)) this->letters.emplace(letter);
 	}
 }
 /**
@@ -1716,18 +1597,6 @@ void anyks::Alphabet::set(const string & alphabet) noexcept {
 	}
 	// Если список букв получен
 	if(!this->alphabet.empty()) this->uri.setLetters(this->alphabet);
-}
-/**
- * rmalt Метод удаления альтернативной буквы
- * @param letter буква у которой есть альтернативная буква
- */
-void anyks::Alphabet::rmalt(const wchar_t letter) noexcept {
-	// Если буква передана
-	if((letter > 0) && !this->alters.empty()){
-		// Удаляем выбранную букву из списка
-		this->alters.erase(letter);
-	// Если буква не передана то удаляем все альтернативные буквы
-	} else this->alters.clear();
 }
 /**
  * setzone Метод установки пользовательской зоны
@@ -1763,18 +1632,6 @@ void anyks::Alphabet::setzones(const std::set <string> & zones) noexcept {
 void anyks::Alphabet::setzones(const std::set <wstring> & zones) noexcept {
 	// Устанавливаем список доменных зон
 	if(!zones.empty()) this->uri.setZones(zones);
-}
-/**
- * setalt Метод добавления альтернативной буквы
- * @param lid буква у которой есть альтернатива
- * @param alt альтернативная буква
- */
-void anyks::Alphabet::setalt(const wchar_t lid, const wchar_t alt) noexcept {
-	// Если буквы переданы
-	if((lid > 0) && (alt > 0)){
-		// Если альтернативная буква не найдена в списке
-		this->alters.emplace(lid, alt);
-	}
 }
 /**
  * setlocale Метод установки локали

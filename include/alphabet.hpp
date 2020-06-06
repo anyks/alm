@@ -104,8 +104,6 @@ namespace anyks {
 			std::set <wchar_t> latian;
 			// Алфавит для проверки
 			std::set <wchar_t> letters;
-			// Список альтернативных букв
-			std::map <wchar_t, wchar_t> alters;
 			// Список похожих букв в разных алфавитах
 			std::map <wchar_t, wchar_t> substitutes;
 		public:
@@ -129,12 +127,6 @@ namespace anyks {
 			 * @return итератор
 			 */
 			const std::set <wchar_t>::const_reverse_iterator crend() const noexcept;
-		public:
-			/**
-			 * alts Метод получения списка альтернативных букв
-			 * return список альтернативных букв
-			 */
-			const std::map <wchar_t, wchar_t> & alts() const noexcept;
 		public:
 			/**
 			 * get Метод получения алфавита языка
@@ -191,18 +183,6 @@ namespace anyks {
 			 */
 			const char toUpper(const char letter) const noexcept;
 			/**
-			 * alt Метод получения альтернативной буквы
-			 * @param  lid буква для проверки
-			 * @return     альтернативная буква
-			 */
-			const wchar_t alt(const wchar_t lid) const noexcept;
-			/**
-			 * rel Метод получения реальной буквы из альтернативной
-			 * @param  lid альтернативная буква
-			 * @return     реальная буква
-			 */
-			const wchar_t rel(const wchar_t lid) const noexcept;
-			/**
 			 * toLower Метод перевода русских букв в нижний регистр
 			 * @param str строка для перевода
 			 * @return    строка в нижнем регистре
@@ -251,12 +231,6 @@ namespace anyks {
 			 * @return      римское число
 			 */
 			const wstring arabic2Roman(const wstring & word) const noexcept;
-			/**
-			 * delAltInWord Метод удаления альтернативных букв в слове
-			 * @param word слово в котором нужно удалить альтернативную букву
-			 * @return     слово без альтернативной буквы
-			 */
-			const wstring delAltInWord(const wstring & word) const noexcept;
 			/**
 			 * delPunctInWord Метод очистки текста от всех знаков препинаний
 			 * @param word слово для очистки
@@ -318,11 +292,6 @@ namespace anyks {
 			const size_t countLetter(const wstring & word, const wchar_t letter) const noexcept;
 		public:
 			/**
-			 * altemp Метод проверки на сущестования альтернативных букв
-			 * @return результат проверки
-			 */
-			const bool altemp() const noexcept;
-			/**
 			 * isAllowApostrophe Метод проверки разрешения апострофа
 			 * @return результат проверки
 			 */
@@ -333,12 +302,6 @@ namespace anyks {
 			 * @return     результат проверки
 			 */
 			const bool isUrl(const wstring & word) const noexcept;
-			/**
-			 * isAlt Метод проверки существования альтернативной буквы
-			 * @param  letter буква для проверки
-			 * @return        результат проверки
-			 */
-			const bool isAlt(const wchar_t letter) const noexcept;
 			/**
 			 * isMath Метод определения математических операий
 			 * @param letter буква для проверки
@@ -530,19 +493,14 @@ namespace anyks {
 			void split(const string & str, const string & delim, vector <wstring> & v) const noexcept;
 			/**
 			 * add Метод добавления буквы в алфавит
-			 * @param lid идентификатор буквы для добавления
+			 * @param letter буква для добавления
 			 */
-			void add(const wchar_t lid) noexcept;
+			void add(const wchar_t letter) noexcept;
 			/**
 			 * set Метод добавления алфавита в словарь
 			 * @param alphabet алфавит символов для текущего языка
 			 */
 			void set(const string & alphabet = "") noexcept;
-			/**
-			 * rmalt Метод удаления альтернативной буквы
-			 * @param letter буква у которой есть альтернативная буква
-			 */
-			void rmalt(const wchar_t letter) noexcept;
 			/**
 			 * setzone Метод установки пользовательской зоны
 			 * @param zone пользовательская зона
@@ -563,12 +521,6 @@ namespace anyks {
 			 * @param zones список доменных зон интернета
 			 */
 			void setzones(const std::set <wstring> & zones) noexcept;
-			/**
-			 * setalt Метод добавления альтернативной буквы
-			 * @param lid буква у которой есть альтернатива
-			 * @param alt альтернативная буква
-			 */
-			void setalt(const wchar_t lid, const wchar_t alt) noexcept;
 			/**
 			 * setlocale Метод установки локали
 			 * @param locale локализация приложения
