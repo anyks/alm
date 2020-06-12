@@ -14,7 +14,7 @@
  * @return    результат проверки
  */
 const bool anyks::Alm::event(const size_t idw) const noexcept {
-	// Если это не спец-слова, формируем слово
+	// Выводим результат
 	return (
 		(idw != size_t(token_t::num)) &&
 		(idw != size_t(token_t::unk)) &&
