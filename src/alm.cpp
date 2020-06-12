@@ -600,6 +600,54 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text, const bool acc
  * @param accurate режим точной проверки
  * @return         результат проверки
  */
+const pair <bool, size_t> anyks::Alm::check(const vector <string> & seq, const bool accurate) const noexcept {
+	// Результат работы функции
+	pair <bool, size_t> result;
+	// Если последовательность получена
+	if(!seq.empty()){
+		// Список последовательности для проверки
+		vector <size_t> tmp(seq.size());
+		// Переходим по всей последовательности
+		for(size_t i = 0; i < seq.size(); i++){
+			// Устанавливаем полученное слово
+			tmp.at(i) = this->getIdw(this->alphabet->convert(seq.at(i)));
+		}
+		// Выводим результат
+		return this->check(tmp, accurate);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * check Метод проверки существования последовательности
+ * @param seq      список слов последовательности
+ * @param accurate режим точной проверки
+ * @return         результат проверки
+ */
+const pair <bool, size_t> anyks::Alm::check(const vector <wstring> & seq, const bool accurate) const noexcept {
+	// Результат работы функции
+	pair <bool, size_t> result;
+	// Если последовательность получена
+	if(!seq.empty()){
+		// Список последовательности для проверки
+		vector <size_t> tmp(seq.size());
+		// Переходим по всей последовательности
+		for(size_t i = 0; i < seq.size(); i++){
+			// Устанавливаем полученное слово
+			tmp.at(i) = this->getIdw(seq.at(i));
+		}
+		// Выводим результат
+		return this->check(tmp, accurate);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * check Метод проверки существования последовательности
+ * @param seq      список слов последовательности
+ * @param accurate режим точной проверки
+ * @return         результат проверки
+ */
 const pair <bool, size_t> anyks::Alm::check(const vector <size_t> & seq, const bool accurate) const noexcept {
 	// Блокируем варнинг
 	(void) seq;

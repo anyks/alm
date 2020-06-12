@@ -300,6 +300,20 @@ namespace anyks {
 			 * @param accurate режим точной проверки
 			 * @return         результат проверки
 			 */
+			const pair <bool, size_t> check(const vector <string> & seq, const bool accurate = false) const noexcept;
+			/**
+			 * check Метод проверки существования последовательности
+			 * @param seq      список слов последовательности
+			 * @param accurate режим точной проверки
+			 * @return         результат проверки
+			 */
+			const pair <bool, size_t> check(const vector <wstring> & seq, const bool accurate = false) const noexcept;
+			/**
+			 * check Метод проверки существования последовательности
+			 * @param seq      список слов последовательности
+			 * @param accurate режим точной проверки
+			 * @return         результат проверки
+			 */
 			virtual const pair <bool, size_t> check(const vector <size_t> & seq, const bool accurate = false) const noexcept;
 		public:
 			/**
