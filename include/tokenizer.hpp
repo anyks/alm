@@ -65,14 +65,19 @@ namespace anyks {
 	 * Tokenizer Класс работы с токенизацией
 	 */
 	typedef struct Tokenizer {
+		public:
+			// Тип функции внешнего токенизатора
+			typedef function <void (const wstring &, function <const bool (const wstring &, const vector <string> &, const bool, const bool)>)> tokenz_t;
 		private:
 			// Объект идентификатора
-			idw_t idWord;
+			idw_t wrdId;
 			// Список аббревиатур
 			set <size_t> abbrs;
 		private:
+			// Внешняя функция токенизатора
+			tokenz_t extFn;
 			// Объект алфавита
-			const alphabet_t * alphabet = nullptr;
+			const alphabet_t * alphabet;
 		public:
 			/**
 			 * setAbbr Метод добавления аббревиатуры
@@ -163,6 +168,11 @@ namespace anyks {
 			 * update Метод обновления параметров
 			 */
 			void update() noexcept;
+			/**
+			 * setExternal Метод установки внешней функции токенизатора
+			 * @param fn внешняя функция токенизатора
+			 */
+			void setExternal(tokenz_t fn) noexcept;
 			/**
 			 * jsonToText Метод преобразования текста в формате json в текст
 			 * @param text     текст для преобразования в формате json

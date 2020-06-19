@@ -23,8 +23,12 @@
  * Наши модули
  */
 #include <alphabet.hpp>
+#include <nlohmann/json.hpp>
 
+// Устанавливаем область видимости
 using namespace std;
+// Активируем пространство имён json
+using json = nlohmann::json;
 
 /**
  * anyks пространство имён
@@ -80,6 +84,11 @@ namespace anyks {
 			 * @param flag значение флага
 			 */
 			void autoRead(const bool flag) noexcept;
+			/**
+			 * setJson Метод добавления данных в формате json
+			 * @param data данные в формате json
+			 */
+			void setJson(const json & data) noexcept;
 			/**
 			 * textEnv Метод установки списка имён которые нужно извлечь
 			 * @param text название переменной для извлечения текстовой информации из потока (если параметром не передана)

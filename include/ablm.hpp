@@ -27,7 +27,6 @@
 #include <toolkit.hpp>
 #include <alphabet.hpp>
 #include <tokenizer.hpp>
-#include <nlohmann/json.hpp>
 
 // Устанавливаем область видимости
 using namespace std;
@@ -140,10 +139,10 @@ namespace anyks {
 			 */
 			void setAlm(alm_t * alm) noexcept;
 			/**
-			 * setMeta Метод установки метаданных в формате json
-			 * @param meta метаданные в формате json
+			 * setAES Метод установки размера шифрования
+			 * @param aes размер шифрования для установки
 			 */
-			void setMeta(const json & meta) noexcept;
+			void setAES(aspl_t::types_t aes) noexcept;
 			/**
 			 * setFlag Метод установки флага модуля
 			 * @param flag флаг для установки
@@ -155,6 +154,16 @@ namespace anyks {
 			 */
 			void unsetFlag(const flag_t flag) noexcept;
 			/**
+			 * setName Метод установки названия словаря
+			 * @param name название словаря для установки
+			 */
+			void setName(const string & name) noexcept;
+			/**
+			 * setAuthor Метод установки автора словаря
+			 * @param author автор словаря для установки
+			 */
+			void setAuthor(const string & author) noexcept;
+			/**
 			 * setLogfile Метод установки файла для вывода логов
 			 * @param logifle адрес файла для вывода отладочной информации
 			 */
@@ -165,10 +174,30 @@ namespace anyks {
 			 */
 			void setToolkit(toolkit_t * toolkit) noexcept;
 			/**
+			 * setLictype Метод установки типа лицензии
+			 * @param lictype тип лицензии для установки
+			 */
+			void setLictype(const string & lictype) noexcept;
+			/**
+			 * setLictext Метод установки текста лицензии
+			 * @param lictext текст лицензии для установки
+			 */
+			void setLictext(const string & lictext) noexcept;
+			/**
 			 * setAlphabet Метод установки объекта словаря
 			 * @param alphabet объект словаря для установки
 			 */
 			void setAlphabet(alphabet_t * alphabet) noexcept;
+			/**
+			 * setContacts Метод установки контактов автора
+			 * @param contacts контакты автора для установки
+			 */
+			void setContacts(const string & contacts) noexcept;
+			/**
+			 * setPassword Метод установки пароля словаря
+			 * @param password пароль словаря для установки
+			 */
+			void setPassword(const string & password) noexcept;
 			/**
 			 * setTokenizer Метод установки токенизатора
 			 * @param tokenizer объект токенизатора
@@ -179,6 +208,11 @@ namespace anyks {
 			 * @param filename адрес файла словаря
 			 */
 			void setFilename(const string & filename) noexcept;
+			/**
+			 * setCopyright Метод установки копирайта автора
+			 * @param copyright копирайт автора для установки
+			 */
+			void setCopyright(const string & copyright) noexcept;
 		public:
 			/**
 			 * AbLM Конструктор

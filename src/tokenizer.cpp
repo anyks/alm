@@ -291,7 +291,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
  */
 const size_t anyks::Tokenizer::idw(const wstring & word) const noexcept {
 	// Формируем идентификатор слова
-	return this->idWord.get(word);
+	return this->wrdId.get(word);
 }
 /**
  * ids Метод извлечения идентификатора последовательности
@@ -300,7 +300,7 @@ const size_t anyks::Tokenizer::idw(const wstring & word) const noexcept {
  */
 const size_t anyks::Tokenizer::ids(const vector <size_t> & seq) const noexcept {
 	// Формируем идентификатор последовательности
-	return this->idWord.get(seq);
+	return this->wrdId.get(seq);
 }
 /**
  * readline Метод извлечения строки из текста
@@ -724,7 +724,15 @@ void anyks::Tokenizer::clear() noexcept {
  */
 void anyks::Tokenizer::update() noexcept {
 	// Устанавливаем алфавит и смещение в 19 позиций (количество системных токенов arpa)
-	this->idWord.set(this->alphabet, 19);
+	this->wrdId.set(this->alphabet, 19);
+}
+/**
+ * setExternal Метод установки внешней функции токенизатора
+ * @param fn внешняя функция токенизатора
+ */
+void anyks::Tokenizer::setExternal(tokenz_t fn) noexcept {
+	// Устанавливаем функцию внешнего токенизатора
+	this->extFn = fn;
 }
 /**
  * jsonToText Метод преобразования текста в формате json в текст
@@ -831,215 +839,180 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
 void anyks::Tokenizer::run(const wstring & text, function <const bool (const wstring &, const vector <string> &, const bool, const bool)> callback) const noexcept {
 	// Если текст передан, и текст не больше 100Mb в одну строку
 	if(!text.empty() && (text.size() <= MAX_STRING_BYTES) && (this->alphabet != nullptr)){
-		// Типы флагов
-		enum class type_t : u_short {
-			url,   // Интернет адрес
-			num,   // Символ числа в тексте
-			null,  // Не определено
-			math,  // Математическая операция
-			specl, // Спец-символ в тексте
-			space, // Символ пробела в тексте
-			allow, // Разрешённый символ
-			punct, // Знак препинания
-			isolat // Изоляционный символ в строке
-		};
-		// Полученное слово
-		wstring word = L"";
-		// Собранный контекст
-		vector <string> context;
-		// Стек открытых скобок
-		stack <wchar_t> brackets;
-		// Тип следующего символа
-		type_t type = type_t::null;
-		// Текущая буква и следующий символ
-		wchar_t letter = 0, lletter = 0, backLetter = 0, next = 0;
-		// Основные флаги токенизации
-		bool open = false, begin = false, end = false, nend = false;
-		bool backPunct = false, stopToken = false, notClear = false;
-		// Получаем буквы алфавита
-		const wstring & letters = this->alphabet->convert(this->alphabet->get());
-		/**
-		 * callbackFn Функция вывода результата
-		 * @param word полученное слово
-		 * @param end  конец обработки текста
-		 * @return     нужно ли завершить работу
-		 */
-		auto callbackFn = [&begin, &context, &callback](const wstring & word, const bool end) noexcept {
-			// Отдаём результат
-			const bool result = callback(word, context, begin && context.empty(), end);
-			// Запоминаем что работа началась
-			begin = (!begin ? !begin : begin);
-			// Выводим результат
-			return result;
-		};
-		/**
-		 * erangeFn Функция проверяющая вхождения позиции в диапазон координат
-		 * @param pos         значение позиции
-		 * @param coordinates список координат в тексте
-		 * @return            результат проверки
-		 */
-		auto erangeFn = [](const size_t pos, const map <size_t, size_t> & coordinates) noexcept {
-			// Результат проверки
-			bool result = false;
-			// Если в списке нет неустановленных координат
-			if(!coordinates.empty() && (coordinates.count(wstring::npos) < 1)){
-				// Выполняем обход всех координат
-				for(auto & item : coordinates){
-					// Если позиция попала в запрещенную зону то сообщаем это
-					result = !((pos <= item.first) || (pos >= item.second));
-					// Если позиция вошла в указанный диапазон то выходим
-					if(result) break;
+		// Если внешняя функция существует, выполняем её
+		if(this->extFn != nullptr) this->extFn(text, callback);
+		// Иначе выполняем обработк собственными методами
+		else {
+			// Типы флагов
+			enum class type_t : u_short {
+				url,   // Интернет адрес
+				num,   // Символ числа в тексте
+				null,  // Не определено
+				math,  // Математическая операция
+				specl, // Спец-символ в тексте
+				space, // Символ пробела в тексте
+				allow, // Разрешённый символ
+				punct, // Знак препинания
+				isolat // Изоляционный символ в строке
+			};
+			// Полученное слово
+			wstring word = L"";
+			// Собранный контекст
+			vector <string> context;
+			// Стек открытых скобок
+			stack <wchar_t> brackets;
+			// Тип следующего символа
+			type_t type = type_t::null;
+			// Текущая буква и следующий символ
+			wchar_t letter = 0, lletter = 0, backLetter = 0, next = 0;
+			// Основные флаги токенизации
+			bool open = false, begin = false, end = false, nend = false;
+			bool backPunct = false, stopToken = false, notClear = false;
+			// Получаем буквы алфавита
+			const wstring & letters = this->alphabet->convert(this->alphabet->get());
+			/**
+			 * callbackFn Функция вывода результата
+			 * @param word полученное слово
+			 * @param end  конец обработки текста
+			 * @return     нужно ли завершить работу
+			 */
+			auto callbackFn = [&begin, &context, &callback](const wstring & word, const bool end) noexcept {
+				// Отдаём результат
+				const bool result = callback(word, context, begin && context.empty(), end);
+				// Запоминаем что работа началась
+				begin = (!begin ? !begin : begin);
+				// Выводим результат
+				return result;
+			};
+			/**
+			 * erangeFn Функция проверяющая вхождения позиции в диапазон координат
+			 * @param pos         значение позиции
+			 * @param coordinates список координат в тексте
+			 * @return            результат проверки
+			 */
+			auto erangeFn = [](const size_t pos, const map <size_t, size_t> & coordinates) noexcept {
+				// Результат проверки
+				bool result = false;
+				// Если в списке нет неустановленных координат
+				if(!coordinates.empty() && (coordinates.count(wstring::npos) < 1)){
+					// Выполняем обход всех координат
+					for(auto & item : coordinates){
+						// Если позиция попала в запрещенную зону то сообщаем это
+						result = !((pos <= item.first) || (pos >= item.second));
+						// Если позиция вошла в указанный диапазон то выходим
+						if(result) break;
+					}
 				}
-			}
-			// Выводим результат
-			return result;
-		};
-		// Выполняем поиск координат в тексте
-		const auto coordinates = this->alphabet->urls(text);
-		// Переходим по всему тексту
-		for(size_t i = 0; i < text.length(); i++){
-			// Получаем значение текущей буквы
-			letter = text.at(i);
-			// Переводим букву в нижний регистр
-			lletter = this->alphabet->toLower(letter);
-			// Определяем является ли это концом предложения
-			end = (i == (text.length() - 1));
-			// Определяем является ли слово адресом интернета
-			if(erangeFn(i, coordinates)){
-				// Формируем слово в виде url адреса
-				word.append(1, letter);
-				// Если это конец текста
-				if(end && !callbackFn(word, end)) return;
-			// Выполняем обычную обработку
-			} else {
-				// Получаем значение следующего символа
-				next = (!end ? this->alphabet->toLower(text.at(i + 1)) : 0);
-				// Если следующий символ является концом строки
-				if((i + 1) == (text.length() - 1)) nend = true;
-				// Если следующий символ является знаком препинания
-				if(this->alphabet->isPunct(next)) type = type_t::punct;
-				// Если следующий символ является математической операцией
-				else if(this->alphabet->isMath(next)) type = type_t::math;
-				// Если следующий символ является пробелом
-				else if(this->alphabet->isSpace(next)) type = type_t::space;
-				// Если следующий символ является спец-символом
-				else if(this->alphabet->isSpecial(next)) type = type_t::specl;
-				// Если следующий символ является числом
-				else if(this->alphabet->isNumber({next})) type = type_t::num;
-				// Если следующий символ является символом изоляции
-				else if(this->alphabet->isIsolation(next)) type = type_t::isolat;
-				// Если следующий символ является разрешённым
-				else if(this->alphabet->check(next)) type = type_t::allow;
-				// Иначе зануляем следующий тип
-				else type = type_t::null;
-				// Если это пробел и слово не пустое
-				if(this->alphabet->isSpace(lletter) && !word.empty()){
-					// Выводим полученное слово
-					if(!callbackFn(word, end)) return;
-					// Добавляем слово в контекст
-					context.push_back(this->alphabet->convert(word));
-					// Очищаем слово
-					word.clear();
-				// Если это знак пунктуации
-				} else if(this->alphabet->isPunct(lletter) ||
-				this->alphabet->isSpecial(lletter) ||
-				this->alphabet->isMath(lletter)) {
-					// Проверяем следующие символы на стоп-токены
-					stopToken = (
-						(type == type_t::math) ||
-						(type == type_t::space) ||
-						(type == type_t::specl) ||
-						(type == type_t::punct) ||
-						(type == type_t::isolat)
-					);
-					// Проверяем является ли предыдущий символ также знаком пунктуации
-					backPunct = ((backLetter > 0) && this->alphabet->isPunct(backLetter));
-					// Выводим результат как он есть
-					if(end){
-						// Если слово не пустое
-						if(!word.empty()){
-							// Если это спец-символ
-							if(this->alphabet->isSpecial(lletter)){
-								// Добавляем букву в слово
-								word.append(1, letter);
-								// Выводим полученное слово
-								if(!callbackFn(word, end)) return;
-							// Если это не спец-символ а математическая операция или знак препинания
-							} else {
-								// Выводим полученное слово
-								if(!callbackFn(word, !end)) return;
-								// Добавляем слово в контекст
-								context.push_back(this->alphabet->convert(word));
-								// Выводим знак препинания
-								if(!callbackFn({letter}, end)) return;
-							}
-						// Выводим знак препинания
-						} else if(!callbackFn({letter}, end)) return;
-					// Если слово не существует
-					} else if(word.empty() && !this->alphabet->isPunct(lletter) &&
-					!(((lletter == L'-') || (lletter == L'+') ||
-					(lletter == L'*')) && (type == type_t::num))) {
-						// Выводим знак препинания
-						if(!callbackFn({letter}, end)) return;
-						// Добавляем знак препинания в контекст
-						context.push_back(this->alphabet->convert(wstring(1, letter)));
-					// Если слово не пустое и это точка, запятая или двоеточие
-					} else if((lletter == L'.') || (lletter == L',') ||
-					(lletter == L':') || (lletter == L';') || (lletter == L'/')) {
-						// Получаем символ для проверки
-						wchar_t sumbol = (
-							(lletter == L'.') ? (!nend && (type == type_t::space) ? text.at(i + 2) :
-							((type == type_t::allow) ? text.at(i + 1) : 0)) : 0
+				// Выводим результат
+				return result;
+			};
+			// Выполняем поиск координат в тексте
+			const auto coordinates = this->alphabet->urls(text);
+			// Переходим по всему тексту
+			for(size_t i = 0; i < text.length(); i++){
+				// Получаем значение текущей буквы
+				letter = text.at(i);
+				// Переводим букву в нижний регистр
+				lletter = this->alphabet->toLower(letter);
+				// Определяем является ли это концом предложения
+				end = (i == (text.length() - 1));
+				// Определяем является ли слово адресом интернета
+				if(erangeFn(i, coordinates)){
+					// Формируем слово в виде url адреса
+					word.append(1, letter);
+					// Если это конец текста
+					if(end && !callbackFn(word, end)) return;
+				// Выполняем обычную обработку
+				} else {
+					// Получаем значение следующего символа
+					next = (!end ? this->alphabet->toLower(text.at(i + 1)) : 0);
+					// Если следующий символ является концом строки
+					if((i + 1) == (text.length() - 1)) nend = true;
+					// Если следующий символ является знаком препинания
+					if(this->alphabet->isPunct(next)) type = type_t::punct;
+					// Если следующий символ является математической операцией
+					else if(this->alphabet->isMath(next)) type = type_t::math;
+					// Если следующий символ является пробелом
+					else if(this->alphabet->isSpace(next)) type = type_t::space;
+					// Если следующий символ является спец-символом
+					else if(this->alphabet->isSpecial(next)) type = type_t::specl;
+					// Если следующий символ является числом
+					else if(this->alphabet->isNumber({next})) type = type_t::num;
+					// Если следующий символ является символом изоляции
+					else if(this->alphabet->isIsolation(next)) type = type_t::isolat;
+					// Если следующий символ является разрешённым
+					else if(this->alphabet->check(next)) type = type_t::allow;
+					// Иначе зануляем следующий тип
+					else type = type_t::null;
+					// Если это пробел и слово не пустое
+					if(this->alphabet->isSpace(lletter) && !word.empty()){
+						// Выводим полученное слово
+						if(!callbackFn(word, end)) return;
+						// Добавляем слово в контекст
+						context.push_back(this->alphabet->convert(word));
+						// Очищаем слово
+						word.clear();
+					// Если это знак пунктуации
+					} else if(this->alphabet->isPunct(lletter) ||
+					this->alphabet->isSpecial(lletter) ||
+					this->alphabet->isMath(lletter)) {
+						// Проверяем следующие символы на стоп-токены
+						stopToken = (
+							(type == type_t::math) ||
+							(type == type_t::space) ||
+							(type == type_t::specl) ||
+							(type == type_t::punct) ||
+							(type == type_t::isolat)
 						);
-						// Проверяем является ли слово аббревиатурой
-						bool abbr = (
-							(!word.empty() && (word.find(L'.') != wstring::npos)) ||
-							((sumbol > 0) && (word.length() <= 4) &&
-							(!this->alphabet->isUpper(sumbol) || (word.length() == 1) ||
-							(letters.find(tolower(sumbol)) == wstring::npos)))
-						);
-						// Если следующий символ является пробелом или нормальным словом
-						if((lletter != L'/') && (((type == type_t::allow) &&
-						((lletter != L'.') || !abbr)) || ((stopToken && !abbr) || backPunct))){
-							// Выводим полученное слово
-							if(!callbackFn(word, end)) return;
-							// Добавляем слово в контекст
-							if(!word.empty()) context.push_back(this->alphabet->convert(word));
+						// Проверяем является ли предыдущий символ также знаком пунктуации
+						backPunct = ((backLetter > 0) && this->alphabet->isPunct(backLetter));
+						// Выводим результат как он есть
+						if(end){
+							// Если слово не пустое
+							if(!word.empty()){
+								// Если это спец-символ
+								if(this->alphabet->isSpecial(lletter)){
+									// Добавляем букву в слово
+									word.append(1, letter);
+									// Выводим полученное слово
+									if(!callbackFn(word, end)) return;
+								// Если это не спец-символ а математическая операция или знак препинания
+								} else {
+									// Выводим полученное слово
+									if(!callbackFn(word, !end)) return;
+									// Добавляем слово в контекст
+									context.push_back(this->alphabet->convert(word));
+									// Выводим знак препинания
+									if(!callbackFn({letter}, end)) return;
+								}
+							// Выводим знак препинания
+							} else if(!callbackFn({letter}, end)) return;
+						// Если слово не существует
+						} else if(word.empty() && !this->alphabet->isPunct(lletter) &&
+						!(((lletter == L'-') || (lletter == L'+') ||
+						(lletter == L'*')) && (type == type_t::num))) {
 							// Выводим знак препинания
 							if(!callbackFn({letter}, end)) return;
 							// Добавляем знак препинания в контекст
 							context.push_back(this->alphabet->convert(wstring(1, letter)));
-							// Иначе очищаем контекст
-							if(!notClear && (!backPunct || !!this->alphabet->isUpper(sumbol)) &&
-							(lletter == L'.') && (type != type_t::punct)) context.clear();
-							// Очищаем слово
-							word.clear();
-						// Если это не пробел
-						} else if(!this->alphabet->isSpace(lletter)) {
-							// Если следующий символ является концом текста или стоп-токеном
-							if(nend && stopToken){
-								// Выводим полученное слово
-								if(!callbackFn(word, end)) return;
-								// Добавляем слово в контекст
-								if(!word.empty()) context.push_back(this->alphabet->convert(word));
-								// Выводим знак препинания
-								if(!callbackFn({letter}, end)) return;
-								// Добавляем знак препинания в контекст
-								context.push_back(this->alphabet->convert(wstring(1, letter)));
-								// Очищаем слово
-								word.clear();
-							// Иначе добавляем символ в словарь
-							} else word.append(1, letter);
-						}
-					// Если это другие знаки препинания
-					} else if((lletter == L'!') || (lletter == L'?')) {
-						// Если следующий символ является пробелом или нормальным словом
-						if((type == type_t::allow) || (type == type_t::space) ||
-						(type == type_t::isolat) || stopToken || backPunct) {
-							// Если это бинарное сравнение, символ в слово
-							if((lletter == L'!') && (next == L'=')) word.append(1, letter);
-							// Иначе обрываем контекст
-							else {
+						// Если слово не пустое и это точка, запятая или двоеточие
+						} else if((lletter == L'.') || (lletter == L',') ||
+						(lletter == L':') || (lletter == L';') || (lletter == L'/')) {
+							// Получаем символ для проверки
+							wchar_t sumbol = (
+								(lletter == L'.') ? (!nend && (type == type_t::space) ? text.at(i + 2) :
+								((type == type_t::allow) ? text.at(i + 1) : 0)) : 0
+							);
+							// Проверяем является ли слово аббревиатурой
+							bool abbr = (
+								(!word.empty() && (word.find(L'.') != wstring::npos)) ||
+								((sumbol > 0) && (word.length() <= 4) &&
+								(!this->alphabet->isUpper(sumbol) || (word.length() == 1) ||
+								(letters.find(tolower(sumbol)) == wstring::npos)))
+							);
+							// Если следующий символ является пробелом или нормальным словом
+							if((lletter != L'/') && (((type == type_t::allow) &&
+							((lletter != L'.') || !abbr)) || ((stopToken && !abbr) || backPunct))){
 								// Выводим полученное слово
 								if(!callbackFn(word, end)) return;
 								// Добавляем слово в контекст
@@ -1049,135 +1022,114 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 								// Добавляем знак препинания в контекст
 								context.push_back(this->alphabet->convert(wstring(1, letter)));
 								// Иначе очищаем контекст
-								if(!notClear && !nend && (type != type_t::punct)
-								&& (type != type_t::isolat)) context.clear();
+								if(!notClear && (!backPunct || !!this->alphabet->isUpper(sumbol)) &&
+								(lletter == L'.') && (type != type_t::punct)) context.clear();
 								// Очищаем слово
 								word.clear();
+							// Если это не пробел
+							} else if(!this->alphabet->isSpace(lletter)) {
+								// Если следующий символ является концом текста или стоп-токеном
+								if(nend && stopToken){
+									// Выводим полученное слово
+									if(!callbackFn(word, end)) return;
+									// Добавляем слово в контекст
+									if(!word.empty()) context.push_back(this->alphabet->convert(word));
+									// Выводим знак препинания
+									if(!callbackFn({letter}, end)) return;
+									// Добавляем знак препинания в контекст
+									context.push_back(this->alphabet->convert(wstring(1, letter)));
+									// Очищаем слово
+									word.clear();
+								// Иначе добавляем символ в словарь
+								} else word.append(1, letter);
 							}
-						// Если это не пробел
-						} else if(!this->alphabet->isSpace(lletter)) {
-							// Если следующий символ является концом текста или стоп-токеном
-							if(nend && stopToken){
+						// Если это другие знаки препинания
+						} else if((lletter == L'!') || (lletter == L'?')) {
+							// Если следующий символ является пробелом или нормальным словом
+							if((type == type_t::allow) || (type == type_t::space) ||
+							(type == type_t::isolat) || stopToken || backPunct) {
+								// Если это бинарное сравнение, символ в слово
+								if((lletter == L'!') && (next == L'=')) word.append(1, letter);
+								// Иначе обрываем контекст
+								else {
+									// Выводим полученное слово
+									if(!callbackFn(word, end)) return;
+									// Добавляем слово в контекст
+									if(!word.empty()) context.push_back(this->alphabet->convert(word));
+									// Выводим знак препинания
+									if(!callbackFn({letter}, end)) return;
+									// Добавляем знак препинания в контекст
+									context.push_back(this->alphabet->convert(wstring(1, letter)));
+									// Иначе очищаем контекст
+									if(!notClear && !nend && (type != type_t::punct)
+									&& (type != type_t::isolat)) context.clear();
+									// Очищаем слово
+									word.clear();
+								}
+							// Если это не пробел
+							} else if(!this->alphabet->isSpace(lletter)) {
+								// Если следующий символ является концом текста или стоп-токеном
+								if(nend && stopToken){
+									// Выводим полученное слово
+									if(!callbackFn(word, end)) return;
+									// Добавляем слово в контекст
+									if(!word.empty()) context.push_back(this->alphabet->convert(word));
+									// Выводим знак препинания
+									if(!callbackFn({letter}, end)) return;
+									// Добавляем знак препинания в контекст
+									context.push_back(this->alphabet->convert(wstring(1, letter)));
+									// Очищаем слово
+									word.clear();
+								// Иначе добавляем символ в словарь
+								} else word.append(1, letter);
+							}
+						// Если это спец-символ
+						} else if(this->alphabet->isSpecial(lletter) || this->alphabet->isMath(lletter)) {
+							// Добавляем символ в слово
+							if(!this->alphabet->isSpace(lletter)) word.append(1, letter);
+							// Если следующий символ является пробелом
+							if(type == type_t::space){
 								// Выводим полученное слово
 								if(!callbackFn(word, end)) return;
 								// Добавляем слово в контекст
 								if(!word.empty()) context.push_back(this->alphabet->convert(word));
+								// Очищаем слово
+								word.clear();
+							}
+						}
+					// Если это изоляционный символ
+					} else if(this->alphabet->isIsolation(lletter) && (!this->alphabet->isAllowApostrophe() || (lletter != L'\''))) {
+						// Выводим результат как он есть
+						if(end){
+							// Если слово не пустое
+							if(!word.empty()){
+								// Выводим полученное слово
+								if(!callbackFn(word, !end)) return;
+								// Добавляем слово в контекст
+								if(open) context.push_back(this->alphabet->convert(word));
+								// Очищаем контекст
+								else if(!notClear) context.clear();
 								// Выводим знак препинания
 								if(!callbackFn({letter}, end)) return;
-								// Добавляем знак препинания в контекст
-								context.push_back(this->alphabet->convert(wstring(1, letter)));
-								// Очищаем слово
-								word.clear();
-							// Иначе добавляем символ в словарь
-							} else word.append(1, letter);
-						}
-					// Если это спец-символ
-					} else if(this->alphabet->isSpecial(lletter) || this->alphabet->isMath(lletter)) {
-						// Добавляем символ в слово
-						if(!this->alphabet->isSpace(lletter)) word.append(1, letter);
-						// Если следующий символ является пробелом
-						if(type == type_t::space){
-							// Выводим полученное слово
-							if(!callbackFn(word, end)) return;
-							// Добавляем слово в контекст
-							if(!word.empty()) context.push_back(this->alphabet->convert(word));
-							// Очищаем слово
-							word.clear();
-						}
-					}
-				// Если это изоляционный символ
-				} else if(this->alphabet->isIsolation(lletter) && (!this->alphabet->isAllowApostrophe() || (lletter != L'\''))) {
-					// Выводим результат как он есть
-					if(end){
-						// Если слово не пустое
-						if(!word.empty()){
-							// Выводим полученное слово
-							if(!callbackFn(word, !end)) return;
-							// Добавляем слово в контекст
-							if(open) context.push_back(this->alphabet->convert(word));
-							// Очищаем контекст
-							else if(!notClear) context.clear();
 							// Выводим знак препинания
-							if(!callbackFn({letter}, end)) return;
-						// Выводим знак препинания
-						} else if(!callbackFn({letter}, end)) return;
-					// Если это не конец
-					} else {
-						// Определяем тип изоляционных знаков
-						u_short typeBracket = (
-							(lletter == L'(') || (lletter == L'[') || (lletter == L'{') ||
-							(lletter == L'«') || (lletter == L'„') ? 1 :
-							((lletter == L')') || (lletter == L']') || (lletter == L'}') ||
-							(lletter == L'»') || (lletter == L'“') ? 2 : 0)
-						);
-						// Если это изоляционный знак открытия
-						if(typeBracket == 1){
-							// Запрещаем очистку словаря
-							notClear = true;
-							// Добавляем в стек наш знак
-							brackets.push(letter);
-							// Если слово не пустое
-							if(!word.empty()){
-								// Добавляем слово в контекст
-								context.push_back(this->alphabet->convert(word));
-								// Выводим полученное слово
-								if(!callbackFn(word, end)) return;
-								// Очищаем слово
-								word.clear();
-							}
-							// Выводим знак препинания
-							if(!callbackFn({letter}, end)) return;
-							// Добавляем знак препинания в контекст
-							context.push_back(this->alphabet->convert(wstring(1, letter)));
-						// Если это изоляционный знак закрытия и он совпадает с открытым
-						} else if(typeBracket == 2) {
-							// Разрешено продолжить работу
-							bool mode = false;
-							// Если стек не пустой
-							if(!brackets.empty()){
-								// Определяем тип открытой скобки
-								switch(brackets.top()){
-									// Если это круглая скобка
-									case L'(': mode = (letter == L')'); break;
-									// Если это квадратная скобка
-									case L'[': mode = (letter == L']'); break;
-									// Если это фигурная скобка
-									case L'{': mode = (letter == L'}'); break;
-									// Если это угловые кавычки
-									case L'«': mode = (letter == L'»'); break;
-									// Если это литературные кавычки
-									case L'„': mode = (letter == L'“'); break;
-								}
-							}
-							// Если слово не пустое
-							if(!word.empty() && !callbackFn(word, end)) return;
-							// Добавляем слово в контекст
-							if(!word.empty()) context.push_back(this->alphabet->convert(word));
-							// Выводим знак препинания
-							if(!callbackFn({letter}, end)) return;
-							// Очищаем слово
-							word.clear();
-							// Добавляем знак препинания в контекст
-							context.push_back(this->alphabet->convert(wstring(1, letter)));
-							// Если разрешено продолжить
-							if(mode) brackets.pop();
-							// Если больше символов изоляции не открыто, разрешаем очистку контекста
-							notClear = !brackets.empty();
-						// Если это открытие изоляционного знака
-						} else if((open = !open)) {
-							// Если слово не пустое
-							if(!word.empty()){
-								// Если апостроф который находится в латинском слове
-								if((letter == L'\'') && this->alphabet->isLatian({next}) &&
-								this->alphabet->isLatian(this->alphabet->toLower(word))){
-									// Отмечаем что символ изоляции не открыт
-									open = false;
-									// Добавляем символ к слову
-									word.append(1, letter);
-									// Продолжаем дальше
-									continue;
-								// Если это нормальное состояние
-								} else {
+							} else if(!callbackFn({letter}, end)) return;
+						// Если это не конец
+						} else {
+							// Определяем тип изоляционных знаков
+							u_short typeBracket = (
+								(lletter == L'(') || (lletter == L'[') || (lletter == L'{') ||
+								(lletter == L'«') || (lletter == L'„') ? 1 :
+								((lletter == L')') || (lletter == L']') || (lletter == L'}') ||
+								(lletter == L'»') || (lletter == L'“') ? 2 : 0)
+							);
+							// Если это изоляционный знак открытия
+							if(typeBracket == 1){
+								// Запрещаем очистку словаря
+								notClear = true;
+								// Добавляем в стек наш знак
+								brackets.push(letter);
+								// Если слово не пустое
+								if(!word.empty()){
 									// Добавляем слово в контекст
 									context.push_back(this->alphabet->convert(word));
 									// Выводим полученное слово
@@ -1185,42 +1137,103 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 									// Очищаем слово
 									word.clear();
 								}
-							}
-							// Выводим знак препинания
-							if(!callbackFn({letter}, end)) return;
-							// Добавляем знак препинания в контекст
-							if(!this->alphabet->isSpace(letter)){
+								// Выводим знак препинания
+								if(!callbackFn({letter}, end)) return;
+								// Добавляем знак препинания в контекст
+								context.push_back(this->alphabet->convert(wstring(1, letter)));
+							// Если это изоляционный знак закрытия и он совпадает с открытым
+							} else if(typeBracket == 2) {
+								// Разрешено продолжить работу
+								bool mode = false;
+								// Если стек не пустой
+								if(!brackets.empty()){
+									// Определяем тип открытой скобки
+									switch(brackets.top()){
+										// Если это круглая скобка
+										case L'(': mode = (letter == L')'); break;
+										// Если это квадратная скобка
+										case L'[': mode = (letter == L']'); break;
+										// Если это фигурная скобка
+										case L'{': mode = (letter == L'}'); break;
+										// Если это угловые кавычки
+										case L'«': mode = (letter == L'»'); break;
+										// Если это литературные кавычки
+										case L'„': mode = (letter == L'“'); break;
+									}
+								}
+								// Если слово не пустое
+								if(!word.empty() && !callbackFn(word, end)) return;
+								// Добавляем слово в контекст
+								if(!word.empty()) context.push_back(this->alphabet->convert(word));
+								// Выводим знак препинания
+								if(!callbackFn({letter}, end)) return;
+								// Очищаем слово
+								word.clear();
+								// Добавляем знак препинания в контекст
+								context.push_back(this->alphabet->convert(wstring(1, letter)));
+								// Если разрешено продолжить
+								if(mode) brackets.pop();
+								// Если больше символов изоляции не открыто, разрешаем очистку контекста
+								notClear = !brackets.empty();
+							// Если это открытие изоляционного знака
+							} else if((open = !open)) {
+								// Если слово не пустое
+								if(!word.empty()){
+									// Если апостроф который находится в латинском слове
+									if((letter == L'\'') && this->alphabet->isLatian({next}) &&
+									this->alphabet->isLatian(this->alphabet->toLower(word))){
+										// Отмечаем что символ изоляции не открыт
+										open = false;
+										// Добавляем символ к слову
+										word.append(1, letter);
+										// Продолжаем дальше
+										continue;
+									// Если это нормальное состояние
+									} else {
+										// Добавляем слово в контекст
+										context.push_back(this->alphabet->convert(word));
+										// Выводим полученное слово
+										if(!callbackFn(word, end)) return;
+										// Очищаем слово
+										word.clear();
+									}
+								}
+								// Выводим знак препинания
+								if(!callbackFn({letter}, end)) return;
+								// Добавляем знак препинания в контекст
+								if(!this->alphabet->isSpace(letter)){
+									// Добавляем знак препинания в контекст
+									context.push_back(this->alphabet->convert(wstring(1, letter)));
+								}
+							// Если это закрытие изоляционного знака
+							} else {
+								// Если слово не пустое
+								if(!word.empty() && !callbackFn(word, end)) return;
+								// Добавляем слово в контекст
+								if(!word.empty()) context.push_back(this->alphabet->convert(word));
+								// Выводим знак препинания
+								if(!callbackFn({letter}, end)) return;
+								// Очищаем слово
+								word.clear();
 								// Добавляем знак препинания в контекст
 								context.push_back(this->alphabet->convert(wstring(1, letter)));
 							}
-						// Если это закрытие изоляционного знака
-						} else {
-							// Если слово не пустое
-							if(!word.empty() && !callbackFn(word, end)) return;
-							// Добавляем слово в контекст
-							if(!word.empty()) context.push_back(this->alphabet->convert(word));
-							// Выводим знак препинания
-							if(!callbackFn({letter}, end)) return;
-							// Очищаем слово
-							word.clear();
-							// Добавляем знак препинания в контекст
-							context.push_back(this->alphabet->convert(wstring(1, letter)));
 						}
+					// Если это другие символы
+					} else {
+						// Если это первая буква в первом слове
+						if(context.empty() && word.empty())
+							// Приводим букву к верхнему регистру
+							letter = this->alphabet->toUpper(letter);
+						// Формируем слово
+						if(!this->alphabet->isSpace(lletter)) word.append(1, letter);
+						// Выводим полученное слово, если это конец текста
+						if(end) if(!callbackFn(word, end)) return;
 					}
-				// Если это другие символы
-				} else {
-					// Если это первая буква в первом слове
-					if(context.empty() && word.empty())
-						// Приводим букву к верхнему регистру
-						letter = this->alphabet->toUpper(letter);
-					// Формируем слово
-					if(!this->alphabet->isSpace(lletter)) word.append(1, letter);
-					// Выводим полученное слово, если это конец текста
-					if(end) if(!callbackFn(word, end)) return;
 				}
+				// Запоминаем текущую букву
+				backLetter = lletter;
 			}
-			// Запоминаем текущую букву
-			backLetter = lletter;
 		}
 	}
 }
@@ -1228,7 +1241,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
  * Tokenizer Конструктор
  * @param alphabet объект алфавита
  */
-anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept {
+anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : extFn(nullptr), alphabet(alphabet) {
 	// Устанавливаем лафавит
 	if(alphabet != nullptr) this->setAlphabet(alphabet);
 }

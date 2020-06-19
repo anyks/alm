@@ -97,6 +97,17 @@ void anyks::Env::autoRead(const bool flag) noexcept {
 	this->aread = flag;
 }
 /**
+ * setJson Метод добавления данных в формате json
+ * @param data данные в формате json
+ */
+void anyks::Env::setJson(const json & data) noexcept {
+	// Если данные переданы
+	if(!data.empty()){
+		// Переходим по всем ключам и добавляем всё в базу данных
+		for(auto & el : data.items()) this->data.emplace(el.key(), el.value());
+	}
+}
+/**
  * textEnv Метод установки списка имён которые нужно извлечь
  * @param text название переменной для извлечения текстовой информации из потока (если параметром не передана)
  */

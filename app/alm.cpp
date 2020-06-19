@@ -129,6 +129,14 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-threads <value> | --threads=<value>]                                       number of threads for data collection\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-bin <value> | --r-bin=<value>]                                           binary file address LM of \x1B[1m*.alm\x1B[0m for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin <value> | --w-bin=<value>]                                           binary file address LM of \x1B[1m*.alm\x1B[0m for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-bin-lictype <value> | --bin-lictype=<value>]                               license type for binary container\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-bin-lictext <value> | --bin-lictext=<value>]                               license text for binary container\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-bin-name <value> | --bin-name=<value>]                                     dictionary name for binary container\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-bin-contacts <value> | --bin-contacts=<value>]                             author contact info for binary container\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-bin-author <value> | --bin-author=<value>]                                 author of the dictionary for binary container\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-bin-copyright <value> | --bin-copyright=<value>]                           copyright of the dictionary owner for binary container\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-bin-aes <value> | --bin-aes=<value>]                                       aes encryption Size \x1B[1m(128, 192, 256) bits\x1B[0m for binary container\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-bin-password <value> | --bin-password=<value>]                             encryption password \x1B[1m(if required)\x1B[0m, encryption is performed only when setting a password for binary container\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-text <value> | --w-text=<value>]                                         file address text of \x1B[1m*.txt\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-map <value> | --w-map=<value>]                                           file address map of \x1B[1m*.map\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-arpa <value> | --w-arpa=<value>]                                         file address arpa of \x1B[1m*.arpa\x1B[0m for export\r\n"
@@ -136,7 +144,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-words <value> | --w-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-ngram <value> | --w-ngram=<value>]                                       file address ngrams of \x1B[1m*.ngrams\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-oovfile <value> | --w-oovfile=<value>]                                   file address OOVs of \x1B[1m*.txt\x1B[0m for export oov words\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-bin-meta <value> | --bin-meta=<value>]                                     file address meta of \x1B[1m*.json\x1B[0m for binary container\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-json <value> | --r-json=<value>]                                         file address json data of \x1B[1m*.json\x1B[0m for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-text <value> | --r-text=<value>]                                         file address text of \x1B[1m*.txt\x1B[0m or dir path for texts import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-words <value> | --r-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m or dir path for words import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-map <value> | --r-map=<value>]                                           file address map of \x1B[1m*.map\x1B[0m or dir path for import\r\n"
@@ -229,6 +237,18 @@ int main(int argc, char * argv[]) noexcept {
 		version(argv[0]);
 		// Выходим из приложения
 		exit(0);
+	}
+	// Если JSON файл указан
+	if(((value = env.get("r-json")) != nullptr) && fsys_t::isfile(value)){
+		// Данные в формате JSON
+		string data = "";
+		// Выполняем считывание всех строк текста
+		fsys_t::rfile(value, [&data](const string & line, const uintmax_t size) noexcept {
+			// Если текст получен
+			if(!line.empty()) data.append(line);
+		});
+		// Если данные получены, устанавливаем их
+		if(!data.empty()) env.setJson(json::parse(data));
 	}
 	// Проверяем существует ли бинарный файл
 	if(((value = env.get("r-bin")) != nullptr) && fsys_t::isfile(value)){
@@ -565,18 +585,32 @@ int main(int argc, char * argv[]) noexcept {
 				if(!binDictFile.empty()){
 					// Создаём бинарный контейнер
 					ablm_t ablm(binDictFile, alm.get(), &alphabet, &tokenizer, env.get("log"));
-					// Если метаданные переданы
-					if(((value = env.get("bin-meta")) != nullptr) && fsys_t::isfile(value)){
-						// Данные в формате json
-						string data = "";
-						// Выполняем считывание всех строк текста
-						fsys_t::rfile(realpath(value, nullptr), [&data](const string & line, const uintmax_t fileSize) noexcept {
-							// Добавляем полученные строки
-							data.append(line);
-						});
-						// Если скрипт получен
-						if(!data.empty()) ablm.setMeta(json::parse(data));
+					// Если размер шифрования передан
+					if((value = env.get("bin-aes")) != nullptr){
+						// Если размер шифрования получен
+						switch(stoi(value)){
+							// Если это 128-и битное шифрование
+							case 128: ablm.setAES(aspl_t::types_t::aes128); break;
+							// Если это 192-х битное шифрование
+							case 192: ablm.setAES(aspl_t::types_t::aes192); break;
+							// Если это 256-и битное шифрование
+							case 256: ablm.setAES(aspl_t::types_t::aes256); break;
+						}
 					}
+					// Если название словаря передано
+					if((value = env.get("bin-name")) != nullptr) ablm.setName(value);
+					// Если автор словаря передан
+					if((value = env.get("bin-author")) != nullptr) ablm.setAuthor(value);
+					// Если тип лицензии словаря передан
+					if((value = env.get("bin-lictype")) != nullptr) ablm.setLictype(value);
+					// Если текст лицензии словаря передан
+					if((value = env.get("bin-lictext")) != nullptr) ablm.setLictext(value);
+					// Если контакты автора словаря переданы
+					if((value = env.get("bin-contacts")) != nullptr) ablm.setContacts(value);
+					// Если пароль словаря передан
+					if((value = env.get("bin-password")) != nullptr) ablm.setPassword(value);
+					// Если копирайт словаря передан
+					if((value = env.get("bin-copyright")) != nullptr) ablm.setCopyright(value);
 					// Устанавливаем флаг отладки
 					if(debug == 1) ablm.setFlag(ablm_t::flag_t::debug);
 					// Выполняем инициализацию словаря
@@ -1006,18 +1040,32 @@ int main(int argc, char * argv[]) noexcept {
 			if(!binDictFile.empty()){
 				// Создаём бинарный контейнер
 				ablm_t ablm(binDictFile, &toolkit, &alphabet, &tokenizer, env.get("log"));
-				// Если метаданные переданы
-				if(((value = env.get("bin-meta")) != nullptr) && fsys_t::isfile(value)){
-					// Данные в формате json
-					string data = "";
-					// Выполняем считывание всех строк текста
-					fsys_t::rfile(realpath(value, nullptr), [&data](const string & line, const uintmax_t fileSize) noexcept {
-						// Добавляем полученные строки
-						data.append(line);
-					});
-					// Если скрипт получен
-					if(!data.empty()) ablm.setMeta(json::parse(data));
+				// Если размер шифрования передан
+				if((value = env.get("bin-aes")) != nullptr){
+					// Если размер шифрования получен
+					switch(stoi(value)){
+						// Если это 128-и битное шифрование
+						case 128: ablm.setAES(aspl_t::types_t::aes128); break;
+						// Если это 192-х битное шифрование
+						case 192: ablm.setAES(aspl_t::types_t::aes192); break;
+						// Если это 256-и битное шифрование
+						case 256: ablm.setAES(aspl_t::types_t::aes256); break;
+					}
 				}
+				// Если название словаря передано
+				if((value = env.get("bin-name")) != nullptr) ablm.setName(value);
+				// Если автор словаря передан
+				if((value = env.get("bin-author")) != nullptr) ablm.setAuthor(value);
+				// Если тип лицензии словаря передан
+				if((value = env.get("bin-lictype")) != nullptr) ablm.setLictype(value);
+				// Если текст лицензии словаря передан
+				if((value = env.get("bin-lictext")) != nullptr) ablm.setLictext(value);
+				// Если контакты автора словаря переданы
+				if((value = env.get("bin-contacts")) != nullptr) ablm.setContacts(value);
+				// Если пароль словаря передан
+				if((value = env.get("bin-password")) != nullptr) ablm.setPassword(value);
+				// Если копирайт словаря передан
+				if((value = env.get("bin-copyright")) != nullptr) ablm.setCopyright(value);
 				// Устанавливаем флаг отладки
 				if(debug == 1) ablm.setFlag(ablm_t::flag_t::debug);
 				// Выполняем инициализацию словаря
@@ -2500,18 +2548,32 @@ int main(int argc, char * argv[]) noexcept {
 			if((value = env.get("w-bin")) != nullptr){
 				// Создаём бинарный контейнер
 				ablm_t ablm(value, &toolkit, &alphabet, &tokenizer, env.get("log"));
-				// Если метаданные переданы
-				if(((value = env.get("bin-meta")) != nullptr) && fsys_t::isfile(value)){
-					// Данные в формате json
-					string data = "";
-					// Выполняем считывание всех строк текста
-					fsys_t::rfile(realpath(value, nullptr), [&data](const string & line, const uintmax_t fileSize) noexcept {
-						// Добавляем полученные строки
-						data.append(line);
-					});
-					// Если скрипт получен
-					if(!data.empty()) ablm.setMeta(json::parse(data));
+				// Если размер шифрования передан
+				if((value = env.get("bin-aes")) != nullptr){
+					// Если размер шифрования получен
+					switch(stoi(value)){
+						// Если это 128-и битное шифрование
+						case 128: ablm.setAES(aspl_t::types_t::aes128); break;
+						// Если это 192-х битное шифрование
+						case 192: ablm.setAES(aspl_t::types_t::aes192); break;
+						// Если это 256-и битное шифрование
+						case 256: ablm.setAES(aspl_t::types_t::aes256); break;
+					}
 				}
+				// Если название словаря передано
+				if((value = env.get("bin-name")) != nullptr) ablm.setName(value);
+				// Если автор словаря передан
+				if((value = env.get("bin-author")) != nullptr) ablm.setAuthor(value);
+				// Если тип лицензии словаря передан
+				if((value = env.get("bin-lictype")) != nullptr) ablm.setLictype(value);
+				// Если текст лицензии словаря передан
+				if((value = env.get("bin-lictext")) != nullptr) ablm.setLictext(value);
+				// Если контакты автора словаря переданы
+				if((value = env.get("bin-contacts")) != nullptr) ablm.setContacts(value);
+				// Если пароль словаря передан
+				if((value = env.get("bin-password")) != nullptr) ablm.setPassword(value);
+				// Если копирайт словаря передан
+				if((value = env.get("bin-copyright")) != nullptr) ablm.setCopyright(value);
 				// Устанавливаем флаг отладки
 				if(debug == 1) ablm.setFlag(ablm_t::flag_t::debug);
 				// Устанавливаем флаг сохранения только arpa данных

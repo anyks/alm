@@ -1128,6 +1128,16 @@ void anyks::AbLM::info() const noexcept {
 		printf("\033c");
 		// Отображаем разделители
 		printf("\r\n\r\n* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\r\n\r\n");
+		// Размер n-граммы
+		u_short size = 0;
+		// Выполняем чтение размера n-граммы
+		this->aspl->get("size", size);
+		// Количество основных блоков данных
+		size_t vocabCount = 0, arpaCount = 0;
+		// Считываем количество записей arpa
+		this->aspl->get("arpaCount", arpaCount);
+		// Считываем количество записей словаря
+		this->aspl->get("vocabCount", vocabCount);
 		// Выводим в консоль название словаря
 		if(!this->meta.name.empty()) printf("* \x1B[1mName:\x1B[0m %s\r\n\r\n", this->meta.name.c_str());
 		// Выводим тип шифрования если словарь зашифрован
@@ -1163,6 +1173,12 @@ void anyks::AbLM::info() const noexcept {
 				printf("* \x1B[1mBuild date:\x1B[0m %s\r\n\r\n", zdate.c_str());
 			}
 		}
+		// Выводим размер языковой модели
+		if(size > 0) printf("* \x1B[1mN-gram size:\x1B[0m %u\r\n\r\n", size);
+		// Выводим количество слов в словаре
+		if(vocabCount > 0) printf("* \x1B[1mWords:\x1B[0m %zu\r\n\r\n", vocabCount);
+		// Выводим количество N-грамм в языковой моделе
+		if(arpaCount > 0) printf("* \x1B[1mN-grams:\x1B[0m %zu\r\n\r\n", arpaCount);
 		// Выводим в консоль данные автора
 		if(!this->meta.author.empty()) printf("* \x1B[1mAuthor:\x1B[0m %s\r\n\r\n", this->meta.author.c_str());
 		// Выводим в консоль данные автора
@@ -1186,37 +1202,12 @@ void anyks::AbLM::setAlm(alm_t * alm) noexcept {
 	this->alm = alm;
 }
 /**
- * setMeta Метод установки метаданных в формате json
- * @param meta метаданные в формате json
+ * setAES Метод установки размера шифрования
+ * @param aes размер шифрования для установки
  */
-void anyks::AbLM::setMeta(const json & meta) noexcept {
-	// Размер шифрования
-	u_short aes = 0;
-	// Считываем размер шифрования
-	if((meta.count("aes") > 0) && meta.at("aes").is_number()) meta.at("aes").get_to(aes);
-	// Получаем название словаря если передано
-	if((meta.count("name") > 0) && meta.at("name").is_string()) meta.at("name").get_to(this->meta.name);
-	// Получаем автора словаря если передано
-	if((meta.count("author") > 0) && meta.at("author").is_string()) meta.at("author").get_to(this->meta.author);
-	// Получаем тип лицензии под которой распространяется словарь
-	if((meta.count("lictype") > 0) && meta.at("lictype").is_string()) meta.at("lictype").get_to(this->meta.lictype);
-	// Получаем текст лицензии под которой распространяется словарь
-	if((meta.count("lictext") > 0) && meta.at("lictext").is_string()) meta.at("lictext").get_to(this->meta.lictext);
-	// Получаем контактные данные автора
-	if((meta.count("contacts") > 0) && meta.at("contacts").is_string()) meta.at("contacts").get_to(this->meta.contacts);
-	// Получаем пароль шифрования словаря
-	if((meta.count("password") > 0) && meta.at("password").is_string()) meta.at("password").get_to(this->meta.password);
-	// Получаем копирайт владельца словаря
-	if((meta.count("copyright") > 0) && meta.at("copyright").is_string()) meta.at("copyright").get_to(this->meta.copyright);
-	// Если размер шифрования получен
-	switch(aes){
-		// Если это 128-и битное шифрование
-		case 128: this->meta.aes = aspl_t::types_t::aes128; break;
-		// Если это 192-х битное шифрование
-		case 192: this->meta.aes = aspl_t::types_t::aes192; break;
-		// Если это 256-и битное шифрование
-		case 256: this->meta.aes = aspl_t::types_t::aes256; break;
-	}
+void anyks::AbLM::setAES(aspl_t::types_t aes) noexcept {
+	// Выполняем установку размера шифрования
+	this->meta.aes = aes;
 }
 /**
  * setFlag Метод установки флага модуля
@@ -1235,6 +1226,22 @@ void anyks::AbLM::unsetFlag(const flag_t flag) noexcept {
 	this->flags.reset((u_short) flag);
 }
 /**
+ * setName Метод установки названия словаря
+ * @param name название словаря для установки
+ */
+void anyks::AbLM::setName(const string & name) noexcept {
+	// Если название словаря передано
+	if(!name.empty()) this->meta.name = name;
+}
+/**
+ * setAuthor Метод установки автора словаря
+ * @param author автор словаря для установки
+ */
+void anyks::AbLM::setAuthor(const string & author) noexcept {
+	// Если автор словаря передан, устанавливаем его
+	if(!author.empty()) this->meta.author = author;
+}
+/**
  * setLogfile Метод установки файла для вывода логов
  * @param logifle адрес файла для вывода отладочной информации
  */
@@ -1251,12 +1258,44 @@ void anyks::AbLM::setToolkit(toolkit_t * toolkit) noexcept {
 	this->toolkit = toolkit;
 }
 /**
+ * setLictype Метод установки типа лицензии
+ * @param lictype тип лицензии для установки
+ */
+void anyks::AbLM::setLictype(const string & lictype) noexcept {
+	// Если тип лицензии передан, устанавливаем его
+	if(!lictype.empty()) this->meta.lictype = lictype;
+}
+/**
+ * setLictext Метод установки текста лицензии
+ * @param lictext текст лицензии для установки
+ */
+void anyks::AbLM::setLictext(const string & lictext) noexcept {
+	// Если текст лицензии передан, устанавливаем его
+	if(!lictext.empty()) this->meta.lictext = lictext;
+}
+/**
  * setAlphabet Метод установки объекта словаря
  * @param alphabet объект словаря для установки
  */
 void anyks::AbLM::setAlphabet(alphabet_t * alphabet) noexcept {
 	// Устанавливаем объект алфавита
 	this->alphabet = alphabet;
+}
+/**
+ * setContacts Метод установки контактов автора
+ * @param contacts контакты автора для установки
+ */
+void anyks::AbLM::setContacts(const string & contacts) noexcept {
+	// Устанавливаем контактную информацию автора
+	if(!contacts.empty()) this->meta.contacts = contacts;
+}
+/**
+ * setPassword Метод установки пароля словаря
+ * @param password пароль словаря для установки
+ */
+void anyks::AbLM::setPassword(const string & password) noexcept {
+	// Устанавливаем пароль словаря
+	if(!password.empty()) this->meta.password = password;
 }
 /**
  * setTokenizer Метод установки токенизатора
@@ -1273,6 +1312,14 @@ void anyks::AbLM::setTokenizer(tokenizer_t * tokenizer) noexcept {
 void anyks::AbLM::setFilename(const string & filename) noexcept {
 	// Устанавливаем имя файла
 	if(!filename.empty()) this->filename = filename;
+}
+/**
+ * setCopyright Метод установки копирайта автора
+ * @param copyright копирайт автора для установки
+ */
+void anyks::AbLM::setCopyright(const string & copyright) noexcept {
+	// Устанавливаем копирайт пользователя
+	if(!copyright.empty()) this->meta.copyright = copyright;
 }
 /**
  * AbLM Конструктор

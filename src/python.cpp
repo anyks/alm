@@ -277,20 +277,29 @@ const wstring anyks::Python::run(const size_t sid, const vector <string> & args,
 				}
 			// Если аргументы не ожидаются
 			} else scriptArgs = PyTuple_New(0);
-			// Выполняем запуск функции
-			PyObject * value = PyObject_CallObject(script.run, scriptArgs);
-			// Очищаем объект аргументов
-			Py_DECREF(scriptArgs);
-			// Если значение получено
-			if(value != nullptr){
-				// Размер считываемых данных
-				Py_ssize_t size = 0;
-				// Получаем результат
-				const wchar_t * res = PyUnicode_AsWideCharString(value, &size);
-				// Получаем результат
-				if(res != nullptr) result = wstring(res, size);
-				// Очищаем полученное значение
-				Py_DECREF(value);
+			// Если функция запуска скрипта существует
+			if(PyCallable_Check(script.run)){
+				// Выполняем запуск функции
+				PyObject * value = PyObject_CallObject(script.run, scriptArgs);
+				// Очищаем объект аргументов
+				Py_DECREF(scriptArgs);
+				// Если значение получено
+				if(value != nullptr){
+					// Размер считываемых данных
+					Py_ssize_t size = 0;
+					// Получаем результат
+					const wchar_t * res = PyUnicode_AsWideCharString(value, &size);
+					// Получаем результат
+					if(res != nullptr) result = wstring(res, size);
+					// Очищаем полученное значение
+					Py_DECREF(value);
+				}
+			// Если функция не передана
+			} else {
+				// Очищаем объект аргументов
+				Py_DECREF(scriptArgs);
+				// Выводим сообщение об ошибке
+				PyErr_Print();
 			}
 		}
 	}
@@ -302,7 +311,14 @@ const wstring anyks::Python::run(const size_t sid, const vector <string> & args,
  */
 anyks::Python::Python() noexcept {
 	// Выполняем инициализацию питона
-	if(!Py_IsInitialized()) Py_Initialize();
+	if(!Py_IsInitialized()){
+		// Выполняем инициализацию контекста питона
+		Py_Initialize();
+		// Активируем системный модуль
+		// PyRun_SimpleString("import sys");
+		// Устанавливаем путь с подмодулями
+		// PyRun_SimpleString("sys.path.append(\"/path/to/python/module/here\")");
+	}
 }
 /**
  * Python Конструктор
@@ -310,7 +326,14 @@ anyks::Python::Python() noexcept {
  */
 anyks::Python::Python(const tokenizer_t * tokenizer) noexcept {
 	// Выполняем инициализацию питона
-	if(!Py_IsInitialized()) Py_Initialize();
+	if(!Py_IsInitialized()){
+		// Выполняем инициализацию контекста питона
+		Py_Initialize();
+		// Активируем системный модуль
+		// PyRun_SimpleString("import sys");
+		// Устанавливаем путь с подмодулями
+		// PyRun_SimpleString("sys.path.append(\"/path/to/python/module/here\")");
+	}
 	// Выполняем установку токенизатора
 	this->setTokenizer(tokenizer);
 }
