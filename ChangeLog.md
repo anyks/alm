@@ -1,5 +1,16 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
+## [3.0.4](https://github.com/anyks/alm/archive/v3.0.4.tar.gz) Bug fixes and new params
+- license type for binary container
+- license text for binary container
+- dictionary name for binary container
+- author contact info for binary container
+- author of the dictionary for binary container
+- copyright of the dictionary owner for binary container
+- aes encryption Size (128, 192, 256) bits for binary container
+- encryption password (if required), encryption is performed only when setting a password for binary container
+- file address json data of *.json for import
+
 ## [3.0.3](https://github.com/anyks/alm/archive/v3.0.3.tar.gz) Other optimization
 
 ## [3.0.2](https://github.com/anyks/alm/archive/v3.0.2.tar.gz) Other optimization

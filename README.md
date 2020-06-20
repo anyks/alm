@@ -489,33 +489,6 @@ info
 
 ---
 
-### Binary container metadata
-```json
-{
-	"aes": 128,
-	"name": "Name dictionary",
-	"author": "Name author",
-	"lictype": "License type",
-	"lictext": "License text",
-	"contacts": "Contacts data",
-	"password": "Password if needed",
-	"copyright": "Copyright author"
-}
-```
-
-#### Description:
-
-- **aes** - AES Encryption Size (128, 192, 256) bits
-- **name** - The dictionary name
-- **author** - The author of the dictionary
-- **lictype** - The license type
-- **lictext** - The license text
-- **contacts** - The author contact info
-- **password** - An encryption password (if required), encryption is performed only when setting a password
-- **copyright** - Copyright of the dictionary owner
-
----
-
 ### The python script format to preprocess the received words
 ```python
 # -*- coding: utf-8 -*-
@@ -571,6 +544,25 @@ $ export $ALM_SMOOTHING=wittenbell
 $ export $ALM_W-ARPA=./lm.arpa
 ```
 
+- Example JSON format file
+
+```json
+{
+  "alphabet": "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя",
+  "smoothing": "wittenbell",
+  "method": "train",
+  "size": "3",
+  "debug": "1",
+  "w-arpa": "./lm.arpa",
+  "w-map": "./lm.map",
+  "w-vocab": "./lm.vocab",
+  "w-ngram": "./lm.ngrams",
+  "allow-unk": "true",
+  "interpolate": "true",
+  "corpus": "./text.txt"
+}
+```
+
 ---
 
 ## Examples
@@ -578,6 +570,11 @@ $ export $ALM_W-ARPA=./lm.arpa
 ![Program operation example](https://raw.githubusercontent.com/anyks/alm/master/site/img/screen1.png "Program operation example")
 
 ### Language Model training example
+
+**Smoothing Algorithm: Witten-Bell, single-file build by JSON**
+```bash
+$ ./alm -r-json ./meta.json
+```
 
 **Smoothing Algorithm: Witten-Bell, single-file build**
 ```bash
@@ -601,12 +598,12 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 
 **Smoothing Algorithm: Good-Turing, build from a group of files from binary container**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -w-bin ./lm.alm -bin-meta ./meta.json -w-bin-arpa -w-bin-utokens -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -w-bin ./lm.alm -bin-aes 128 -bin-password 911 -bin-name test -bin-lictype MIT -w-bin-arpa -w-bin-utokens -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
 ```
 
 **Smoothing Algorithm: Witten-Bell, build from binary container**
 ```bash
-$ ./alm -r-bin ./lm.alm -bin-meta ./meta.json -method train -debug 1 -size 3 -smoothing wittenbell -w-arpa ./lm.arpa
+$ ./alm -r-bin ./lm.alm -bin-aes 128 -bin-password 911 -method train -debug 1 -size 3 -smoothing wittenbell -w-arpa ./lm.arpa
 ```
 
 ### Arpa patch example
@@ -643,7 +640,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 
 ### Binary container information
 ```bash
-$ ./alm -r-bin ./lm.alm -bin-meta ./meta.json -method info
+$ ./alm -r-bin ./lm.alm -bin-aes 128 -bin-password 911 -method info
 ```
 
 ### Arpa modification example

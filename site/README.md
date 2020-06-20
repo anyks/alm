@@ -489,33 +489,6 @@ info
 
 ---
 
-### Мета-данные бинарного контейнера
-```json
-{
-	"aes": 128,
-	"name": "Name dictionary",
-	"author": "Name author",
-	"lictype": "License type",
-	"lictext": "License text",
-	"contacts": "Contacts data",
-	"password": "Password if needed",
-	"copyright": "Copyright author"
-}
-```
-
-#### Описание:
-
-- **aes** - Размер шифрования AES (128, 192, 256) бит
-- **name** - Название словаря
-- **author** - Автор словаря
-- **lictype** - Тип лицензии
-- **lictext** - Текст лицензии
-- **contacts** - Контактные данные автора
-- **password** - Пароль шифрования (если требуется), шифрование производится только при установки пароля
-- **copyright** - Копирайт владельца словаря
-
----
-
 ### Формат скрипта python предобработки полученных слов
 ```python
 # -*- coding: utf-8 -*-
@@ -571,6 +544,25 @@ $ export $ALM_SMOOTHING=wittenbell
 $ export $ALM_W-ARPA=./lm.arpa
 ```
 
+- Example JSON format file
+
+```json
+{
+  "alphabet": "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя",
+  "smoothing": "wittenbell",
+  "method": "train",
+  "size": "3",
+  "debug": "1",
+  "w-arpa": "./lm.arpa",
+  "w-map": "./lm.map",
+  "w-vocab": "./lm.vocab",
+  "w-ngram": "./lm.ngrams",
+  "allow-unk": "true",
+  "interpolate": "true",
+  "corpus": "./text.txt"
+}
+```
+
 ---
 
 ## Примеры
@@ -578,6 +570,11 @@ $ export $ALM_W-ARPA=./lm.arpa
 ![Пример работы программы](https://raw.githubusercontent.com/anyks/alm/master/site/img/screen1.png "Пример работы программы")
 
 ### Пример обучения языковой модели
+
+**Алгоритм сглаживания: Witten-Bell, сборка из одного файла, с помощью JSON параметров**
+```bash
+$ ./alm -r-json ./meta.json
+```
 
 **Алгоритм сглаживания: Witten-Bell, сборка из одного файла**
 ```bash
@@ -601,12 +598,12 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 
 **Алгоритм сглаживания: Good-Turing, сборка из группы файлов бинарного контейнера**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -w-bin ./lm.alm -bin-meta ./meta.json -w-bin-arpa -w-bin-utokens -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing goodturing -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -w-bin ./lm.alm -bin-aes 128 -bin-password 911 -bin-name test -bin-lictype MIT -w-bin-arpa -w-bin-utokens -w-bin-options -w-bin-preword -w-bin-badwords -w-bin-goodwords
 ```
 
 **Алгоритм сглаживания: Witten-Bell, сборка из бинарного контейнера**
 ```bash
-$ ./alm -r-bin ./lm.alm -bin-meta ./meta.json -method train -debug 1 -size 3 -smoothing wittenbell -w-arpa ./lm.arpa
+$ ./alm -r-bin ./lm.alm -bin-aes 128 -bin-password 911 -method train -debug 1 -size 3 -smoothing wittenbell -w-arpa ./lm.arpa
 ```
 
 ### Пример исправления arpa
@@ -643,7 +640,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 
 ### Информация о бинарном контейнере
 ```bash
-$ ./alm -r-bin ./lm.alm -bin-meta ./meta.json -method info
+$ ./alm -r-bin ./lm.alm -bin-aes 128 -bin-password 911 -method info
 ```
 
 ### Пример модификации arpa
