@@ -544,7 +544,7 @@ $ export $ALM_SMOOTHING=wittenbell
 $ export $ALM_W-ARPA=./lm.arpa
 ```
 
-- Example JSON format file
+- Пример параметров в JSON формате
 
 ```json
 {
