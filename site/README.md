@@ -539,9 +539,9 @@ def run(token, word):
 - Если одновременно указаны и параметры приложения и переменные окружения, приоритет будут иметь параметры приложения.
 
 ```bash
-$ export $ALM_SMOOTHING=wittenbell
+$ export ALM_SMOOTHING=wittenbell
 
-$ export $ALM_W-ARPA=./lm.arpa
+$ export ALM_W-ARPA=./lm.arpa
 ```
 
 - Пример параметров в JSON формате

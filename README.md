@@ -539,9 +539,9 @@ def run(token, word):
 - If both application parameters and environment variables are specified at the same time, application parameters will take precedence.
 
 ```bash
-$ export $ALM_SMOOTHING=wittenbell
+$ export ALM_SMOOTHING=wittenbell
 
-$ export $ALM_W-ARPA=./lm.arpa
+$ export ALM_W-ARPA=./lm.arpa
 ```
 
 - Example JSON format file
