@@ -810,6 +810,8 @@ void anyks::Alm::clear(){
 	this->unknown = 0;
 	// Очищаем словарь
 	this->vocab.clear();
+	// Очищаем список скриптов
+	this->scripts.clear();
 	// Очищаем список пользовательских токенов
 	this->utokens.clear();
 	// Очищаем список плохих слов
