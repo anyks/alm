@@ -561,9 +561,9 @@ $ export $ALM_W-ARPA=./lm.arpa
   "interpolate": "true",
   "corpus": "./text.txt"
 }
+```
 
 **P.S.** Значения ключей должны быть исключительно строками!
-```
 
 ---
 
