@@ -225,7 +225,7 @@ const anyks::Alm::ppl_t anyks::Alm2::perplexity(const vector <size_t> & seq) con
 		 */
 		auto debugFn = [&debugMessages, this](const string & first, const string & second, const bool bigram, const u_short gram, const double weight, const double delim, const size_t pos){
 			// Выводим отладочную информацию
-			if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
+			if(this->isOption(options_t::debug)){
 				// Граммность n-граммы
 				string numGram = "OOV";
 				// Результат работы функции
@@ -331,7 +331,7 @@ const anyks::Alm::ppl_t anyks::Alm2::perplexity(const vector <size_t> & seq) con
 		 */
 		auto putDebugFn = [&debugFn, this](const vector <size_t> & seq, const u_short gram, const double weight, const size_t pos) noexcept {
 			// Если последовательность передана
-			if(!seq.empty() && (this->isOption(options_t::debug) || (this->logfile != nullptr))){
+			if(!seq.empty() && this->isOption(options_t::debug)){
 				// Получившийся разделитель
 				double delim = 0.0;
 				// Получаем нашу последовательность
@@ -433,7 +433,7 @@ const anyks::Alm::ppl_t anyks::Alm2::perplexity(const vector <size_t> & seq) con
 		result.ppl  = ppl.first;
 		result.ppl1 = ppl.second;
 		// Выводим отладочную информацию
-		if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
+		if(this->isOption(options_t::debug)){
 			// Блокируем поток
 			this->locker.lock();
 			// Если список отладки сформирован

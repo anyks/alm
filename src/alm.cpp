@@ -284,7 +284,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 		// Выполняем разбивку текста на токены
 		this->tokenizer->run(text, modeFn);
 		// Выводим отладочную информацию
-		if((this->isOption(options_t::debug) || (this->logfile != nullptr)) && (this->threads == 1)){
+		if((this->isOption(options_t::debug)) && (this->threads == 1)){
 			// Выводим сообщение отладки - количество слов
 			this->alphabet->log(
 				"%u sentences, %u words, %u OOVs",
@@ -455,7 +455,7 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 		// Ожидаем завершения обработки
 		this->tpool.wait();
 		// Выводим отладочную информацию
-		if(this->isOption(options_t::debug) || (this->logfile != nullptr)){
+		if(this->isOption(options_t::debug)){
 			// Выводим разделитель
 			this->alphabet->log("%s", alphabet_t::log_t::null, this->logfile, "\r\n");
 			// Выводим сообщение отладки - количество слов
@@ -1003,7 +1003,7 @@ void anyks::Alm::initPython(){
 		// Если происходит ошибка то игнорируем её
 		} catch(const bad_alloc &) {
 			// Выводим сообщение об ошибке, если режим отладки включён
-			if(this->isOption(options_t::debug) || (this->logfile != nullptr)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "bad alloc for init python scripts");
+			if(this->isOption(options_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "bad alloc for init python scripts");
 			// Выходим из приложения
 			exit(EXIT_FAILURE);
 		}
@@ -1604,7 +1604,7 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 			}
 		});
 	// Выводим сообщение об ошибке
-	} else if(this->isOption(options_t::debug) || (this->logfile != nullptr)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is not exist");
+	} else if(this->isOption(options_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is not exist");
 }
 /**
  * sentencesToFile Метод сборки указанного количества предложений и записи в файл

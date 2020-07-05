@@ -212,7 +212,7 @@ const bool anyks::Arpa::backoffs(const u_short gram, data_t * ngram) const noexc
 		// Устанавливаем нуминатор и денуминатор
 		double numerator = 0.0, denominator = 0.0;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		/**
 		 * Пытаемся расчитать коэффициенты для веса и частоты отката,
 		 * чтобы общий вес n-грамм и частоты отката,
@@ -370,7 +370,7 @@ const bool anyks::Arpa::compute(data_t * ngram, const u_short gram, double & num
 	// Результат работы функции
 	bool result = false;
 	// Проверяем включён ли режим отладки
-	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+	const bool debug = this->isOption(options_t::debug);
 	/**
 	 * Частота отката BOW(c) для контекста рассчитывается как,
 	 *
@@ -560,7 +560,7 @@ void anyks::Arpa::distribute(const double mass) const noexcept {
 		// Количество слов с нулевой частотой
 		double numZeroProbs = 0.0;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		// Переходим по всему слов в контексте
 		for(auto & item : this->data){
 			// Если это не безсобытийная грамма (Начальная)
@@ -629,7 +629,7 @@ void anyks::Arpa::fixupProbs(const u_short gram) const noexcept {
 		// Список n-грамм для работы
 		list <data_t *> ngrams;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		// Если это нулевая n-грамма
 		switch(gram){
 			// Если это юниграмма
@@ -1092,7 +1092,7 @@ const bool anyks::Arpa::emplace(const vector <pair_t> & seq, const double weight
 			// Формируем последовательность меньше на одно слово
 			vector <pair_t> tmp(seq.begin() + 1, seq.end());
 			// Проверяем включён ли режим отладки
-			const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+			const bool debug = this->isOption(options_t::debug);
 			// Проверяем существует ли дочерняя n-грамма
 			if(checkFn(tmp)){
 				// Переходим по всему объекту
@@ -1145,7 +1145,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 	// Результат работы функции
 	bool result = false;
 	// Проверяем включён ли режим отладки
-	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+	const bool debug = this->isOption(options_t::debug);
 	// Если последовательности переданы
 	if(!seq1.empty() && !seq2.empty() && (seq1.size() == seq2.size())){
 		// Проверяем на валидность контекста
@@ -1666,7 +1666,7 @@ void anyks::Arpa::del(const vector <size_t> & seq) const noexcept {
 		// Копируем основную карту
 		data_t * obj = &this->data;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		// Выполняем удаление n-граммы
 		while(index < seq.size()){
 			// Ищем слово в последовательности
@@ -1722,7 +1722,7 @@ void anyks::Arpa::inc(const vector <pair_t> & seq, const double value) const noe
 		// Копируем основную карту
 		data_t * obj = &this->data;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		// Выполняем увеличение частоты n-граммы
 		while(index < seq.size()){
 			// Ищем слово в последовательности
@@ -2565,7 +2565,7 @@ void anyks::Arpa::add(const vector <seq_t> & seq, const size_t idd, const bool r
  */
 void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
-	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+	const bool debug = this->isOption(options_t::debug);
 	// Если словарь не пустой
 	if(!this->data.empty()){
 		// Список n-грамм для работы
@@ -2666,7 +2666,7 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
  */
 void anyks::Arpa::train(function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
-	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+	const bool debug = this->isOption(options_t::debug);
 	// Если словарь не пустой
 	if(!this->data.empty() && !this->isOption(options_t::notTrain)){
 		// Сбрасываем текущую позицию n-граммы
@@ -2980,7 +2980,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const noexcept {
  */
 void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
-	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+	const bool debug = this->isOption(options_t::debug);
 	// Если словарь не пустой
 	if(!this->data.empty()){
 		// Сбрасываем текущую позицию n-граммы
@@ -3092,7 +3092,7 @@ void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept 
  */
 void anyks::Arpa::prune(const double threshold, const u_short mingram, function <void (const u_short)> status) const noexcept {
 	// Проверяем включён ли режим отладки
-	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+	const bool debug = this->isOption(options_t::debug);
 	// Если словарь не пустой
 	if(!this->data.empty() && (this->size > 1)){
 		/**
@@ -3300,10 +3300,10 @@ void anyks::Arpa::mixForward(const Arpa * lm, const double lambda, function <voi
 	if(!this->data.empty() && !lm->empty()){
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
+		// Проверяем включён ли режим отладки
+		const bool debug = this->isOption(options_t::debug);
 		// Количество данных в двух языковых моделях
 		size_t index = 0, count = (this->data.size() + lm->data.size());
-		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
 		/**
 		 * mixLogFn Функция сложения частот двух языковых моделей
 		 * @param weight1 частота n-граммы первой языковой модели
@@ -3478,7 +3478,7 @@ void anyks::Arpa::mixBackward(const Arpa * lm, const double lambda, function <vo
 		// Список n-грамм для работы
 		list <data_t *> ngrams1, ngrams2;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		// Переходим по всем n-грамм
 		for(u_short i = max(this->size, lm->size); i > 0; i--){
 			// Выполняем расчёт количество данных в языковых моделях
@@ -3738,7 +3738,7 @@ void anyks::Arpa::mixLoglinear(const vector <const Arpa *> & lms, const vector <
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		/**
 		 * seqFn Функция получения последовательности
 		 * @param ngram контекст для получения последовательности
@@ -4042,7 +4042,7 @@ void anyks::Arpa::mixBayes(const vector <const Arpa *> & lms, const vector <doub
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		/**
 		 * seqFn Функция получения последовательности
 		 * @param ngram контекст для получения последовательности
@@ -4503,7 +4503,7 @@ const bool anyks::GoodTuring::estimate(const u_short gram) const noexcept {
 		// Значение начальное n-граммы
 		size_t idw = 0;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		// Переходим по всему списку полученных n-грамм
 		for(auto & item : ngrams){
 			// Если дочерние граммы существует
@@ -4819,7 +4819,7 @@ void anyks::KneserNey::prepare(const u_short gram) const noexcept {
 	// Если все n-граммы обработаны или не нужно модифицировать встречаемости, выходим
 	if(this->modified[gram] || (gram >= this->size)) return;
 	// Проверяем включён ли режим отладки
-	const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+	const bool debug = this->isOption(options_t::debug);
 	// Если отладка включена, выводим сообщение в консоль
 	if(debug) this->alphabet->log("modifying %u-gram counts for Kneser-Ney smoothing", alphabet_t::log_t::info, this->logfile, gram);
 	// Список n-грамм для работы
@@ -4885,7 +4885,7 @@ const bool anyks::KneserNey::estimate(const u_short gram) const noexcept {
 		// Первый табулированный счетчик и идентификатор слова
 		size_t n1 = 0, n2 = 0, idw = 0;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		// Переходим по всему списку полученных n-грамм
 		for(auto & item : ngrams){
 			// Переходим по всем n-граммам
@@ -5041,7 +5041,7 @@ const bool anyks::ModKneserNey::estimate(const u_short gram) const noexcept {
 		// Первый табулированный счетчик
 		size_t n1 = 0, n2 = 0, n3 = 0, n4 = 0, idw = 0;
 		// Проверяем включён ли режим отладки
-		const bool debug = (this->isOption(options_t::debug) || (this->logfile != nullptr));
+		const bool debug = this->isOption(options_t::debug);
 		// Переходим по всему списку полученных n-грамм
 		for(auto & item : ngrams){
 			// Переходим по всем n-граммам
