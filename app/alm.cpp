@@ -258,7 +258,7 @@ int main(int argc, char * argv[]) noexcept {
 	// Если алфавит снова не найден
 	if(binDictFile.empty() && ((value = env.get("alphabet")) == nullptr)){
 		// Выводим сообщение в консоль
-		print("alphabet in not set", env.get("log"));
+		print("alphabet in not set\r\n", env.get("log"));
 	// Продолжаем дальше
 	} else {
 		// Объявляем прогресс бра
@@ -323,9 +323,9 @@ int main(int argc, char * argv[]) noexcept {
 					!env.is("smoothing", "kneserney") &&
 					!env.is("smoothing", "mkneserney"))
 						// Выводим сообщение в консоль
-						print(alphabet.format("the algorithm name \"%s\" is bad", env.get("smoothing")), env.get("log"));
+						print(alphabet.format("the algorithm name \"%s\" is bad\r\n", env.get("smoothing")), env.get("log"));
 				// Сообщаем что алгоритм сглаживания не указан
-				} else print("algorithm smoothing is not set", env.get("log"));
+				} else print("algorithm smoothing is not set\r\n", env.get("log"));
 			}
 			// Если основной метод работы получен
 			if(env.is("method") && (string(env.get("method")).compare("-yes-") != 0)){
@@ -346,9 +346,9 @@ int main(int argc, char * argv[]) noexcept {
 				!env.is("method", "checktext") &&
 				!env.is("method", "sentences"))
 					// Выводим сообщение в консоль
-					print(alphabet.format("the method name \"%s\" is bad", env.get("method")), env.get("log"));
+					print(alphabet.format("the method name \"%s\" is bad\r\n", env.get("method")), env.get("log"));
 			// Сообщаем что метод не указан
-			} else print("toolkit method is not set", env.get("log"));
+			} else print("toolkit method is not set\r\n", env.get("log"));
 			// Если ни один файл для сохранения не передан, выходим
 			if(!env.is("w-map") && !env.is("w-arpa") &&
 			!env.is("w-vocab") && !env.is("w-words") &&
@@ -358,7 +358,7 @@ int main(int argc, char * argv[]) noexcept {
 			!env.is("method", "tokens") && !env.is("method", "sentences") &&
 			!env.is("method", "fixcase") && !env.is("method", "checktext")){
 				// Выводим сообщение и выходим из приложения
-				print("file address to save is not specified", env.get("log"));
+				print("file address to save is not specified\r\n", env.get("log"));
 			}
 			/** Начало работы основных методов **/
 			// Создаём токенизатор
@@ -665,7 +665,7 @@ int main(int argc, char * argv[]) noexcept {
 						case 2: pss.status(100); break;
 					}
 				// Если arpa файл не указан
-				} else print("language model file address is empty", env.get("log"));
+				} else print("language model file address is empty\r\n", env.get("log"));
 				// Если это генерация предложений
 				if(env.is("method", "sentences")){
 					// Получаем количество предложений для генерации
@@ -755,7 +755,7 @@ int main(int argc, char * argv[]) noexcept {
 							alphabet.log("%zu zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\r\n", alphabet_t::log_t::null, nullptr, ppl.zeroprobs, ppl.logprob, ppl.ppl, ppl.ppl1);
 						}
 					// Сообщаем что текст не указан
-					} else print("text is empty", env.get("log"));
+					} else print("text is empty\r\n", env.get("log"));
 				// Если это метод поиска n-граммы в тексте
 				} else if(env.is("method", "find")) {
 					// Если текст передан
@@ -803,7 +803,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 2: pss.status(100); break;
 						}
 					// Сообщаем что текст не указан
-					} else print("text is empty", env.get("log"));
+					} else print("text is empty\r\n", env.get("log"));
 				// Если это метод проверки текста
 				} else if(env.is("method", "checktext")){
 					// Если текст передан
@@ -850,7 +850,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 2: pss.status(100); break;
 						}
 					// Сообщаем что текст не указан
-					} else print("text is empty", env.get("log"));
+					} else print("text is empty\r\n", env.get("log"));
 				// Если это метод исправления регистров слов
 				} else if(env.is("method", "fixcase")){
 					// Если текст передан
@@ -895,7 +895,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 2: pss.status(100); break;
 						}
 					// Сообщаем что текст не указан
-					} else print("text is empty", env.get("log"));
+					} else print("text is empty\r\n", env.get("log"));
 				// Если это метод определения количества n-грамм в тексте
 				} else if(env.is("method", "counts")){
 					// Определяем какое количество n-грамм нужно проверить
@@ -949,7 +949,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 2: pss.status(100); break;
 						}
 					// Сообщаем что текст не указан
-					} else print("text is empty", env.get("log"));
+					} else print("text is empty\r\n", env.get("log"));
 				}
 				// Если режим отладки включён
 				if(debug > 0){
@@ -1194,9 +1194,9 @@ int main(int argc, char * argv[]) noexcept {
 								case 2: pss.status(100); break;
 							}
 						// Сообщаем что контекст пустой
-						} else print("context is empty", env.get("log"));
+						} else print("context is empty\r\n", env.get("log"));
 					// Выходим из приложения и выводим сообщение
-					} else print("file to write result is not found", env.get("log"));
+					} else print("file to write result is not found\r\n", env.get("log"));
 				// Если файл json с токенами получен
 				} else if(((value = env.get("r-tokens-json")) != nullptr) && fsys_t::isfile(value)){
 					// Получаем адрес json файла для чтения
@@ -1260,18 +1260,18 @@ int main(int argc, char * argv[]) noexcept {
 										file.close();
 									}
 								// Сообщаем что контекст в json файле пустой
-								} else print("context in json file is empty", env.get("log"));
+								} else print("context in json file is empty\r\n", env.get("log"));
 							// Сообщаем что json файл испорчен
-							} else print("broken json file", env.get("log"));
+							} else print("broken json file\r\n", env.get("log"));
 						// Сообщаем что контекст пустой
-						} else print("context is empty", env.get("log"));
+						} else print("context is empty\r\n", env.get("log"));
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(100); break;
 							case 2: pss.status(100); break;
 						}
 					// Выходим из приложения и выводим сообщение
-					} else print("file to write result is not found", env.get("log"));
+					} else print("file to write result is not found\r\n", env.get("log"));
 				// Если каталог с текстовымы файлами корпуса получен
 				} else if(((value = env.get("r-tokens-path")) != nullptr) && fsys_t::isdir(value)) {
 					// Получаем адрес каталога с текстовыми файлами для чтения
@@ -1365,11 +1365,11 @@ int main(int argc, char * argv[]) noexcept {
 												}
 											}
 										// Сообщаем что контекст в json файле пустой
-										} else print("context in json file is empty", env.get("log"));
+										} else print("context in json file is empty\r\n", env.get("log"));
 									// Сообщаем что json файл испорчен
-									} else print("broken json file", env.get("log"));
+									} else print("broken json file\r\n", env.get("log"));
 								// Сообщаем что контекст пустой
-								} else print("context is empty", env.get("log"));
+								} else print("context is empty\r\n", env.get("log"));
 							// Если это текстовые данные
 							} else if(!jsonData.empty()) {
 								// Получаем параметры файла
@@ -1391,7 +1391,7 @@ int main(int argc, char * argv[]) noexcept {
 									}
 								}
 							// Сообщаем что контекст пустой
-							} else print("context is empty", env.get("log"));
+							} else print("context is empty\r\n", env.get("log"));
 						});
 						// Отображаем ход процесса
 						switch(debug){
@@ -1399,7 +1399,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 2: pss.status(100); break;
 						}
 					// Выходим из приложения и выводим сообщение
-					} else print("path to write result is not found", env.get("log"));
+					} else print("path to write result is not found\r\n", env.get("log"));
 				// Если текст передан
 				} else if((value = env.get("text")) != nullptr) {
 					// Флаг входящего типа данных
@@ -1444,9 +1444,9 @@ int main(int argc, char * argv[]) noexcept {
 						// Выводим сообщение в консоль
 						} else cout << textData;
 					// Сообщаем что контекст пустой
-					} else print("context is empty", env.get("log"));
+					} else print("context is empty\r\n", env.get("log"));
 				// Выходим из приложения и выводим сообщение
-				} else print("text corpus for tokenization is not found", env.get("log"));
+				} else print("text corpus for tokenization is not found\r\n", env.get("log"));
 				// Если режим отладки включён
 				if(debug > 0){
 					// Формируем строку результата времени работы
@@ -1482,9 +1482,9 @@ int main(int argc, char * argv[]) noexcept {
 				// Если это ModKneserNey
 				else if(env.is("smoothing", "mkneserney")) toolkit.init(toolkit_t::algorithm_t::modKneserNey, env.is("kneserney-modified"), env.is("kneserney-prepares"), 0.0);
 				// Сообщаем что сглаживание выбрано не верно
-				else print("smoothing is bad", env.get("log"));
+				else print("smoothing is bad\r\n", env.get("log"));
 			// Сообщаем что сглаживание выбрано не верно
-			} else if(!env.is("method", "mix")) print("smoothing is bad", env.get("log"));
+			} else if(!env.is("method", "mix")) print("smoothing is bad\r\n", env.get("log"));
 			// Если передан метод обучения
 			if(env.is("method", "train")){
 				// Если нужно использовать бинарный контейнер
@@ -1710,7 +1710,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 					// Если путь не указан
-					} else print("path or file with corpus texts is not specified", env.get("log"));
+					} else print("path or file with corpus texts is not specified\r\n", env.get("log"));
 				}
 			// Если передан метод интерполяции
 			} else if(env.is("method", "mix") && ((value = env.get("r-arpa")) != nullptr)) {
@@ -1774,7 +1774,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						});
 					// Если файлы arpa указаны не верно
-					} else print("the arpa files transferred incorrectly specified", env.get("log"));
+					} else print("the arpa files transferred incorrectly specified\r\n", env.get("log"));
 				// Если это алгоритм интерполяции Логарифмическо-линейная
 				} else if(env.is("mix", "loglinear")) {
 					// Если адреса файлов языковых моделей получены
@@ -1790,7 +1790,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						});
 					// Если файлы arpa указаны не верно
-					} else print("the arpa files transferred incorrectly specified", env.get("log"));
+					} else print("the arpa files transferred incorrectly specified\r\n", env.get("log"));
 				// Если это интерполяция статическая
 				} else if(env.is("mix", "static")) {
 					// Загружаем 65000 языковых моделей
@@ -1825,9 +1825,9 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						});
 					// Если файлы arpa указаны не верно
-					} else print("the arpa files transferred incorrectly specified", env.get("log"));
+					} else print("the arpa files transferred incorrectly specified\r\n", env.get("log"));
 				// Выводим сообщение об ошибке
-				} else print("the mixing method is not defined", env.get("log"));
+				} else print("the mixing method is not defined\r\n", env.get("log"));
 				// Отображаем ход процесса
 				switch(debug){
 					case 1: pss.update(100); break;
@@ -2299,7 +2299,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 2: pss.status(100); break;
 						}
 					// Сообщаем что порог передан неверный
-					} else print("vprune-threshold is broken", env.get("log"));
+					} else print("vprune-threshold is broken\r\n", env.get("log"));
 				// Если нужно выполнить прунинг arpa
 				} else if(env.is("method", "aprune")) {
 					// Максимальный размер n-граммы
@@ -2353,9 +2353,9 @@ int main(int argc, char * argv[]) noexcept {
 						// Если это флаг замены n-грамм
 						else if(env.is("modify", "replace")) modify = toolkit_t::modify_t::replace;
 						// Иначе выходим
-						else print("modify flag is broken", env.get("log"));
+						else print("modify flag is broken\r\n", env.get("log"));
 					// Сообщаем что флаг не установлен
-					} else print("modify flag is not set", env.get("log"));
+					} else print("modify flag is not set\r\n", env.get("log"));
 					// Если файл передан
 					if(((value = env.get("modify-file")) != nullptr) && fsys_t::isfile(value)){
 						// Запоминаем адрес файла
@@ -2388,10 +2388,10 @@ int main(int argc, char * argv[]) noexcept {
 							case 2: pss.status(100); break;
 						}
 					// Сообщаем что файл модификации не передан
-					} else print("file modify not found", env.get("log"));
+					} else print("file modify not found\r\n", env.get("log"));
 				}
 			// Выводим сообщение что файлы не переданы
-			} else print("arpa file is not loaded", env.get("log"));
+			} else print("arpa file is not loaded\r\n", env.get("log"));
 			// Если файл для сохранения слов передан
 			if((value = env.get("w-words")) != nullptr){
 				// Если отладка включена, выводим индикатор загрузки
@@ -2628,7 +2628,7 @@ int main(int argc, char * argv[]) noexcept {
 				print(result, env.get("log"), alphabet_t::log_t::info, false);
 			}
 		// Сообщаем что файл алфавита не найден
-		} else print("file alphabet not found", env.get("log"));
+		} else print("file alphabet not found\r\n", env.get("log"));
 	}
 	// Успешно выходим
 	return 0;
