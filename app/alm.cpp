@@ -954,7 +954,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если режим отладки включён
 				if(debug > 0){
 					// Формируем строку результата времени работы
-					const string & result = alphabet.format("work time shifting: %lld seconds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+					const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 					// Выводим результат
 					print(result, env.get("log"), alphabet_t::log_t::info, false);
 				}
@@ -1095,7 +1095,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если режим отладки включён
 					if(debug > 0){
 						// Формируем строку результата времени работы
-						const string & result = alphabet.format("work time shifting: %lld seconds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+						const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 						// Выводим результат
 						print(result, env.get("log"), alphabet_t::log_t::info, false);
 					}
@@ -1450,7 +1450,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если режим отладки включён
 				if(debug > 0){
 					// Формируем строку результата времени работы
-					const string & result = alphabet.format("work time shifting: %lld seconds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+					const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 					// Выводим результат
 					print(result, env.get("log"), alphabet_t::log_t::info, false);
 				}
@@ -2623,7 +2623,7 @@ int main(int argc, char * argv[]) noexcept {
 			// Если режим отладки включён
 			if(debug > 0){
 				// Формируем строку результата времени работы
-				const string & result = alphabet.format("work time shifting: %lld seconds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+				const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 				// Выводим результат
 				print(result, env.get("log"), alphabet_t::log_t::info, false);
 			}
