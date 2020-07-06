@@ -954,7 +954,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если режим отладки включён
 				if(debug > 0){
 					// Формируем строку результата времени работы
-					const string & result = alphabet.format("work time shifting: %u seconds\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+					const string & result = alphabet.format("work time shifting: %lld seconds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 					// Выводим результат
 					print(result, env.get("log"), alphabet_t::log_t::info, false);
 				}
@@ -1095,7 +1095,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если режим отладки включён
 					if(debug > 0){
 						// Формируем строку результата времени работы
-						const string & result = alphabet.format("work time shifting: %u seconds\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+						const string & result = alphabet.format("work time shifting: %lld seconds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 						// Выводим результат
 						print(result, env.get("log"), alphabet_t::log_t::info, false);
 					}
@@ -1151,7 +1151,7 @@ int main(int argc, char * argv[]) noexcept {
 											// Пытаемся восстановить текст из json объекта
 											tokenizer.jsonToText(text, [&](const string & text) noexcept {
 												// Если текст получен
-												if(!text.empty()) textData.append(alphabet.format("%s\n", text.c_str()));
+												if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
 											});
 										}
 									}
@@ -1244,7 +1244,7 @@ int main(int argc, char * argv[]) noexcept {
 										// Пытаемся восстановить текст из json объекта
 										tokenizer.jsonToText(item.value().dump(), [&](const string & text) noexcept {
 											// Если текст получен
-											if(!text.empty()) textData.append(alphabet.format("%s\n", text.c_str()));
+											if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
 										});
 									}
 								}
@@ -1342,7 +1342,7 @@ int main(int argc, char * argv[]) noexcept {
 												// Пытаемся восстановить текст из json объекта
 												tokenizer.jsonToText(item.value().dump(), [&](const string & text) noexcept {
 													// Если текст получен
-													if(!text.empty()) textData.append(alphabet.format("%s\n", text.c_str()));
+													if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
 												});
 											}
 										}
@@ -1413,14 +1413,14 @@ int main(int argc, char * argv[]) noexcept {
 						// Пытаемся восстановить текст из json объекта
 						tokenizer.jsonToText(text, [&](const string & text) noexcept {
 							// Если текст получен
-							if(!text.empty()) textData.append(alphabet.format("%s\n", text.c_str()));
+							if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
 						});
 					// Иначе обрабатываем как обычный текст
 					} else {
 						// Выполняем преобразование текста в json
 						tokenizer.textToJson(text, [&](const string & text) noexcept {
 							// Если текст получен
-							if(!text.empty()) textData = alphabet.format("%s\n", text.c_str());
+							if(!text.empty()) textData = alphabet.format("%s\r\n", text.c_str());
 						});
 					}
 					// Если результат получен
@@ -1450,7 +1450,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если режим отладки включён
 				if(debug > 0){
 					// Формируем строку результата времени работы
-					const string & result = alphabet.format("work time shifting: %u seconds\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+					const string & result = alphabet.format("work time shifting: %lld seconds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 					// Выводим результат
 					print(result, env.get("log"), alphabet_t::log_t::info, false);
 				}
@@ -2623,7 +2623,7 @@ int main(int argc, char * argv[]) noexcept {
 			// Если режим отладки включён
 			if(debug > 0){
 				// Формируем строку результата времени работы
-				const string & result = alphabet.format("work time shifting: %u seconds\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+				const string & result = alphabet.format("work time shifting: %lld seconds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 				// Выводим результат
 				print(result, env.get("log"), alphabet_t::log_t::info, false);
 			}
