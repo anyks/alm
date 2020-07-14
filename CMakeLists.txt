@@ -37,7 +37,7 @@ include_directories(${ZLIB_INCLUDE_DIRS})
 list(APPEND LIB_LIST ${ZLIB_LIBRARIES})
 
 # Ищем библиотеку Python
-find_package(PythonLibs REQUIRED)
+find_package(PythonLibs 3.7 REQUIRED)
 
 # Выводим сообщение
 message("Python include dir: ${PYTHON_INCLUDE_DIRS}")
