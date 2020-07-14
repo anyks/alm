@@ -10,11 +10,11 @@ ifeq ($(OS), Darwin)
 	CC = clang++
 
 	# Версия
-	PYVER = 7
+	PYVER = 8
 	# Питон
-	PYTHON = python3.$(PYVER)m
+	PYTHON = python3.$(PYVER)
 	# Путь питона
-	PYPATH = /usr/local/Frameworks/Python.framework/Versions/3.$(PYVER)
+	PYPATH = /System/Volumes/Data/usr/local/Cellar/python@3.8/3.8.3_2/Frameworks/Python.framework/Versions/3.$(PYVER)
 
 	# Сторонние модули
 	LIBS = \
@@ -27,7 +27,7 @@ ifeq ($(OS), Darwin)
 		-ljemalloc \
 		-l$(PYTHON) \
 		-L$(PYPATH)/lib \
-		-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib
+		-L/usr/local/Cellar/openssl@1.1/1.1.1g/lib
 
 	# Расширение библиотеки
 	EXT = dylib
@@ -47,7 +47,7 @@ ifeq ($(OS), Darwin)
 		-I/usr/local/include \
 		-I./gtest/include \
 		-I$(PYPATH)/include/$(PYTHON) \
-		-I/usr/local/Cellar/openssl@1.1/1.1.1d/include
+		-I/usr/local/Cellar/openssl@1.1/1.1.1g/include
 
 	# brew install google-perftools
 
