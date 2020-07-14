@@ -1,5 +1,10 @@
 # Example:
-# cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1d -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl@1.1/1.1.1d/include/lib ..
+# cmake \
+# -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1g \
+# -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl@1.1/1.1.1g/include/lib \
+# -DPYTHON_INCLUDE_DIR='/System/Volumes/Data/usr/local/Cellar/python@3.8/3.8.3_2/Frameworks/Python.framework/Versions/3.8/include/python3.8' \
+# -DPYTHON_LIBRARY='/System/Volumes/Data/usr/local/Cellar/python@3.8/3.8.3_2/Frameworks/Python.framework/Versions/3.8/lib/libpython3.8.dylib' \
+# ..
 
 # Проверка версии CMake.
 cmake_minimum_required(VERSION 2.8)
