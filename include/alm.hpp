@@ -621,7 +621,7 @@ namespace anyks {
 			 * getOptions Метод извлечения установленных опций
 			 * @return установленные опции
 			 */
-			const u_int getOptions() const noexcept;
+			const u_short getOptions() const noexcept;
 			/**
 			 * getUserTokenId Метод получения идентификатора пользовательского токена
 			 * @param name слово для которого нужно получить идентификатор

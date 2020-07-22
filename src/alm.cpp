@@ -2045,7 +2045,7 @@ const u_short anyks::Alm::getSize() const noexcept {
  * getOptions Метод извлечения установленных опций
  * @return установленные опции
  */
-const u_int anyks::Alm::getOptions() const noexcept {
+const u_short anyks::Alm::getOptions() const noexcept {
 	// Выводим установленные опции
 	return this->options.to_ulong();
 }
