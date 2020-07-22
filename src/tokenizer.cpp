@@ -409,10 +409,14 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 					else if(this->alphabet->isIsolation(letter)) {
 						// Определяем тип изоляционных знаков
 						const u_short type = (
-							(letter == L'(') || (letter == L'[') || (letter == L'{') ||
-							(letter == L'«') || (letter == L'„') ? 1 :
-							((letter == L')') || (letter == L']') || (letter == L'}') ||
-							(letter == L'»') || (letter == L'“') ? 2 : 0)
+							(letter == L'(') || (letter == L'[') ||
+							(letter == L'{') || (letter == L'«') ||
+							(letter == L'„') || (letter == L'‹') ||
+							(letter == L'‚') ? 1 :
+							((letter == L')') || (letter == L']') ||
+							(letter == L'}') || (letter == L'»') ||
+							(letter == L'“') || (letter == L'›') ||
+							(letter == L'’') ? 2 : 0)
 						);
 						// Определяем тип изоляционного символа
 						switch(type){
@@ -594,10 +598,14 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					else if(this->alphabet->isIsolation(letter)) {
 						// Определяем тип изоляционных знаков
 						const u_short type = (
-							(letter == L'(') || (letter == L'[') || (letter == L'{') ||
-							(letter == L'«') || (letter == L'„') ? 1 :
-							((letter == L')') || (letter == L']') || (letter == L'}') ||
-							(letter == L'»') || (letter == L'“') ? 2 : 0)
+							(letter == L'(') || (letter == L'[') ||
+							(letter == L'{') || (letter == L'«') ||
+							(letter == L'„') || (letter == L'‹') ||
+							(letter == L'‚') ? 1 :
+							((letter == L')') || (letter == L']') ||
+							(letter == L'}') || (letter == L'»') ||
+							(letter == L'“') || (letter == L'›') ||
+							(letter == L'’') ? 2 : 0)
 						);
 						// Определяем тип изоляционного символа
 						switch(type){
@@ -1117,10 +1125,14 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 						} else {
 							// Определяем тип изоляционных знаков
 							u_short typeBracket = (
-								(lletter == L'(') || (lletter == L'[') || (lletter == L'{') ||
-								(lletter == L'«') || (lletter == L'„') ? 1 :
-								((lletter == L')') || (lletter == L']') || (lletter == L'}') ||
-								(lletter == L'»') || (lletter == L'“') ? 2 : 0)
+								(lletter == L'(') || (lletter == L'[') ||
+								(lletter == L'{') || (lletter == L'«') ||
+								(lletter == L'„') || (lletter == L'‹') ||
+								(lletter == L'‚') ? 1 :
+								((lletter == L')') || (lletter == L']') ||
+								(lletter == L'}') || (lletter == L'»') ||
+								(lletter == L'“') || (lletter == L'›') ||
+								(lletter == L'’') ? 2 : 0)
 							);
 							// Если это изоляционный знак открытия
 							if(typeBracket == 1){
@@ -1159,6 +1171,10 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 										case L'«': mode = (letter == L'»'); break;
 										// Если это литературные кавычки
 										case L'„': mode = (letter == L'“'); break;
+										// Если это угловые кавычки
+										case L'‹': mode = (letter == L'›'); break;
+										// Если это одиночные кавычки
+										case L'‚': mode = (letter == L'’'); break;
 									}
 								}
 								// Если слово не пустое

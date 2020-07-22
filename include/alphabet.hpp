@@ -74,13 +74,16 @@ namespace anyks {
 			// Список спец-символом
 			const std::set <wchar_t> specialSymbols = {
 				L'~', L'_', L'@', L'#', L'№', L'©',
-				L'%', L'&', L'$', L'|', L'§', L'\\', L'±'
+				L'%', L'&', L'$', L'|', L'§', L'\\',
+				L'±', L'–', L'‾', L'−', L'‑', L'—'
 			};
 			// Список символов изоляции
 			const std::set <wchar_t> isolationSymbols = {
 				L'(', L')', L'[', L']', L'{',
 				L'}', L'"', L'«', L'»', L'„',
-				L'“', L'`', L'\'',
+				L'“', L'`', L'\'', L'´', L'′',
+				L'″', L'‘', L'’', L'‚', L'”',
+				L'‹', L'›'
 			};
 			// Список символов симиляции
 			const std::set <wchar_t> similarsSymbols = {
@@ -90,7 +93,7 @@ namespace anyks {
 			// Список математических символов
 			const std::set <wchar_t> mathSymbols = {L'+', L'-', L'=', L'/', L'*', L'^'};
 			// Список знаков пунктуации
-			const std::set <wchar_t> punctsSymbols = {L'.', L',', L'?', L'!', L':', L';'};
+			const std::set <wchar_t> punctsSymbols = {L'.', L',', L'?', L'!', L':', L';', L'…'};
 		public:
 			// log_t Флаги логирования
 			enum class log_t : u_short {info, warning, error, null};
