@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_THREAD_POOL_
-#define _ANYKS_THREAD_POOL_
+#ifndef __ANYKS_THREAD_POOL__
+#define __ANYKS_THREAD_POOL__
 
 /**
  * Стандартная библиотека
@@ -172,4 +172,4 @@ namespace anyks {
 	} tpool_t;
 };
 
-#endif // _ANYKS_THREAD_POOL_
+#endif // __ANYKS_THREAD_POOL__

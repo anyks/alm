@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_COLLECTOR_
-#define _ANYKS_COLLECTOR_
+#ifndef __ANYKS_COLLECTOR__
+#define __ANYKS_COLLECTOR__
 
 /**
  * Стандартная библиотека
@@ -184,4 +184,4 @@ namespace anyks {
 	} collector_t;
 };
 
-#endif // _ANYKS_COLLECTOR_
+#endif // __ANYKS_COLLECTOR__

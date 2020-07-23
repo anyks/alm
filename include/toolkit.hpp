@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_TOOLKIT_
-#define _ANYKS_TOOLKIT_
+#ifndef __ANYKS_TOOLKIT__
+#define __ANYKS_TOOLKIT__
 
 /**
  * Стандартная библиотека
@@ -671,4 +671,4 @@ namespace anyks {
 	} toolkit_t;
 };
 
-#endif // _ANYKS_TOOLKIT_
+#endif // __ANYKS_TOOLKIT__

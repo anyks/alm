@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_ID_WORD_
-#define _ANYKS_ID_WORD_
+#ifndef __ANYKS_ID_WORD__
+#define __ANYKS_ID_WORD__
 
 /**
  * Стандартная библиотека
@@ -98,4 +98,4 @@ namespace anyks {
 	} idw_t;
 };
 
-#endif // _ANYKS_ID_WORD_
+#endif // __ANYKS_ID_WORD__

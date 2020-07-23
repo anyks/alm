@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_ABLM_
-#define _ANYKS_ABLM_
+#ifndef __ANYKS_ABLM__
+#define __ANYKS_ABLM__
 
 /**
  * Стандартная библиотека
@@ -243,4 +243,4 @@ namespace anyks {
 	} ablm_t;
 };
 
-#endif // _ANYKS_ABLM_
+#endif // __ANYKS_ABLM__

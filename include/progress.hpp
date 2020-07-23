@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_PROGRESS_
-#define _ANYKS_PROGRESS_
+#ifndef __ANYKS_PROGRESS__
+#define __ANYKS_PROGRESS__
 
 /**
  * Стандартная библиотека
@@ -69,4 +69,4 @@ namespace anyks {
 	} progress_t;
 };
 
-#endif // _ANYKS_PROGRESS_
+#endif // __ANYKS_PROGRESS__

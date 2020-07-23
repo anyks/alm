@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_ARPA_
-#define _ANYKS_ARPA_
+#ifndef __ANYKS_ARPA__
+#define __ANYKS_ARPA__
 
 /**
  * Стандартная библиотека
@@ -987,4 +987,4 @@ namespace anyks {
 	};
 };
 
-#endif // _ANYKS_ARPA_
+#endif // __ANYKS_ARPA__

@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_ASPL_
-#define _ANYKS_ASPL_
+#ifndef __ANYKS_ASPL__
+#define __ANYKS_ASPL__
 
 /**
  * Стандартная библиотека
@@ -1603,4 +1603,4 @@ namespace anyks {
 	} aspl_t;
 };
 
-#endif // _ANYKS_ASPL_
+#endif // __ANYKS_ASPL__

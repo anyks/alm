@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_NWT_
-#define _ANYKS_NWT_
+#ifndef __ANYKS_NWT__
+#define __ANYKS_NWT__
 
 /**
  * Стандартная библиотека
@@ -116,4 +116,4 @@ namespace anyks {
 	} uri_t;
 };
 
-#endif // _ANYKS_NWT_
+#endif // __ANYKS_NWT__

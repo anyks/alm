@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_ENV_
-#define _ANYKS_ENV_
+#ifndef __ANYKS_ENV__
+#define __ANYKS_ENV__
 
 /**
  * Стандартная библиотека
@@ -143,4 +143,4 @@ namespace anyks {
 	} env_t;
 };
 
-#endif // _ANYKS_ENV_
+#endif // __ANYKS_ENV__

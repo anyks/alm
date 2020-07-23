@@ -5,8 +5,8 @@
  *  email:    forman@anyks.com
  *  site:     https://anyks.com
  */
-#ifndef _ANYKS_WORD_
-#define _ANYKS_WORD_
+#ifndef __ANYKS_WORD__
+#define __ANYKS_WORD__
 
 /**
  * Стандартная библиотека
@@ -3309,4 +3309,4 @@ namespace anyks {
 	} word_t;
 };
 
-#endif // _ANYKS_WORD_
+#endif // __ANYKS_WORD__

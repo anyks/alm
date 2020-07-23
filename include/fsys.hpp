@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_FSYS_
-#define _ANYKS_FSYS_
+#ifndef __ANYKS_FSYS__
+#define __ANYKS_FSYS__
 
 /**
  * Стандартная библиотека
@@ -27,7 +27,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 // Если это clang v10 или выше
-#if defined(__clang__) && (__clang_major__ > 9)
+#if defined(__ANYKS_EXPERIMENTAL__)
 #include <filesystem>
 #endif
 
@@ -275,7 +275,7 @@ namespace anyks {
 			return result;
 		}
 // Если это clang v10 или выше
-#if defined(__clang__) && (__clang_major__ > 9)
+#if defined(__ANYKS_EXPERIMENTAL__)
 		/**
 		 * dsize Функция подсчёта размера каталога
 		 * @param path путь для подсчёта
@@ -467,7 +467,7 @@ namespace anyks {
 			}
 		}
 // Если это clang v10 или выше
-#if defined(__clang__) && (__clang_major__ > 9)
+#if defined(__ANYKS_EXPERIMENTAL__)
 		/**
 		 * rdir Функция рекурсивного получения файлов во всех подкаталогах
 		 * @param path     путь до каталога
@@ -566,4 +566,4 @@ namespace anyks {
 	} fsys_t;
 };
 
-#endif // _ANYKS_FSYS_
+#endif // __ANYKS_FSYS__

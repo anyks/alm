@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_TOKENIZER_
-#define _ANYKS_TOKENIZER_
+#ifndef __ANYKS_TOKENIZER__
+#define __ANYKS_TOKENIZER__
 
 /**
  * Стандартная библиотека
@@ -210,4 +210,4 @@ namespace anyks {
 	} tokenizer_t;
 };
 
-#endif // _ANYKS_TOKENIZER_
+#endif // __ANYKS_TOKENIZER__

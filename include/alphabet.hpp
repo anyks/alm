@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_ALPHABET_
-#define _ANYKS_ALPHABET_
+#ifndef __ANYKS_ALPHABET__
+#define __ANYKS_ALPHABET__
 
 /**
  * Стандартная библиотека
@@ -562,4 +562,4 @@ namespace anyks {
 	ostream & operator << (ostream & os, const wstring & word) noexcept;
 };
 
-#endif // _ANYKS_ALPHABET_
+#endif // __ANYKS_ALPHABET__

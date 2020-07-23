@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_LANGUAGE_MODEL_
-#define _ANYKS_LANGUAGE_MODEL_
+#ifndef __ANYKS_LANGUAGE_MODEL__
+#define __ANYKS_LANGUAGE_MODEL__
 
 /**
  * Стандартная библиотека
@@ -1057,4 +1057,4 @@ namespace anyks {
 	} alm2_t;
 };
 
-#endif // _ANYKS_LANGUAGE_MODEL_
+#endif // __ANYKS_LANGUAGE_MODEL__

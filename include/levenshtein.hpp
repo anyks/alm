@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_LEV_
-#define _ANYKS_LEV_
+#ifndef __ANYKS_LEV__
+#define __ANYKS_LEV__
 
 /**
  * Стандартная библиотека
@@ -164,4 +164,4 @@ namespace anyks {
 	} lev_t;
 };
 
-#endif // _ANYKS_LEV_
+#endif // __ANYKS_LEV__

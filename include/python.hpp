@@ -6,8 +6,8 @@
  *  site:     https://anyks.com
  */
 
-#ifndef _ANYKS_PYTHON_
-#define _ANYKS_PYTHON_
+#ifndef __ANYKS_PYTHON__
+#define __ANYKS_PYTHON__
 
 /**
  * Стандартная библиотека
@@ -123,4 +123,4 @@ namespace anyks {
 	} python_t;
 };
 
-#endif // _ANYKS_PYTHON_
+#endif // __ANYKS_PYTHON__

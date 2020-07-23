@@ -5,8 +5,8 @@
  *  email:    forman@anyks.com
  *  site:     https://anyks.com
  */
-#ifndef _ANYKS_WORD2_
-#define _ANYKS_WORD2_
+#ifndef __ANYKS_WORD2__
+#define __ANYKS_WORD2__
 
 /**
  * Стандартная библиотека
@@ -2219,4 +2219,4 @@ namespace anyks {
 	} word2_t;
 };
 
-#endif // _ANYKS_WORD2_
+#endif // __ANYKS_WORD2__
