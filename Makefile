@@ -14,7 +14,7 @@ ifeq ($(OS), Darwin)
 	# Питон
 	PYTHON = python3.$(PYVER)
 	# Путь питона
-	PYPATH = /System/Volumes/Data/usr/local/Cellar/python@3.8/3.8.3_2/Frameworks/Python.framework/Versions/3.$(PYVER)
+	PYPATH = /System/Volumes/Data/usr/local/Cellar/python@3.$(PYVER)/3.$(PYVER).5/Frameworks/Python.framework/Versions/3.$(PYVER)
 
 	# Сторонние модули
 	LIBS = \
