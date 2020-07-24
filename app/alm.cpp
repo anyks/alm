@@ -98,6 +98,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-arpa | --w-bin-arpa]                   flag export in binary dictionary of only arpa data without n-gram statistics\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-interpolate | --interpolate]                 flag allowing to use interpolation in estimating\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mixed-dicts | --mixed-dicts]                 flag allowing the use of words consisting of mixed dictionaries\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-allow-stress | --allow-stress]               flag allowing the use of a stress symbol as part of the word\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mix-backward | --mix-backward]               flag to mixing language models in the backward direction\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-utokens | --w-bin-utokens]             flag export in binary dictionary of users tokens\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-options | --w-bin-options]             flag export in binary dictionary of toolkit options\r\n"
@@ -365,6 +366,8 @@ int main(int argc, char * argv[]) noexcept {
 			tokenizer_t tokenizer(&alphabet);
 			// Замеряем время начала работы
 			auto timeShifting = chrono::system_clock::now();
+			// Если разрешено использовать символы ударения, активируем
+			if(env.is("allow-stress")) tokenizer.allowStress();
 			// Если апостроф разрешён в токенизаторе, активируем его
 			if(env.is("allow-apostrophe")) alphabet.switchAllowApostrophe();
 			// Если файл с буквами для восстановления слов, передан

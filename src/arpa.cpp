@@ -515,6 +515,10 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const noexcep
 		case u_short(token_t::range): result = "<range>"; break;
 		// Если это токен знака пунктуации
 		case u_short(token_t::punct): result = "<punct>"; break;
+		// Если это токен знака греческого алфавита
+		case u_short(token_t::greek): result = "<greek>"; break;
+		// Если это токен знака направления (стрелка)
+		case u_short(token_t::route): result = "<route>"; break;
 		// Если это токен приблизительного числа
 		case u_short(token_t::aprox): result = "<aprox>"; break;
 		// Если это токен числового счёта
@@ -525,6 +529,10 @@ const string anyks::Arpa::word(const size_t idw, const size_t ups) const noexcep
 		case u_short(token_t::fract): result = "<fract>"; break;
 		// Если это токен изоляции
 		case u_short(token_t::isolat): result = "<isolat>"; break;
+		// Если это токен игральных карт
+		case u_short(token_t::pcards): result = "<pcards>"; break;
+		// Если это токен мировой валюты
+		case u_short(token_t::currency): result = "<currency>"; break;
 		// Если это нормальное слово
 		default: {
 			// Получаем слово по его идентификатору
@@ -1010,10 +1018,14 @@ const bool anyks::Arpa::event(const size_t idw) const noexcept {
 		(idw != size_t(token_t::range)) &&
 		(idw != size_t(token_t::score)) &&
 		(idw != size_t(token_t::punct)) &&
+		(idw != size_t(token_t::greek)) &&
+		(idw != size_t(token_t::route)) &&
 		(idw != size_t(token_t::dimen)) &&
 		(idw != size_t(token_t::fract)) &&
 		(idw != size_t(token_t::isolat)) &&
-		(idw != size_t(token_t::finish))
+		(idw != size_t(token_t::finish)) &&
+		(idw != size_t(token_t::pcards)) &&
+		(idw != size_t(token_t::currency))
 	);
 }
 /**

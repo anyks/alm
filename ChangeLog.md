@@ -1,5 +1,9 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
+## [3.0.9](https://github.com/anyks/alm/archive/v3.0.9.tar.gz) Bug fixes and other optimization
+### Params
+- flag allowing the use of a stress symbol as part of the word
+
 ## [3.0.8](https://github.com/anyks/alm/archive/v3.0.8.tar.gz) Other optimization
 
 ## [3.0.7](https://github.com/anyks/alm/archive/v3.0.7.tar.gz) Other optimization

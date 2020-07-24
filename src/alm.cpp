@@ -30,10 +30,14 @@ const bool anyks::Alm::event(const size_t idw) const noexcept {
 		(idw != size_t(token_t::range)) &&
 		(idw != size_t(token_t::score)) &&
 		(idw != size_t(token_t::punct)) &&
+		(idw != size_t(token_t::greek)) &&
+		(idw != size_t(token_t::route)) &&
 		(idw != size_t(token_t::dimen)) &&
 		(idw != size_t(token_t::fract)) &&
 		(idw != size_t(token_t::isolat)) &&
-		(idw != size_t(token_t::finish))
+		(idw != size_t(token_t::finish)) &&
+		(idw != size_t(token_t::pcards)) &&
+		(idw != size_t(token_t::currency))
 	);
 }
 /**
@@ -914,7 +918,11 @@ void anyks::Alm::setAllTokenUnknown() noexcept {
 		token_t::dimen,
 		token_t::fract,
 		token_t::punct,
-		token_t::isolat
+		token_t::greek,
+		token_t::route,
+		token_t::isolat,
+		token_t::pcards,
+		token_t::currency
 	};
 }
 /**
@@ -938,7 +946,11 @@ void anyks::Alm::setAllTokenDisable() noexcept {
 		token_t::dimen,
 		token_t::fract,
 		token_t::punct,
-		token_t::isolat
+		token_t::greek,
+		token_t::route,
+		token_t::isolat,
+		token_t::pcards,
+		token_t::currency
 	};
 }
 /**
@@ -1203,22 +1215,26 @@ void anyks::Alm::setTokenUnknown(const string & options) noexcept {
 			// Переходим по всему списку токенов
 			for(auto & token : tokens){
 				// Определяем тип токена
-				if(token.compare(L"num") == 0)         this->tokenUnknown.emplace(token_t::num);
-				else if(token.compare(L"url") == 0)    this->tokenUnknown.emplace(token_t::url);
-				else if(token.compare(L"abbr") == 0)   this->tokenUnknown.emplace(token_t::abbr);
-				else if(token.compare(L"date") == 0)   this->tokenUnknown.emplace(token_t::date);
-				else if(token.compare(L"time") == 0)   this->tokenUnknown.emplace(token_t::time);
-				else if(token.compare(L"anum") == 0)   this->tokenUnknown.emplace(token_t::anum);
-				else if(token.compare(L"math") == 0)   this->tokenUnknown.emplace(token_t::math);
-				else if(token.compare(L"rnum") == 0)   this->tokenUnknown.emplace(token_t::rnum);
-				else if(token.compare(L"specl") == 0)  this->tokenUnknown.emplace(token_t::specl);
-				else if(token.compare(L"aprox") == 0)  this->tokenUnknown.emplace(token_t::aprox);
-				else if(token.compare(L"range") == 0)  this->tokenUnknown.emplace(token_t::range);
-				else if(token.compare(L"score") == 0)  this->tokenUnknown.emplace(token_t::score);
-				else if(token.compare(L"dimen") == 0)  this->tokenUnknown.emplace(token_t::dimen);
-				else if(token.compare(L"fract") == 0)  this->tokenUnknown.emplace(token_t::fract);
-				else if(token.compare(L"punct") == 0)  this->tokenUnknown.emplace(token_t::punct);
-				else if(token.compare(L"isolat") == 0) this->tokenUnknown.emplace(token_t::isolat);
+				if(token.compare(L"num") == 0)           this->tokenUnknown.emplace(token_t::num);
+				else if(token.compare(L"url") == 0)      this->tokenUnknown.emplace(token_t::url);
+				else if(token.compare(L"abbr") == 0)     this->tokenUnknown.emplace(token_t::abbr);
+				else if(token.compare(L"date") == 0)     this->tokenUnknown.emplace(token_t::date);
+				else if(token.compare(L"time") == 0)     this->tokenUnknown.emplace(token_t::time);
+				else if(token.compare(L"anum") == 0)     this->tokenUnknown.emplace(token_t::anum);
+				else if(token.compare(L"math") == 0)     this->tokenUnknown.emplace(token_t::math);
+				else if(token.compare(L"rnum") == 0)     this->tokenUnknown.emplace(token_t::rnum);
+				else if(token.compare(L"specl") == 0)    this->tokenUnknown.emplace(token_t::specl);
+				else if(token.compare(L"aprox") == 0)    this->tokenUnknown.emplace(token_t::aprox);
+				else if(token.compare(L"range") == 0)    this->tokenUnknown.emplace(token_t::range);
+				else if(token.compare(L"score") == 0)    this->tokenUnknown.emplace(token_t::score);
+				else if(token.compare(L"dimen") == 0)    this->tokenUnknown.emplace(token_t::dimen);
+				else if(token.compare(L"fract") == 0)    this->tokenUnknown.emplace(token_t::fract);
+				else if(token.compare(L"punct") == 0)    this->tokenUnknown.emplace(token_t::punct);
+				else if(token.compare(L"greek") == 0)    this->tokenUnknown.emplace(token_t::greek);
+				else if(token.compare(L"route") == 0)    this->tokenUnknown.emplace(token_t::route);
+				else if(token.compare(L"isolat") == 0)   this->tokenUnknown.emplace(token_t::isolat);
+				else if(token.compare(L"pcards") == 0)   this->tokenUnknown.emplace(token_t::pcards);
+				else if(token.compare(L"currency") == 0) this->tokenUnknown.emplace(token_t::currency);
 			}
 		}
 	}
@@ -1239,22 +1255,26 @@ void anyks::Alm::setTokenDisable(const string & options) noexcept {
 			// Переходим по всему списку токенов
 			for(auto & token : tokens){
 				// Определяем тип токена
-				if(token.compare(L"num") == 0)         this->tokenDisable.emplace(token_t::num);
-				else if(token.compare(L"url") == 0)    this->tokenDisable.emplace(token_t::url);
-				else if(token.compare(L"abbr") == 0)   this->tokenDisable.emplace(token_t::abbr);
-				else if(token.compare(L"date") == 0)   this->tokenDisable.emplace(token_t::date);
-				else if(token.compare(L"time") == 0)   this->tokenDisable.emplace(token_t::time);
-				else if(token.compare(L"anum") == 0)   this->tokenDisable.emplace(token_t::anum);
-				else if(token.compare(L"math") == 0)   this->tokenDisable.emplace(token_t::math);
-				else if(token.compare(L"rnum") == 0)   this->tokenDisable.emplace(token_t::rnum);
-				else if(token.compare(L"specl") == 0)  this->tokenDisable.emplace(token_t::specl);
-				else if(token.compare(L"aprox") == 0)  this->tokenDisable.emplace(token_t::aprox);
-				else if(token.compare(L"range") == 0)  this->tokenDisable.emplace(token_t::range);
-				else if(token.compare(L"score") == 0)  this->tokenDisable.emplace(token_t::score);
-				else if(token.compare(L"dimen") == 0)  this->tokenDisable.emplace(token_t::dimen);
-				else if(token.compare(L"fract") == 0)  this->tokenDisable.emplace(token_t::fract);
-				else if(token.compare(L"punct") == 0)  this->tokenDisable.emplace(token_t::punct);
-				else if(token.compare(L"isolat") == 0) this->tokenDisable.emplace(token_t::isolat);
+				if(token.compare(L"num") == 0)           this->tokenDisable.emplace(token_t::num);
+				else if(token.compare(L"url") == 0)      this->tokenDisable.emplace(token_t::url);
+				else if(token.compare(L"abbr") == 0)     this->tokenDisable.emplace(token_t::abbr);
+				else if(token.compare(L"date") == 0)     this->tokenDisable.emplace(token_t::date);
+				else if(token.compare(L"time") == 0)     this->tokenDisable.emplace(token_t::time);
+				else if(token.compare(L"anum") == 0)     this->tokenDisable.emplace(token_t::anum);
+				else if(token.compare(L"math") == 0)     this->tokenDisable.emplace(token_t::math);
+				else if(token.compare(L"rnum") == 0)     this->tokenDisable.emplace(token_t::rnum);
+				else if(token.compare(L"specl") == 0)    this->tokenDisable.emplace(token_t::specl);
+				else if(token.compare(L"aprox") == 0)    this->tokenDisable.emplace(token_t::aprox);
+				else if(token.compare(L"range") == 0)    this->tokenDisable.emplace(token_t::range);
+				else if(token.compare(L"score") == 0)    this->tokenDisable.emplace(token_t::score);
+				else if(token.compare(L"dimen") == 0)    this->tokenDisable.emplace(token_t::dimen);
+				else if(token.compare(L"fract") == 0)    this->tokenDisable.emplace(token_t::fract);
+				else if(token.compare(L"punct") == 0)    this->tokenDisable.emplace(token_t::punct);
+				else if(token.compare(L"greek") == 0)    this->tokenDisable.emplace(token_t::greek);
+				else if(token.compare(L"route") == 0)    this->tokenDisable.emplace(token_t::route);
+				else if(token.compare(L"isolat") == 0)   this->tokenDisable.emplace(token_t::isolat);
+				else if(token.compare(L"pcards") == 0)   this->tokenDisable.emplace(token_t::pcards);
+				else if(token.compare(L"currency") == 0) this->tokenDisable.emplace(token_t::currency);
 			}
 		}
 	}
@@ -2121,8 +2141,16 @@ const size_t anyks::Alm::getIdw(const wstring & word, const bool check) const no
 		else if(word.compare(L"<dimen>") == 0) result = (size_t) token_t::dimen;
 		// Проверяем является ли слово числовой дробью
 		else if(word.compare(L"<fract>") == 0) result = (size_t) token_t::fract;
+		// Проверяем является ли слово греческим символом
+		else if(word.compare(L"<greek>") == 0) result = (size_t) token_t::greek;
+		// Проверяем является ли слово знаком направления (стрелкой)
+		else if(word.compare(L"<route>") == 0) result = (size_t) token_t::route;
 		// Проверяем является ли слово знаком изоляции
 		else if(word.compare(L"<isolat>") == 0) result = (size_t) token_t::isolat;
+		// Проверяем является ли слово знаком игральной карты
+		else if(word.compare(L"<pcards>") == 0) result = (size_t) token_t::pcards;
+		// Проверяем является ли слово знаком мировой валюты
+		else if(word.compare(L"<currency>") == 0) result = (size_t) token_t::currency;
 		// Если это другое слово
 		else {
 			// Формируем идентификатор слова
@@ -2168,6 +2196,18 @@ const size_t anyks::Alm::getIdw(const wstring & word, const bool check) const no
 							if(this->tokenDisable.count(token_t::math) < 1) result = (size_t) token_t::math;
 							// Устанавливаем токен неизвестного слова
 							if(this->tokenUnknown.count(token_t::math) > 0) result = (size_t) token_t::unk;
+						// Если это символ греческого алфавита
+						} else if(this->alphabet->isGreek(letter)) {
+							// Если идентифицирование токена не отключено
+							if(this->tokenDisable.count(token_t::greek) < 1) result = (size_t) token_t::greek;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token_t::greek) > 0) result = (size_t) token_t::unk;
+						// Если это символ направления (стрелка)
+						} else if(this->alphabet->isRoute(letter)) {
+							// Если идентифицирование токена не отключено
+							if(this->tokenDisable.count(token_t::route) < 1) result = (size_t) token_t::route;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token_t::route) > 0) result = (size_t) token_t::unk;
 						// Если это спец-символ
 						} else if(this->alphabet->isSpecial(letter)) {
 							// Если идентифицирование токена не отключено
@@ -2180,6 +2220,18 @@ const size_t anyks::Alm::getIdw(const wstring & word, const bool check) const no
 							if(this->tokenDisable.count(token_t::isolat) < 1) result = (size_t) token_t::isolat;
 							// Устанавливаем токен неизвестного слова
 							if(this->tokenUnknown.count(token_t::isolat) > 0) result = (size_t) token_t::unk;
+						// Если это символ игральных карт
+						} else if(this->alphabet->isPlayCards(letter)) {
+							// Если идентифицирование токена не отключено
+							if(this->tokenDisable.count(token_t::pcards) < 1) result = (size_t) token_t::pcards;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token_t::pcards) > 0) result = (size_t) token_t::unk;
+						// Если это знак мировой валюты
+						} else if(this->alphabet->isCurrency(letter)) {
+							// Если идентифицирование токена не отключено
+							if(this->tokenDisable.count(token_t::currency) < 1) result = (size_t) token_t::currency;
+							// Устанавливаем токен неизвестного слова
+							if(this->tokenUnknown.count(token_t::currency) > 0) result = (size_t) token_t::unk;
 						}
 					// Проверяем есть ли изоляционный знак и количество дефисов в слове больше 2-х
 					} else if(
@@ -2350,6 +2402,10 @@ const anyks::word_t anyks::Alm::word(const size_t idw, const size_t ups) const n
 		case u_short(token_t::range): result = L"<range>"; break;
 		// Если это токен знака пунктуации
 		case u_short(token_t::punct): result = L"<punct>"; break;
+		// Если это токен знака греческого символа
+		case u_short(token_t::greek): result = L"<greek>"; break;
+		// Если это токен знака направления (стрелки)
+		case u_short(token_t::route): result = L"<route>"; break;
 		// Если это токен приблизительного числа
 		case u_short(token_t::aprox): result = L"<aprox>"; break;
 		// Если это токен числового счёта
@@ -2360,6 +2416,10 @@ const anyks::word_t anyks::Alm::word(const size_t idw, const size_t ups) const n
 		case u_short(token_t::fract): result = L"<fract>"; break;
 		// Если это токен изоляции
 		case u_short(token_t::isolat): result = L"<isolat>"; break;
+		// Если это токен знака игральных карт
+		case u_short(token_t::pcards): result = L"<pcards>"; break;
+		// Если это токен знака мировой валюты
+		case u_short(token_t::currency): result = L"<currency>"; break;
 		// Если это нормальное слово
 		default: {
 			// Получаем слово по его идентификатору

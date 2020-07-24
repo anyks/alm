@@ -165,25 +165,28 @@ ngram 3=15
 | -1.328447             | после того                   | -0.477121                  |
 
 #### Description:
-
  - **〈s〉** - Sentence beginning token
  - **〈/s〉** - Sentence end token
  - **〈url〉** - URL-address token
  - **〈num〉** - Number (arabic or roman) token
  - **〈unk〉** - Unknown word token
- - **〈date〉** - Date token **(18.07.2004 | 07/18/2004)**
  - **〈time〉** - Time token **(15:44:56)**
+ - **〈score〉** - Score count token **(4:3 | 01:04)**
+ - **〈fract〉** - Fraction token **(5/20 | 192/864)**
+ - **〈date〉** - Date token **(18.07.2004 | 07/18/2004)**
  - **〈abbr〉** - Abbreviation token **(1-й | 2-е | 20-я)**
- - **〈anum〉** - Pseudo-number token (combination of numbers and other symbols) **(T34 | 895-M-86 | 39km)**
- - **〈math〉** - Mathematical operation token **(+ | - | = | / | * | ^)**
+ - **〈dimen〉** - Dimensions token **(200x300 | 1920x1080)**
  - **〈range〉** - Range of numbers token **(1-2 | 100-200 | 300-400)**
  - **〈aprox〉** - Approximate number token (**~93** | **~95.86** | **10~20**)
- - **〈score〉** - Score count token **(4:3 | 01:04)**
- - **〈dimen〉** - Dimensions token **(200x300 | 1920x1080)**
- - **〈fract〉** - Fraction token **(5/20 | 192/864)**
- - **〈punct〉** - Punctuation token **(. | ... | , | ! | ? | : | ;)**
- - **〈specl〉** - Special character token **(~ | @ | # | № | % | & | $ | § | © )**
- - **〈isolat〉** - Isolation/quotation token **(" | ' | « | » | „ | “ | ` | ( | ) | [ | ] | { | })**
+ - **〈anum〉** - Pseudo-number token (combination of numbers and other symbols) **(T34 | 895-M-86 | 39km)**
+ - **〈pcards〉** - Symbols of the play cards **(♠ | ♣ | ♥ | ♦ )**
+ - **〈punct〉** - Punctuation token **(. | , | ? | ! | : | ; | … | ¡ | ¿)**
+ - **〈currency〉** - Symbols of world currencies **($ | € | ₽ | ¢ | £ | ¤ | ¥ )**
+ - **〈route〉** - Direction symbols (arrows) **(← | ↑ | ↓ | ↔ | ↵ | ⇐ | ⇑ | ⇒ | ⇓ | ⇔ | ◄ | ▲ | ► | ▼)**
+ - **〈greek〉** - Symbols of the Greek alphabet **(Α | Β | Γ | Δ | Ε | Ζ | Η | Θ | Ι | Κ | Λ | Μ | Ν | Ξ | Ο | Π | Ρ | Σ | Τ | Υ | Φ | Χ | Ψ | Ω)**
+ - **〈isolat〉** - Isolation/quotation token **(( | ) | [ | ] | { | } | " | « | » | „ | “ | ` | ⌈ | ⌉ | ⌊ | ⌋ | ‹ | › | ‚ | ’ | ′ | ‛ | ″ | ‘ | ” | ‟ | ' |〈 | 〉)**
+ - **〈specl〉** - Special character token **(_ | @ | # | № | © | ® | & | ¦ | § | æ | ø | Þ | – | ‾ | ‑ | — | ¯ | ¶ | ˆ | ˜ | † | ‡ | • | ‰ | ⁄ | ℑ | ℘ | ℜ | ℵ | ◊ | \ )**
+ - **〈math〉** - Mathematical operation token **(+ | - | = | / | * | ^ | × | ÷ | − | ∕ | ∖ | ∗ | √ | ∝ | ∞ | ∠ | ± | ¹ | ² | ³ | ½ | ⅓ | ¼ | ¾ | % | ~ | · | ⋅ | ° | º | ¬ | ƒ | ∀ | ∂ | ∃ | ∅ | ∇ | ∈ | ∉ | ∋ | ∏ | ∑ | ∧ | ∨ | ∩ | ∪ | ∫ | ∴ | ∼ | ≅ | ≈ | ≠ | ≡ | ≤ | ≥ | ª | ⊂ | ⊃ | ⊄ | ⊆ | ⊇ | ⊕ | ⊗ | ⊥ | ¨)**
 
 ---
 

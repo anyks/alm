@@ -892,6 +892,32 @@ const bool anyks::Alphabet::isSpace(const wchar_t letter) const noexcept {
 	return ((lid == 32) || (lid == 160) || (lid == 173) || (lid == 9));
 }
 /**
+ * isGreek Метод определения символа греческого алфавита
+ * @param letter буква для проверки
+ * @return       результат проверки
+ */
+const bool anyks::Alphabet::isGreek(const wchar_t letter) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(letter > 0) result = (this->greekSymbols.count(letter) > 0);
+	// Выводим результат
+	return result;
+}
+/**
+ * isRoute Метод определения символов стрелок
+ * @param letter буква для проверки
+ * @return       результат проверки
+ */
+const bool anyks::Alphabet::isRoute(const wchar_t letter) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(letter > 0) result = (this->routeSymbols.count(letter) > 0);
+	// Выводим результат
+	return result;
+}
+/**
  * isNumber Метод проверки является ли слово числом
  * @param  word слово для проверки
  * @return      результат проверки
@@ -1067,6 +1093,32 @@ const bool anyks::Alphabet::isSpecial(const wchar_t letter) const noexcept {
 	bool result = false;
 	// Если слово передано
 	if(letter > 0) result = (this->specialSymbols.count(letter) > 0);
+	// Выводим результат
+	return result;
+}
+/**
+ * isCurrency Метод определения символа валюты
+ * @param letter буква для проверки
+ * @return       результат проверки
+ */
+const bool anyks::Alphabet::isCurrency(const wchar_t letter) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(letter > 0) result = (this->currencySymbols.count(letter) > 0);
+	// Выводим результат
+	return result;
+}
+/**
+ * isPlayCards Метод определения символа игральных карт
+ * @param letter буква для проверки
+ * @return       результат проверки
+ */
+const bool anyks::Alphabet::isPlayCards(const wchar_t letter) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(letter > 0) result = (this->playCardsSymbols.count(letter) > 0);
 	// Выводим результат
 	return result;
 }
@@ -1269,7 +1321,7 @@ const bool anyks::Alphabet::checkSimilars(const wstring & str) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если строка передана
-	if(!str.empty()){
+	if(!str.empty() && !this->substitutes.empty()){
 		// Длина слова
 		const size_t length = str.length();
 		// Если длина строки больше 1
@@ -1300,7 +1352,7 @@ const bool anyks::Alphabet::checkSimilars(const wstring & str) const noexcept {
 			// Переходим по всему слову
 			for(size_t i = 0; i < length; i++){
 				// Если буква совпала
-				if(this->similarsSymbols.count(str.at(i)) > 0){
+				if(this->substitutes.count(str.at(i)) > 0){
 					// Проверяем первую букву
 					first = (i > 0 ? existFn(str.at(i - 1)) : false);
 					// Проверяем следующую букву
@@ -1318,10 +1370,19 @@ const bool anyks::Alphabet::checkSimilars(const wstring & str) const noexcept {
 }
 /**
  * getzones Метод извлечения списка пользовательских зон интернета
+ * @return список доменных зон
  */
 const std::set <wstring> & anyks::Alphabet::getzones() const noexcept {
 	// Выводим список доменных зон интернета
 	return this->uri.getZones();
+}
+/**
+ * getAllowed Метод извлечения списка разрешённых символов
+ * @return список разрешённых символов
+ */
+const std::set <wchar_t> & anyks::Alphabet::getAllowed() const noexcept {
+	// Выводим список разрешённых символов
+	return this->allowedSymbols;
 }
 /**
  * getSubstitutes Метод извлечения букв для исправления слов из смешанных алфавитов

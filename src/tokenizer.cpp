@@ -9,6 +9,20 @@
 #include <tokenizer.hpp>
 
 /**
+ * allowStress Метод разрешения, использовать ударение в словах
+ */
+void anyks::Tokenizer::allowStress() noexcept {
+	// Разрешаем использовать ударение
+	this->stress = true;
+}
+/**
+ * disallowStress Метод запрещения использовать ударение в словах
+ */
+void anyks::Tokenizer::disallowStress() noexcept {
+	// Запрещаем использовать ударение
+	this->stress = false;
+}
+/**
  * setAbbr Метод добавления аббревиатуры
  * @param word слово для добавления
  */
@@ -278,6 +292,22 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 			}
 		// Если это число то выводим токен числа
 		} else if(this->alphabet->isNumber(word)) result = token_t::num;
+		// Если это математический символ
+		else if(this->alphabet->isMath(word.front())) result = token_t::math;
+		// Если это символ знака пунктуации
+		else if(this->alphabet->isPunct(word.front())) result = token_t::punct;
+		// Если это символ греческого алфавита
+		else if(this->alphabet->isGreek(word.front())) result = token_t::greek;
+		// Если это символ направления (стрелка)
+		else if(this->alphabet->isRoute(word.front())) result = token_t::route;
+		// Если это спец-символ
+		else if(this->alphabet->isSpecial(word.front())) result = token_t::specl;
+		// Если это символ изоляции
+		else if(this->alphabet->isIsolation(word.front())) result = token_t::isolat;
+		// Если это символ игральных карт
+		else if(this->alphabet->isPlayCards(word.front())) result = token_t::pcards;
+		// Если это символ мировой валюты
+		else if(this->alphabet->isCurrency(word.front())) result = token_t::currency;
 		// Если слово не идентифицируемо и не разрешено, устанавливаем неизвестное слово
 		if((result == token_t::null) && (!this->alphabet->isAllowed(word) && !this->alphabet->isLatian(word))) result = token_t::unk;
 	}
@@ -358,18 +388,22 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 		wstring text = L"";
 		// Типы флагов
 		enum class type_t : u_short {
-			end,   // Конец контекста
-			num,   // Символ числа в тексте
-			null,  // Не определено
-			word,  // нормальное слово
-			math,  // Математическая операция
-			open,  // Открытие изоляционного символа
-			close, // Закрытие изоляционного символа
-			specl, // Спец-символ в тексте
-			space, // Символ пробела в тексте
-			allow, // Разрешённый символ
-			punct, // Знак препинания
-			isolat // Изоляционный символ в строке
+			end,     // Конец контекста
+			num,     // Символ числа в тексте
+			null,    // Не определено
+			word,    // нормальное слово
+			math,    // Математическая операция
+			open,    // Открытие изоляционного символа
+			greek,   // Символ греческого алфавита
+			route,   // Символ направления (стрелок)
+			close,   // Закрытие изоляционного символа
+			specl,   // Спец-символ в тексте
+			space,   // Символ пробела в тексте
+			allow,   // Разрешённый символ
+			punct,   // Знак препинания
+			pcards,  // Символ игральных карт
+			isolat,  // Изоляционный символ в строке
+			currency // Символ мировой валюты
 		};
 		// Стек типов собранного контекста
 		stack <type_t> typeContext;
@@ -403,8 +437,16 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 					else if(this->alphabet->isSpace(letter)) result = type_t::space;
 					// Если это знак пунктуации
 					else if(this->alphabet->isPunct(letter)) result = type_t::punct;
+					// Если это символ греческого алфавита
+					else if(this->alphabet->isGreek(letter)) result = type_t::greek;
+					// Если это символ направления (стрелки)
+					else if(this->alphabet->isRoute(letter)) result = type_t::route;
 					// Если это спец-символ
 					else if(this->alphabet->isSpecial(letter)) result = type_t::specl;
+					// Если это символ игральных карт
+					else if(this->alphabet->isPlayCards(letter)) result = type_t::pcards;
+					// Если это символ мировой валюты
+					else if(this->alphabet->isCurrency(letter)) result = type_t::currency;
 					// Если это изоляционный символ
 					else if(this->alphabet->isIsolation(letter)) {
 						// Определяем тип изоляционных знаков
@@ -412,11 +454,13 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 							(letter == L'(') || (letter == L'[') ||
 							(letter == L'{') || (letter == L'«') ||
 							(letter == L'„') || (letter == L'‹') ||
-							(letter == L'‚') ? 1 :
+							(letter == L'⌈') || (letter == L'⌊') || 
+							(letter == L'<') || (letter == L'〈') ? 1 :
 							((letter == L')') || (letter == L']') ||
 							(letter == L'}') || (letter == L'»') ||
 							(letter == L'“') || (letter == L'›') ||
-							(letter == L'’') ? 2 : 0)
+							(letter == L'⌉') || (letter == L'⌋') ||
+							(letter == L'>') || (letter == L'〉') ? 2 : 0)
 						);
 						// Определяем тип изоляционного символа
 						switch(type){
@@ -455,11 +499,17 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 					// Если это открытый изоляционный символ
 					case (u_short) type_t::open:
 					// Если это нормальная буква
-					case (u_short) type_t::allow: {
+					case (u_short) type_t::allow:
+					// Если это символ греческого алфавита
+					case (u_short) type_t::greek: {
 						// Если предыдущий символ не является открытым изоляционнмы символом
 						if((typeContext.empty() ||
 						(typeContext.top() != type_t::open)) &&
-						(!this->alphabet->isSpace(text.back())) &&
+						(text.back() != L'´') &&
+						(text.back() != L'¸') &&
+						(text.back() != L'\x301') &&
+						(text.back() != L'\x311') &&
+						!this->alphabet->isSpace(text.back()) &&
 						(!this->alphabet->isNumber(token.substr(0, 1)) ||
 						!this->alphabet->isMath(text.back()) ||
 						(text.back() == L'='))) text.append(1, L' ');
@@ -469,7 +519,9 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 					// Если это число
 					case (u_short) type_t::num:
 					// Если это математическая операция
-					case (u_short) type_t::math: {
+					case (u_short) type_t::math:
+					// Если это символ игральных карт
+					case (u_short) type_t::currency: {
 						// Если предыдущий символ не является числом, математической операцией и пробелом
 						if((typeContext.empty() ||
 						((token.front() == L'=') && (text.back() != L'=')) ||
@@ -493,6 +545,28 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 						// Добавляем слово
 						text.append(token);
 					} break;
+					// Если это символ направления (стрелки)
+					case (u_short) type_t::route: {
+						// Если предыдущий символ не является символом направления и пробелом
+						if((typeContext.empty() ||
+						((typeContext.top() != type_t::route) &&
+						(typeContext.top() != type_t::open) &&
+						(typeContext.top() != type_t::space))) &&
+						(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
+						// Добавляем слово
+						text.append(token);
+					} break;
+					// Если это символ игральных карт
+					case (u_short) type_t::pcards: {
+						// Если предыдущий символ не является символом игральных карт и пробелом
+						if((typeContext.empty() ||
+						((typeContext.top() != type_t::pcards) &&
+						(typeContext.top() != type_t::open) &&
+						(typeContext.top() != type_t::space))) &&
+						(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
+						// Добавляем слово
+						text.append(token);
+					} break;
 					// Если это закрытый изоляционный символ
 					case (u_short) type_t::close:
 					// Если это знак-пунктуации
@@ -502,7 +576,11 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 						// Добавляем слово
 						text.append(token);
 						// Если следующий символ не является знаком пунктуации
-						if((nextToken != type_t::punct) &&
+						if((text.back() != L'´') &&
+						(text.back() != L'¸') &&
+						(text.back() != L'\x301') &&
+						(text.back() != L'\x311') &&
+						(nextToken != type_t::punct) &&
 						(nextToken != type_t::end) &&
 						(nextToken != type_t::space) &&
 						(nextToken != type_t::close)) text.append(1, L' ');
@@ -547,18 +625,22 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 		bool end = false;
 		// Типы флагов
 		enum class type_t : u_short {
-			end,   // Конец контекста
-			num,   // Символ числа в тексте
-			null,  // Не определено
-			word,  // нормальное слово
-			math,  // Математическая операция
-			open,  // Открытие изоляционного символа
-			close, // Закрытие изоляционного символа
-			specl, // Спец-символ в тексте
-			space, // Символ пробела в тексте
-			allow, // Разрешённый символ
-			punct, // Знак препинания
-			isolat // Изоляционный символ в строке
+			end,     // Конец контекста
+			num,     // Символ числа в тексте
+			null,    // Не определено
+			word,    // нормальное слово
+			math,    // Математическая операция
+			open,    // Открытие изоляционного символа
+			greek,   // Символ греческого алфавита
+			route,   // Символ направления (стрелок)
+			close,   // Закрытие изоляционного символа
+			specl,   // Спец-символ в тексте
+			space,   // Символ пробела в тексте
+			allow,   // Разрешённый символ
+			punct,   // Знак препинания
+			pcards,  // Символ игральных карт
+			isolat,  // Изоляционный символ в строке
+			currency // Символ мировой валюты
 		};
 		// Стек типов собранного контекста
 		stack <type_t> typeContext;
@@ -592,8 +674,16 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					else if(this->alphabet->isSpace(letter)) result = type_t::space;
 					// Если это знак пунктуации
 					else if(this->alphabet->isPunct(letter)) result = type_t::punct;
+					// Если это символ греческого алфавита
+					else if(this->alphabet->isGreek(letter)) result = type_t::greek;
+					// Если это символ направления (стрелки)
+					else if(this->alphabet->isRoute(letter)) result = type_t::route;
 					// Если это спец-символ
 					else if(this->alphabet->isSpecial(letter)) result = type_t::specl;
+					// Если это символ игральных карт
+					else if(this->alphabet->isPlayCards(letter)) result = type_t::pcards;
+					// Если это символ мировой валюты
+					else if(this->alphabet->isCurrency(letter)) result = type_t::currency;
 					// Если это изоляционный символ
 					else if(this->alphabet->isIsolation(letter)) {
 						// Определяем тип изоляционных знаков
@@ -601,11 +691,13 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 							(letter == L'(') || (letter == L'[') ||
 							(letter == L'{') || (letter == L'«') ||
 							(letter == L'„') || (letter == L'‹') ||
-							(letter == L'‚') ? 1 :
+							(letter == L'⌈') || (letter == L'⌊') || 
+							(letter == L'<') || (letter == L'〈') ? 1 :
 							((letter == L')') || (letter == L']') ||
 							(letter == L'}') || (letter == L'»') ||
 							(letter == L'“') || (letter == L'›') ||
-							(letter == L'’') ? 2 : 0)
+							(letter == L'⌉') || (letter == L'⌋') ||
+							(letter == L'>') || (letter == L'〉') ? 2 : 0)
 						);
 						// Определяем тип изоляционного символа
 						switch(type){
@@ -644,11 +736,17 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					// Если это открытый изоляционный символ
 					case (u_short) type_t::open:
 					// Если это нормальная буква
-					case (u_short) type_t::allow: {
+					case (u_short) type_t::allow:
+					// Если это символ греческого алфавита
+					case (u_short) type_t::greek: {
 						// Если предыдущий символ не является открытым изоляционнмы символом
 						if((typeContext.empty() ||
 						(typeContext.top() != type_t::open)) &&
-						(!this->alphabet->isSpace(result.back())) &&
+						(result.back() != L'´') &&
+						(result.back() != L'¸') &&
+						(result.back() != L'\x301') &&
+						(result.back() != L'\x311') &&
+						!this->alphabet->isSpace(result.back()) &&
 						(!this->alphabet->isNumber(token.substr(0, 1)) ||
 						!this->alphabet->isMath(result.back()) ||
 						(result.back() == L'='))) result.append(1, L' ');
@@ -658,7 +756,9 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					// Если это число
 					case (u_short) type_t::num:
 					// Если это математическая операция
-					case (u_short) type_t::math: {
+					case (u_short) type_t::math:
+					// Если это символ игральных карт
+					case (u_short) type_t::currency: {
 						// Если предыдущий символ не является числом, математической операцией и пробелом
 						if((typeContext.empty() ||
 						((token.front() == L'=') && (result.back() != L'=')) ||
@@ -682,6 +782,28 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 						// Добавляем слово
 						result.append(token);
 					} break;
+					// Если это символ направления (стрелки)
+					case (u_short) type_t::route: {
+						// Если предыдущий символ не является символом направления и пробелом
+						if((typeContext.empty() ||
+						((typeContext.top() != type_t::route) &&
+						(typeContext.top() != type_t::open) &&
+						(typeContext.top() != type_t::space))) &&
+						(!this->alphabet->isSpace(result.back()))) result.append(1, L' ');
+						// Добавляем слово
+						result.append(token);
+					} break;
+					// Если это символ игральных карт
+					case (u_short) type_t::pcards: {
+						// Если предыдущий символ не является символом игральных карт и пробелом
+						if((typeContext.empty() ||
+						((typeContext.top() != type_t::pcards) &&
+						(typeContext.top() != type_t::open) &&
+						(typeContext.top() != type_t::space))) &&
+						(!this->alphabet->isSpace(result.back()))) result.append(1, L' ');
+						// Добавляем слово
+						result.append(token);
+					} break;
 					// Если это закрытый изоляционный символ
 					case (u_short) type_t::close:
 					// Если это знак-пунктуации
@@ -691,7 +813,11 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 						// Добавляем слово
 						result.append(token);
 						// Если следующий символ не является знаком пунктуации
-						if((nextToken != type_t::punct) &&
+						if((result.back() != L'´') &&
+						(result.back() != L'¸') &&
+						(result.back() != L'\x301') &&
+						(result.back() != L'\x311') &&
+						(nextToken != type_t::punct) &&
 						(nextToken != type_t::end) &&
 						(nextToken != type_t::space) &&
 						(nextToken != type_t::close)) result.append(1, L' ');
@@ -853,15 +979,19 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 		else {
 			// Типы флагов
 			enum class type_t : u_short {
-				url,   // Интернет адрес
-				num,   // Символ числа в тексте
-				null,  // Не определено
-				math,  // Математическая операция
-				specl, // Спец-символ в тексте
-				space, // Символ пробела в тексте
-				allow, // Разрешённый символ
-				punct, // Знак препинания
-				isolat // Изоляционный символ в строке
+				url,     // Интернет адрес
+				num,     // Символ числа в тексте
+				null,    // Не определено
+				math,    // Математическая операция
+				greek,   // Символ греческого алфавита
+				route,   // Символ направления (стрелок)
+				specl,   // Спец-символ в тексте
+				space,   // Символ пробела в тексте
+				allow,   // Разрешённый символ
+				punct,   // Знак препинания
+				pcards,  // Символ игральных карт
+				isolat,  // Изоляционный символ в строке
+				currency // Символ мировой валюты
 			};
 			// Полученное слово
 			wstring word = L"";
@@ -875,7 +1005,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 			wchar_t letter = 0, lletter = 0, backLetter = 0, next = 0;
 			// Основные флаги токенизации
 			bool open = false, begin = false, end = false, nend = false;
-			bool backPunct = false, stopToken = false, notClear = false;
+			bool backPunct = false, stopToken = false, notClear = false, stress = false;
 			// Получаем буквы алфавита
 			const wstring & letters = this->alphabet->convert(this->alphabet->get());
 			/**
@@ -942,8 +1072,16 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 					else if(this->alphabet->isMath(next)) type = type_t::math;
 					// Если следующий символ является пробелом
 					else if(this->alphabet->isSpace(next)) type = type_t::space;
+					// Если это символ греческого алфавита
+					else if(this->alphabet->isGreek(next)) type = type_t::greek;
+					// Если это символ направления (стрелки)
+					else if(this->alphabet->isRoute(next)) type = type_t::route;
 					// Если следующий символ является спец-символом
 					else if(this->alphabet->isSpecial(next)) type = type_t::specl;
+					// Если это символ игральных карт
+					else if(this->alphabet->isPlayCards(next)) type = type_t::pcards;
+					// Если это символ мировой валюты
+					else if(this->alphabet->isCurrency(next)) type = type_t::currency;
 					// Если следующий символ является числом
 					else if(this->alphabet->isNumber({next})) type = type_t::num;
 					// Если следующий символ является символом изоляции
@@ -963,23 +1101,29 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 					// Если это знак пунктуации
 					} else if(this->alphabet->isPunct(lletter) ||
 					this->alphabet->isSpecial(lletter) ||
-					this->alphabet->isMath(lletter)) {
+					this->alphabet->isRoute(lletter) ||
+					this->alphabet->isMath(lletter) ||
+					this->alphabet->isPlayCards(lletter)) {
 						// Проверяем следующие символы на стоп-токены
 						stopToken = (
 							(type == type_t::math) ||
 							(type == type_t::space) ||
 							(type == type_t::specl) ||
 							(type == type_t::punct) ||
-							(type == type_t::isolat)
+							(type == type_t::route) ||
+							(type == type_t::isolat) ||
+							(type == type_t::pcards)
 						);
 						// Проверяем является ли предыдущий символ также знаком пунктуации
 						backPunct = ((backLetter > 0) && this->alphabet->isPunct(backLetter));
+						// Запоминаем, что это символ ударения или подобный
+						stress = (this->stress && ((lletter == L'´') || (lletter == L'¸') || (lletter == L'\x301') || (lletter == L'\x311')));
 						// Выводим результат как он есть
 						if(end){
 							// Если слово не пустое
 							if(!word.empty()){
 								// Если это спец-символ
-								if(this->alphabet->isSpecial(lletter)){
+								if(this->alphabet->isSpecial(lletter) || this->alphabet->isRoute(lletter) || this->alphabet->isPlayCards(lletter)){
 									// Добавляем букву в слово
 									word.append(1, letter);
 									// Выводим полученное слово
@@ -1004,11 +1148,16 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 							// Добавляем знак препинания в контекст
 							context.push_back(this->alphabet->convert(wstring(1, letter)));
 						// Если слово не пустое и это точка, запятая или двоеточие
-						} else if((lletter == L'.') || (lletter == L',') ||
-						(lletter == L':') || (lletter == L';') || (lletter == L'/')) {
+						} else if(stress || (lletter == L'.') || (lletter == L'…') || (lletter == L',') ||
+						(lletter == L':') || (lletter == L';') || (lletter == L'/') || (lletter == L'™')) {
+							// Если это многоточие
+							if(lletter == L'…') backPunct = true;
+							// Если это символ ударения, устанавливаем, что это не стоп-токен
+							if(stress) stopToken = false;
 							// Получаем символ для проверки
 							wchar_t sumbol = (
-								(lletter == L'.') ? (!nend && (type == type_t::space) ? text.at(i + 2) :
+								((lletter == L'.') || (lletter == L'…')) ?
+								(!nend && (type == type_t::space) ? text.at(i + 2) :
 								((type == type_t::allow) ? text.at(i + 1) : 0)) : 0
 							);
 							// Проверяем является ли слово аббревиатурой
@@ -1019,7 +1168,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 								(letters.find(tolower(sumbol)) == wstring::npos)))
 							);
 							// Если следующий символ является пробелом или нормальным словом
-							if((lletter != L'/') && (((type == type_t::allow) &&
+							if((lletter != L'/') && ((!stress && (type == type_t::allow) &&
 							((lletter != L'.') || !abbr)) || ((stopToken && !abbr) || backPunct))){
 								// Выводим полученное слово
 								if(!callbackFn(word, end)) return;
@@ -1031,7 +1180,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 								context.push_back(this->alphabet->convert(wstring(1, letter)));
 								// Иначе очищаем контекст
 								if(!notClear && (!backPunct || !!this->alphabet->isUpper(sumbol)) &&
-								(lletter == L'.') && (type != type_t::punct)) context.clear();
+								((lletter == L'.') || (lletter == L'…')) && (type != type_t::punct)) context.clear();
 								// Очищаем слово
 								word.clear();
 							// Если это не пробел
@@ -1052,7 +1201,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 								} else word.append(1, letter);
 							}
 						// Если это другие знаки препинания
-						} else if((lletter == L'!') || (lletter == L'?')) {
+						} else if((lletter == L'!') || (lletter == L'?') || (lletter == L'¡') || (lletter == L'¿')) {
 							// Если следующий символ является пробелом или нормальным словом
 							if((type == type_t::allow) || (type == type_t::space) ||
 							(type == type_t::isolat) || stopToken || backPunct) {
@@ -1092,7 +1241,8 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 								} else word.append(1, letter);
 							}
 						// Если это спец-символ
-						} else if(this->alphabet->isSpecial(lletter) || this->alphabet->isMath(lletter)) {
+						} else if(this->alphabet->isSpecial(lletter) || this->alphabet->isMath(lletter) ||
+						this->alphabet->isRoute(lletter) || this->alphabet->isPlayCards(lletter)) {
 							// Добавляем символ в слово
 							if(!this->alphabet->isSpace(lletter)) word.append(1, letter);
 							// Если следующий символ является пробелом
@@ -1128,11 +1278,13 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 								(lletter == L'(') || (lletter == L'[') ||
 								(lletter == L'{') || (lletter == L'«') ||
 								(lletter == L'„') || (lletter == L'‹') ||
-								(lletter == L'‚') ? 1 :
+								(lletter == L'⌈') || (lletter == L'⌊') || 
+								(lletter == L'<') || (lletter == L'〈') ? 1 :
 								((lletter == L')') || (lletter == L']') ||
 								(lletter == L'}') || (lletter == L'»') ||
 								(lletter == L'“') || (lletter == L'›') ||
-								(lletter == L'’') ? 2 : 0)
+								(lletter == L'⌉') || (lletter == L'⌋') ||
+								(lletter == L'>') || (lletter == L'〉') ? 2 : 0)
 							);
 							// Если это изоляционный знак открытия
 							if(typeBracket == 1){
@@ -1173,11 +1325,17 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 										case L'„': mode = (letter == L'“'); break;
 										// Если это угловые кавычки
 										case L'‹': mode = (letter == L'›'); break;
-										// Если это одиночные кавычки
-										case L'‚': mode = (letter == L'’'); break;
+										// Если это верхние скобки
+										case L'⌈': mode = (letter == L'⌉'); break;
+										// Если это нижние скобки
+										case L'⌊': mode = (letter == L'⌋'); break;
+										// Если это обычные угловые скобки
+										case L'<': mode = (letter == L'>'); break;
+										// Если это большие угловые скобки
+										case L'〈': mode = (letter == L'〉'); break;
 									}
 								}
-								// Если слово не пустое
+								// Если слово не пусто
 								if(!word.empty() && !callbackFn(word, end)) return;
 								// Добавляем слово в контекст
 								if(!word.empty()) context.push_back(this->alphabet->convert(word));
@@ -1257,7 +1415,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
  * Tokenizer Конструктор
  * @param alphabet объект алфавита
  */
-anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : extFn(nullptr), alphabet(alphabet) {
+anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : stress(false), extFn(nullptr), alphabet(alphabet) {
 	// Устанавливаем лафавит
 	if(alphabet != nullptr) this->setAlphabet(alphabet);
 }

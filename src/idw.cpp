@@ -98,10 +98,19 @@ void anyks::Idw::set(const alphabet_t * alphabet, const u_short offset) noexcept
 		this->alphabet = alphabet;
 		// Получаем модуль
 		this->mod = (pow(2, MAX_WORD_LENGTH + 1) - 1);
+		// Извлекаем список разрешённых символов
+		const auto & symbols = this->alphabet->getAllowed();
 		// Получаем алфавит
 		this->letters.append(this->alphabet->convert(this->alphabet->get()));
-		// Добавляем стандартные символы в список
-		this->letters.append(L"<>~-+=*/:%|^'&#\\0123456789");
+		// Если список разрешённых символов получен
+		if(!symbols.empty()){
+			// Строка разрешённых символов
+			wstring letters = L"";
+			// Формируем строку разрешённых символов
+			for(auto & letter : symbols) letters.append(1, letter);
+			// Если строка разрешённых символов получена, добавляем в список
+			if(!letters.empty()) this->letters.append(letters);
+		}
 		// Получаем длину алфавита
 		const size_t length = this->letters.length();
 		// Формируем диапазон значений

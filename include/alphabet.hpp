@@ -67,33 +67,66 @@ namespace anyks {
 			const nums_t numsSymbols;
 			// Список разрешённых спец-символом
 			const std::set <wchar_t> allowedSymbols = {
-				L'~', L'-', L'+', L'=',
-				L'*', L'/', L':', L'%',
-				L'|', L'^', L'&', L'#', L'\\'
+				L'<', L'>', L'~', L'-', L'+', L'=',
+				L'*', L'/', L':', L'%', L'|', L'^',
+				L'&', L'#', L'0', L'1', L'2', L'3',
+				L'4', L'5', L'6', L'7', L'8', L'9',
+				L'\'', L'\\'
 			};
 			// Список спец-символом
 			const std::set <wchar_t> specialSymbols = {
-				L'~', L'_', L'@', L'#', L'№', L'©',
-				L'%', L'&', L'$', L'|', L'§', L'\\',
-				L'±', L'–', L'‾', L'−', L'‑', L'—'
+				L'_', L'@', L'#', L'№', L'©', L'®',
+				L'&', L'|', L'¦', L'§', L'æ', L'ø',
+				L'Þ', L'–', L'‾', L'‑', L'—', L'¯',
+				L'¶', L'ˆ', L'˜', L'†', L'‡', L'•',
+				L'‰', L'⁄', L'ℑ', L'℘', L'ℜ', L'ℵ',
+				L'◊', L'\\'
+			};
+			// Список символов греческого алфавита
+			const std::set <wchar_t> greekSymbols = {
+				L'µ', L'β', L'ß', L'γ', L'α', L'δ',
+				L'ε', L'ζ', L'η', L'θ', L'ι', L'κ',
+				L'λ', L'ν', L'ξ', L'ο', L'π', L'ρ',
+				L'ς', L'σ', L'τ', L'υ', L'φ', L'χ',
+				L'ψ', L'ω', L'ϑ', L'ϒ', L'ϕ', L'ϖ',
+				L'ϝ', L'ϰ', L'ϱ', L'ϵ', L'϶'
+			};
+			// Список символов стрелок
+			const std::set <wchar_t> routeSymbols = {
+				L'←', L'↑', L'→', L'↓', L'↔', L'↵',
+				L'⇐', L'⇑', L'⇒', L'⇓', L'⇔', L'◄',
+				L'▲', L'►', L'▼'
 			};
 			// Список символов изоляции
 			const std::set <wchar_t> isolationSymbols = {
-				L'(', L')', L'[', L']', L'{',
-				L'}', L'"', L'«', L'»', L'„',
-				L'“', L'`', L'\'', L'´', L'′',
-				L'″', L'‘', L'’', L'‚', L'”',
-				L'‹', L'›'
-			};
-			// Список символов симиляции
-			const std::set <wchar_t> similarsSymbols = {
-				L'a', L'b', L'c', L'e', L'h', L'k',
-				L'm', L'o', L'p', L't', L'u', L'x'
+				L'(', L')', L'[', L']', L'{', L'}',
+				L'"', L'«', L'»', L'„', L'“', L'`',
+				L'⌈', L'⌉', L'⌊', L'⌋', L'‹', L'›',
+				L'<', L'>', L'‚', L'’', L'′', L'‛',
+				L'″', L'‘', L'”', L'‟', L'\'', L'〈', L'〉'
 			};
 			// Список математических символов
-			const std::set <wchar_t> mathSymbols = {L'+', L'-', L'=', L'/', L'*', L'^'};
+			const std::set <wchar_t> mathSymbols = {
+				L'+', L'-', L'=', L'/', L'*', L'^', L'×',
+				L'÷', L'−', L'∕', L'∖', L'∗', L'√', L'∝',
+				L'∞', L'∠', L'±', L'¹', L'²', L'³', L'½',
+				L'⅓', L'¼', L'¾', L'%', L'~', L'·', L'⋅',
+				L'°', L'º', L'¬', L'ƒ', L'∀', L'∂', L'∃',
+				L'∅', L'∇', L'∈', L'∉', L'∋', L'∏', L'∑',
+				L'∧', L'∨', L'∩', L'∪', L'∫', L'∴', L'∼',
+				L'≅', L'≈', L'≠', L'≡', L'≤', L'≥', L'ª',
+				L'⊂', L'⊃', L'⊄', L'⊆', L'⊇', L'⊕', L'⊗',
+				L'⊥', L'¨'
+			};
 			// Список знаков пунктуации
-			const std::set <wchar_t> punctsSymbols = {L'.', L',', L'?', L'!', L':', L';', L'…'};
+			const std::set <wchar_t> punctsSymbols = {
+				L'.', L',', L'?', L'!', L':', L';', L'…',
+				L'¡', L'¿', L'´', L'¸', L'™', L'\x301', L'\x311'
+			};
+			// Список символов игральных карт
+			const std::set <wchar_t> playCardsSymbols = {L'♠', L'♣', L'♥', L'♦'};
+			// Список символов валют
+			const std::set <wchar_t> currencySymbols = {L'$', L'€', L'₽', L'¢', L'£', L'¤', L'¥'};
 		public:
 			// log_t Флаги логирования
 			enum class log_t : u_short {info, warning, error, null};
@@ -339,6 +372,18 @@ namespace anyks {
 			 */
 			const bool isSpace(const wchar_t letter) const noexcept;
 			/**
+			 * isGreek Метод определения символа греческого алфавита
+			 * @param letter буква для проверки
+			 * @return       результат проверки
+			 */
+			const bool isGreek(const wchar_t letter) const noexcept;
+			/**
+			 * isRoute Метод определения символов стрелок
+			 * @param letter буква для проверки
+			 * @return       результат проверки
+			 */
+			const bool isRoute(const wchar_t letter) const noexcept;
+			/**
 			 * isNumber Метод проверки является ли слово числом
 			 * @param  word слово для проверки
 			 * @return      результат проверки
@@ -368,6 +413,18 @@ namespace anyks {
 			 * @return       результат проверки
 			 */
 			const bool isSpecial(const wchar_t letter) const noexcept;
+			/**
+			 * isCurrency Метод определения символа валюты
+			 * @param letter буква для проверки
+			 * @return       результат проверки
+			 */
+			const bool isCurrency(const wchar_t letter) const noexcept;
+			/**
+			 * isPlayCards Метод определения символа игральных карт
+			 * @param letter буква для проверки
+			 * @return       результат проверки
+			 */
+			const bool isPlayCards(const wchar_t letter) const noexcept;
 			/**
 			 * isIsolation Метод определения знака изоляции (кавычки, скобки)
 			 * @param  letter буква для проверки
@@ -414,8 +471,14 @@ namespace anyks {
 		public:
 			/**
 			 * getzones Метод извлечения списка пользовательских зон интернета
+			 * @return список доменных зон
 			 */
 			const std::set <wstring> & getzones() const noexcept;
+			/**
+			 * getAllowed Метод извлечения списка разрешённых символов
+			 * @return список разрешённых символов
+			 */
+			const std::set <wchar_t> & getAllowed() const noexcept;
 			/**
 			 * getSubstitutes Метод извлечения букв для исправления слов из смешанных алфавитов
 			 * @param return список букв разных алфавитов соответствующих друг-другу
