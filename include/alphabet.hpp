@@ -118,6 +118,15 @@ namespace anyks {
 				L'⊂', L'⊃', L'⊄', L'⊆', L'⊇', L'⊕', L'⊗',
 				L'⊥', L'¨'
 			};
+			// Список символов валют
+			const std::set <wchar_t> currencySymbols = {
+				L'$', L'€', L'₽', L'¢', L'£', L'₤', L'¤',
+				L'¥', L'ℳ', L'₣', L'₴', L'₸', L'₹', L'₩',
+				L'₦', L'₭', L'₪', L'৳', L'ƒ', L'₨', L'฿',
+				L'₫', L'៛', L'₮', L'₱', L'﷼', L'₡', L'₲',
+				L'؋', L'₵', L'₺', L'₼', L'₾', L'₠', L'₧',
+				L'₯', L'₢', L'₳', L'₥', L'₰', L'₿', L'ұ'
+			};
 			// Список знаков пунктуации
 			const std::set <wchar_t> punctsSymbols = {
 				L'.', L',', L'?', L'!', L':', L';', L'…',
@@ -125,8 +134,6 @@ namespace anyks {
 			};
 			// Список символов игральных карт
 			const std::set <wchar_t> playCardsSymbols = {L'♠', L'♣', L'♥', L'♦'};
-			// Список символов валют
-			const std::set <wchar_t> currencySymbols = {L'$', L'€', L'₽', L'¢', L'£', L'¤', L'¥'};
 		public:
 			// log_t Флаги логирования
 			enum class log_t : u_short {info, warning, error, null};

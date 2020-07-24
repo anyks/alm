@@ -181,11 +181,11 @@ ngram 3=15
  - **〈anum〉** - Pseudo-number token (combination of numbers and other symbols) **(T34 | 895-M-86 | 39km)**
  - **〈pcards〉** - Symbols of the play cards **(♠ | ♣ | ♥ | ♦ )**
  - **〈punct〉** - Punctuation token **(. | , | ? | ! | : | ; | … | ¡ | ¿)**
- - **〈currency〉** - Symbols of world currencies **($ | € | ₽ | ¢ | £ | ¤ | ¥ )**
  - **〈route〉** - Direction symbols (arrows) **(← | ↑ | ↓ | ↔ | ↵ | ⇐ | ⇑ | ⇒ | ⇓ | ⇔ | ◄ | ▲ | ► | ▼)**
  - **〈greek〉** - Symbols of the Greek alphabet **(Α | Β | Γ | Δ | Ε | Ζ | Η | Θ | Ι | Κ | Λ | Μ | Ν | Ξ | Ο | Π | Ρ | Σ | Τ | Υ | Φ | Χ | Ψ | Ω)**
  - **〈isolat〉** - Isolation/quotation token **(( | ) | [ | ] | { | } | " | « | » | „ | “ | ` | ⌈ | ⌉ | ⌊ | ⌋ | ‹ | › | ‚ | ’ | ′ | ‛ | ″ | ‘ | ” | ‟ | ' |〈 | 〉)**
  - **〈specl〉** - Special character token **(_ | @ | # | № | © | ® | & | ¦ | § | æ | ø | Þ | – | ‾ | ‑ | — | ¯ | ¶ | ˆ | ˜ | † | ‡ | • | ‰ | ⁄ | ℑ | ℘ | ℜ | ℵ | ◊ | \ )**
+ - **〈currency〉** - Symbols of world currencies **($ | € | ₽ | ¢ | £ | ₤ | ¤ | ¥ | ℳ | ₣ | ₴ | ₸ | ₹ | ₩ | ₦ | ₭ | ₪ | ৳ | ƒ | ₨ | ฿ | ₫ | ៛ | ₮ | ₱ | ﷼ | ₡ | ₲ | ؋ | ₵ | ₺ | ₼ | ₾ | ₠ | ₧ | ₯ | ₢ | ₳ | ₥ | ₰ | ₿ | ұ)**
  - **〈math〉** - Mathematical operation token **(+ | - | = | / | * | ^ | × | ÷ | − | ∕ | ∖ | ∗ | √ | ∝ | ∞ | ∠ | ± | ¹ | ² | ³ | ½ | ⅓ | ¼ | ¾ | % | ~ | · | ⋅ | ° | º | ¬ | ƒ | ∀ | ∂ | ∃ | ∅ | ∇ | ∈ | ∉ | ∋ | ∏ | ∑ | ∧ | ∨ | ∩ | ∪ | ∫ | ∴ | ∼ | ≅ | ≈ | ≠ | ≡ | ≤ | ≥ | ª | ⊂ | ⊃ | ⊄ | ⊆ | ⊇ | ⊕ | ⊗ | ⊥ | ¨)**
 
 ---
