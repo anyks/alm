@@ -2069,7 +2069,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если требуется загрузить каталог списка слов
 				} else if(((value = env.get("r-words")) != nullptr) && fsys_t::isdir(value)) {
 					// Параметры индикаторы процесса
-					size_t size = 0, status = 0, rate = 0;
+					size_t size = 0, status = 0, rate = 0, index = 0;
 					// Запоминаем каталог для загрузки
 					const string & path = realpath(value, nullptr);
 					// Расширение файлов текстового корпуса
@@ -2095,7 +2095,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Если слово получено
 							if(!word.empty()){
 								// Добавляем слово в словарь
-								toolkit.addWord(alphabet.convert(word));
+								toolkit.addWord(alphabet.convert(word), 0, index);
 								// Если отладка включена, выводим индикатор загрузки
 								if(debug > 0){
 									// Общий полученный размер данных
@@ -2115,6 +2115,8 @@ int main(int argc, char * argv[]) noexcept {
 								}
 							}
 						});
+						// Увеличиваем количество обработанных документов
+						index++;
 					});
 					// Отображаем ход процесса
 					switch(debug){
