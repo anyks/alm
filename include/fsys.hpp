@@ -277,6 +277,37 @@ namespace anyks {
 // Если это clang v10 или выше
 #if defined(__ANYKS_EXPERIMENTAL__)
 		/**
+		 * fcount Функция подсчёта количество файлов в каталоге
+		 * @param path путь для подсчёта
+		 * @param ext  расширение файла по которому идет фильтрация
+		 * @return     количество файлов в каталоге
+		 */
+		static const uintmax_t fcount(const string & path, const string & ext) noexcept {
+			// Результат работы функции
+			uintmax_t result = 0;
+			// Если адрес каталога и расширение файлов переданы
+			if(!path.empty() && !ext.empty() && isdir(path)){
+				// Устанавливаем область видимости
+				namespace fs = std::__fs::filesystem;
+				// Устанавливаем путь поиска
+				fs::path dirpath = path;
+				// Выполняем рекурсивный переход по всем подкаталогам
+				for(auto && entry : fs::recursive_directory_iterator(dirpath, fs::directory_options::skip_permission_denied)){
+					// Возможная ошибка
+					error_code ignore_error;
+					// Запрашиваем файл из каталога и считаем его размер
+					if(fs::is_regular_file(fs::symlink_status(entry, ignore_error))){
+						// Получаем путь файла
+						fs::path fsp = entry.path();
+						// Если расширение файла соответствует
+						if(string(fsp.extension().c_str()).rfind(ext) != string::npos) result++;
+					}
+				}
+			}
+			// Выводим результат
+			return result;
+		}
+		/**
 		 * dsize Функция подсчёта размера каталога
 		 * @param path путь для подсчёта
 		 * @param ext  расширение файла по которому идет фильтрация
@@ -309,6 +340,58 @@ namespace anyks {
 		}
 // Если это gcc
 #else
+		/**
+		 * fcount Функция подсчёта количество файлов в каталоге
+		 * @param path путь для подсчёта
+		 * @param ext  расширение файла по которому идет фильтрация
+		 * @return     количество файлов в каталоге
+		 */
+		static const uintmax_t fcount(const string & path, const string & ext) noexcept {
+			// Результат работы функции
+			uintmax_t result = 0;
+			// Если адрес каталога и расширение файлов переданы
+			if(!path.empty() && !ext.empty() && isdir(path)){
+				// Открываем указанный каталог
+				DIR * dir = opendir(path.c_str());
+				// Если каталог открыт
+				if(dir != nullptr){
+					// Структура проверка статистики
+					struct stat info;
+					// Создаём объект алфавита
+					alphabet_t alphabet;
+					// Создаем указатель на содержимое каталога
+					struct dirent * ptr = nullptr;
+					// Выполняем чтение содержимого каталога
+					while((ptr = readdir(dir))){
+						// Пропускаем названия текущие "." и внешние "..", так как идет рекурсия
+						if(!strcmp(ptr->d_name, ".") || !strcmp(ptr->d_name, "..")) continue;
+						// Получаем адрес в виде строки
+						const string & address = alphabet.format("%s/%s", path.c_str(), ptr->d_name);
+						// Если статистика извлечена
+						if(!stat(address.c_str(), &info)){
+							// Если дочерний элемент является дирректорией
+							if(S_ISDIR(info.st_mode)) result += dsize(address, ext);
+							// Если дочерний элемент является файлом то удаляем его
+							else {
+								// Получаем расширение файла
+								const string & extension = alphabet.format(".%s", ext.c_str());
+								// Получаем длину адреса
+								const size_t length = extension.length();
+								// Если расширение файла найдено
+								if(address.substr(address.length() - length, length).compare(extension) == 0){
+									// Получаем количество файлов в каталоге
+									result++;
+								}
+							}
+						}
+					}
+					// Закрываем открытый каталог
+					closedir(dir);
+				}
+			}
+			// Выводим результат
+			return result;
+		}
 		/**
 		 * dsize Функция подсчёта размера каталога
 		 * @param path путь для подсчёта

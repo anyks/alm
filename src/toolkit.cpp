@@ -982,7 +982,9 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 						// Блокируем поток
 						this->locker.lock();
 						// Выполняем внешний python скрипт
-						tmp = this->python->run(it->second.second, {tmp.real()}, ctx);
+						const auto & res = this->python->run(it->second.second, {tmp.real()}, ctx);
+						// Если результат получен
+						if(!res.empty()) tmp = res;
 						// Разблокируем поток
 						this->locker.unlock();
 					}
