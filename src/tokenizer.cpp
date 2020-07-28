@@ -156,22 +156,28 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 			const bool frontNum = this->alphabet->isNumber({first});
 			// Определяем является ли последний символ числом
 			const bool backNum = this->alphabet->isNumber({second});
-			// Если первый символ не является числом а второй является (+42, +22.84, -12, -15.64, -18,22, ~25, ~845.53, ~12,46)
+			// Если первый символ не является числом а второй является (+42, +22.84, -12, -15.64, -18,22, ~25, ~845.53, ~12,46, ±43, ±44.22)
 			if(!frontNum && backNum){
 				// Проверяем является ли первый символ (-/+ или ~)
-				if((first == L'-') || (first == L'~') || (first == L'+')){
+				if((first == L'-') || (first == L'−') || (first == L'~') || (first == L'∼') || (first == L'+') || (first == L'±')){
 					// Получаем оставшуюся часть слова
 					const wstring & tmp = word.substr(1);
 					// Проверяем оставшуюся часть слова является числом
 					if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp)){
 						// Определяем тип токена
 						switch(first){
+							// Это положительно-отрицательное число
+							case L'±':
 							// Это положительное число
 							case L'+':
 							// Это отрицательное число
-							case L'-': result = token_t::num;   break;
+							case L'-':
+							// Это отрицательное число
+							case L'−': result = token_t::num; break;
 							// Это приблизительное число
-							case L'~': result = token_t::aprox; break;
+							case L'~':
+							// Это приблизительное число
+							case L'∼': result = token_t::aprox; break;
 						}
 					// Сообщаем что это псевдо-число
 					} else result = token_t::anum;
@@ -187,35 +193,59 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 				}
 			// Если первый символ является числом а последний нет (2-й, 13-летний)
 			} else if(frontNum && !backNum) {
-				// Ищем дефис в конце слова
-				size_t pos = word.rfind(L'-');
-				// Проверяем является ли слово сокращением (не 25TM)
-				if(pos != wstring::npos){
-					// Получаем новое слово для проверки
-					const wstring & tmp = word.substr(pos + 1);
-					// Если это не псевдо-число (не 2-15tm)
-					if(!this->alphabet->isANumber(tmp)){
-						// Слово запрещено для использования
-						bool noallow = false;
-						// Длина переданного слова
-						const size_t size = tmp.size();
-						// Переходим по всему списку
-						for(size_t i = 0, j = size - 1; j > (size / 2); i++, j--){
-							// Проверяем является ли слово арабским числом
-							noallow = (i == j ? !this->alphabet->check(tmp.at(i)) : !this->alphabet->check(tmp.at(i)) || !this->alphabet->check(tmp.at(j)));
-							// Если хоть один символ является числом, выходим
-							if(noallow) break;
-						}
-						// Если слово разрешено, значит это аббревиатура
-						if(!noallow && this->alphabet->isNumber(word.substr(0, pos))){
-							// Запоминаем что это аббревиатура
-							result = token_t::abbr;
-						// Иначе запоминаем что это неизвестный символ (2-@tm)
+				// Проверяем является ли первый символ числом со значением
+				if((second == L'°') || (second == L'%') || (second == L'¹') || (second == L'²') ||
+				(second == L'³') || (second == L'½') || (second == L'⅓') || (second == L'¼') || (second == L'¾')){
+					// Получаем оставшуюся часть слова
+					const wstring & tmp = word.substr(0, word.length() - 1);
+					// Проверяем оставшуюся часть слова является числом
+					if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp))
+						// Запоминаем, что это число
+						result = token_t::num;
+					// Сообщаем что это псевдо-число
+					else result = token_t::anum;
+				// Если последний символ, является символом валюты
+				} else if(this->alphabet->isCurrency(second)) {
+					// Получаем оставшуюся часть слова
+					const wstring & tmp = word.substr(0, word.length() - 1);
+					// Проверяем оставшуюся часть слова является числом
+					if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp))
+						// Запоминаем, что это мировая валюта
+						result = token_t::currency;
+					// Сообщаем что это псевдо-число
+					else result = token_t::anum;
+				// Если - это не число и не мировая валюта
+				} else {
+					// Ищем дефис в конце слова
+					size_t pos = word.rfind(L'-');
+					// Проверяем является ли слово сокращением (не 25TM)
+					if(pos != wstring::npos){
+						// Получаем новое слово для проверки
+						const wstring & tmp = word.substr(pos + 1);
+						// Если это не псевдо-число (не 2-15tm)
+						if(!this->alphabet->isANumber(tmp)){
+							// Слово запрещено для использования
+							bool noallow = false;
+							// Длина переданного слова
+							const size_t size = tmp.size();
+							// Переходим по всему списку
+							for(size_t i = 0, j = size - 1; j > (size / 2); i++, j--){
+								// Проверяем является ли слово арабским числом
+								noallow = (i == j ? !this->alphabet->check(tmp.at(i)) : !this->alphabet->check(tmp.at(i)) || !this->alphabet->check(tmp.at(j)));
+								// Если хоть один символ является числом, выходим
+								if(noallow) break;
+							}
+							// Если слово разрешено, значит это аббревиатура
+							if(!noallow && this->alphabet->isNumber(word.substr(0, pos))){
+								// Запоминаем что это аббревиатура
+								result = token_t::abbr;
+							// Иначе запоминаем что это неизвестный символ (2-@tm)
+							} else result = token_t::anum;
+						// Сообщаем что это псевдо-число
 						} else result = token_t::anum;
 					// Сообщаем что это псевдо-число
 					} else result = token_t::anum;
-				// Сообщаем что это псевдо-число
-				} else result = token_t::anum;
+				}
 			// Если оба символа являются числом (5353, 5353.243, 3:4, 18:00, 18:00:01, 18.02.2012, 18/02/2012, 2/3, 3х10, 3~4)
 			} else if(frontNum && backNum) {
 				// Если это число
@@ -231,7 +261,8 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 						// Получаем значение текущей буквы
 						letter = word.at(i);
 						// Если плавающая точка найдена
-						if((letter == L'.') || (letter == L',') || (letter == L':') || (letter == L'/') || (letter == L'х') || (letter == L'~') || (letter == L'-')){
+						if((letter == L'.') || (letter == L',') || (letter == L':') || (letter == L'/') ||
+						(letter == L'х') || (letter == L'×') || (letter == L'~') || (letter == L'∼') || (letter == L'-') || (letter == L'−')){
 							// Проверяем правые и левую части
 							delim = (this->alphabet->isNumber(word.substr(0, i)) && this->alphabet->isNumber(word.substr(i + 1)));
 							// Если число собрано
@@ -240,10 +271,13 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 								switch(letter){
 									case L',':
 									case L'.': result = token_t::num;   break;
-									case L'~': result = token_t::aprox; break;
-									case L'-': result = token_t::range; break;
+									case L'~':
+									case L'∼': result = token_t::aprox; break;
+									case L'-':
+									case L'−': result = token_t::range; break;
 									case L'/': result = token_t::fract; break;
-									case L'х': result = token_t::dimen; break;
+									case L'х':
+									case L'×': result = token_t::dimen; break;
 									case L':': result = token_t::score; break;
 								}
 							// Если число не собрано а являетс временем или датой
@@ -1141,8 +1175,10 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 							} else if(!callbackFn({letter}, end)) return;
 						// Если слово не существует
 						} else if(word.empty() && !this->alphabet->isPunct(lletter) &&
-						!(((lletter == L'-') || (lletter == L'+') ||
-						(lletter == L'*')) && (type == type_t::num))) {
+						!(((lletter == L'-') || (lletter == L'+') || (lletter == L'*') || (lletter == L'×') ||
+						(lletter == L'÷') || (lletter == L'∗') || (lletter == L'±') || (lletter == L'·') ||
+						(lletter == L'⋅') || (lletter == L'≤') || (lletter == L'≥') || (lletter == L'−') ||
+						(lletter == L'∼')) && (type == type_t::num))) {
 							// Выводим знак препинания
 							if(!callbackFn({letter}, end)) return;
 							// Добавляем знак препинания в контекст
