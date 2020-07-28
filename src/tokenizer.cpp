@@ -191,7 +191,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 						result = token_t::anum;
 					}
 				}
-			// Если первый символ является числом а последний нет (2-й, 13-летний)
+			// Если первый символ является числом а последний нет (2-й, 13-летний, 12$, 30°)
 			} else if(frontNum && !backNum) {
 				// Проверяем является ли первый символ числом со значением
 				if((second == L'°') || (second == L'%') || (second == L'¹') || (second == L'²') ||
@@ -310,19 +310,46 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 					if((result == token_t::null) && this->alphabet->isUrl(word)) result = token_t::url;
 				}
 			// Если это вообще не число, проверяем может это римское число
-			} else if(!frontNum && !backNum){
-				// Переводим слово в нижний регистр
-				const wstring & tmp = this->alphabet->toLower(word);
-				// Запоминаем что это число
-				if(this->alphabet->roman2Arabic(tmp) > 0) result = token_t::num;
-				// Если это аббревиатура
-				else if(this->alphabet->isAbbr(tmp)) result = token_t::abbr;
-				// Проверяем, является ли слово url-адресом
-				else if(this->alphabet->isUrl(tmp)) result = token_t::url;
-				// Определяем является ли слово, псевдо-числом
-				else if(this->alphabet->isANumber(tmp)) result = token_t::anum;
-				// Проверяем является ли слово аббревиатурой
-				else if(this->isAbbr(tmp)) result = token_t::abbr;
+			} else if(!frontNum && !backNum) {
+				// Проверяем является ли первый символ (-/+ или ~)
+				if((word.length() > 2) && ((first == L'-') || (first == L'−') || (first == L'~') || (first == L'∼') || (first == L'+') || (first == L'±'))){
+					// Проверяем является ли первый символ числом со значением
+					if((second == L'°') || (second == L'%') || (second == L'¹') || (second == L'²') ||
+					(second == L'³') || (second == L'½') || (second == L'⅓') || (second == L'¼') || (second == L'¾')){
+						// Получаем оставшуюся часть слова
+						const wstring & tmp = word.substr(1, word.length() - 2);
+						// Проверяем оставшуюся часть слова является числом
+						if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp))
+							// Запоминаем, что это число
+							result = token_t::num;
+						// Сообщаем что это псевдо-число
+						else result = token_t::anum;
+					// Если последний символ, является символом валюты
+					} else if(this->alphabet->isCurrency(second)) {
+						// Получаем оставшуюся часть слова
+						const wstring & tmp = word.substr(1, word.length() - 2);
+						// Проверяем оставшуюся часть слова является числом
+						if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp))
+							// Запоминаем, что это мировая валюта
+							result = token_t::currency;
+						// Сообщаем что это псевдо-число
+						else result = token_t::anum;
+					// Сообщаем что это псевдо-число
+					} else result = token_t::anum;
+				} else {
+					// Переводим слово в нижний регистр
+					const wstring & tmp = this->alphabet->toLower(word);
+					// Запоминаем что это число
+					if(this->alphabet->roman2Arabic(tmp) > 0) result = token_t::num;
+					// Если это аббревиатура
+					else if(this->alphabet->isAbbr(tmp)) result = token_t::abbr;
+					// Проверяем, является ли слово url-адресом
+					else if(this->alphabet->isUrl(tmp)) result = token_t::url;
+					// Определяем является ли слово, псевдо-числом
+					else if(this->alphabet->isANumber(tmp)) result = token_t::anum;
+					// Проверяем является ли слово аббревиатурой
+					else if(this->isAbbr(tmp)) result = token_t::abbr;
+				}
 			}
 		// Если это число то выводим токен числа
 		} else if(this->alphabet->isNumber(word)) result = token_t::num;
