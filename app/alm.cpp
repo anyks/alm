@@ -1562,11 +1562,11 @@ int main(int argc, char * argv[]) noexcept {
 								}
 							}
 							// Переходим по всему списку файлов в каталоге
-							fsys_t::rdir(path, ext, [&idd, &rate, &status, &size, debug, &pss, &toolkit](const string & filename, const uintmax_t dirSize) noexcept {
+							fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
 								// Устанавливаем название файла
 								if(debug > 0) pss.description(filename);
 								// Выполняем считывание всех строк текста
-								fsys_t::rfile(filename, [idd, &rate, &status, &size, dirSize, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize) noexcept {
+								fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 									// Если текст получен
 									if(!text.empty()) toolkit.addText(text, idd);
 									// Если отладка включена
@@ -1662,7 +1662,7 @@ int main(int argc, char * argv[]) noexcept {
 								}
 							}
 							// Выполняем считывание всех строк текста
-							fsys_t::rfile(filename, [&rate, &status, &size, debug, &pss, &toolkit](const string & text, const uintmax_t fileSize) noexcept {
+							fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 								// Если текст получен
 								if(!text.empty()) toolkit.addText(text, 0);
 								// Если отладка включена

@@ -155,11 +155,11 @@ const long anyks::Collector::getSize(const string & str) const noexcept {
  * @param text     список строк текста для обучения
  * @param idd      идентификатор документа
  */
-void anyks::Collector::train(const string & filename, const list <string> & text, const size_t idd) noexcept {
+void anyks::Collector::train(const string & filename, const vector <string> & text, const size_t idd) noexcept {
 	// Если текст передан
 	if(!filename.empty() && !text.empty() && (this->tpool != nullptr)){
 		// Добавляем в тредпул новое задание на обработку
-		this->tpool->push([this](const string filename, const list <string> text, const size_t idd){
+		this->tpool->push([this](const string filename, const vector <string> text, const size_t idd){
 			// Общее количество данных собранное этим потоком
 			size_t size = 0;
 			// Получаем максимальное значение общего размера
@@ -215,11 +215,15 @@ void anyks::Collector::train(const string & filename, const list <string> & text
 					if(this->rate != this->status){
 						// Запоминаем текущее процентное соотношение
 						this->rate.store(this->status, memory_order_relaxed);
+						// Блокируем поток
+						this->locker.lock();
 						// Отображаем ход процесса
 						switch(this->debug){
 							case 1: this->pss.update(this->status); break;
 							case 2: this->pss.status(this->status); break;
 						}
+						// Разблокируем поток
+						this->locker.unlock();
 					}
 				}
 			}
@@ -290,11 +294,11 @@ void anyks::Collector::train(const string & filename, const list <string> & text
 			}
 		}, filename, text, idd);
 		// Получаем объект текста
-		list <string> * obj = const_cast <list <string> *> (&text);
+		vector <string> * obj = const_cast <vector <string> *> (&text);
 		// Очищаем список текстов
 		obj->clear();
 		// Очищаем выделенную память
-		list <string> ().swap(* obj);
+		vector <string> ().swap(* obj);
 	}
 }
 /**
@@ -393,7 +397,7 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 			// Размер собранных данных
 			uintmax_t size = 0;
 			// Список строк для обработки
-			list <string> text = {};
+			vector <string> text = {};
 			// Создаём каталог
 			const string & dir = this->createDir();
 			// Если отладка включена, выводим индикатор загрузки
@@ -476,7 +480,7 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 			// Размер собранных данных
 			uintmax_t size = 0;
 			// Список строк для обработки
-			list <string> text = {};
+			vector <string> text = {};
 			// Создаём каталог
 			const string & dir = this->createDir();
 			// Если отладка включена, выводим индикатор загрузки

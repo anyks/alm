@@ -17,6 +17,7 @@
 #include <ctime>
 #include <regex>
 #include <atomic>
+#include <vector>
 /**
  * Наши модули
  */
@@ -104,7 +105,7 @@ namespace anyks {
 			 * @param text     список строк текста для обучения
 			 * @param idd      идентификатор документа
 			 */
-			void train(const string & filename, const list <string> & text, const size_t idd) noexcept;
+			void train(const string & filename, const vector <string> & text, const size_t idd) noexcept;
 		public:
 			/**
 			 * setOrder Метод установки размер n-граммы
