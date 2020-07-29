@@ -9,14 +9,6 @@
 #include <nwt.hpp>
 
 /**
- * get Метод получения распарсенных данных
- * @return параметры полученные в результате парсинга
- */
-const anyks::Uri::data_t & anyks::Uri::get() noexcept {
-	// Выводим результат парсинга
-	return this->data;
-}
-/**
  * getZones Метод извлечения списка пользовательских зон интернета
  */
 const set <wstring> & anyks::Uri::getZones() const noexcept {
@@ -29,22 +21,15 @@ const set <wstring> & anyks::Uri::getZones() const noexcept {
 void anyks::Uri::clear() noexcept {
 	// Очищаем список пользовательских зон
 	this->user.clear();
-	// Очищаем блок полученных данных
-	this->data.uri.clear();
-	this->data.data.clear();
-	this->data.path.clear();
-	this->data.port.clear();
-	this->data.user.clear();
-	this->data.domain.clear();
-	this->data.params.clear();
-	this->data.protocol.clear();
-	this->data.type = types_t::null;
 }
 /**
  * parse Метод парсинга URI строки
  * @param text текст для парсинга
+ * @return     параметры полученные в результате парсинга
  */
-void anyks::Uri::parse(const wstring & text) noexcept {
+const anyks::Uri::data_t anyks::Uri::parse(const wstring & text) noexcept {
+	// Результат работы функции
+	data_t result = {};
 	// Если текст передан
 	if(!text.empty()){
 		/**
@@ -195,14 +180,16 @@ void anyks::Uri::parse(const wstring & text) noexcept {
 				// Выполняем поиск ip адресов
 				data_t ip = ipFn(text);
 				// Если результат получен
-				if(ip.type != types_t::null) this->data = move(ip);
+				if(ip.type != types_t::null) result = move(ip);
 				// Если же ip адре не получен то возвращаем данные домена
-				else this->data = move(domain);
+				else result = move(domain);
 			// Иначе запоминаем результат
-			} else this->data = move(domain);
+			} else result = move(domain);
 		// Иначе запоминаем результат
-		} else this->data = move(email);
+		} else result = move(email);
 	}
+	// Выводим результат
+	return result;
 }
 /**
  * setZone Метод установки пользовательской зоны

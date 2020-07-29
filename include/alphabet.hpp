@@ -15,7 +15,6 @@
 #include <set>
 #include <map>
 #include <list>
-#include <mutex>
 #include <locale>
 #include <string>
 #include <vector>
@@ -57,8 +56,6 @@ namespace anyks {
 				const vector <wstring> m = {L"", L"M", L"MM", L"MMM", L"MMMM"};
 			} nums_t;
 		private:
-			// Мютекс для блокировки потока
-			mutable mutex locker;
 			// Латинский тип алфавита
 			bool typeLatian = true;
 			// Разрешить апостроф как часть слова

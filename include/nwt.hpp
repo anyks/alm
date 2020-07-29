@@ -68,32 +68,26 @@ namespace anyks {
 			// Список букв разрешенных в последовательности
 			wstring letters = L"";
 		private:
-			// Распарсенные данные
-			data_t data;
 			// Списки доменных зон интернета
 			set <wstring> general, national, user;
 			// Основные регулярные выражения модуля
 			wregex expressEmail, expressDomain, expressIP;
 		public:
 			/**
-			 * get Метод получения распарсенных данных
-			 * @return параметры полученные в результате парсинга
-			 */
-			const data_t & get() noexcept;
-			/**
 			 * getZones Метод извлечения списка пользовательских зон интернета
 			 */
 			const set <wstring> & getZones() const noexcept;
+			/**
+			 * parse Метод парсинга URI строки
+			 * @param text текст для парсинга
+			 * @return     параметры полученные в результате парсинга
+			 */
+			const data_t parse(const wstring & text) noexcept;
 		public:
 			/**
 			 * clear Метод очистки результатов парсинга
 			 */
 			void clear() noexcept;
-			/**
-			 * parse Метод парсинга URI строки
-			 * @param text текст для парсинга
-			 */
-			void parse(const wstring & text) noexcept;
 			/**
 			 * setZone Метод установки пользовательской зоны
 			 * @param zone пользовательская зона
