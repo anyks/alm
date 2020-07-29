@@ -999,7 +999,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 					// Выполняем проверку на плохое слово
 					const bool isBad = (this->badwords.count(idw) > 0);
 					// Если это плохое слово, заменяем его на неизвестное
-					if(((idw == 0) || (idw == idw_t::NIDW) || isBad) && !unkFn()) return true;
+					if((isBad || (idw == 0) || (idw == idw_t::NIDW)) && !unkFn()) return true;
 					// Иначе продолжаем дальше
 					else {
 						// Флаг проверки слова на событийное
@@ -1021,9 +1021,6 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 								// Добавляем слово в словарь
 								this->addWord(tmp.wreal(), idw, idd);
 							}
-
-							if(this->badwords.count(idw) > 0) cout << " ################### " << idw << " === " << word << endl;
-
 							// Добавляем слово в последовательность
 							seq.emplace_back(idw, uppers);
 						// Отправляем слово как неизвестное
