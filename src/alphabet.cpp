@@ -163,16 +163,16 @@ const string anyks::Alphabet::convert(const wstring & str) const noexcept {
 	string result = "";
 	// Если строка передана
 	if(!str.empty()){
+		/*
 		// Выполняем создание фаски
 		const auto & facet = use_facet <codecvt1 <wchar_t, char, mbstate_t>> (this->locale);
 		// Выполняем декодирование строки
 		result = wstring_convert <remove_reference <decltype(facet)>::type, wchar_t>(&facet).to_bytes(str);
-		/*
+		*/
 		// Создаём тип конвертера
 		using convert_typeX = codecvt_utf8 <wchar_t>;
 		// Выполняем декодирование строки
 		result = wstring_convert <convert_typeX, wchar_t> ().to_bytes(str);
-		*/
 	}
 	// Выводим результат
 	return result;
@@ -300,16 +300,16 @@ const wstring anyks::Alphabet::convert(const string & str) const noexcept {
 	wstring result = L"";
 	// Если строка передана
 	if(!str.empty()){
+		/*
 		// Выполняем создание фаски
 		const auto & facet = use_facet <codecvt1 <wchar_t, char, mbstate_t>> (this->locale);
 		// Выполняем декодирование строки
 		result = wstring_convert <remove_reference <decltype(facet)>::type, wchar_t>(&facet).from_bytes(str);
-		/*
+		*/
 		// Создаём тип конвертера
 		using convert_typeX = codecvt_utf8 <wchar_t>;
 		// Выполняем декодирование строки
 		result = wstring_convert <convert_typeX, wchar_t> ().from_bytes(str);
-		*/
 	}
 	// Выводим результат
 	return result;
