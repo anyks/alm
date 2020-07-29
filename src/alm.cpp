@@ -443,17 +443,14 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 		// Если это каталог
 		} else if(fsys_t::isdir(path)) {
 			// Выполняем загрузку каталога с текстовыми файлами
-			fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
-				// Выполняем загрузку данных текстового файла
-				fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
-					// Если текст передан
-					if(!text.empty()){
-						// Если это первый расчёт, считаем его в основном потоке
-						if(result.words == 0) runFn(text, dirSize);
-						// Добавляем в тредпул новое задание на обработку
-						else this->tpool.push(runFn, text, dirSize);
-					}
-				});
+			fsys_t::rfdir(path, ext, [&](const string & text, const string & filename, const uintmax_t fileSize, const uintmax_t dirSize) noexcept {
+				// Если текст передан
+				if(!text.empty()){
+					// Если это первый расчёт, считаем его в основном потоке
+					if(result.words == 0) runFn(text, dirSize);
+					// Добавляем в тредпул новое задание на обработку
+					else this->tpool.push(runFn, text, dirSize);
+				}
 			});
 		}
 		// Ожидаем завершения обработки
@@ -1752,13 +1749,10 @@ void anyks::Alm::findByFiles(const string & path, const string & filename, funct
 			});
 		// Если это каталог
 		} else if(fsys_t::isdir(path)) {
-			// Переходим по всему списку файлов в каталоге
-			fsys_t::rdir(path, ext, [&runFn, this](const string & filename, const uintmax_t dirSize) noexcept {
-				// Выполняем считывание всех строк текста
-				fsys_t::rfile(filename, [dirSize, &filename, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
-					// Выполняем обработку
-					this->tpool.push(runFn, text, filename, dirSize);
-				});
+			// Выполняем загрузку каталога с текстовыми файлами
+			fsys_t::rfdir(path, ext, [&](const string & text, const string & filename, const uintmax_t fileSize, const uintmax_t dirSize) noexcept {
+				// Выполняем обработку
+				this->tpool.push(runFn, text, filename, dirSize);
 			});
 		}
 		// Ожидаем завершения обработки
@@ -1832,13 +1826,10 @@ void anyks::Alm::fixUppersByFiles(const string & path, const string & filename, 
 			});
 		// Если это каталог
 		} else if(fsys_t::isdir(path)) {
-			// Переходим по всему списку файлов в каталоге
-			fsys_t::rdir(path, ext, [&runFn, this](const string & filename, const uintmax_t dirSize) noexcept {
-				// Выполняем считывание всех строк текста
-				fsys_t::rfile(filename, [dirSize, &filename, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
-					// Выполняем обработку
-					this->tpool.push(runFn, text, filename, dirSize);
-				});
+			// Выполняем загрузку каталога с текстовыми файлами
+			fsys_t::rfdir(path, ext, [&](const string & text, const string & filename, const uintmax_t fileSize, const uintmax_t dirSize) noexcept {
+				// Выполняем обработку
+				this->tpool.push(runFn, text, filename, dirSize);
 			});
 		}
 		// Ожидаем завершения обработки
@@ -1950,13 +1941,10 @@ void anyks::Alm::countsByFiles(const string & path, const string & filename, con
 			});
 		// Если это каталог
 		} else if(fsys_t::isdir(path)) {
-			// Переходим по всему списку файлов в каталоге
-			fsys_t::rdir(path, ext, [&runFn, this](const string & filename, const uintmax_t dirSize) noexcept {
-				// Выполняем считывание всех строк текста
-				fsys_t::rfile(filename, [dirSize, &filename, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
-					// Выполняем обработку
-					this->tpool.push(runFn, text, filename, dirSize);
-				});
+			// Выполняем загрузку каталога с текстовыми файлами
+			fsys_t::rfdir(path, ext, [&](const string & text, const string & filename, const uintmax_t fileSize, const uintmax_t dirSize) noexcept {
+				// Выполняем обработку
+				this->tpool.push(runFn, text, filename, dirSize);
 			});
 		}
 		// Ожидаем завершения обработки
@@ -2036,13 +2024,10 @@ void anyks::Alm::checkByFiles(const string & path, const string & filename, cons
 			});
 		// Если это каталог
 		} else if(fsys_t::isdir(path)) {
-			// Переходим по всему списку файлов в каталоге
-			fsys_t::rdir(path, ext, [&runFn, this](const string & filename, const uintmax_t dirSize) noexcept {
-				// Выполняем считывание всех строк текста
-				fsys_t::rfile(filename, [dirSize, &filename, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
-					// Выполняем обработку
-					this->tpool.push(runFn, text, filename, dirSize);
-				});
+			// Выполняем загрузку каталога с текстовыми файлами
+			fsys_t::rfdir(path, ext, [&](const string & text, const string & filename, const uintmax_t fileSize, const uintmax_t dirSize) noexcept {
+				// Выполняем обработку
+				this->tpool.push(runFn, text, filename, dirSize);
 			});
 		}
 		// Ожидаем завершения обработки

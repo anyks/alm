@@ -3116,64 +3116,97 @@ void anyks::Toolkit::readNgrams(const string & path, const string & ext, functio
 		const size_t uid = (size_t) token_t::unk;
 		// Получаем расширение файлов в каталоге
 		const string & extension = (!ext.empty() ? ext : "ngrams");
-		// Переходим по всему списку файлов в каталоге
-		fsys_t::rdir(fullpath, extension, [&](const string & filename, const uintmax_t dirSize) noexcept {
-			// Выполняем считывание всех строк текста
-			fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
-				// Если слово получено
-				if(!text.empty()){
-					// Определяем тип считываемых данных
-					switch(type){
-						// Если получено обозначение заголовка
-						case 0: if(text.find("\\data\\") != string::npos) type++; break;
-						// Если это тип считывания статистики
-						case 1: {
-							// Если мы дошли до считывания данных слов
-							if(text.rfind("-grams:") != string::npos) type++;
-							// Пытаемся прочитать статистику
-							else if((pos = text.find("=")) != string::npos){
-								// Извлекаем ключ
-								const string & key = this->alphabet->trim(text.substr(0, pos));
-								// Получаем значение записи
-								const string & val = this->alphabet->trim(text.substr(pos + 1, text.length() - (pos + 1)));
-								// Если это общее количество документов
-								if(key.compare("ad") == 0) this->info.ad += stoull(val);
-								// Если же это количество слов во всех документах
-								else if(key.compare("cw") == 0) this->info.cw += stoull(val);
-								// Если же это количество уникальных слов во всех документах
-								else if(key.compare("unq") == 0) this->info.unq = stoull(val);
-							}
-						} break;
-						// Если это тип считывания данных n-грамм
-						case 2: {
-							// Если мы дошли до конца, выходим
-							if(text.find("\\end\\") != string::npos) break;
-							// Иначе считываем данные слова
-							else if((pos = text.find("\t")) != string::npos){
-								// Обнуляем локальную позицию
-								loc = 0;
-								// Считываем n-грамму
-								const string & ngram = this->alphabet->trim(text.substr(loc, pos));
-								// Запоминаем текущую позицию
-								loc = pos;
-								// Ищем встречаемость слова
-								if((pos = text.find("|", pos + 1)) != string::npos){
-									// Очищаем последовательность
-									seq.clear();
-									// Извлекаем встречаемость слова
-									const string & oc = this->alphabet->trim(text.substr(loc + 1, pos - (loc + 1)));
-									// Количество документов где встретилось слово
-									const string & dc = this->alphabet->trim(text.substr(pos + 1, text.length() - (pos + 1)));
-									// Выполняем сплит n-грамм
-									this->alphabet->split(ngram, " ", words);
-									// Если список слов получен
-									if(!words.empty()){
-										// Полученное слово
-										word_t word = L"";
-										// Если это юниграмма
-										if(words.size() == 1){
+		// Выполняем загрузку каталога с текстовыми файлами
+		fsys_t::rfdir(fullpath, extension, [&](const string & text, const string & filename, const uintmax_t fileSize, const uintmax_t dirSize) noexcept {
+			// Если слово получено
+			if(!text.empty()){
+				// Определяем тип считываемых данных
+				switch(type){
+					// Если получено обозначение заголовка
+					case 0: if(text.find("\\data\\") != string::npos) type++; break;
+					// Если это тип считывания статистики
+					case 1: {
+						// Если мы дошли до считывания данных слов
+						if(text.rfind("-grams:") != string::npos) type++;
+						// Пытаемся прочитать статистику
+						else if((pos = text.find("=")) != string::npos){
+							// Извлекаем ключ
+							const string & key = this->alphabet->trim(text.substr(0, pos));
+							// Получаем значение записи
+							const string & val = this->alphabet->trim(text.substr(pos + 1, text.length() - (pos + 1)));
+							// Если это общее количество документов
+							if(key.compare("ad") == 0) this->info.ad += stoull(val);
+							// Если же это количество слов во всех документах
+							else if(key.compare("cw") == 0) this->info.cw += stoull(val);
+							// Если же это количество уникальных слов во всех документах
+							else if(key.compare("unq") == 0) this->info.unq = stoull(val);
+						}
+					} break;
+					// Если это тип считывания данных n-грамм
+					case 2: {
+						// Если мы дошли до конца, выходим
+						if(text.find("\\end\\") != string::npos) break;
+						// Иначе считываем данные слова
+						else if((pos = text.find("\t")) != string::npos){
+							// Обнуляем локальную позицию
+							loc = 0;
+							// Считываем n-грамму
+							const string & ngram = this->alphabet->trim(text.substr(loc, pos));
+							// Запоминаем текущую позицию
+							loc = pos;
+							// Ищем встречаемость слова
+							if((pos = text.find("|", pos + 1)) != string::npos){
+								// Очищаем последовательность
+								seq.clear();
+								// Извлекаем встречаемость слова
+								const string & oc = this->alphabet->trim(text.substr(loc + 1, pos - (loc + 1)));
+								// Количество документов где встретилось слово
+								const string & dc = this->alphabet->trim(text.substr(pos + 1, text.length() - (pos + 1)));
+								// Выполняем сплит n-грамм
+								this->alphabet->split(ngram, " ", words);
+								// Если список слов получен
+								if(!words.empty()){
+									// Полученное слово
+									word_t word = L"";
+									// Если это юниграмма
+									if(words.size() == 1){
+										// Получаем слово
+										word = move(words.front());
+										// Получаем идентификатор слова
+										size_t idw = this->getIdw(word);
+										// Проверяем отсутствует ли слово в списке запрещённых слов
+										if(this->badwords.count(idw) < 1){
+											// Если это неизвестное слово
+											if(idw == uid){
+												// Если неизвестное слово не установлено
+												if(this->unknown == 0) seq.emplace_back(idw, 0);
+												// Если неизвестное слово установлено
+												else if(this->unknown > 0) seq.emplace_back(this->unknown, this->vocab.at(this->unknown).getUppers());
+											// Добавляем слово в список
+											} else {
+												// Получаем регистры слова
+												size_t uppers = word.getUppers();
+												// Если название токена получено, устанавливаем его регистры
+												if(this->utokens.count(idw) > 0) uppers = 0;
+												// Добавляем слово в список последовательности
+												seq.emplace_back(idw, uppers);
+												// Если это правильное слово
+												if((idw > 0) && this->arpa->event(idw)){
+													// Добавляем в слово его метаданные
+													word.setmeta(stoull(dc), stoull(oc));
+													// Добавляем слово в словарь
+													this->vocab.emplace(idw, word);
+												}
+											}
+											// Добавляем последовательность в словарь
+											this->arpa->set(seq, (size_t) stoull(oc), (size_t) stoull(dc));
+										}
+									// Переходим по всему списку слов и создаём последовательность
+									} else {
+										// Переходим по всему списку слов
+										for(auto & item : words){
 											// Получаем слово
-											word = move(words.front());
+											word = move(item);
 											// Получаем идентификатор слова
 											size_t idw = this->getIdw(word);
 											// Проверяем отсутствует ли слово в списке запрещённых слов
@@ -3192,74 +3225,38 @@ void anyks::Toolkit::readNgrams(const string & path, const string & ext, functio
 													if(this->utokens.count(idw) > 0) uppers = 0;
 													// Добавляем слово в список последовательности
 													seq.emplace_back(idw, uppers);
-													// Если это правильное слово
-													if((idw > 0) && this->arpa->event(idw)){
-														// Добавляем в слово его метаданные
-														word.setmeta(stoull(dc), stoull(oc));
-														// Добавляем слово в словарь
-														this->vocab.emplace(idw, word);
-													}
 												}
-												// Добавляем последовательность в словарь
-												this->arpa->set(seq, (size_t) stoull(oc), (size_t) stoull(dc));
+											// Если слово найдено в всписке запрещённых
+											} else {
+												// Очищаем последовательность
+												seq.clear();
+												// Выходим из цикла
+												break;
 											}
-										// Переходим по всему списку слов и создаём последовательность
-										} else {
-											// Переходим по всему списку слов
-											for(auto & item : words){
-												// Получаем слово
-												word = move(item);
-												// Получаем идентификатор слова
-												size_t idw = this->getIdw(word);
-												// Проверяем отсутствует ли слово в списке запрещённых слов
-												if(this->badwords.count(idw) < 1){
-													// Если это неизвестное слово
-													if(idw == uid){
-														// Если неизвестное слово не установлено
-														if(this->unknown == 0) seq.emplace_back(idw, 0);
-														// Если неизвестное слово установлено
-														else if(this->unknown > 0) seq.emplace_back(this->unknown, this->vocab.at(this->unknown).getUppers());
-													// Добавляем слово в список
-													} else {
-														// Получаем регистры слова
-														size_t uppers = word.getUppers();
-														// Если название токена получено, устанавливаем его регистры
-														if(this->utokens.count(idw) > 0) uppers = 0;
-														// Добавляем слово в список последовательности
-														seq.emplace_back(idw, uppers);
-													}
-												// Если слово найдено в всписке запрещённых
-												} else {
-													// Очищаем последовательность
-													seq.clear();
-													// Выходим из цикла
-													break;
-												}
-											}
-											// Добавляем последовательность в словарь
-											if(!seq.empty()) this->arpa->set(seq, (size_t) stoull(oc), (size_t) stoull(dc));
 										}
+										// Добавляем последовательность в словарь
+										if(!seq.empty()) this->arpa->set(seq, (size_t) stoull(oc), (size_t) stoull(dc));
 									}
 								}
 							}
-						} break;
-					}
-					// Если функция вывода статуса передана
-					if(status != nullptr){
-						// Увеличиваем количество общих обработанных байт
-						index += text.size();
-						// Выполняем расчёт текущего статуса
-						actual = u_short(index / double(dirSize) * 100.0);
-						// Если статус обновился
-						if(actual != past){
-							// Запоминаем текущий статус
-							past = actual;
-							// Выводим статус извлечения
-							status(actual);
 						}
+					} break;
+				}
+				// Если функция вывода статуса передана
+				if(status != nullptr){
+					// Увеличиваем количество общих обработанных байт
+					index += text.size();
+					// Выполняем расчёт текущего статуса
+					actual = u_short(index / double(dirSize) * 100.0);
+					// Если статус обновился
+					if(actual != past){
+						// Запоминаем текущий статус
+						past = actual;
+						// Выводим статус извлечения
+						status(actual);
 					}
 				}
-			});
+			}
 		});
 		// Обновляем количество уникальных слов
 		this->info.unq = this->vocab.size();
@@ -3295,7 +3292,7 @@ void anyks::Toolkit::readMaps(const string & path, const string & ext, function 
 		// Переходим по всему списку файлов в каталоге
 		fsys_t::rdir(fullpath, extension, [&](const string & filename, const uintmax_t dirSize) noexcept {
 			// Выполняем считывание всех строк текста
-			fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+			fsys_t::rfile2(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 				// Если слово получено
 				if(!text.empty()){
 					// Извлекаем данные n-граммы

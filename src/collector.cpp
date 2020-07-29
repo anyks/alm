@@ -200,7 +200,7 @@ void anyks::Collector::train(const string & dest, const vector <string> & filena
 				// Увеличиваем значение индекса
 				index++;
 				// Выполняем считывание всех строк текста
-				fsys_t::rfile(filename, [&](const string & str, const uintmax_t fileSize) noexcept {
+				fsys_t::rfile2(filename, [&](const string & str, const uintmax_t fileSize) noexcept {
 					// Добавляем полученную строку текста
 					if(!str.empty()) toolkit.addText(str, index);
 				});
@@ -322,7 +322,7 @@ void anyks::Collector::train(const string & dest, const string & filename, const
 			// Разблокируем поток
 			this->locker.unlock();
 			// Выполняем считывание всех строк текста
-			fsys_t::rfile(filename, [&](const string & str, const uintmax_t fileSize) noexcept {
+			fsys_t::rfile2(filename, [&](const string & str, const uintmax_t fileSize) noexcept {
 				// Если текст получен
 				if(!str.empty()){
 					// Добавляем полученную строку текста

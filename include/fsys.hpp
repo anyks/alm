@@ -549,6 +549,72 @@ namespace anyks {
 				} else cerr << "error: the file name: \"" << filename << "\" is not found" << endl;
 			}
 		}
+		/**
+		 * rfile2 Функция рекурсивного получения всех строк файла (стандартным способом)
+		 * @param filename адрес файла для чтения
+		 * @param callback функция обратного вызова
+		 */
+		static void rfile2(const string & filename, function <void (const string &, const uintmax_t)> callback) noexcept {
+			// Если адрес файла передан
+			if(!filename.empty()){
+				// Если файл существует
+				if(isfile(filename)){
+					// Открываем файл на чтение
+					ifstream file(filename, ios::in);
+					// Если файл открыт
+					if(file.is_open()){
+						// Перемещаем указатель в конец файла
+						file.seekg(0, file.end);
+						// Определяем размер файла
+						const size_t size = file.tellg();
+						// Возвращаем указатель обратно
+						file.seekg(0, file.beg);
+						// Устанавливаем размер буфера
+						vector <char> buffer(size);
+						// Выполняем чтение данных из файла
+						file.read(buffer.data(), size);
+						// Устанавливаем буфер
+						if(!buffer.empty()){
+							// Значение текущей и предыдущей буквы
+							char letter = 0, old = 0;
+							// Смещение в буфере и длина полученной строки
+							size_t offset = 0, length = 0;
+							// Получаем данные буфера
+							const char * data = buffer.data();
+							// Получаем размер файла
+							const uintmax_t size = buffer.size();
+							// Переходим по всему буферу
+							for(uintmax_t i = 0; i < size; i++){
+								// Получаем значение текущей буквы
+								letter = reinterpret_cast <const char *> (data)[i];
+								// Если текущая буква является переносом строк
+								if((i > 0) && ((letter == '\n') || (i == (size - 1)))){
+									// Если предыдущая буква была возвратом каретки, уменьшаем длину строки
+									length = ((old == '\r' ? i - 1 : i) - offset);
+									// Если это конец файла, корректируем размер последнего байта
+									if(length == 0) length = 1;
+									// Если длина слова получена, выводим полученную строку
+									callback(string((char *) data + offset, length), size);
+									// Выполняем смещение
+									offset = (i + 1);
+								}
+								// Запоминаем предыдущую букву
+								old = letter;
+							}
+							// Если данные не все прочитаны, выводим как есть
+							if((offset == 0) && (size > 0)) callback(string((char *) data, size), size);
+							// Очищаем буфер данных
+							buffer.clear();
+							// Освобождаем выделенную память
+							vector <char> ().swap(buffer);
+						}
+						// Закрываем файл
+						file.close();
+					}
+				// Выводим сообщение об ошибке
+				} else cerr << "error: the file name: \"" << filename << "\" is not found" << endl;
+			}
+		}
 // Если это clang v10 или выше
 #if defined(__ANYKS_EXPERIMENTAL__)
 		/**
@@ -646,6 +712,26 @@ namespace anyks {
 			} else cerr << "error: the path name: \"" << path << "\" is not found" << endl;
 		}
 #endif
+		/**
+		 * rfdir Функция рекурсивного чтения файлов во всех подкаталогах
+		 * @param path     путь до каталога
+		 * @param ext      расширение файла по которому идет фильтрация
+		 * @param callback функция обратного вызова
+		 */
+		static void rfdir(const string & path, const string & ext, function <void (const string &, const string &, const uintmax_t, const uintmax_t)> callback) noexcept {
+			// Если адрес каталога и расширение файлов переданы
+			if(!path.empty() && !ext.empty() && isdir(path)){
+				// Переходим по всему списку файлов в каталоге
+				rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
+					// Выполняем считывание всех строк текста
+					rfile2(filename, [&](const string & str, const uintmax_t fileSize) noexcept {
+						// Если текст получен
+						if(!str.empty()) callback(str, filename, fileSize, dirSize);
+					});
+				});
+			// Выводим сообщение об ошибке
+			} else cerr << "error: the path name: \"" << path << "\" is not found" << endl;
+		}
 	} fsys_t;
 };
 

@@ -1296,7 +1296,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем название файла
 							if(debug > 0) pss.description(filename);
 							// Выполняем считывание всех строк текста
-							fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+							fsys_t::rfile2(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 								// Если текст получен
 								if(!text.empty()){
 									// Если это json
@@ -1566,7 +1566,7 @@ int main(int argc, char * argv[]) noexcept {
 								// Устанавливаем название файла
 								if(debug > 0) pss.description(filename);
 								// Выполняем считывание всех строк текста
-								fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+								fsys_t::rfile2(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 									// Если текст получен
 									if(!text.empty()) toolkit.addText(text, idd);
 									// Если отладка включена
@@ -2091,7 +2091,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Если отладка включена, выводим название файла
 						if(debug > 0) pss.description(filename);
 						// Выполняем загрузку файла словаря списка слов
-						fsys_t::rfile(filename, [&](const string & word, const uintmax_t fileSize) noexcept {
+						fsys_t::rfile2(filename, [&](const string & word, const uintmax_t fileSize) noexcept {
 							// Если слово получено
 							if(!word.empty()){
 								// Добавляем слово в словарь
