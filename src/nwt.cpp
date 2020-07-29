@@ -58,23 +58,10 @@ void anyks::Uri::parse(const wstring & text) noexcept {
 			if(!text.empty()){
 				// Результат работы регулярного выражения
 				wsmatch match;
-				// Устанавливаем регулярное выражение для проверки электронной почты
-				wregex e(
-					wstring(L"((?:([\\w\\-")
-					+ this->letters
-					+ wstring(L"]+)\\@)(\\[(?:\\:\\:ffff\\:\\d{1,3}(?:\\.\\d{1,3}){3}|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4})|\\:){1,6}\\:[a-f\\d]{1,4})|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4}){7}|(?:\\:[a-f\\d]{1,4}){1,6}\\:\\:|\\:\\:)|\\:\\:))\\]|(?:\\d{1,3}(?:\\.\\d{1,3}){3})|(?:(?:xn\\-\\-[\\w\\d]+\\.){0,100}(?:xn\\-\\-[\\w\\d]+)|(?:[\\w\\-")
-					+ this->letters
-					+ wstring(L"]+\\.){0,100}[\\w\\-")
-					+ this->letters
-					+ wstring(L"]+)\\.(xn\\-\\-[\\w\\d]+|[a-z")
-					+ this->letters
-					+ wstring(L"]+)))"),
-					wregex::ECMAScript | wregex::icase
-				);
 				// Выполняем проверку электронной почты
-				regex_search(text, match, e);
+				regex_search(text, match, this->expressEmail);
 				// Если результат найден
-				if(!match.empty()){
+				if(!match.empty() && (match.size() >= 5)){
 					// Запоминаем тип параметра
 					result.type = types_t::email;
 					// Запоминаем uri адрес
@@ -101,21 +88,10 @@ void anyks::Uri::parse(const wstring & text) noexcept {
 			if(!text.empty()){
 				// Результат работы регулярного выражения
 				wsmatch match;
-				// Устанавливаем правило регулярного выражения
-				wregex e(
-					wstring(L"(?:(http[s]?)\\:\\/\\/)?(\\[(?:\\:\\:ffff\\:\\d{1,3}(?:\\.\\d{1,3}){3}|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4})|\\:){1,6}\\:[a-f\\d]{1,4})|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4}){7}|(?:\\:[a-f\\d]{1,4}){1,6}\\:\\:|\\:\\:)|\\:\\:))\\]|(?:\\d{1,3}(?:\\.\\d{1,3}){3})|(?:(?:xn\\-\\-[\\w\\d]+\\.){0,100}(?:xn\\-\\-[\\w\\d]+)|(?:[\\w\\-")
-					+ this->letters
-					+ wstring(L"]+\\.){0,100}[\\w\\-")
-					+ this->letters
-					+ wstring(L"]+)\\.(xn\\-\\-[\\w\\d]+|[a-z")
-					+ this->letters
-					+ wstring(L"]+))(?:\\:(\\d+))?((?:\\/[\\w\\-]+){0,100}(?:$|\\/|\\.[\\w]+)|\\/)?(\\?(?:[\\w\\-\\.\\~\\:\\#\\[\\]\\@\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=]+)?)?"),
-					wregex::ECMAScript | wregex::icase
-				);
 				// Выполняем проверку адреса сайта
-				regex_search(text, match, e);
+				regex_search(text, match, this->expressDomain);
 				// Если результат найден
-				if(!match.empty()){
+				if(!match.empty() && (match.size() >= 7)){
 					// Запоминаем тип параметра
 					result.type = types_t::domain;
 					// Запоминаем uri адрес
@@ -157,36 +133,24 @@ void anyks::Uri::parse(const wstring & text) noexcept {
 		 * ipFn Функция извлечения данных ip адресов
 		 * @param text текст для парсинга
 		 */
-		auto ipFn = [](const wstring & text) noexcept {
+		auto ipFn = [this](const wstring & text) noexcept {
 			// Результат работы функции
 			data_t result;
 			// Если текст передан
 			if(!text.empty()){
 				// Результат работы регулярного выражения
 				wsmatch match;
-				// Устанавливаем правило регулярного выражения
-				wregex e(
-					// Если это сеть
-					L"(?:((?:\\d{1,3}(?:\\.\\d{1,3}){3}|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4})|\\:){1,6}\\:[a-f\\d]{1,4})|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4}){7}|(?:\\:[a-f\\d]{1,4}){1,6}[\\:]{2}|[\\:]{2})|[\\:]{2}))\\/(?:\\d{1,3}(?:\\.\\d{1,3}){3}|\\d+))|"
-					// Определение мак адреса
-					L"([a-f\\d]{2}(?:\\:[a-f\\d]{2}){5})|"
-					// Определение ip6 адреса
-					L"(?:(?:http[s]?\\:[\\/]{2})?(?:\\[?([\\:]{2}ffff\\:\\d{1,3}(?:\\.\\d{1,3}){3}|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4})|\\:){1,6}\\:[a-f\\d]{1,4})|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4}){7}|(?:\\:[a-f\\d]{1,4}){1,6}[\\:]{2}|[\\:]{2})|[\\:]{2}))\\]?)(?:\\:\\d+)?\\/?)|"
-					// Определение ip4 адреса
-					L"(?:(?:http[s]?\\:[\\/]{2})?(\\d{1,3}(?:\\.\\d{1,3}){3})(?:\\:\\d+)?\\/?))",
-					wregex::ECMAScript | wregex::icase
-				);
 				// Выполняем проверку
-				regex_search(text, match, e);
+				regex_search(text, match, this->expressIP);
 				// Если результат найден
-				if(!match.empty()){
+				if(!match.empty() && (match.size() >= 5)){
 					// Запоминаем uri адрес
 					result.uri = match[0].str();
 					// Извлекаем полученные данные
-					const wstring & mac = match[2].str();
-					const wstring & ip4 = match[4].str();
-					const wstring & ip6 = match[3].str();
-					const wstring & network = match[1].str();
+					const wstring mac = match[2].str();
+					const wstring ip4 = match[4].str();
+					const wstring ip6 = match[3].str();
+					const wstring network = match[1].str();
 					// Если это MAC адрес
 					if(!mac.empty()){
 						// Запоминаем сам параметр
@@ -257,7 +221,46 @@ void anyks::Uri::setZone(const wstring & zone) noexcept {
  */
 void anyks::Uri::setLetters(const wstring & letters) noexcept {
 	// Если буквы переданы запоминаем их
-	if(!letters.empty()) this->letters = move(letters);
+	if(!letters.empty()){
+		// Устанавливаем буквы алфавита
+		this->letters = letters;
+		// Устанавливаем регулярное выражение для проверки электронной почты
+		this->expressEmail = wregex(
+			wstring(L"((?:([\\w\\-")
+			+ this->letters
+			+ wstring(L"]+)\\@)(\\[(?:\\:\\:ffff\\:\\d{1,3}(?:\\.\\d{1,3}){3}|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4})|\\:){1,6}\\:[a-f\\d]{1,4})|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4}){7}|(?:\\:[a-f\\d]{1,4}){1,6}\\:\\:|\\:\\:)|\\:\\:))\\]|(?:\\d{1,3}(?:\\.\\d{1,3}){3})|(?:(?:xn\\-\\-[\\w\\d]+\\.){0,100}(?:xn\\-\\-[\\w\\d]+)|(?:[\\w\\-")
+			+ this->letters
+			+ wstring(L"]+\\.){0,100}[\\w\\-")
+			+ this->letters
+			+ wstring(L"]+)\\.(xn\\-\\-[\\w\\d]+|[a-z")
+			+ this->letters
+			+ wstring(L"]+)))"),
+			wregex::ECMAScript | wregex::icase
+		);
+		// Устанавливаем правило регулярного выражения
+		this->expressDomain = wregex(
+			wstring(L"(?:(http[s]?)\\:\\/\\/)?(\\[(?:\\:\\:ffff\\:\\d{1,3}(?:\\.\\d{1,3}){3}|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4})|\\:){1,6}\\:[a-f\\d]{1,4})|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4}){7}|(?:\\:[a-f\\d]{1,4}){1,6}\\:\\:|\\:\\:)|\\:\\:))\\]|(?:\\d{1,3}(?:\\.\\d{1,3}){3})|(?:(?:xn\\-\\-[\\w\\d]+\\.){0,100}(?:xn\\-\\-[\\w\\d]+)|(?:[\\w\\-")
+			+ this->letters
+			+ wstring(L"]+\\.){0,100}[\\w\\-")
+			+ this->letters
+			+ wstring(L"]+)\\.(xn\\-\\-[\\w\\d]+|[a-z")
+			+ this->letters
+			+ wstring(L"]+))(?:\\:(\\d+))?((?:\\/[\\w\\-]+){0,100}(?:$|\\/|\\.[\\w]+)|\\/)?(\\?(?:[\\w\\-\\.\\~\\:\\#\\[\\]\\@\\!\\$\\&\\'\\(\\)\\*\\+\\,\\;\\=]+)?)?"),
+			wregex::ECMAScript | wregex::icase
+		);
+		// Устанавливаем правило регулярного выражения
+		this->expressIP = wregex(
+			// Если это сеть
+			L"(?:((?:\\d{1,3}(?:\\.\\d{1,3}){3}|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4})|\\:){1,6}\\:[a-f\\d]{1,4})|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4}){7}|(?:\\:[a-f\\d]{1,4}){1,6}[\\:]{2}|[\\:]{2})|[\\:]{2}))\\/(?:\\d{1,3}(?:\\.\\d{1,3}){3}|\\d+))|"
+			// Определение мак адреса
+			L"([a-f\\d]{2}(?:\\:[a-f\\d]{2}){5})|"
+			// Определение ip6 адреса
+			L"(?:(?:http[s]?\\:[\\/]{2})?(?:\\[?([\\:]{2}ffff\\:\\d{1,3}(?:\\.\\d{1,3}){3}|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4})|\\:){1,6}\\:[a-f\\d]{1,4})|(?:[a-f\\d]{1,4}(?:(?:\\:[a-f\\d]{1,4}){7}|(?:\\:[a-f\\d]{1,4}){1,6}[\\:]{2}|[\\:]{2})|[\\:]{2}))\\]?)(?:\\:\\d+)?\\/?)|"
+			// Определение ip4 адреса
+			L"(?:(?:http[s]?\\:[\\/]{2})?(\\d{1,3}(?:\\.\\d{1,3}){3})(?:\\:\\d+)?\\/?))",
+			wregex::ECMAScript | wregex::icase
+		);
+	}
 }
 /**
  * setZones Метод установки списка пользовательских зон
@@ -265,7 +268,7 @@ void anyks::Uri::setLetters(const wstring & letters) noexcept {
  */
 void anyks::Uri::setZones(const set <wstring> & zones) noexcept {
 	// Если список зон не пустой
-	if(!zones.empty()) this->user = move(zones);
+	if(!zones.empty()) this->user = zones;
 }
 /**
  * Uri Конструктор

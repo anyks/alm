@@ -8,6 +8,10 @@
 
 #include <alphabet.hpp>
 
+template <class I, class E, class S>
+struct codecvt1 : std::codecvt <I, E, S> {
+	~codecvt1(){}
+};
 
 // Устанавливаем шаблон функции
 template <typename T>
@@ -159,10 +163,16 @@ const string anyks::Alphabet::convert(const wstring & str) const noexcept {
 	string result = "";
 	// Если строка передана
 	if(!str.empty()){
-		// Объявляем конвертер
-		wstring_convert <codecvt_utf8 <wchar_t>> conv;
-		// Выполняем конвертирование в utf-8 строку
-		result = conv.to_bytes(str);
+		// Выполняем создание фаски
+		const auto & facet = use_facet <codecvt1 <wchar_t, char, mbstate_t>> (this->locale);
+		// Выполняем декодирование строки
+		result = wstring_convert <remove_reference <decltype(facet)>::type, wchar_t>(&facet).to_bytes(str);
+		/*
+		// Создаём тип конвертера
+		using convert_typeX = codecvt_utf8 <wchar_t>;
+		// Выполняем декодирование строки
+		result = wstring_convert <convert_typeX, wchar_t> ().to_bytes(str);
+		*/
 	}
 	// Выводим результат
 	return result;
@@ -208,14 +218,12 @@ const char anyks::Alphabet::toLower(const char letter) const noexcept {
 	if(letter > 0){
 		// Строка для конвертации
 		wstring str = L"";
-		// Объявляем конвертер
-		wstring_convert <codecvt_utf8 <wchar_t>> conv;
 		// Выполняем конвертирование в utf-8 строку
-		const wchar_t c = conv.from_bytes({1, letter}).front();
+		const wchar_t c = this->convert(string{1, letter}).front();
 		// Формируем новую строку
 		str.assign(1, towlower(c));
 		// Выполняем конвертирование в utf-8 строку
-		result = conv.to_bytes(str).front();
+		result = this->convert(str).front();
 	}
 	// Выводим результат
 	return result;
@@ -232,14 +240,12 @@ const char anyks::Alphabet::toUpper(const char letter) const noexcept {
 	if(letter > 0){
 		// Строка для конвертации
 		wstring str = L"";
-		// Объявляем конвертер
-		wstring_convert <codecvt_utf8 <wchar_t>> conv;
 		// Выполняем конвертирование в utf-8 строку
-		const wchar_t c = conv.from_bytes({1, letter}).front();
+		const wchar_t c = this->convert(string{1, letter}).front();
 		// Формируем новую строку
 		str.assign(1, towupper(c));
 		// Выполняем конвертирование в utf-8 строку
-		result = conv.to_bytes(str).front();
+		result = this->convert(str).front();
 	}
 	// Выводим результат
 	return result;
@@ -294,10 +300,16 @@ const wstring anyks::Alphabet::convert(const string & str) const noexcept {
 	wstring result = L"";
 	// Если строка передана
 	if(!str.empty()){
-		// Объявляем конвертер
-		wstring_convert <codecvt_utf8 <wchar_t>> conv;
-		// Выполняем конвертирование в utf-8 строку
-		result.assign(conv.from_bytes(str));
+		// Выполняем создание фаски
+		const auto & facet = use_facet <codecvt1 <wchar_t, char, mbstate_t>> (this->locale);
+		// Выполняем декодирование строки
+		result = wstring_convert <remove_reference <decltype(facet)>::type, wchar_t>(&facet).from_bytes(str);
+		/*
+		// Создаём тип конвертера
+		using convert_typeX = codecvt_utf8 <wchar_t>;
+		// Выполняем декодирование строки
+		result = wstring_convert <convert_typeX, wchar_t> ().from_bytes(str);
+		*/
 	}
 	// Выводим результат
 	return result;
@@ -1704,6 +1716,8 @@ void anyks::Alphabet::setlocale(const string & locale) noexcept {
 		// Устанавливапм локализацию приложения
 		::setlocale(LC_CTYPE, locale.c_str());
 		::setlocale(LC_COLLATE, locale.c_str());
+		// Устанавливаем локаль системы
+		this->locale = std::locale(locale.c_str());
 	}
 }
 /**

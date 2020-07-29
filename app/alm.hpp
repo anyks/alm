@@ -22,6 +22,8 @@
 #define ANYKS_LM_SITE "https://anyks.com"
 
 /** ПАРАМЕТРЫ СЛОВ **/
+// Локаль словаря по умолчанию
+#define ALPHABET_LOCALE "en_US.UTF-8"
 // Максимальная длина последовательности в символах
 #define MAX_SEQ_LENGTH 50
 // Максимальная длина слова

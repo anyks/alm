@@ -60,6 +60,8 @@ namespace anyks {
 			bool typeLatian = true;
 			// Разрешить апостроф как часть слова
 			bool apostrophe = false;
+			// Устанавливаем локаль по умолчанию
+			std::locale locale{ALPHABET_LOCALE};
 			// Алфавит словаря
 			wstring alphabet = L"abcdefghijklmnopqrstuvwxyz";
 		private:

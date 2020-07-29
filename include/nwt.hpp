@@ -72,6 +72,8 @@ namespace anyks {
 			data_t data;
 			// Списки доменных зон интернета
 			set <wstring> general, national, user;
+			// Основные регулярные выражения модуля
+			wregex expressEmail, expressDomain, expressIP;
 		public:
 			/**
 			 * get Метод получения распарсенных данных
