@@ -662,17 +662,19 @@ const bool anyks::Alphabet::isAllowApostrophe() const noexcept {
 const bool anyks::Alphabet::isUrl(const wstring & word) const noexcept {
 	// Результат работы функции
 	bool result = false;
-	/*
 	// Если слово передано
 	if(!word.empty()){
+		// Блокируем поток
+		this->locker.lock();
 		// Выполняем парсинг uri адреса
 		this->uri.parse(word);
 		// Извлекаем данные uri адреса
 		auto resUri = this->uri.get();
+		// Разблокируем поток
+		this->locker.unlock();
 		// Если ссылка найдена
 		result = ((resUri.type != uri_t::types_t::null) && (resUri.type != uri_t::types_t::wrong));
 	}
-	*/
 	// Выводим результат
 	return result;
 }
@@ -1410,17 +1412,20 @@ const std::map <string, string> & anyks::Alphabet::getSubstitutes() const noexce
 const std::map <size_t, size_t> anyks::Alphabet::urls(const wstring & text) const noexcept {
 	// Результат работы функции
 	map <size_t, size_t> result;
-	/*
 	// Если текст передан
 	if(!text.empty()){
 		// Позиция найденного uri адреса
 		size_t pos = 0;
 		// Выполням поиск ссылок в тексте
 		while(pos < text.length()){
+			// Блокируем поток
+			this->locker.lock();
 			// Выполняем парсинг uri адреса
 			this->uri.parse(text.substr(pos));
 			// Извлекаем данные uri адреса
 			auto resUri = this->uri.get();
+			// Разблокируем поток
+			this->locker.unlock();
 			// Если ссылка найдена
 			if(resUri.type != uri_t::types_t::null){
 				// Получаем данные слова
@@ -1442,7 +1447,6 @@ const std::map <size_t, size_t> anyks::Alphabet::urls(const wstring & text) cons
 			} else break;
 		}
 	}
-	*/
 	// Выводим результат
 	return result;
 }
@@ -1655,8 +1659,12 @@ void anyks::Alphabet::set(const string & alphabet) noexcept {
 		// Если буква не является латинской - запоминаем, что это не латинский алфавит
 		if(!(this->typeLatian = this->checkLatian({letter}))) break;
 	}
+	// Блокируем поток
+	this->locker.lock();
 	// Если список букв получен
 	if(!this->alphabet.empty()) this->uri.setLetters(this->alphabet);
+	// Разблокируем поток
+	this->locker.unlock();
 }
 /**
  * setzone Метод установки пользовательской зоны
