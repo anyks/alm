@@ -1019,6 +1019,9 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 								// Добавляем слово в словарь
 								this->addWord(tmp.wreal(), idw, idd);
 							}
+
+							if(this->badwords.count(idw) > 0) cout << " ################### " << idw << " === " << word << endl;
+
 							// Добавляем слово в последовательность
 							seq.emplace_back(idw, uppers);
 						// Отправляем слово как неизвестное

@@ -103,8 +103,17 @@ void anyks::Env::autoRead(const bool flag) noexcept {
 void anyks::Env::setJson(const json & data) noexcept {
 	// Если данные переданы
 	if(!data.empty()){
+		// Значение ключа
+		string val = "";
 		// Переходим по всем ключам и добавляем всё в базу данных
-		for(auto & el : data.items()) this->data.emplace(el.key(), el.value());
+		for(auto & el : data.items()){
+			// Получаем значение ключа
+			val = el.value();
+			// Если значение является отрицательным булевым
+			if(this->alphabet->toLower(val).compare("false") == 0) continue;
+			// Добавляем значение ключа в базу параметров
+			this->data.emplace(el.key(), val);
+		}
 	}
 }
 /**
