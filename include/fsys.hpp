@@ -370,7 +370,7 @@ namespace anyks {
 						// Если статистика извлечена
 						if(!stat(address.c_str(), &info)){
 							// Если дочерний элемент является дирректорией
-							if(S_ISDIR(info.st_mode)) result += dsize(address, ext);
+							if(S_ISDIR(info.st_mode)) result += fcount(address, ext);
 							// Если дочерний элемент является файлом то удаляем его
 							else {
 								// Получаем расширение файла
