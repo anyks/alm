@@ -662,6 +662,7 @@ const bool anyks::Alphabet::isAllowApostrophe() const noexcept {
 const bool anyks::Alphabet::isUrl(const wstring & word) const noexcept {
 	// Результат работы функции
 	bool result = false;
+	/*
 	// Если слово передано
 	if(!word.empty()){
 		// Выполняем парсинг uri адреса
@@ -671,6 +672,7 @@ const bool anyks::Alphabet::isUrl(const wstring & word) const noexcept {
 		// Если ссылка найдена
 		result = ((resUri.type != uri_t::types_t::null) && (resUri.type != uri_t::types_t::wrong));
 	}
+	*/
 	// Выводим результат
 	return result;
 }
@@ -1408,6 +1410,7 @@ const std::map <string, string> & anyks::Alphabet::getSubstitutes() const noexce
 const std::map <size_t, size_t> anyks::Alphabet::urls(const wstring & text) const noexcept {
 	// Результат работы функции
 	map <size_t, size_t> result;
+	/*
 	// Если текст передан
 	if(!text.empty()){
 		// Позиция найденного uri адреса
@@ -1439,6 +1442,7 @@ const std::map <size_t, size_t> anyks::Alphabet::urls(const wstring & text) cons
 			} else break;
 		}
 	}
+	*/
 	// Выводим результат
 	return result;
 }
