@@ -58,7 +58,7 @@ namespace anyks {
 			} nums_t;
 		private:
 			// Мютекс для блокировки потока
-			mutex locker;
+			mutable mutex locker;
 			// Латинский тип алфавита
 			bool typeLatian = true;
 			// Разрешить апостроф как часть слова
