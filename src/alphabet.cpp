@@ -156,8 +156,13 @@ const string anyks::Alphabet::toUpper(const string & str) const noexcept {
 const string anyks::Alphabet::convert(const wstring & str) const noexcept {
 	// Результат работы функции
 	string result = "";
-	// Выполняем декодирование строки
-	if(!str.empty()) result = wstring_convert <codecvt_utf8 <wchar_t>> ().to_bytes(str);
+	// Если строка передана
+	if(!str.empty()){
+		// Объявляем конвертер
+		wstring_convert <codecvt_utf8 <wchar_t>> conv;
+		// Выполняем конвертирование в utf-8 строку
+		result = conv.to_bytes(str);
+	}
 	// Выводим результат
 	return result;
 }
@@ -282,8 +287,13 @@ const wstring anyks::Alphabet::trim(const wstring & text) const noexcept {
 const wstring anyks::Alphabet::convert(const string & str) const noexcept {
 	// Результат работы функции
 	wstring result = L"";
-	// Выполняем декодирование строки
-	if(!str.empty()) result = wstring_convert <codecvt_utf8 <wchar_t>> ().from_bytes(str);
+	// Если строка передана
+	if(!str.empty()){
+		// Объявляем конвертер
+		wstring_convert <codecvt_utf8 <wchar_t>> conv;
+		// Выполняем конвертирование в utf-8 строку
+		result.assign(conv.from_bytes(str));
+	}
 	// Выводим результат
 	return result;
 }
