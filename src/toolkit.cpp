@@ -996,16 +996,18 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 				else if(!tmp.empty()) {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
+					// Выполняем проверку на плохое слово
+					const bool isBad = (this->badwords.count(idw) > 0);
 					// Если это плохое слово, заменяем его на неизвестное
-					if(((idw == 0) || (idw == idw_t::NIDW) || (this->badwords.count(idw) > 0)) && !unkFn()) return true;
+					if(((idw == 0) || (idw == idw_t::NIDW) || isBad) && !unkFn()) return true;
 					// Иначе продолжаем дальше
 					else {
 						// Флаг проверки слова на событийное
 						const bool isWord = this->arpa->event(idw);
 						// Если это неизвестное слово
-						if((idw == uid) && !unkFn()) return true;
+						if((isBad || (idw == uid)) && !unkFn()) return true;
 						// Иначе добавляем слово
-						else if(!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)) {
+						else if(!isBad && (!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp))) {
 							// Регистры слова
 							size_t uppers = 0;
 							// Если это событийное слово
