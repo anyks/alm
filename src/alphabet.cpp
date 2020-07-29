@@ -8,11 +8,6 @@
 
 #include <alphabet.hpp>
 
-template <class I, class E, class S>
-struct codecvt1 : std::codecvt <I, E, S> {
-	~codecvt1(){}
-};
-
 // Устанавливаем шаблон функции
 template <typename T>
 /**
@@ -161,19 +156,8 @@ const string anyks::Alphabet::toUpper(const string & str) const noexcept {
 const string anyks::Alphabet::convert(const wstring & str) const noexcept {
 	// Результат работы функции
 	string result = "";
-	// Если строка передана
-	if(!str.empty()){
-		/*
-		// Выполняем создание фаски
-		const auto & facet = use_facet <codecvt1 <wchar_t, char, mbstate_t>> (this->locale);
-		// Выполняем декодирование строки
-		result = wstring_convert <remove_reference <decltype(facet)>::type, wchar_t>(&facet).to_bytes(str);
-		*/
-		// Создаём тип конвертера
-		using convert_typeX = codecvt_utf8 <wchar_t>;
-		// Выполняем декодирование строки
-		result = wstring_convert <convert_typeX, wchar_t> ().to_bytes(str);
-	}
+	// Выполняем декодирование строки
+	if(!str.empty()) result = wstring_convert <codecvt_utf8 <wchar_t>> ().to_bytes(str);
 	// Выводим результат
 	return result;
 }
@@ -298,19 +282,8 @@ const wstring anyks::Alphabet::trim(const wstring & text) const noexcept {
 const wstring anyks::Alphabet::convert(const string & str) const noexcept {
 	// Результат работы функции
 	wstring result = L"";
-	// Если строка передана
-	if(!str.empty()){
-		/*
-		// Выполняем создание фаски
-		const auto & facet = use_facet <codecvt1 <wchar_t, char, mbstate_t>> (this->locale);
-		// Выполняем декодирование строки
-		result = wstring_convert <remove_reference <decltype(facet)>::type, wchar_t>(&facet).from_bytes(str);
-		*/
-		// Создаём тип конвертера
-		using convert_typeX = codecvt_utf8 <wchar_t>;
-		// Выполняем декодирование строки
-		result = wstring_convert <convert_typeX, wchar_t> ().from_bytes(str);
-	}
+	// Выполняем декодирование строки
+	if(!str.empty()) result = wstring_convert <codecvt_utf8 <wchar_t>> ().from_bytes(str);
 	// Выводим результат
 	return result;
 }
