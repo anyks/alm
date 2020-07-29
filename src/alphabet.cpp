@@ -1692,11 +1692,13 @@ void anyks::Alphabet::setzones(const std::set <wstring> & zones) noexcept {
 void anyks::Alphabet::setlocale(const string & locale) noexcept {
 	// Устанавливаем локаль
 	if(!locale.empty()){
+		// Создаём новую локаль
+		std::locale loc(locale.c_str());
 		// Устанавливапм локализацию приложения
 		::setlocale(LC_CTYPE, locale.c_str());
 		::setlocale(LC_COLLATE, locale.c_str());
 		// Устанавливаем локаль системы
-		this->locale = std::locale(locale.c_str());
+		this->locale = std::locale::global(loc);
 	}
 }
 /**
