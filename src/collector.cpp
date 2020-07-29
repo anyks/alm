@@ -209,7 +209,7 @@ void anyks::Collector::train(const string & dest, const vector <string> & filena
 					// Общий полученный размер данных
 					this->allSize.store(this->allSize + 1, memory_order_relaxed);
 					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / this->dataSize * 100.0);
+					this->status = u_short(this->allSize / double(this->dataSize) * 100.0);
 					// Если процентное соотношение изменилось
 					if(this->rate != this->status){
 						// Запоминаем текущее процентное соотношение
@@ -217,7 +217,7 @@ void anyks::Collector::train(const string & dest, const vector <string> & filena
 						// Блокируем поток
 						this->locker.lock();
 						// Устанавливаем название файла
-						if(this->debug > 0) this->pss.description(filename);
+						this->pss.description(filename);
 						// Отображаем ход процесса
 						switch(this->debug){
 							case 1: this->pss.update(this->status); break;
@@ -277,10 +277,6 @@ void anyks::Collector::train(const string & dest, const string & filename, const
 	if(!dest.empty() && !filename.empty() && (this->tpool != nullptr)){
 		// Добавляем в тредпул новое задание на обработку
 		this->tpool->push([this](const string dest, const string filename, const size_t idd){
-			// Общее количество данных собранное этим потоком
-			size_t size = 0;
-			// Получаем максимальное значение общего размера
-			const double maxSize = (this->dataSize + ceil(1 * this->dataSize / 100.0));
 			// Получаем копию объекта тулкита
 			toolkit_t toolkit(this->alphabet, this->tokenizer, this->order);
 			// Устанавливаем log файл
@@ -315,47 +311,13 @@ void anyks::Collector::train(const string & dest, const string & filename, const
 			const auto params = this->toolkit->getParams();
 			// Выполняем инициализацию тулкита
 			toolkit.init((toolkit_t::algorithm_t) params.algorithm, params.modified, params.prepares, params.mod);
-			// Блокируем поток
-			this->locker.lock();
-			// Устанавливаем название файла
-			if(this->debug > 0) this->pss.description(filename);
-			// Разблокируем поток
-			this->locker.unlock();
 			// Выполняем считывание всех строк текста
 			fsys_t::rfile2(filename, [&](const string & str, const uintmax_t fileSize) noexcept {
-				// Если текст получен
-				if(!str.empty()){
-					// Добавляем полученную строку текста
-					toolkit.addText(str, idd);
-					// Считаем общий размер данных обработанное данным процессом
-					size += str.size();
-					// Если отладка включена, выводим индикатор загрузки
-					if(this->debug > 0){
-						// Общий полученный размер данных
-						this->allSize.store(this->allSize + str.size(), memory_order_relaxed);
-						// Подсчитываем статус выполнения
-						this->status = u_short(this->allSize / maxSize * 100.0);
-						// Если процентное соотношение изменилось
-						if(this->rate != this->status){
-							// Запоминаем текущее процентное соотношение
-							this->rate.store(this->status, memory_order_relaxed);
-							// Блокируем поток
-							this->locker.lock();
-							// Отображаем ход процесса
-							switch(this->debug){
-								case 1: this->pss.update(this->status); break;
-								case 2: this->pss.status(this->status); break;
-							}
-							// Разблокируем поток
-							this->locker.unlock();
-						}
-					}
-				}
+				// Добавляем полученную строку текста
+				if(!str.empty()) toolkit.addText(str, idd);
 			});
 			// Блокируем поток
 			this->locker.lock();
-			// Получаем минимальный размер оставшихся данных
-			const double minSize = (1 * size / 100.0);
 			// Получаем данные статистики словаря
 			const auto & stat1 = toolkit.getStatistic();
 			// Получаем данные статистики основного словаря
@@ -363,50 +325,16 @@ void anyks::Collector::train(const string & dest, const string & filename, const
 			// Увеличиваем статистику основного словаря
 			this->toolkit->getStatistic(stat1.first + stat2.first, stat1.second + stat2.second);
 			// Считываем все слова словаря
-			toolkit.words([minSize, maxSize, this](const word_t & word, const size_t idw, const size_t size){
+			toolkit.words([this](const word_t & word, const size_t idw, const size_t size){
 				// Добавляем слово в словарь
 				this->toolkit->addWord(word, idw);
-				// Если отладка включена, выводим индикатор загрузки
-				if(this->debug > 0){
-					// Общий полученный размер данных
-					this->allSize.store(this->allSize + (size / (minSize / 2)), memory_order_relaxed);
-					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / maxSize * 100.0);
-					// Если процентное соотношение изменилось
-					if(this->rate != this->status){
-						// Запоминаем текущее процентное соотношение
-						this->rate.store(this->status, memory_order_relaxed);
-						// Отображаем ход процесса
-						switch(this->debug){
-							case 1: this->pss.update(this->status); break;
-							case 2: this->pss.status(this->status); break;
-						}
-					}
-				}
 				// Разрешаем перебор остальных слов
 				return true;
 			});
 			// Извлекаем n-граммы
-			toolkit.saveArpa([idd, minSize, maxSize, this](const vector <char> & buffer, const u_short status){
+			toolkit.saveArpa([idd, this](const vector <char> & buffer, const u_short status){
 				// Загружаем данные n-граммы
 				this->toolkit->appendArpa(buffer, idd);
-				// Если отладка включена, выводим индикатор загрузки
-				if(this->debug > 0){
-					// Общий полученный размер данных
-					this->allSize.store(this->allSize + (100 / (minSize / 2)), memory_order_relaxed);
-					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / maxSize * 100.0);
-					// Если процентное соотношение изменилось
-					if(this->rate != this->status){
-						// Запоминаем текущее процентное соотношение
-						this->rate.store(this->status, memory_order_relaxed);
-						// Отображаем ход процесса
-						switch(this->debug){
-							case 1: this->pss.update(this->status); break;
-							case 2: this->pss.status(this->status); break;
-						}
-					}
-				}
 			});
 			// Разблокируем поток
 			this->locker.unlock();
@@ -416,6 +344,29 @@ void anyks::Collector::train(const string & dest, const string & filename, const
 				toolkit.writeMap(dest + to_string(idd) + ".map");
 				// Экспортируем полученные данные словаря
 				toolkit.writeVocab(dest + to_string(idd) + ".vocab");
+			}
+			// Если отладка включена, выводим индикатор загрузки
+			if(this->debug > 0){
+				// Общий полученный размер данных
+				this->allSize.store(this->allSize + 1, memory_order_relaxed);
+				// Подсчитываем статус выполнения
+				this->status = u_short(this->allSize / double(this->dataSize) * 100.0);
+				// Если процентное соотношение изменилось
+				if(this->rate != this->status){
+					// Запоминаем текущее процентное соотношение
+					this->rate.store(this->status, memory_order_relaxed);
+					// Блокируем поток
+					this->locker.lock();
+					// Устанавливаем название файла
+					this->pss.description(filename);
+					// Отображаем ход процесса
+					switch(this->debug){
+						case 1: this->pss.update(this->status); break;
+						case 2: this->pss.status(this->status); break;
+					}
+					// Разблокируем поток
+					this->locker.unlock();
+				}
 			}
 		}, dest, filename, idd);
 	}
@@ -790,8 +741,6 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 				this->train(dir + "/alm", filenames);
 			// Если сегментация файла не нужна
 			} else {
-				// Получаем размер файла
-				this->dataSize = fsys_t::dsize(path, ext);
 				// Переходим по всему списку файлов в каталоге
 				fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
 					// Выполняем обучение полученного текста
