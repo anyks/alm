@@ -44,6 +44,77 @@ void anyks::Collector::finish(){
 	}
 }
 /**
+ * dumpRaw Метод дампа промежуточных данных
+ */
+void anyks::Collector::dumpRaw(){
+	// Если нужно вывести промежуточные результаты
+	if(this->intermed && (this->toolkit != nullptr)){
+		// Создаём каталог
+		const string & dir = this->createDir();
+		// Еали каталог получен
+		if(!dir.empty()){
+			// Получаем адрес файла карты последовательностей
+			const string & fileMap = this->alphabet->format("%s/raw.map", dir.c_str());
+			// Получаем адрес файла словаря собранных слов
+			const string & fileVocab = this->alphabet->format("%s/raw.vocab", dir.c_str());
+			// Если отладка включена, выводим индикатор загрузки
+			if(this->debug > 0){
+				// Очищаем предыдущий прогресс-бар
+				this->pss.clear();
+				// Устанавливаем название файла
+				this->pss.description(fileMap);
+				// Устанавливаем заголовки прогресс-бара
+				this->pss.title("Write raw map", "Write raw map is done");
+				// Выводим индикатор прогресс-бара
+				switch(this->debug){
+					case 1: this->pss.update(); break;
+					case 2: this->pss.status(); break;
+				}
+			}
+			// Выполняем сохранение каты последовательности
+			this->toolkit->writeMap(fileMap, [this](const u_short status) noexcept {
+				// Отображаем ход процесса
+				switch(this->debug){
+					case 1: this->pss.update(status); break;
+					case 2: this->pss.status(status); break;
+				}
+			});
+			// Отображаем ход процесса
+			switch(this->debug){
+				case 1: this->pss.update(100); break;
+				case 2: this->pss.status(100); break;
+			}
+			// Если отладка включена, выводим индикатор загрузки
+			if(this->debug > 0){
+				// Очищаем предыдущий прогресс-бар
+				this->pss.clear();
+				// Устанавливаем название файла
+				this->pss.description(fileVocab);
+				// Устанавливаем заголовки прогресс-бара
+				this->pss.title("Write raw vocab", "Write raw vocab is done");
+				// Выводим индикатор прогресс-бара
+				switch(this->debug){
+					case 1: this->pss.update(); break;
+					case 2: this->pss.status(); break;
+				}
+			}
+			// Выполняем извлечение словаря в файл
+			this->toolkit->writeVocab(fileVocab, [this](const u_short status) noexcept {
+				// Отображаем ход процесса
+				switch(this->debug){
+					case 1: this->pss.update(status); break;
+					case 2: this->pss.status(status); break;
+				}
+			});
+			// Отображаем ход процесса
+			switch(this->debug){
+				case 1: this->pss.update(100); break;
+				case 2: this->pss.status(100); break;
+			}
+		}
+	}
+}
+/**
  * initPython Метод инициализации модуля питона
  */
 void anyks::Collector::initPython(){
@@ -71,30 +142,39 @@ const string & anyks::Collector::createDir() const noexcept {
 	static const string dirName = "";
 	// Если разрешено сохранять промежуточные результаты
 	if(this->intermed){
-		// Создаем буфер для хранения даты
-		char date[80];
-		// Добавляем в название каталога штамп времени
-		// Получаем текущее время
-		time_t timeStamp = time(nullptr);
-		// Заполняем его нулями
-		memset(date, 0, sizeof(date));
-		// Получаем структуру локального времени
-		struct tm * timeinfo = localtime(&timeStamp);
-		// Создаем формат полученного времени
-		const string & dateformat = "%m-%d-%Y_%H-%M-%S";
-		// Копируем в буфер полученную дату и время
-		const int length = strftime(date, sizeof(date), dateformat.c_str(), timeinfo);
-		// Если дата создана
-		if(length > 0){
+		// Если пункт назначения указан
+		if(!this->destination.empty()){
 			// Получаем данные строки
 			string * dir = const_cast <string *> (&dirName);
-			// Добавляем префикс каталога
-			dir->append("./alm_");
-			// Добавляем дату в адрес каталога
-			dir->append(date, length);
-			// Если каталога не существует, создаём его
-			if(!fsys_t::isdir(dirName)) fsys_t::mkdir(dirName);
+			// Устанавливаем адрес назначения
+			dir->append(this->destination);
+		// Если пункт назначения не указан
+		} else {
+			// Создаем буфер для хранения даты
+			char date[80];
+			// Добавляем в название каталога штамп времени
+			// Получаем текущее время
+			time_t timeStamp = time(nullptr);
+			// Заполняем его нулями
+			memset(date, 0, sizeof(date));
+			// Получаем структуру локального времени
+			struct tm * timeinfo = localtime(&timeStamp);
+			// Создаем формат полученного времени
+			const string & dateformat = "%m-%d-%Y_%H-%M-%S";
+			// Копируем в буфер полученную дату и время
+			const int length = strftime(date, sizeof(date), dateformat.c_str(), timeinfo);
+			// Если дата создана
+			if(length > 0){
+				// Получаем данные строки
+				string * dir = const_cast <string *> (&dirName);
+				// Добавляем префикс каталога
+				dir->append("./alm_");
+				// Добавляем дату в адрес каталога
+				dir->append(date, length);
+			}
 		}
+		// Если каталога не существует, создаём его
+		if(!dirName.empty() && !fsys_t::isdir(dirName)) fsys_t::mkdir(dirName);
 	}
 	// Выводим результат
 	return dirName;
@@ -105,6 +185,8 @@ const string & anyks::Collector::createDir() const noexcept {
  * @return     размер сегмента в байтах
  */
 const long anyks::Collector::getSize(const string & str) const noexcept {
+	// Если это просто число, тогда выводим как есть
+	if(this->alphabet->isNumber(this->alphabet->convert(str))) return stoull(str);
 	/*
 	* Help - http://www.securitylab.ru/analytics/243414.php
 	*
@@ -151,14 +233,13 @@ const long anyks::Collector::getSize(const string & str) const noexcept {
 }
 /**
  * train Обучения полученного текста
- * @param dest      адрес каталога для сохранения
  * @param filenames список файлов для обучения
  */
-void anyks::Collector::train(const string & dest, const vector <string> & filenames) noexcept {
+void anyks::Collector::train(const vector <string> & filenames) noexcept {
 	// Если текст передан
-	if(!dest.empty() && !filenames.empty() && (this->tpool != nullptr)){
+	if(!filenames.empty() && (this->tpool != nullptr)){
 		// Добавляем в тредпул новое задание на обработку
-		this->tpool->push([this](const string dest, const vector <string> filenames){
+		this->tpool->push([this](const vector <string> filenames){
 			// Общее количество данных собранное этим потоком
 			size_t index = 0;
 			// Получаем копию объекта тулкита
@@ -250,14 +331,7 @@ void anyks::Collector::train(const string & dest, const vector <string> & filena
 			});
 			// Разблокируем поток
 			this->locker.unlock();
-			// Если нужно вывести промежуточные результаты
-			if(this->intermed){
-				// Экспортируем полученные данные карты
-				toolkit.writeMap(dest + ".map");
-				// Экспортируем полученные данные словаря
-				toolkit.writeVocab(dest + ".vocab");
-			}
-		}, dest, filenames);
+		}, filenames);
 		// Получаем объект списка файлов
 		vector <string> * obj = const_cast <vector <string> *> (&filenames);
 		// Очищаем список файлов
@@ -268,15 +342,14 @@ void anyks::Collector::train(const string & dest, const vector <string> & filena
 }
 /**
  * train Обучения полученного текста
- * @param dest     адрес каталога для сохранения
  * @param filename файл для чтения
  * @param idd      идентификатор документа
  */
-void anyks::Collector::train(const string & dest, const string & filename, const size_t idd) noexcept {
+void anyks::Collector::train(const string & filename, const size_t idd) noexcept {
 	// Если текст передан
-	if(!dest.empty() && !filename.empty() && (this->tpool != nullptr)){
+	if(!filename.empty() && (this->tpool != nullptr)){
 		// Добавляем в тредпул новое задание на обработку
-		this->tpool->push([this](const string dest, const string filename, const size_t idd){
+		this->tpool->push([this](const string filename, const size_t idd){
 			// Получаем копию объекта тулкита
 			toolkit_t toolkit(this->alphabet, this->tokenizer, this->order);
 			// Устанавливаем log файл
@@ -338,13 +411,6 @@ void anyks::Collector::train(const string & dest, const string & filename, const
 			});
 			// Разблокируем поток
 			this->locker.unlock();
-			// Если нужно вывести промежуточные результаты
-			if(this->intermed){
-				// Экспортируем полученные данные карты
-				toolkit.writeMap(dest + to_string(idd) + ".map");
-				// Экспортируем полученные данные словаря
-				toolkit.writeVocab(dest + to_string(idd) + ".vocab");
-			}
 			// Если отладка включена, выводим индикатор загрузки
 			if(this->debug > 0){
 				// Общий полученный размер данных
@@ -368,24 +434,23 @@ void anyks::Collector::train(const string & dest, const string & filename, const
 					this->locker.unlock();
 				}
 			}
-		}, dest, filename, idd);
+		}, filename, idd);
 	}
 }
 /**
  * train Обучения полученного текста
- * @param dest адрес каталога для сохранения
  * @param text список строк текста для обучения
  * @param idd  идентификатор документа
  */
-void anyks::Collector::train(const string & dest, const vector <string> & text, const size_t idd) noexcept {
+void anyks::Collector::train(const vector <string> & text, const size_t idd) noexcept {
 	// Если текст передан
-	if(!dest.empty() && !text.empty() && (this->tpool != nullptr)){
+	if(!text.empty() && (this->tpool != nullptr)){
 		// Добавляем в тредпул новое задание на обработку
-		this->tpool->push([this](const string dest, const vector <string> text, const size_t idd){
+		this->tpool->push([this](const vector <string> text, const size_t idd){
 			// Общее количество данных собранное этим потоком
 			size_t size = 0;
 			// Получаем максимальное значение общего размера
-			const double maxSize = (this->dataSize + ceil(1 * this->dataSize / 100.0));
+			const double maxSize = (this->dataSize + ceil(this->dataSize / 100.0));
 			// Получаем копию объекта тулкита
 			toolkit_t toolkit(this->alphabet, this->tokenizer, this->order);
 			// Устанавливаем log файл
@@ -507,14 +572,7 @@ void anyks::Collector::train(const string & dest, const vector <string> & text, 
 			});
 			// Разблокируем поток
 			this->locker.unlock();
-			// Если нужно вывести промежуточные результаты
-			if(this->intermed){
-				// Экспортируем полученные данные карты
-				toolkit.writeMap(dest + to_string(idd) + ".map");
-				// Экспортируем полученные данные словаря
-				toolkit.writeVocab(dest + to_string(idd) + ".vocab");
-			}
-		}, dest, text, idd);
+		}, text, idd);
 		// Получаем объект текста
 		vector <string> * obj = const_cast <vector <string> *> (&text);
 		// Очищаем список текстов
@@ -562,6 +620,14 @@ void anyks::Collector::setToolkit(toolkit_t * toolkit) noexcept {
 void anyks::Collector::setLogfile(const char * logfile) noexcept {
 	// Устанавливаем адрес log файла
 	this->logfile = logfile;
+}
+/**
+ * setDest Метод установки место назначения для сохранения сырых данных
+ * @param destination местоназначения для сырых данных
+ */
+void anyks::Collector::setDest(const string & destination) noexcept {
+	// Выполняем установку мета назначения для сохранения сырых данных
+	if(!destination.empty()) this->destination = destination;
 }
 /**
  * setThreads Метод установки количества потоков
@@ -620,8 +686,6 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 			uintmax_t size = 0;
 			// Список строк для обработки
 			vector <string> text = {};
-			// Создаём каталог
-			const string & dir = this->createDir();
 			// Если отладка включена, выводим индикатор загрузки
 			if(this->debug > 0){
 				// Сбрасываем общий размер собранных данных
@@ -645,7 +709,7 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 				// Если размер сегмента нулевой
 				if(this->segmentSize == 0) this->segmentSize = ceil(this->dataSize / double(this->threads));
 				// Выполняем считывание всех строк текста
-				fsys_t::rfile(filename, [&count, &size, &text, &dir, this](const string & str, const uintmax_t fileSize) noexcept {
+				fsys_t::rfile(filename, [&count, &size, &text, this](const string & str, const uintmax_t fileSize) noexcept {
 					// Если текст получен
 					if(!str.empty()){
 						// Формируем блок собранных данных
@@ -655,7 +719,7 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 							// Очищаем размер собранных данных
 							size = 0;
 							// Выполняем обучение полученного текста
-							this->train(dir + "/alm", text, count);
+							this->train(text, count);
 							// Увеличиваем количество файлов
 							count++;
 						}
@@ -664,7 +728,7 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 					}
 				});
 				// Выполняем обучение полученного текста
-				this->train(dir + "/alm", text, count);
+				this->train(text, count);
 			// Если сегментация файла не нужна
 			} else {
 				// Выполняем считывание всех строк текста
@@ -673,7 +737,7 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 					if(!str.empty()) text.push_back(str);
 				});
 				// Выполняем обучение полученного текста
-				this->train(dir + "/alm", text, 0);
+				this->train(text, 0);
 			}
 			// Завершаем работу тредпула
 			this->finish();
@@ -682,6 +746,8 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 				case 1: this->pss.update(100); break;
 				case 2: this->pss.status(100); break;
 			}
+			// Выполняем дамп промежуточных данных
+			this->dumpRaw();
 		}
 	}
 }
@@ -701,8 +767,6 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 			size_t count = 0;
 			// Список строк файлов для обработки
 			vector <string> filenames = {};
-			// Создаём каталог
-			const string & dir = this->createDir();
 			// Если отладка включена, выводим индикатор загрузки
 			if(this->debug > 0){
 				// Сбрасываем общий размер собранных данных
@@ -732,19 +796,19 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 						// Очищаем размер собранных данных
 						count = 0;
 						// Выполняем обучение полученного текста
-						this->train(dir + "/alm", filenames);
+						this->train(filenames);
 					}
 					// Добавляем в список файлов полученный файл
 					filenames.push_back(filename);
 				});
 				// Выполняем обучение полученного текста
-				this->train(dir + "/alm", filenames);
+				this->train(filenames);
 			// Если сегментация файла не нужна
 			} else {
 				// Переходим по всему списку файлов в каталоге
 				fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
 					// Выполняем обучение полученного текста
-					this->train(dir + "/alm", filename, count);
+					this->train(filename, count);
 					// Увеличиваем идентификатор документа
 					count++;
 				});
@@ -756,6 +820,8 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 				case 1: this->pss.update(100); break;
 				case 2: this->pss.status(100); break;
 			}
+			// Выполняем дамп промежуточных данных
+			this->dumpRaw();
 		}
 	}
 }

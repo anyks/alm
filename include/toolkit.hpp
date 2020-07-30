@@ -463,12 +463,6 @@ namespace anyks {
 			 */
 			void repair(function <void (const u_short)> status = nullptr) noexcept;
 			/**
-			 * pruneVocab Метод прунинга словаря
-			 * @param wltf   пороговый вес слова для прунинга
-			 * @param status статус прунинга словаря
-			 */
-			void pruneVocab(const double wltf, function <void (const u_short)> status = nullptr) noexcept;
-			/**
 			 * modify Метод модификации arpa
 			 * @param filename адрес файла для чтения
 			 * @param flag     флаг модификации arpa
@@ -482,6 +476,14 @@ namespace anyks {
 			 * @param status    функция вывода статуса обучения
 			 */
 			void prune(const double threshold, const u_short mingram, function <void (const u_short)> status = nullptr) const noexcept;
+			/**
+			 * pruneVocab Метод прунинга словаря
+			 * @param wltf   пороговый вес слова для прунинга
+			 * @param oc     встречаемость слова во всех документах
+			 * @param dc     количество документов в которых встретилось слово
+			 * @param status статус прунинга словаря
+			 */
+			void pruneVocab(const double wltf = idw_t::NIDW, const size_t oc = 0, const size_t dc = 0, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * mix Метод интерполяции нескольких arpa
 			 * @param filenames список файлов arpa для объединения

@@ -1303,49 +1303,6 @@ void anyks::Toolkit::repair(function <void (const u_short)> status) noexcept {
 	this->arpa->repair(status);
 }
 /**
- * pruneVocab Метод прунинга словаря
- * @param wltf   пороговый вес слова для прунинга
- * @param status статус прунинга словаря
- */
-void anyks::Toolkit::pruneVocab(const double wltf, function <void (const u_short)> status) noexcept {
-	// Если словарь не пустой
-	if(!this->vocab.empty()){
-		// Количество извлечённых слов
-		size_t index = 0;
-		// Текущий и предыдущий статус
-		u_short actual = 0, past = 100;
-		// Переходим по всему списку слов
-		for(auto it = this->vocab.begin(); it != this->vocab.end();){
-			// Получаем метаданные слова
-			auto meta = it->second.calc(this->info.ad, this->info.cw);
-			// Если вес слова не ниже порогового значения
-			if((wltf != 0.0) && (meta.wltf <= wltf)){
-				// Выполняем удаление слова в arpa
-				this->arpa->removeWord(it->first);
-				// Удаляем слово в алфавите
-				it = this->vocab.erase(it);
-			// Увеличиваем значение итератора
-			} else it++;
-			// Если функция вывода статуса передана
-			if(status != nullptr){
-				// Увеличиваем количество записанных слов
-				index++;
-				// Выполняем расчёт текущего статуса
-				actual = u_short(index / double(this->vocab.size()) * 100.0);
-				// Если статус обновился
-				if(actual != past){
-					// Запоминаем текущий статус
-					past = actual;
-					// Выводим статус извлечения
-					status(actual);
-				}
-			}
-		}
-		// Обновляем количество уникальных слов
-		this->info.unq = this->vocab.size();
-	}
-}
-/**
  * modify Метод модификации arpa
  * @param filename адрес файла для чтения
  * @param flag     флаг модификации arpa
@@ -1620,6 +1577,66 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 void anyks::Toolkit::prune(const double threshold, const u_short mingram, function <void (const u_short)> status) const noexcept {
 	// Выполняем прунинг arpa
 	this->arpa->prune(threshold, mingram, status);
+}
+/**
+ * pruneVocab Метод прунинга словаря
+ * @param wltf   пороговый вес слова для прунинга
+ * @param oc     встречаемость слова во всех документах
+ * @param dc     количество документов в которых встретилось слово
+ * @param status статус прунинга словаря
+ */
+void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t dc, function <void (const u_short)> status) noexcept {
+	// Если словарь не пустой
+	if(!this->vocab.empty() && ((wltf != idw_t::NIDW) || (oc > 0) || (dc > 0))){
+		// Количество извлечённых слов
+		size_t index = 0;
+		// Текущий и предыдущий статус
+		u_short actual = 0, past = 100;
+		// Переходим по всему списку слов
+		for(auto it = this->vocab.begin(); it != this->vocab.end();){
+			// Если вес слова передан
+			if(wltf != idw_t::NIDW){
+				// Получаем метаданные слова
+				const auto & meta = it->second.calc(this->info.ad, this->info.cw);
+				// Если вес слова не ниже порогового значения
+				if(meta.wltf <= wltf){
+					// Выполняем удаление слова в arpa
+					this->arpa->removeWord(it->first);
+					// Удаляем слово в алфавите
+					it = this->vocab.erase(it);
+				// Увеличиваем значение итератора
+				} else it++;
+			// Если слова фильтруются по встречаемости
+			} else {
+				// Получаем метаданные слова
+				const auto & meta = it->second.getmeta();
+				// Если вес слова не ниже порогового значения
+				if((oc > 0) && (dc > 0) ? (meta.oc <= oc) && (meta.dc <= dc) : (oc > 0 ? meta.oc <= oc : (dc > 0 ? meta.dc <= dc : false))){
+					// Выполняем удаление слова в arpa
+					this->arpa->removeWord(it->first);
+					// Удаляем слово в алфавите
+					it = this->vocab.erase(it);
+				// Увеличиваем значение итератора
+				} else it++;
+			}
+			// Если функция вывода статуса передана
+			if(status != nullptr){
+				// Увеличиваем количество записанных слов
+				index++;
+				// Выполняем расчёт текущего статуса
+				actual = u_short(index / double(this->vocab.size()) * 100.0);
+				// Если статус обновился
+				if(actual != past){
+					// Запоминаем текущий статус
+					past = actual;
+					// Выводим статус извлечения
+					status(actual);
+				}
+			}
+		}
+		// Обновляем количество уникальных слов
+		this->info.unq = this->vocab.size();
+	}
 }
 /**
  * mix Метод интерполяции нескольких arpa

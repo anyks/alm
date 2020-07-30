@@ -38,6 +38,8 @@ namespace anyks {
 		private:
 			// Прогресс бар
 			progress_t pss;
+			// Местоназначение
+			string destination = "";
 		private:
 			// Общий размер считанных данных
 			atomic <double> allSize{0};
@@ -85,6 +87,10 @@ namespace anyks {
 			 */
 			void finish();
 			/**
+			 * dumpRaw Метод дампа промежуточных данных
+			 */
+			void dumpRaw();
+			/**
 			 * initPython Метод инициализации модуля питона
 			 */
 			void initPython();
@@ -101,24 +107,21 @@ namespace anyks {
 			const long getSize(const string & str) const noexcept;
 			/**
 			 * train Обучения полученного текста
-			 * @param dest      адрес каталога для сохранения
 			 * @param filenames список файлов для обучения
 			 */
-			void train(const string & dest, const vector <string> & filenames) noexcept;
+			void train(const vector <string> & filenames) noexcept;
 			/**
 			 * train Обучения полученного текста
-			 * @param dest     адрес каталога для сохранения
 			 * @param filename файл для чтения
 			 * @param idd      идентификатор документа
 			 */
-			void train(const string & dest, const string & filename, const size_t idd) noexcept;
+			void train(const string & filename, const size_t idd) noexcept;
 			/**
 			 * train Обучения полученного текста
-			 * @param dest адрес каталога для сохранения
 			 * @param text список строк текста для обучения
 			 * @param idd  идентификатор документа
 			 */
-			void train(const string & dest, const vector <string> & text, const size_t idd) noexcept;
+			void train(const vector <string> & text, const size_t idd) noexcept;
 		public:
 			/**
 			 * setOrder Метод установки размер n-граммы
@@ -145,6 +148,11 @@ namespace anyks {
 			 * @param logifle адрес файла для вывода отладочной информации
 			 */
 			void setLogfile(const char * logfile) noexcept;
+			/**
+			 * setDest Метод установки место назначения для сохранения сырых данных
+			 * @param destination местоназначения для сырых данных
+			 */
+			void setDest(const string & destination) noexcept;
 			/**
 			 * setThreads Метод установки количества потоков
 			 * @param threads количество потоков для работы

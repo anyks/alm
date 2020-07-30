@@ -29,6 +29,7 @@
   - [Пример обучения языковой модели](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D1%8F-%D1%8F%D0%B7%D1%8B%D0%BA%D0%BE%D0%B2%D0%BE%D0%B9-%D0%BC%D0%BE%D0%B4%D0%B5%D0%BB%D0%B8)
   - [Пример исправления arpa](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%B8%D1%81%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-arpa)
   - [Пример удаления n-грамм у которых частота ниже backoff](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D1%83%D0%B4%D0%B0%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D1%83-%D0%BA%D0%BE%D1%82%D0%BE%D1%80%D1%8B%D1%85-%D1%87%D0%B0%D1%81%D1%82%D0%BE%D1%82%D0%B0-%D0%BD%D0%B8%D0%B6%D0%B5-backoff)
+  - [Пример объединения собранных (необученных данных)](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D1%83%D0%B4%D0%B0%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-n-%D0%B3%D1%80%D0%B0%D0%BC%D0%BC-%D1%83-%D0%BA%D0%BE%D1%82%D0%BE%D1%80%D1%8B%D1%85-%D1%87%D0%B0%D1%81%D1%82%D0%BE%D1%82%D0%B0-%D0%BD%D0%B8%D0%B6%D0%B5-backoff)
   - [Пример прунинга arpa](https://github.com/anyks/alm/blob/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%BF%D1%80%D1%83%D0%BD%D0%B8%D0%BD%D0%B3%D0%B0-arpa)
   - [Пример прунинга словаря](https://github.com/anyks/alm/tree/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%BF%D1%80%D1%83%D0%BD%D0%B8%D0%BD%D0%B3%D0%B0-%D1%81%D0%BB%D0%BE%D0%B2%D0%B0%D1%80%D1%8F)
   - [Пример детектирования и исправления слов состоящих из смешанных словарей](https://github.com/anyks/alm/tree/master/site#%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80-%D0%B4%D0%B5%D1%82%D0%B5%D0%BA%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-%D0%B8-%D0%B8%D1%81%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F-%D1%81%D0%BB%D0%BE%D0%B2-%D1%81%D0%BE%D1%81%D1%82%D0%BE%D1%8F%D1%89%D0%B8%D1%85-%D0%B8%D0%B7-%D1%81%D0%BC%D0%B5%D1%88%D0%B0%D0%BD%D0%BD%D1%8B%D1%85-%D1%81%D0%BB%D0%BE%D0%B2%D0%B0%D1%80%D0%B5%D0%B9)
@@ -622,6 +623,11 @@ $ ./alm -r-bin ./lm.alm -bin-aes 128 -bin-password 911 -method train -debug 1 -s
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method sweep -debug 1 -w-arpa ./lm2.arpa -allow-unk -interpolate -r-arpa ./lm1.arpa
 ```
 
+### Пример объединения собранных (необученных данных)
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method merge -debug 1 -r-map ./path -r-vocab ./path -w-map ./lm.map -w-vocab ./lm.vocab
+```
+
 ### Пример прунинга arpa
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method aprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -r-map ./lm.map -r-vocab ./lm.vocab -aprune-threshold 0.003 -aprune-max-gram 2
@@ -630,10 +636,22 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ### Пример прунинга словаря
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-threshold -9.11
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-wltf -9.11
 ```
 
-> **Прунинг словаря** - позволяет удалить низкочастотные слова которые предположительно содержат **ошибки/опечатки**. Прунинг производится по порогу параметра **wltf**.
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-oc 5892
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-dc 624
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-oc 5892 -vprune-dc 624
+```
+
+> **Прунинг словаря** - позволяет удалить низкочастотные слова которые предположительно содержат **ошибки/опечатки**. Прунинг производится по порогу параметров **wltf**, **oc** или **dc**.
 
 ### Пример детектирования и исправления слов состоящих из смешанных словарей
 

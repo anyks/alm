@@ -1,5 +1,11 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
+## [3.1.5](https://github.com/anyks/alm/archive/v3.1.5.tar.gz) Bug fixes and new params
+### Method
+- **merge** - method merge of raw data from *.map files
+### Params
+- directory path with raw data files for write
+
 ## [3.1.4](https://github.com/anyks/alm/archive/v3.1.4.tar.gz) Bug fixes and other optimization
 
 ## [3.1.3](https://github.com/anyks/alm/archive/v3.1.3.tar.gz) Bug fixes and other optimization
@@ -23,6 +29,7 @@
 ## [3.0.5](https://github.com/anyks/alm/archive/v3.0.5.tar.gz) Other optimization
 
 ## [3.0.4](https://github.com/anyks/alm/archive/v3.0.4.tar.gz) Bug fixes and new params
+### Params
 - license type for binary container
 - license text for binary container
 - dictionary name for binary container
@@ -63,6 +70,7 @@
 ## [2.1.0](https://github.com/anyks/alm/archive/v2.1.0.tar.gz) Bug fixes
 
 ## [2.0.9](https://github.com/anyks/alm/archive/v2.0.9.tar.gz) Bug fixes and new params
+### Params
 - type of mixing language models
 - context length for Bayes mixture LM
 - log likelihood scale for bayes mixing
@@ -110,9 +118,11 @@
 - flag arpa file loading without pre-processing the words
 
 ## 1.0.4 Performance optimization and bug fixes
+### Params
 - flag to save intermediate data during training
 
 ## 1.0.3 Multiprocessor training and bug fixes
+### Params
 - flag to performing data segmentation during training
 - flag to clearing temporary data during training
 - segment size for training data segmentation
@@ -127,6 +137,7 @@
 - file address for restore mixed words for import
 
 ## 1.0.1 Performance improvements, bug fixes
+### Params
 - flag to reset the frequency of an unknown word
 - flag export in binary dictionary of all data
 - flag to disable all tokens

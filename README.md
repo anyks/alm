@@ -29,6 +29,7 @@
   - [Language Model training example](https://github.com/anyks/alm/#language-model-training-example)
   - [Arpa patch example](https://github.com/anyks/alm/#arpa-patch-example)
   - [Example of removing n-grams with a frequency lower than backoff](https://github.com/anyks/alm/#example-of-removing-n-grams-with-a-frequency-lower-than-backoff)
+  - [Example of merge raw data](https://github.com/anyks/alm/#example-of-merge-raw-data)
   - [Arpa pruning example](https://github.com/anyks/alm/#arpa-pruning-example)
   - [Vocab pruning example](https://github.com/anyks/alm/#vocab-pruning-example)
   - [An example of detecting and correcting words consisting of mixed dictionaries](https://github.com/anyks/alm/#an-example-of-detecting-and-correcting-words-consisting-of-mixed-dictionaries)
@@ -620,6 +621,11 @@ $ ./alm -r-bin ./lm.alm -bin-aes 128 -bin-password 911 -method train -debug 1 -s
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method sweep -debug 1 -w-arpa ./lm2.arpa -allow-unk -interpolate -r-arpa ./lm1.arpa
 ```
 
+### Example of merge raw data
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method merge -debug 1 -r-map ./path -r-vocab ./path -w-map ./lm.map -w-vocab ./lm.vocab
+```
+
 ### Arpa pruning example
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method aprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -r-map ./lm.map -r-vocab ./lm.vocab -aprune-threshold 0.003 -aprune-max-gram 2
@@ -628,10 +634,22 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ### Vocab pruning example
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-threshold -9.11
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-wltf -9.11
 ```
 
-> **Vocabulary pruning** - removes low-frequency words that are supposed to contain **errors/typos**. Pruning is done according to the threshold of the **wltf** parameter.
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-oc 5892
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-dc 624
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method vprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -w-vocab ./lm2.vocab -r-map ./lm.map -r-vocab ./lm.vocab -vprune-oc 5892 -vprune-dc 624
+```
+
+> **Vocabulary pruning** - removes low-frequency words that are supposed to contain **errors/typos**. Pruning is done according to the threshold of the **wltf**, **oc** or **dc** parameters.
 
 ### An example of detecting and correcting words consisting of mixed dictionaries
 

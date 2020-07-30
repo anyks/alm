@@ -83,6 +83,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mfixcase\x1B[0m]   words case correction method\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mchecktext\x1B[0m] text validation method\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1msentences\x1B[0m] sentences generation method\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mmerge\x1B[0m]     method merge of raw data from \x1B[1m*.map\x1B[0m files\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [\x1B[1mmodify\x1B[0m]    method for modifying a language model\r\n"
 	"  \x1B[1m-\x1B[0m (emplace | remove | change | replace)\r\n\r\n\r\n"
 	"\x1B[34m\x1B[1m[FLAGS]\x1B[0m\r\n"
@@ -162,10 +163,13 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-mix-restwords <value> | --r-mix-restwords=<value>]                       file address restore mixed words of \x1B[1m*.txt\x1B[0m for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-path <value> | --r-tokens-path=<value>]                           directory path with tokens files for read\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-path <value> | --w-tokens-path=<value>]                           directory path with tokens files for write\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-train-intermed-dest <value> | --train-intermed-dest=<value>]               directory path with raw data files for write\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mix-bayes-scale <value> | --mix-bayes-scale=<value>]                       log likelihood scale for bayes mixing\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mix-bayes-length <value> | --mix-bayes-length=<value>]                     context length for Bayes mixture LM\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mix-lambda[1...N] <value> | --mix-lambda[1...N]=<value>]                   weight lambda first model for mixing\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-vprune-threshold <value> | --vprune-threshold=<value>]                     \x1B[1mwltf threshold\x1B[0m of pruning vocabulary\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-vprune-oc <value> | --vprune-oc=<value>]                                   \x1B[1moc threshold\x1B[0m of pruning vocabulary\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-vprune-dc <value> | --vprune-dc=<value>]                                   \x1B[1mdc threshold\x1B[0m of pruning vocabulary\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-vprune-wltf <value> | --vprune-wltf=<value>]                               \x1B[1mwltf threshold\x1B[0m of pruning vocabulary\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-aprune-threshold <value> | --aprune-threshold=<value>]                     frequency threshold of pruning language model\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-aprune-max-gram <value> | --aprune-max-gram=<value>]                       maximum size of n-grams pruning\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-utokens <value> | --utokens=<value>]                                       list of custom attributes\r\n"
@@ -183,7 +187,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-tokens-unknown <value1|value2|...> | --tokens-unknown=<value1|value2|...>] list of tokens for identification as <unk>\r\n"
 	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-train-segment-size <value> | --train-segment-size=<value>]                 segment size for training data segmentation\r\n"
-	"  \x1B[1m-\x1B[0m (nb | nkb | nMb | nGb), example: --train-segment-size=4096Mb\r\n"
+	"  \x1B[1m-\x1B[0m (nb | nkb | nMb | nGb), example: --train-segment-size=4096Mb or --train-segment-size=1000\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-smoothing <value> | --smoothing=<value>]                                   smoothing algorithm for \x1B[1mtrain method\x1B[0m]\r\n"
 	"  \x1B[1m-\x1B[0m (goodturing | cdiscount | ndiscount | addsmooth | wittenbell | kneserney | mkneserney)\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-method <value> | --method=<value>]                                         method application\r\n"
@@ -305,6 +309,7 @@ int main(int argc, char * argv[]) noexcept {
 				env.is("method", "ppl") ||
 				env.is("method", "mix") ||
 				env.is("method", "find") ||
+				env.is("method", "info") ||
 				env.is("method", "tokens") ||
 				env.is("method", "counts") ||
 				env.is("method", "fixcase") ||
@@ -337,6 +342,7 @@ int main(int argc, char * argv[]) noexcept {
 				!env.is("method", "info") &&
 				!env.is("method", "sweep") &&
 				!env.is("method", "train") &&
+				!env.is("method", "merge") &&
 				!env.is("method", "tokens") &&
 				!env.is("method", "repair") &&
 				!env.is("method", "modify") &&
@@ -351,13 +357,10 @@ int main(int argc, char * argv[]) noexcept {
 			// Сообщаем что метод не указан
 			} else print("toolkit method is not set\r\n", env.get("log"));
 			// Если ни один файл для сохранения не передан, выходим
-			if(!env.is("w-map") && !env.is("w-arpa") &&
-			!env.is("w-vocab") && !env.is("w-words") &&
-			!env.is("w-ngram") && !env.is("w-bin") &&
-			!env.is("method", "ppl") && !env.is("method", "find") &&
-			!env.is("method", "info") && !env.is("method", "counts") &&
-			!env.is("method", "tokens") && !env.is("method", "sentences") &&
-			!env.is("method", "fixcase") && !env.is("method", "checktext")){
+			if(!env.is("w-map") && !env.is("w-arpa") && !env.is("w-vocab") && !env.is("w-words") && !env.is("w-ngram") &&
+			!env.is("w-bin") && !env.is("method", "merge") && !env.is("method", "ppl") && !env.is("method", "find") &&
+			!env.is("method", "info") && !env.is("method", "counts") && !env.is("method", "tokens") &&
+			!env.is("method", "sentences") && !env.is("method", "fixcase") && !env.is("method", "checktext")){
 				// Выводим сообщение и выходим из приложения
 				print("file address to save is not specified\r\n", env.get("log"));
 			}
@@ -1543,6 +1546,8 @@ int main(int argc, char * argv[]) noexcept {
 								env.is("train-segments"),
 								((value = env.get("train-segment-size")) != nullptr ? value : "auto")
 							);
+							// Устанавливаем путь назначения
+							if((value = env.get("train-intermed-dest")) != nullptr) collector.setDest(value);
 							// Выполняем чтение данных файла
 							collector.readDir(path, ext);
 						// Иначе выполняем сборку обычным способом
@@ -1641,6 +1646,8 @@ int main(int argc, char * argv[]) noexcept {
 								env.is("train-segments"),
 								((value = env.get("train-segment-size")) != nullptr ? value : "auto")
 							);
+							// Устанавливаем путь назначения
+							if((value = env.get("train-intermed-dest")) != nullptr) collector.setDest(value);
 							// Выполняем чтение данных файла
 							collector.readFile(filename);
 						// Иначе выполняем сборку обычным способом
@@ -1839,7 +1846,7 @@ int main(int argc, char * argv[]) noexcept {
 			// Проверяем правильно ли указаны адреса файлов
 			} else if((env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) || env.is("r-ngram") || env.is("r-arpa") || !binDictFile.empty()) {
 				// Если требуется загрузить файл n-грамм
-				if(((value = env.get("r-ngram")) != nullptr) && fsys_t::isfile(value)){
+				if(!env.is("method", "merge") && ((value = env.get("r-ngram")) != nullptr) && fsys_t::isfile(value)){
 					// Запоминаем адрес файла
 					const string & filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
@@ -1904,7 +1911,7 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				}
 				// Если требуется загрузить arpa
-				if(((value = env.get("r-arpa")) != nullptr) && fsys_t::isfile(value)){
+				if(!env.is("method", "merge") && ((value = env.get("r-arpa")) != nullptr) && fsys_t::isfile(value)){
 					// Запоминаем адрес файла
 					const string & filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
@@ -1936,7 +1943,7 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				}
 				// Если требуется загрузить файл словаря vocab
-				if(((value = env.get("r-vocab")) != nullptr) && fsys_t::isfile(value)){
+				if(!env.is("method", "merge") && ((value = env.get("r-vocab")) != nullptr) && fsys_t::isfile(value)){
 					// Запоминаем адрес файла
 					const string & filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
@@ -2017,7 +2024,7 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				}
 				// Если требуется загрузить файл списка слов
-				if(((value = env.get("r-words")) != nullptr) && fsys_t::isfile(value)){
+				if(!env.is("method", "merge") && ((value = env.get("r-words")) != nullptr) && fsys_t::isfile(value)){
 					// Параметры индикаторы процесса
 					size_t size = 0, status = 0, rate = 0;
 					// Запоминаем адрес файла
@@ -2127,7 +2134,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если требуется загрузить карту последовательности или список карт последовательностей
 				if(env.is("r-map") && env.is("r-vocab")){
 					// Если нужно загрузить карту последовательности
-					if(((value = env.get("r-map")) != nullptr) && fsys_t::isfile(value)){
+					if(!env.is("method", "merge") && ((value = env.get("r-map")) != nullptr) && fsys_t::isfile(value)){
 						// Запоминаем адрес файла
 						const string & filename = realpath(value, nullptr);
 						// Если отладка включена, выводим индикатор загрузки
@@ -2193,7 +2200,7 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				}
 				// Если конфигурация файлов верная и требуется обучение
-				if(env.is("w-arpa") && (((env.is("r-vocab") || env.is("r-words")) && env.is("r-map")) || env.is("r-ngram"))){
+				if(!env.is("method", "merge") && env.is("w-arpa") && (((env.is("r-vocab") || env.is("r-words")) && env.is("r-map")) || env.is("r-ngram"))){
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Очищаем предыдущий прогресс-бар
@@ -2275,9 +2282,15 @@ int main(int argc, char * argv[]) noexcept {
 						case 2: pss.status(100); break;
 					}
 				// Если нужно выполнить прунинг словаря
-				} else if(env.is("method", "vprune") && ((value = env.get("vprune-threshold")) != nullptr)) {
-					// Выполняем является ли переданная строка числом
-					if(alphabet.isDecimal(alphabet.convert(value))){
+				} else if(env.is("method", "vprune") && (env.is("vprune-wltf") || env.is("vprune-oc") || env.is("vprune-dc"))) {
+					// Получаем порог встречаемости слова
+					const size_t oc = (((value = env.get("vprune-oc")) != nullptr) && alphabet.isNumber(alphabet.convert(value)) ? stoull(value) : 0);
+					// Получаем порог количества документов, где встретилось слово
+					const size_t dc = (((value = env.get("vprune-dc")) != nullptr) && alphabet.isNumber(alphabet.convert(value)) ? stoull(value) : 0);
+					// Получаем порог веса слова
+					const double wltf = (((value = env.get("vprune-wltf")) != nullptr) && alphabet.isDecimal(alphabet.convert(value)) ? stod(value) : idw_t::NIDW);
+					// Проверяем на правильность входных параметров
+					if((wltf != idw_t::NIDW) || (oc > 0) || (dc > 0)){
 						// Если отладка включена, выводим индикатор прунинга
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
@@ -2291,7 +2304,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 						// Выполняем прунинг словаря
-						toolkit.pruneVocab(stod(value), [debug, &pss](const u_short status) noexcept {
+						toolkit.pruneVocab(wltf, oc, dc, [debug, &pss](const u_short status) noexcept {
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
@@ -2304,7 +2317,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 2: pss.status(100); break;
 						}
 					// Сообщаем что порог передан неверный
-					} else print("vprune-threshold is broken\r\n", env.get("log"));
+					} else print("threshold is broken\r\n", env.get("log"));
 				// Если нужно выполнить прунинг arpa
 				} else if(env.is("method", "aprune")) {
 					// Максимальный размер n-граммы
@@ -2489,7 +2502,7 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			}
 			// Если файл для сохранения arpa передан
-			if((value = env.get("w-arpa")) != nullptr){
+			if(!env.is("method", "merge") && ((value = env.get("w-arpa")) != nullptr)){
 				// Если отладка включена, выводим индикатор загрузки
 				if(debug > 0){
 					// Очищаем предыдущий прогресс-бар
@@ -2550,7 +2563,7 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			}
 			// Если нужно использовать бинарный контейнер
-			if((value = env.get("w-bin")) != nullptr){
+			if(!env.is("method", "merge") && ((value = env.get("w-bin")) != nullptr)){
 				// Создаём бинарный контейнер
 				ablm_t ablm(value, &toolkit, &alphabet, &tokenizer, env.get("log"));
 				// Если размер шифрования передан
