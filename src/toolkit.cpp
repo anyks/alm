@@ -3068,12 +3068,12 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const u_sh
 								// Извлекаем параметров слова
 								this->alphabet->split(item.substr(pos + 2, item.length() - ((pos + 2) + 1)), L",", params);
 								// Если параметры получены
-								if(!params.empty()){
+								if(!params.empty() && (params.size() == 3)){
 									// Формируем блок слова
 									sequence.idw  = idw;
-									sequence.oc   = stoull(params[0]);
-									sequence.dc   = stoull(params[1]);
-									sequence.ups  = stoull(params[2]);
+									sequence.oc   = stoull(params.at(0));
+									sequence.dc   = stoull(params.at(1));
+									sequence.ups  = stoull(params.at(2));
 									// Формируем последовательность
 									seq.push_back(sequence);
 								}
