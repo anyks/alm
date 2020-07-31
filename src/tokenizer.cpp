@@ -941,32 +941,35 @@ void anyks::Tokenizer::setExternal(tokenz_t fn) noexcept {
 void anyks::Tokenizer::jsonToText(const string & text, function <void (const string &)> callback) const noexcept {
 	// Если текст передан, и текст не больше 100Mb в одну строку
 	if(!text.empty() && (this->alphabet != nullptr)){
-		// Получаем данные в виде json
-		json obj = json::parse(text);
-		// Если это массив
-		if(obj.is_array()){
-			// Слово в контексте
-			string word = "";
-			// Список полученных слов
-			vector <string> context;
-			// Переходим по всем элементам объекта
-			for(auto & item : obj.items()){
-				// Если значение является массивом
-				if(item.value().is_array()){
-					// Переходим по всем словам контекста
-					for(auto & elem : item.value().items()){
-						// Если это строка
-						if(elem.value().is_string()) elem.value().get_to(word);
-						// Если слово получено, добавляем в контекст
-						if(!word.empty()) context.push_back(word);
+		try {
+			// Получаем данные в виде json
+			json obj = json::parse(text);
+			// Если это массив
+			if(obj.is_array()){
+				// Слово в контексте
+				string word = "";
+				// Список полученных слов
+				vector <string> context;
+				// Переходим по всем элементам объекта
+				for(auto & item : obj.items()){
+					// Если значение является массивом
+					if(item.value().is_array()){
+						// Переходим по всем словам контекста
+						for(auto & elem : item.value().items()){
+							// Если это строка
+							if(elem.value().is_string()) elem.value().get_to(word);
+							// Если слово получено, добавляем в контекст
+							if(!word.empty()) context.push_back(word);
+						}
+						// Если список токенов получен
+						if(!context.empty()) callback(this->restore(context));
 					}
-					// Если список токенов получен
-					if(!context.empty()) callback(this->restore(context));
+					// Очищаем полученный контекст
+					context.clear();
 				}
-				// Очищаем полученный контекст
-				context.clear();
 			}
-		}
+		// Если возникает ошибка, ничего не делаем
+		} catch(const exception & e) {}
 	}
 }
 /**

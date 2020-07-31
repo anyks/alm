@@ -185,8 +185,6 @@ const string & anyks::Collector::createDir() const noexcept {
  * @return     размер сегмента в байтах
  */
 const long anyks::Collector::getSize(const string & str) const noexcept {
-	// Если это просто число, тогда выводим как есть
-	if(this->alphabet->isNumber(this->alphabet->convert(str))) return stoull(str);
 	/*
 	* Help - http://www.securitylab.ru/analytics/243414.php
 	*
@@ -233,115 +231,6 @@ const long anyks::Collector::getSize(const string & str) const noexcept {
 }
 /**
  * train Обучения полученного текста
- * @param filenames список файлов для обучения
- */
-void anyks::Collector::train(const vector <string> & filenames) noexcept {
-	// Если текст передан
-	if(!filenames.empty() && (this->tpool != nullptr)){
-		// Добавляем в тредпул новое задание на обработку
-		this->tpool->push([this](const vector <string> filenames){
-			// Общее количество данных собранное этим потоком
-			size_t index = 0;
-			// Получаем копию объекта тулкита
-			toolkit_t toolkit(this->alphabet, this->tokenizer, this->order);
-			// Устанавливаем log файл
-			toolkit.setLogfile(this->logfile);
-			// Устанавливаем внешний объект питона
-			toolkit.setPythonObj(this->python);
-			// Устанавливаем неизвестное слово
-			toolkit.setUnknown(this->toolkit->getUnknown());
-			// Устанавливаем опции тулкита
-			toolkit.setOptions(this->toolkit->getOptions());
-			// Устанавливаем список токенов приводимых к <unk>
-			toolkit.setTokensUnknown(this->toolkit->getTokensUnknown());
-			// Устанавливаем список запрещённых токенов
-			toolkit.setTokensDisable(this->toolkit->getTokensDisable());
-			// Устанавливаем скрипт препроцессинга слов
-			toolkit.setWordScript(this->toolkit->getWordScript());
-			// Устанавливаем скрипт идентифицирования пользовательский токенов
-			toolkit.setUserTokenScript(this->toolkit->getUserTokenScript());
-			// Получаем пользовательские токены
-			const auto & tokens = this->toolkit->getUserTokens();
-			// Получаем список плохих слов
-			const auto & badwords = this->toolkit->getBadwords();
-			// Получаем список хороших слов
-			const auto & goodwords = this->toolkit->getGoodwords();
-			// Устанавливаем пользовательские токены
-			if(!tokens.empty()) for(auto & token : tokens) toolkit.setUserToken(token);
-			// Переходим по всему списку плохих слов и добавляем их
-			if(!badwords.empty()) for(auto & idw : badwords) toolkit.addBadword(idw);
-			// Переходим по всему списку хороших слов и добавляем их
-			if(!goodwords.empty()) for(auto & idw : goodwords) toolkit.addGoodword(idw);
-			// Получаем параметры туллкита
-			const auto params = this->toolkit->getParams();
-			// Выполняем инициализацию тулкита
-			toolkit.init((toolkit_t::algorithm_t) params.algorithm, params.modified, params.prepares, params.mod);
-			// Переходим по всему списку файлов
-			for(auto & filename : filenames){
-				// Увеличиваем значение индекса
-				index++;
-				// Выполняем считывание всех строк текста
-				fsys_t::rfile2(filename, [&](const string & str, const uintmax_t fileSize) noexcept {
-					// Добавляем полученную строку текста
-					if(!str.empty()) toolkit.addText(str, index);
-				});
-				// Если отладка включена, выводим индикатор загрузки
-				if(this->debug > 0){
-					// Общий полученный размер данных
-					this->allSize.store(this->allSize + 1, memory_order_relaxed);
-					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / double(this->dataSize) * 100.0);
-					// Если процентное соотношение изменилось
-					if(this->rate != this->status){
-						// Запоминаем текущее процентное соотношение
-						this->rate.store(this->status, memory_order_relaxed);
-						// Блокируем поток
-						this->locker.lock();
-						// Устанавливаем название файла
-						this->pss.description(filename);
-						// Отображаем ход процесса
-						switch(this->debug){
-							case 1: this->pss.update(this->status); break;
-							case 2: this->pss.status(this->status); break;
-						}
-						// Разблокируем поток
-						this->locker.unlock();
-					}
-				}
-			}
-			// Блокируем поток
-			this->locker.lock();
-			// Получаем данные статистики словаря
-			const auto & stat1 = toolkit.getStatistic();
-			// Получаем данные статистики основного словаря
-			const auto & stat2 = this->toolkit->getStatistic();
-			// Увеличиваем статистику основного словаря
-			this->toolkit->getStatistic(stat1.first + stat2.first, stat1.second + stat2.second);
-			// Считываем все слова словаря
-			toolkit.words([this](const word_t & word, const size_t idw, const size_t size){
-				// Добавляем слово в словарь
-				this->toolkit->addWord(word, idw);
-				// Разрешаем перебор остальных слов
-				return true;
-			});
-			// Извлекаем n-граммы
-			toolkit.saveArpa([this](const vector <char> & buffer, const u_short status){
-				// Загружаем данные n-граммы
-				this->toolkit->appendArpa(buffer);
-			});
-			// Разблокируем поток
-			this->locker.unlock();
-		}, filenames);
-		// Получаем объект списка файлов
-		vector <string> * obj = const_cast <vector <string> *> (&filenames);
-		// Очищаем список файлов
-		obj->clear();
-		// Очищаем выделенную память
-		vector <string> ().swap(* obj);
-	}
-}
-/**
- * train Обучения полученного текста
  * @param filename файл для чтения
  * @param idd      идентификатор документа
  */
@@ -360,12 +249,12 @@ void anyks::Collector::train(const string & filename, const size_t idd) noexcept
 			toolkit.setUnknown(this->toolkit->getUnknown());
 			// Устанавливаем опции тулкита
 			toolkit.setOptions(this->toolkit->getOptions());
+			// Устанавливаем скрипт препроцессинга слов
+			toolkit.setWordScript(this->toolkit->getWordScript());
 			// Устанавливаем список токенов приводимых к <unk>
 			toolkit.setTokensUnknown(this->toolkit->getTokensUnknown());
 			// Устанавливаем список запрещённых токенов
 			toolkit.setTokensDisable(this->toolkit->getTokensDisable());
-			// Устанавливаем скрипт препроцессинга слов
-			toolkit.setWordScript(this->toolkit->getWordScript());
 			// Устанавливаем скрипт идентифицирования пользовательский токенов
 			toolkit.setUserTokenScript(this->toolkit->getUserTokenScript());
 			// Получаем пользовательские токены
@@ -439,18 +328,14 @@ void anyks::Collector::train(const string & filename, const size_t idd) noexcept
 }
 /**
  * train Обучения полученного текста
- * @param text список строк текста для обучения
- * @param idd  идентификатор документа
+ * @param texts список строк текста для обучения
+ * @param idd   идентификатор документа
  */
-void anyks::Collector::train(const vector <string> & text, const size_t idd) noexcept {
-	// Если текст передан
-	if(!text.empty() && (this->tpool != nullptr)){
+void anyks::Collector::train(const vector <string> & texts, const size_t idd) noexcept {
+	// Если тексты переданы
+	if(!texts.empty() && (this->tpool != nullptr)){
 		// Добавляем в тредпул новое задание на обработку
-		this->tpool->push([this](const vector <string> text, const size_t idd){
-			// Общее количество данных собранное этим потоком
-			size_t size = 0;
-			// Получаем максимальное значение общего размера
-			const double maxSize = (this->dataSize + ceil(this->dataSize / 100.0));
+		this->tpool->push([this](const vector <string> texts, const size_t idd){
 			// Получаем копию объекта тулкита
 			toolkit_t toolkit(this->alphabet, this->tokenizer, this->order);
 			// Устанавливаем log файл
@@ -461,12 +346,12 @@ void anyks::Collector::train(const vector <string> & text, const size_t idd) noe
 			toolkit.setUnknown(this->toolkit->getUnknown());
 			// Устанавливаем опции тулкита
 			toolkit.setOptions(this->toolkit->getOptions());
+			// Устанавливаем скрипт препроцессинга слов
+			toolkit.setWordScript(this->toolkit->getWordScript());
 			// Устанавливаем список токенов приводимых к <unk>
 			toolkit.setTokensUnknown(this->toolkit->getTokensUnknown());
 			// Устанавливаем список запрещённых токенов
 			toolkit.setTokensDisable(this->toolkit->getTokensDisable());
-			// Устанавливаем скрипт препроцессинга слов
-			toolkit.setWordScript(this->toolkit->getWordScript());
 			// Устанавливаем скрипт идентифицирования пользовательский токенов
 			toolkit.setUserTokenScript(this->toolkit->getUserTokenScript());
 			// Получаем пользовательские токены
@@ -487,37 +372,36 @@ void anyks::Collector::train(const vector <string> & text, const size_t idd) noe
 			toolkit.init((toolkit_t::algorithm_t) params.algorithm, params.modified, params.prepares, params.mod);
 			// Сегодня в мире - две остановки
 			// Переходим по всему списку строк текста
-			for(auto & str : text){
-				// Добавляем полученную строку текста
-				toolkit.addText(str, idd);
-				// Считаем общий размер данных обработанное данным процессом
-				size += str.size();
-				// Если отладка включена, выводим индикатор загрузки
-				if(this->debug > 0){
-					// Общий полученный размер данных
-					this->allSize.store(this->allSize + str.size(), memory_order_relaxed);
-					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / maxSize * 100.0);
-					// Если процентное соотношение изменилось
-					if(this->rate != this->status){
-						// Запоминаем текущее процентное соотношение
-						this->rate.store(this->status, memory_order_relaxed);
-						// Блокируем поток
-						this->locker.lock();
-						// Отображаем ход процесса
-						switch(this->debug){
-							case 1: this->pss.update(this->status); break;
-							case 2: this->pss.status(this->status); break;
+			for(auto & text : texts){
+				// Если текст не пустой
+				if(!text.empty()){
+					// Добавляем полученную строку текста
+					toolkit.addText(text, idd);
+					// Если отладка включена, выводим индикатор загрузки
+					if(this->debug > 0){
+						// Общий полученный размер данных
+						this->allSize.store(this->allSize + text.size(), memory_order_relaxed);
+						// Подсчитываем статус выполнения
+						this->status = u_short(this->allSize / double(this->dataSize) * 100.0);
+						// Если процентное соотношение изменилось
+						if(this->rate != this->status){
+							// Запоминаем текущее процентное соотношение
+							this->rate.store(this->status, memory_order_relaxed);
+							// Блокируем поток
+							this->locker.lock();
+							// Отображаем ход процесса
+							switch(this->debug){
+								case 1: this->pss.update(this->status); break;
+								case 2: this->pss.status(this->status); break;
+							}
+							// Разблокируем поток
+							this->locker.unlock();
 						}
-						// Разблокируем поток
-						this->locker.unlock();
 					}
 				}
 			}
 			// Блокируем поток
 			this->locker.lock();
-			// Получаем минимальный размер оставшихся данных
-			const double minSize = (1 * size / 100.0);
 			// Получаем данные статистики словаря
 			const auto & stat1 = toolkit.getStatistic();
 			// Получаем данные статистики основного словаря
@@ -525,56 +409,22 @@ void anyks::Collector::train(const vector <string> & text, const size_t idd) noe
 			// Увеличиваем статистику основного словаря
 			this->toolkit->getStatistic(stat1.first + stat2.first, stat1.second + stat2.second);
 			// Считываем все слова словаря
-			toolkit.words([minSize, maxSize, this](const word_t & word, const size_t idw, const size_t size){
+			toolkit.words([this](const word_t & word, const size_t idw, const size_t size){
 				// Добавляем слово в словарь
 				this->toolkit->addWord(word, idw);
-				// Если отладка включена, выводим индикатор загрузки
-				if(this->debug > 0){
-					// Общий полученный размер данных
-					this->allSize.store(this->allSize + (size / (minSize / 2)), memory_order_relaxed);
-					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / maxSize * 100.0);
-					// Если процентное соотношение изменилось
-					if(this->rate != this->status){
-						// Запоминаем текущее процентное соотношение
-						this->rate.store(this->status, memory_order_relaxed);
-						// Отображаем ход процесса
-						switch(this->debug){
-							case 1: this->pss.update(this->status); break;
-							case 2: this->pss.status(this->status); break;
-						}
-					}
-				}
 				// Разрешаем перебор остальных слов
 				return true;
 			});
 			// Извлекаем n-граммы
-			toolkit.saveArpa([idd, minSize, maxSize, this](const vector <char> & buffer, const u_short status){
+			toolkit.saveArpa([idd, this](const vector <char> & buffer, const u_short status){
 				// Загружаем данные n-граммы
 				this->toolkit->appendArpa(buffer, idd);
-				// Если отладка включена, выводим индикатор загрузки
-				if(this->debug > 0){
-					// Общий полученный размер данных
-					this->allSize.store(this->allSize + (100 / (minSize / 2)), memory_order_relaxed);
-					// Подсчитываем статус выполнения
-					this->status = u_short(this->allSize / maxSize * 100.0);
-					// Если процентное соотношение изменилось
-					if(this->rate != this->status){
-						// Запоминаем текущее процентное соотношение
-						this->rate.store(this->status, memory_order_relaxed);
-						// Отображаем ход процесса
-						switch(this->debug){
-							case 1: this->pss.update(this->status); break;
-							case 2: this->pss.status(this->status); break;
-						}
-					}
-				}
 			});
 			// Разблокируем поток
 			this->locker.unlock();
-		}, text, idd);
+		}, texts, idd);
 		// Получаем объект текста
-		vector <string> * obj = const_cast <vector <string> *> (&text);
+		vector <string> * obj = const_cast <vector <string> *> (&texts);
 		// Очищаем список текстов
 		obj->clear();
 		// Очищаем выделенную память
@@ -684,8 +534,8 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 			size_t count = 0;
 			// Размер собранных данных
 			uintmax_t size = 0;
-			// Список строк для обработки
-			vector <string> text = {};
+			// Список текстов для обработки
+			vector <string> texts;
 			// Если отладка включена, выводим индикатор загрузки
 			if(this->debug > 0){
 				// Сбрасываем общий размер собранных данных
@@ -709,35 +559,35 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 				// Если размер сегмента нулевой
 				if(this->segmentSize == 0) this->segmentSize = ceil(this->dataSize / double(this->threads));
 				// Выполняем считывание всех строк текста
-				fsys_t::rfile(filename, [&count, &size, &text, this](const string & str, const uintmax_t fileSize) noexcept {
+				fsys_t::rfile(filename, [&count, &size, &texts, this](const string & text, const uintmax_t fileSize) noexcept {
 					// Если текст получен
-					if(!str.empty()){
+					if(!text.empty()){
 						// Формируем блок собранных данных
-						size += str.size();
+						size += text.size();
 						// Если собранных данных достаточно, добавляем данные в поток
 						if(size >= this->segmentSize){
 							// Очищаем размер собранных данных
 							size = 0;
 							// Выполняем обучение полученного текста
-							this->train(text, count);
+							this->train(texts, count);
 							// Увеличиваем количество файлов
 							count++;
 						}
 						// Добавляем в список текстов полученный текст
-						text.push_back(str);
+						texts.push_back(text);
 					}
 				});
 				// Выполняем обучение полученного текста
-				this->train(text, count);
+				this->train(texts, count);
 			// Если сегментация файла не нужна
 			} else {
 				// Выполняем считывание всех строк текста
-				fsys_t::rfile(filename, [&text](const string & str, const uintmax_t fileSize) noexcept {
+				fsys_t::rfile(filename, [&texts](const string & text, const uintmax_t fileSize) noexcept {
 					// Если текст получен
-					if(!str.empty()) text.push_back(str);
+					if(!text.empty()) texts.push_back(text);
 				});
 				// Выполняем обучение полученного текста
-				this->train(text, 0);
+				this->train(texts, 0);
 			}
 			// Завершаем работу тредпула
 			this->finish();
@@ -759,52 +609,66 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 void anyks::Collector::readDir(const string & path, const string & ext) noexcept {
 	// Если адрес каталога передан
 	if((this->toolkit != nullptr) && !path.empty() && !ext.empty() && fsys_t::isdir(path)){
-		// Получаем размер файла
-		this->dataSize = fsys_t::fcount(path, ext);
-		// Если размер файла получен
-		if(this->dataSize > 0){
-			// Количество файлов
-			size_t count = 0;
-			// Список строк файлов для обработки
-			vector <string> filenames = {};
-			// Если отладка включена, выводим индикатор загрузки
-			if(this->debug > 0){
-				// Сбрасываем общий размер собранных данных
-				this->allSize = 0;
-				// Очищаем предыдущий прогресс-бар
-				this->pss.clear();
-				// Устанавливаем заголовки прогресс-бара
-				this->pss.title("Read text corpora", "Read text corpora is done");
-				// Выводим индикатор прогресс-бара
-				switch(this->debug){
-					case 1: this->pss.update(); break;
-					case 2: this->pss.status(); break;
-				}
+		// Количество файлов
+		size_t count = 0;
+		// Если отладка включена, выводим индикатор загрузки
+		if(this->debug > 0){
+			// Сбрасываем общий размер собранных данных
+			this->allSize = 0;
+			// Очищаем предыдущий прогресс-бар
+			this->pss.clear();
+			// Устанавливаем заголовки прогресс-бара
+			this->pss.title("Read text corpora", "Read text corpora is done");
+			// Выводим индикатор прогресс-бара
+			switch(this->debug){
+				case 1: this->pss.update(); break;
+				case 2: this->pss.status(); break;
 			}
-			// Создаём тредпул
-			this->start();
-			// Если нужно произвести сегментацию файла
-			if(this->segments && (this->dataSize > this->segmentSize)){
-				// Если размер сегмента нулевой
-				if(this->segmentSize == 0) this->segmentSize = ceil(this->dataSize / double(this->threads));
-				// Переходим по всему списку файлов в каталоге
-				fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
-					// Увеличиваем идентификатор документа
-					count++;
-					// Если собранных данных достаточно, добавляем данные в поток
-					if(count >= this->segmentSize){
-						// Очищаем размер собранных данных
-						count = 0;
-						// Выполняем обучение полученного текста
-						this->train(filenames);
+		}
+		// Создаём тредпул
+		this->start();
+		// Получаем размер файлов в каталоге
+		if(this->segments) this->dataSize = fsys_t::dsize(path, ext);
+		// Если нужно произвести сегментацию файла
+		if(this->segments && (this->dataSize > this->segmentSize)){
+			// Размер собранных данных
+			uintmax_t size = 0;
+			// Список текстов для обработки
+			vector <string> texts;
+			// Если размер сегмента нулевой
+			if(this->segmentSize == 0) this->segmentSize = ceil(this->dataSize / double(this->threads));
+			// Переходим по всему списку файлов в каталоге
+			fsys_t::rdir(path, ext, [&count, &size, &texts, this](const string & filename, const uintmax_t dirSize) noexcept {
+				// Устанавливаем название файла
+				this->pss.description(filename);
+				// Выполняем считывание всех строк текста
+				fsys_t::rfile2(filename, [&count, &size, &texts, this](const string & text, const uintmax_t fileSize) noexcept {
+					// Если текст получен
+					if(!text.empty()){
+						// Формируем блок собранных данных
+						size += text.size();
+						// Если собранных данных достаточно, добавляем данные в поток
+						if(size >= this->segmentSize){
+							// Очищаем размер собранных данных
+							size = 0;
+							// Выполняем обучение полученного текста
+							this->train(texts, count);
+							// Увеличиваем количество файлов
+							count++;
+						}
+						// Добавляем в список текстов полученный текст
+						texts.push_back(text);
 					}
-					// Добавляем в список файлов полученный файл
-					filenames.push_back(filename);
 				});
-				// Выполняем обучение полученного текста
-				this->train(filenames);
-			// Если сегментация файла не нужна
-			} else {
+			});
+			// Выполняем обучение полученного текста
+			this->train(texts, count);
+		// Если сегментация файла не нужна
+		} else {
+			// Получаем размер файла
+			this->dataSize = fsys_t::fcount(path, ext);
+			// Если количество файлов в каталоге, больше 0
+			if(this->dataSize > 0){
 				// Переходим по всему списку файлов в каталоге
 				fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
 					// Выполняем обучение полученного текста
@@ -813,16 +677,16 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 					count++;
 				});
 			}
-			// Завершаем работу тредпула
-			this->finish();
-			// Отображаем ход процесса
-			switch(this->debug){
-				case 1: this->pss.update(100); break;
-				case 2: this->pss.status(100); break;
-			}
-			// Выполняем дамп промежуточных данных
-			this->dumpRaw();
 		}
+		// Завершаем работу тредпула
+		this->finish();
+		// Отображаем ход процесса
+		switch(this->debug){
+			case 1: this->pss.update(100); break;
+			case 2: this->pss.status(100); break;
+		}
+		// Выполняем дамп промежуточных данных
+		this->dumpRaw();
 	}
 }
 /**

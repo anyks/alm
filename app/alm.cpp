@@ -187,7 +187,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-tokens-unknown <value1|value2|...> | --tokens-unknown=<value1|value2|...>] list of tokens for identification as <unk>\r\n"
 	"  \x1B[1m-\x1B[0m (num | url | abbr | date | time | anum | math | rnum | specl | ...)\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-train-segment-size <value> | --train-segment-size=<value>]                 segment size for training data segmentation\r\n"
-	"  \x1B[1m-\x1B[0m (nb | nkb | nMb | nGb), example: --train-segment-size=4096Mb or --train-segment-size=1000\r\n"
+	"  \x1B[1m-\x1B[0m (nb | nkb | nMb | nGb), example: --train-segment-size=4096Mb\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-smoothing <value> | --smoothing=<value>]                                   smoothing algorithm for \x1B[1mtrain method\x1B[0m]\r\n"
 	"  \x1B[1m-\x1B[0m (goodturing | cdiscount | ndiscount | addsmooth | wittenbell | kneserney | mkneserney)\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-method <value> | --method=<value>]                                         method application\r\n"
@@ -253,7 +253,16 @@ int main(int argc, char * argv[]) noexcept {
 			if(!line.empty()) data.append(line);
 		});
 		// Если данные получены, устанавливаем их
-		if(!data.empty()) env.setJson(json::parse(data));
+		if(!data.empty()){
+			try {
+				// Выполняем парсинг JSON конфиг
+				env.setJson(json::parse(data));
+			// Если возникает ошибка
+			} catch(const exception & e) {
+				// Выводим сообщение об ошибке
+				print(alphabet.format("the JSON config [%s] is broken\r\n", value), env.get("log"));
+			}
+		}
 	}
 	// Проверяем существует ли бинарный файл
 	if(((value = env.get("r-bin")) != nullptr) && fsys_t::isfile(value)){
@@ -330,7 +339,7 @@ int main(int argc, char * argv[]) noexcept {
 					!env.is("smoothing", "mkneserney"))
 						// Выводим сообщение в консоль
 						print(alphabet.format("the algorithm name \"%s\" is bad\r\n", env.get("smoothing")), env.get("log"));
-				// Сообщаем что алгоритм сглаживания не указан
+				// Сообщаем, что алгоритм сглаживания не указан
 				} else print("algorithm smoothing is not set\r\n", env.get("log"));
 			}
 			// Если основной метод работы получен
@@ -354,7 +363,7 @@ int main(int argc, char * argv[]) noexcept {
 				!env.is("method", "sentences"))
 					// Выводим сообщение в консоль
 					print(alphabet.format("the method name \"%s\" is bad\r\n", env.get("method")), env.get("log"));
-			// Сообщаем что метод не указан
+			// Сообщаем, что метод не указан
 			} else print("toolkit method is not set\r\n", env.get("log"));
 			// Если ни один файл для сохранения не передан, выходим
 			if(!env.is("w-map") && !env.is("w-arpa") && !env.is("w-vocab") && !env.is("w-words") && !env.is("w-ngram") &&
@@ -760,7 +769,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Выводим сообщение отладки - результатов расчёта
 							alphabet.log("%zu zeroprobs, logprob= %4.8f ppl= %4.8f ppl1= %4.8f\r\n", alphabet_t::log_t::null, nullptr, ppl.zeroprobs, ppl.logprob, ppl.ppl, ppl.ppl1);
 						}
-					// Сообщаем что текст не указан
+					// Сообщаем, что текст не указан
 					} else print("text is empty\r\n", env.get("log"));
 				// Если это метод поиска n-граммы в тексте
 				} else if(env.is("method", "find")) {
@@ -808,7 +817,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 1: pss.update(100); break;
 							case 2: pss.status(100); break;
 						}
-					// Сообщаем что текст не указан
+					// Сообщаем, что текст не указан
 					} else print("text is empty\r\n", env.get("log"));
 				// Если это метод проверки текста
 				} else if(env.is("method", "checktext")){
@@ -855,7 +864,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 1: pss.update(100); break;
 							case 2: pss.status(100); break;
 						}
-					// Сообщаем что текст не указан
+					// Сообщаем, что текст не указан
 					} else print("text is empty\r\n", env.get("log"));
 				// Если это метод исправления регистров слов
 				} else if(env.is("method", "fixcase")){
@@ -900,7 +909,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 1: pss.update(100); break;
 							case 2: pss.status(100); break;
 						}
-					// Сообщаем что текст не указан
+					// Сообщаем, что текст не указан
 					} else print("text is empty\r\n", env.get("log"));
 				// Если это метод определения количества n-грамм в тексте
 				} else if(env.is("method", "counts")){
@@ -954,7 +963,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 1: pss.update(100); break;
 							case 2: pss.status(100); break;
 						}
-					// Сообщаем что текст не указан
+					// Сообщаем, что текст не указан
 					} else print("text is empty\r\n", env.get("log"));
 				}
 				// Если режим отладки включён
@@ -1199,7 +1208,7 @@ int main(int argc, char * argv[]) noexcept {
 								case 1: pss.update(100); break;
 								case 2: pss.status(100); break;
 							}
-						// Сообщаем что контекст пустой
+						// Сообщаем, что контекст пустой
 						} else print("context is empty\r\n", env.get("log"));
 					// Выходим из приложения и выводим сообщение
 					} else print("file to write result is not found\r\n", env.get("log"));
@@ -1237,39 +1246,45 @@ int main(int argc, char * argv[]) noexcept {
 						});
 						// Если результат получен
 						if(!textData.empty()){
-							// Выполняем парсинг json данных
-							jsonData = json::parse(textData);
-							// Если json данные получены
-							if(!jsonData.empty() && jsonData.is_array()){
-								// Очищаем блок текстовых данных
-								textData.clear();
-								// Переходим по всем json данным
-								for(auto & item : jsonData.items()){
-									// Если данные получены
-									if(item.value().is_array()){
-										// Пытаемся восстановить текст из json объекта
-										tokenizer.jsonToText(item.value().dump(), [&](const string & text) noexcept {
-											// Если текст получен
-											if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
-										});
+							try {
+								// Выполняем парсинг json данных
+								jsonData = json::parse(textData);
+								// Если json данные получены
+								if(!jsonData.empty() && jsonData.is_array()){
+									// Очищаем блок текстовых данных
+									textData.clear();
+									// Переходим по всем json данным
+									for(auto & item : jsonData.items()){
+										// Если данные получены
+										if(item.value().is_array()){
+											// Пытаемся восстановить текст из json объекта
+											tokenizer.jsonToText(item.value().dump(), [&](const string & text) noexcept {
+												// Если текст получен
+												if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
+											});
+										}
 									}
-								}
-								// Если результат получен
-								if(!textData.empty()){
-									// Открываем файл на запись
-									ofstream file(writefile, ios::binary);
-									// Если файл открыт
-									if(file.is_open()){
-										// Выполняем запись данных в файл
-										file.write(textData.data(), textData.size());
-										// Закрываем файл
-										file.close();
-									}
-								// Сообщаем что контекст в json файле пустой
-								} else print("context in json file is empty\r\n", env.get("log"));
-							// Сообщаем что json файл испорчен
-							} else print("broken json file\r\n", env.get("log"));
-						// Сообщаем что контекст пустой
+									// Если результат получен
+									if(!textData.empty()){
+										// Открываем файл на запись
+										ofstream file(writefile, ios::binary);
+										// Если файл открыт
+										if(file.is_open()){
+											// Выполняем запись данных в файл
+											file.write(textData.data(), textData.size());
+											// Закрываем файл
+											file.close();
+										}
+									// Сообщаем, что контекст в json файле пустой
+									} else print("context in json file is empty\r\n", env.get("log"));
+								// Сообщаем, что json файл испорчен
+								} else print("broken json file\r\n", env.get("log"));
+							// Если возникает ошибка
+							} catch(const exception & e) {
+								// Сообщаем, что json файл испорчен
+								print("broken json file\r\n", env.get("log"));
+							}
+						// Сообщаем, что контекст пустой
 						} else print("context is empty\r\n", env.get("log"));
 						// Отображаем ход процесса
 						switch(debug){
@@ -1335,46 +1350,52 @@ int main(int argc, char * argv[]) noexcept {
 							if(ext.compare("json") == 0){
 								// Если результат получен
 								if(!textData.empty()){
-									// Выполняем парсинг json данных
-									jsonData = json::parse(textData);
-									// Если json данные получены
-									if(!jsonData.empty() && jsonData.is_array()){
-										// Очищаем блок текстовых данных
-										textData.clear();
-										// Переходим по всем json данным
-										for(auto & item : jsonData.items()){
-											// Если данные получены
-											if(item.value().is_array()){
-												// Пытаемся восстановить текст из json объекта
-												tokenizer.jsonToText(item.value().dump(), [&](const string & text) noexcept {
-													// Если текст получен
-													if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
-												});
-											}
-										}
-										// Если результат получен
-										if(!textData.empty()){
-											// Получаем параметры файла
-											auto param = fsys_t::file(filename);
-											// Если имя файла получено
-											if(!param.first.empty()){
-												// Формируем имя файла для записи
-												const string & filename = alphabet.format("%s/%s.txt", writepath.c_str(), param.first.c_str());
-												// Открываем файл на запись
-												ofstream file(filename, ios::binary);
-												// Если файл открыт
-												if(file.is_open()){
-													// Выполняем запись данных в файл
-													file.write(textData.data(), textData.size());
-													// Закрываем файл
-													file.close();
+									try {
+										// Выполняем парсинг json данных
+										jsonData = json::parse(textData);
+										// Если json данные получены
+										if(!jsonData.empty() && jsonData.is_array()){
+											// Очищаем блок текстовых данных
+											textData.clear();
+											// Переходим по всем json данным
+											for(auto & item : jsonData.items()){
+												// Если данные получены
+												if(item.value().is_array()){
+													// Пытаемся восстановить текст из json объекта
+													tokenizer.jsonToText(item.value().dump(), [&](const string & text) noexcept {
+														// Если текст получен
+														if(!text.empty()) textData.append(alphabet.format("%s\r\n", text.c_str()));
+													});
 												}
 											}
-										// Сообщаем что контекст в json файле пустой
-										} else print("context in json file is empty\r\n", env.get("log"));
-									// Сообщаем что json файл испорчен
-									} else print("broken json file\r\n", env.get("log"));
-								// Сообщаем что контекст пустой
+											// Если результат получен
+											if(!textData.empty()){
+												// Получаем параметры файла
+												auto param = fsys_t::file(filename);
+												// Если имя файла получено
+												if(!param.first.empty()){
+													// Формируем имя файла для записи
+													const string & filename = alphabet.format("%s/%s.txt", writepath.c_str(), param.first.c_str());
+													// Открываем файл на запись
+													ofstream file(filename, ios::binary);
+													// Если файл открыт
+													if(file.is_open()){
+														// Выполняем запись данных в файл
+														file.write(textData.data(), textData.size());
+														// Закрываем файл
+														file.close();
+													}
+												}
+											// Сообщаем, что контекст в json файле пустой
+											} else print("context in json file is empty\r\n", env.get("log"));
+										// Сообщаем, что json файл испорчен
+										} else print("broken json file\r\n", env.get("log"));
+									// Если возникает ошибка
+									} catch(const exception & e) {
+										// Сообщаем, что json файл испорчен
+										print("broken json file\r\n", env.get("log"));
+									}
+								// Сообщаем, что контекст пустой
 								} else print("context is empty\r\n", env.get("log"));
 							// Если это текстовые данные
 							} else if(!jsonData.empty()) {
@@ -1396,7 +1417,7 @@ int main(int argc, char * argv[]) noexcept {
 										file.close();
 									}
 								}
-							// Сообщаем что контекст пустой
+							// Сообщаем, что контекст пустой
 							} else print("context is empty\r\n", env.get("log"));
 						});
 						// Отображаем ход процесса
@@ -1414,7 +1435,7 @@ int main(int argc, char * argv[]) noexcept {
 					const string text = value;
 					// Проверяем является ли текст json-ом
 					if((text.front() == '[') && (text.back() == ']')){
-						// Запоминаем что это json
+						// Запоминаем, что это json
 						isJSON = true;
 						// Пытаемся восстановить текст из json объекта
 						tokenizer.jsonToText(text, [&](const string & text) noexcept {
@@ -1449,7 +1470,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						// Выводим сообщение в консоль
 						} else cout << textData;
-					// Сообщаем что контекст пустой
+					// Сообщаем, что контекст пустой
 					} else print("context is empty\r\n", env.get("log"));
 				// Выходим из приложения и выводим сообщение
 				} else print("text corpus for tokenization is not found\r\n", env.get("log"));
@@ -1487,9 +1508,9 @@ int main(int argc, char * argv[]) noexcept {
 				else if(env.is("smoothing", "kneserney")) toolkit.init(toolkit_t::algorithm_t::kneserNey, env.is("kneserney-modified"), env.is("kneserney-prepares"), 0.0);
 				// Если это ModKneserNey
 				else if(env.is("smoothing", "mkneserney")) toolkit.init(toolkit_t::algorithm_t::modKneserNey, env.is("kneserney-modified"), env.is("kneserney-prepares"), 0.0);
-				// Сообщаем что сглаживание выбрано не верно
+				// Сообщаем, что сглаживание выбрано не верно
 				else print("smoothing is bad\r\n", env.get("log"));
-			// Сообщаем что сглаживание выбрано не верно
+			// Сообщаем, что сглаживание выбрано не верно
 			} else if(!env.is("method", "mix")) print("smoothing is bad\r\n", env.get("log"));
 			// Если передан метод обучения
 			if(env.is("method", "train")){
@@ -2316,7 +2337,7 @@ int main(int argc, char * argv[]) noexcept {
 							case 1: pss.update(100); break;
 							case 2: pss.status(100); break;
 						}
-					// Сообщаем что порог передан неверный
+					// Сообщаем, что порог передан неверный
 					} else print("threshold is broken\r\n", env.get("log"));
 				// Если нужно выполнить прунинг arpa
 				} else if(env.is("method", "aprune")) {
@@ -2372,7 +2393,7 @@ int main(int argc, char * argv[]) noexcept {
 						else if(env.is("modify", "replace")) modify = toolkit_t::modify_t::replace;
 						// Иначе выходим
 						else print("modify flag is broken\r\n", env.get("log"));
-					// Сообщаем что флаг не установлен
+					// Сообщаем, что флаг не установлен
 					} else print("modify flag is not set\r\n", env.get("log"));
 					// Если файл передан
 					if(((value = env.get("modify-file")) != nullptr) && fsys_t::isfile(value)){
@@ -2405,10 +2426,10 @@ int main(int argc, char * argv[]) noexcept {
 							case 1: pss.update(100); break;
 							case 2: pss.status(100); break;
 						}
-					// Сообщаем что файл модификации не передан
+					// Сообщаем, что файл модификации не передан
 					} else print("file modify not found\r\n", env.get("log"));
 				}
-			// Выводим сообщение что файлы не переданы
+			// Выводим сообщение, что файлы не переданы
 			} else print("arpa file is not loaded\r\n", env.get("log"));
 			// Если файл для сохранения слов передан
 			if((value = env.get("w-words")) != nullptr){
@@ -2645,7 +2666,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Выводим результат
 				print(result, env.get("log"), alphabet_t::log_t::info, false);
 			}
-		// Сообщаем что файл алфавита не найден
+		// Сообщаем, что файл алфавита не найден
 		} else print("file alphabet not found\r\n", env.get("log"));
 	}
 	// Успешно выходим

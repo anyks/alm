@@ -107,21 +107,16 @@ namespace anyks {
 			const long getSize(const string & str) const noexcept;
 			/**
 			 * train Обучения полученного текста
-			 * @param filenames список файлов для обучения
-			 */
-			void train(const vector <string> & filenames) noexcept;
-			/**
-			 * train Обучения полученного текста
 			 * @param filename файл для чтения
 			 * @param idd      идентификатор документа
 			 */
 			void train(const string & filename, const size_t idd) noexcept;
 			/**
 			 * train Обучения полученного текста
-			 * @param text список строк текста для обучения
-			 * @param idd  идентификатор документа
+			 * @param texts список строк текста для обучения
+			 * @param idd   идентификатор документа
 			 */
-			void train(const vector <string> & text, const size_t idd) noexcept;
+			void train(const vector <string> & texts, const size_t idd) noexcept;
 		public:
 			/**
 			 * setOrder Метод установки размер n-граммы

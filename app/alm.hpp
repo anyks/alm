@@ -9,7 +9,7 @@
 // Название языковой модели
 #define ANYKS_LM_NAME "alm"
 // Версия приложения
-#define ANYKS_LM_VERSION "3.1.7"
+#define ANYKS_LM_VERSION "3.1.8"
 // Автор приложения
 #define ANYKS_LM_AUTHOR "Yuriy Lobarev"
 // Телефон автора
