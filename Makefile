@@ -41,7 +41,6 @@ ifeq ($(OS), Darwin)
 	INCLUDE = \
 		-I./ \
 		-I./include \
-		-I./json/include \
 		-I./contrib/include \
 		-I/usr/include \
 		-I/usr/local/include \
@@ -89,7 +88,6 @@ ifeq ($(OS), FreeBSD)
 	INCLUDE = \
 		-I./ \
 		-I./include \
-		-I./json/include \
 		-I./contrib/include \
 		-I/usr/include \
 		-I/usr/local/include \
@@ -135,7 +133,6 @@ ifeq ($(OS), Linux)
 	INCLUDE = \
 		-I./ \
 		-I./include \
-		-I./json/include \
 		-I./contrib/include \
 		-I/usr/include \
 		-I/usr/local/include \

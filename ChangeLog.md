@@ -1,5 +1,7 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
+## [3.1.6](https://github.com/anyks/alm/archive/v3.1.6.tar.gz) Other optimization
+
 ## [3.1.5](https://github.com/anyks/alm/archive/v3.1.5.tar.gz) Bug fixes and new params
 ### Method
 - **merge** - method merge of raw data from *.map files

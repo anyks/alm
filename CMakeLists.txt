@@ -121,7 +121,6 @@ list(APPEND LIB_LIST ${OPENSSL_LIBRARIES})
 # Устанавливаем каталог заголовков
 include_directories(${PROJECT_BINARY_DIR}/../)
 include_directories(${PROJECT_BINARY_DIR}/../include)
-include_directories(${PROJECT_BINARY_DIR}/../json/include)
 include_directories(${PROJECT_BINARY_DIR}/../contrib/include)
 
 # Установка переменной со списком исходников для исполняемого файла

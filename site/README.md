@@ -93,10 +93,10 @@ $ python3 -m pip install anyks-lm
 
 [Документация pip](https://pypi.org/project/anyks-lm)
 
-### Клонирование проекта, флаг [--recursive] обязателен
+### Клонирование проекта
 
 ```bash
-$ git clone --recursive https://github.com/anyks/alm.git
+$ git clone https://github.com/anyks/alm.git
 ```
 
 ### Linux и FreeBSD
