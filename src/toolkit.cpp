@@ -2831,19 +2831,19 @@ void anyks::Toolkit::readVocab(const string & filename, function <void (const u_
 						}
 					} break;
 				}
-			}
-			// Если функция вывода статуса передана
-			if(status != nullptr){
-				// Увеличиваем количество записанных n-грамм
-				index += text.size();
-				// Выполняем расчёт текущего статуса
-				actual = u_short(index / double(fileSize) * 100.0);
-				// Если статус обновился
-				if(actual != past){
-					// Запоминаем текущий статус
-					past = actual;
-					// Выводим статус извлечения
-					status(actual);
+				// Если функция вывода статуса передана
+				if(status != nullptr){
+					// Увеличиваем количество записанных n-грамм
+					index += text.size();
+					// Выполняем расчёт текущего статуса
+					actual = u_short(index / double(fileSize) * 100.0);
+					// Если статус обновился
+					if(actual != past){
+						// Запоминаем текущий статус
+						past = actual;
+						// Выводим статус извлечения
+						status(actual);
+					}
 				}
 			}
 		});

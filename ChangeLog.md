@@ -1,5 +1,9 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
+## [3.1.9](https://github.com/anyks/alm/archive/v3.1.9.tar.gz) Bug fixes and new params
+### Params
+- file address json data of *.json for export
+
 ## [3.1.8](https://github.com/anyks/alm/archive/v3.1.8.tar.gz) Other optimization
 
 ## [3.1.7](https://github.com/anyks/alm/archive/v3.1.7.tar.gz) Other optimization

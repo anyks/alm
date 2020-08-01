@@ -62,6 +62,11 @@ namespace anyks {
 			const string env(const string & key) const noexcept;
 		public:
 			/**
+			 * getJson Метод получения конфигурационных данных в формате JSON
+			 * @return конфигурационные данные
+			 */
+			const json getJson() const noexcept;
+			/**
 			 * count Метод извлечения количества аргументов
 			 * @return количество полученных аргументов
 			 */

@@ -139,6 +139,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-bin-copyright <value> | --bin-copyright=<value>]                           copyright of the dictionary owner for binary container\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-bin-aes <value> | --bin-aes=<value>]                                       aes encryption Size \x1B[1m(128, 192, 256) bits\x1B[0m for binary container\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-bin-password <value> | --bin-password=<value>]                             encryption password \x1B[1m(if required)\x1B[0m, encryption is performed only when setting a password for binary container\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-abbrs <value> | --abbrs=<value>]                                           file address abbreviations of \x1B[1m*.txt\x1B[0m for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-text <value> | --w-text=<value>]                                         file address text of \x1B[1m*.txt\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-map <value> | --w-map=<value>]                                           file address map of \x1B[1m*.map\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-arpa <value> | --w-arpa=<value>]                                         file address arpa of \x1B[1m*.arpa\x1B[0m for export\r\n"
@@ -146,6 +147,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-words <value> | --w-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-ngram <value> | --w-ngram=<value>]                                       file address ngrams of \x1B[1m*.ngrams\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-oovfile <value> | --w-oovfile=<value>]                                   file address OOVs of \x1B[1m*.txt\x1B[0m for export oov words\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-json <value> | --w-json=<value>]                                         file address json data of \x1B[1m*.json\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-json <value> | --r-json=<value>]                                         file address json data of \x1B[1m*.json\x1B[0m for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-text <value> | --r-text=<value>]                                         file address text of \x1B[1m*.txt\x1B[0m or dir path for texts import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-words <value> | --r-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m or dir path for words import\r\n"
@@ -153,14 +155,13 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-arpa <value> | --r-arpa=<value>]                                         file address arpa of \x1B[1m*.arpa\x1B[0m or dir path for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-vocab <value> | --r-vocab=<value>]                                       file address vocab of \x1B[1m*.vocab\x1B[0m or dir path for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-ngram <value> | --r-ngram=<value>]                                       file address ngrams of \x1B[1m*.ngrams\x1B[0m or dir path for import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-abbrs <value> | --r-abbrs=<value>]                                       file address abbreviations of \x1B[1m*.txt\x1B[0m for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-text <value> | --w-tokens-text=<value>]                           file address tokens of \x1B[1m*.txt\x1B[0m text for tokens export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-json <value> | --w-tokens-json=<value>]                           file address tokens of \x1B[1m*.json\x1B[0m text for tokens export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-text <value> | --r-tokens-text=<value>]                           file address tokens of \x1B[1m*.txt\x1B[0m text for tokens import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-json <value> | --r-tokens-json=<value>]                           file address tokens of \x1B[1m*.json\x1B[0m text for tokens import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-domain-zones <value> | --domain-zones=<value>]                             file address domain zones of \x1B[1m*.txt\x1B[0m for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-mix-restwords <value> | --mix-restwords=<value>]                           file address restore mixed words of \x1B[1m*.txt\x1B[0m for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mix-arpa[1...N] <value> | --mix-arpa[1...N]=<value>]                       file address LM of \x1B[1m*.arpa\x1B[0m for mixing\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-domain-zones <value> | --r-domain-zones=<value>]                         file address domain zones of \x1B[1m*.txt\x1B[0m for import\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-r-mix-restwords <value> | --r-mix-restwords=<value>]                       file address restore mixed words of \x1B[1m*.txt\x1B[0m for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-tokens-path <value> | --r-tokens-path=<value>]                           directory path with tokens files for read\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-path <value> | --w-tokens-path=<value>]                           directory path with tokens files for write\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-train-intermed-dest <value> | --train-intermed-dest=<value>]               directory path with raw data files for write\r\n"
@@ -383,7 +384,7 @@ int main(int argc, char * argv[]) noexcept {
 			// Если апостроф разрешён в токенизаторе, активируем его
 			if(env.is("allow-apostrophe")) alphabet.switchAllowApostrophe();
 			// Если файл с буквами для восстановления слов, передан
-			if(((value = env.get("r-mix-restwords")) != nullptr) && fsys_t::isfile(value)){
+			if(((value = env.get("mix-restwords")) != nullptr) && fsys_t::isfile(value)){
 				// Идентификатор документа
 				size_t size = 0;
 				// Статус и процентное соотношение
@@ -447,7 +448,7 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			}
 			// Если загрузка списка аббревиатур или доменных зон
-			if(env.is("r-abbrs") || env.is("r-domain-zones")){
+			if(env.is("abbrs") || env.is("domain-zones")){
 				/**
 				 * loadFn Функция загрузки списка доменных зон или аббревиатур
 				 * @param filename адрес файла для загрузки
@@ -515,9 +516,9 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				};
 				// Устанавливаем режим считывания файла аббревиатур
-				if(((value = env.get("r-abbrs")) != nullptr) && fsys_t::isfile(value)) loadFn(realpath(value, nullptr), 2);
+				if(((value = env.get("abbrs")) != nullptr) && fsys_t::isfile(value)) loadFn(realpath(value, nullptr), 2);
 				// Устанавливаем режим считывания файла доменных зон
-				if(((value = env.get("r-domain-zones")) != nullptr) && fsys_t::isfile(value)) loadFn(realpath(value, nullptr), 1);
+				if(((value = env.get("domain-zones")) != nullptr) && fsys_t::isfile(value)) loadFn(realpath(value, nullptr), 1);
 			}
 			// Если это работа с уже собранной языковой моделью
 			if(env.is("method", "sentences") || env.is("method", "ppl") || env.is("method", "find") ||
@@ -2431,6 +2432,25 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			// Выводим сообщение, что файлы не переданы
 			} else print("arpa file is not loaded\r\n", env.get("log"));
+			// Если файл для сохранения конфигурационных данных передан
+			if((value = env.get("w-json")) != nullptr){
+				// Открываем файл на запись
+				ofstream file(value, ios::binary);
+				// Если файл открыт
+				if(file.is_open()){
+					// Получаем конфигурационные данные в формате JSON
+					const json & config = env.getJson();
+					// Если конфигурационные данные получены
+					if(!config.empty()){
+						// Формируем текст результата
+						const string & text = config.dump(4);
+						// Если текст получен, записываем данные в файл
+						if(!text.empty()) file.write(text.data(), text.size());
+					}
+					// Закрываем файл
+					file.close();
+				}
+			}
 			// Если файл для сохранения слов передан
 			if((value = env.get("w-words")) != nullptr){
 				// Если отладка включена, выводим индикатор загрузки

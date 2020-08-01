@@ -654,7 +654,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ### An example of detecting and correcting words consisting of mixed dictionaries
 
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -reset-unk -interpolate -mixed-dicts -corpus ./text.txt -r-mix-restwords ./restwords.txt
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -reset-unk -interpolate -mixed-dicts -corpus ./text.txt -mix-restwords ./restwords.txt
 ```
 
 > Words in the text that contain typos in the form of similar letters of the alphabet of another language will be corrected if there are letters to replace in [restwords.txt](https://github.com/anyks/alm/#file-of-similar-letters-in-different-dictionaries).

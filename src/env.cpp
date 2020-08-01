@@ -29,6 +29,41 @@ const string anyks::Env::env(const string & key) const noexcept {
 	return result;
 }
 /**
+ * getJson Метод получения конфигурационных данных в формате JSON
+ * @return конфигурационные данные
+ */
+const json anyks::Env::getJson() const noexcept {
+	// Результат работы функции
+	json result;
+	// Если данные заполнены
+	if(!this->data.empty()){
+		// Значение строки в utf-8
+		wstring value = L"";
+		// Переходим по всему списку данных
+		for(auto & item : this->data){
+			// Если это флаг, устанавливаем булевое значение
+			if(item.second.compare("-yes-") == 0) result[item.first] = true;
+			// Если это что-то другое, устанавливаем - как есть
+			else {
+				// Выполняем поличение строки
+				value = this->alphabet->convert(item.second);
+				// Если это число или отрицательное число
+				if(this->alphabet->isNumber(value) || ((value.front() == L'-') && this->alphabet->isNumber(value.substr(1)))){
+					// Выполняем конвертирование в число
+					result[item.first] = stoll(value);
+				// Если это дробное число
+				} else if(this->alphabet->isDecimal(value)) {
+					// Выполняем конвертирование в дробное число
+					result[item.first] = stod(value);
+				// Иначе добавляем значение - как оно есть
+				} else result[item.first] = item.second;
+			}
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * count Метод извлечения количества аргументов
  * @return количество полученных аргументов
  */
@@ -107,12 +142,18 @@ void anyks::Env::setJson(const json & data) noexcept {
 		string val = "";
 		// Переходим по всем ключам и добавляем всё в базу данных
 		for(auto & el : data.items()){
-			// Получаем значение ключа
-			val = el.value();
-			// Если значение является отрицательным булевым
-			if(this->alphabet->toLower(val).compare("false") == 0) continue;
+			// Если это булевое значение
+			if(data.at(el.key()).is_boolean()){
+				// Если это положительное булевое значение
+				if(el.value()) val = "-yes-";
+				// Если это отрицательное булевое значение
+				else continue;
+			// Если это чило
+			} else if(data.at(el.key()).is_number()) val = to_string(el.value());
+			// Иначе это обычная строка
+			else val = el.value();
 			// Добавляем значение ключа в базу параметров
-			this->data.emplace(el.key(), val);
+			if(!val.empty()) this->data.emplace(el.key(), val);
 		}
 	}
 }
