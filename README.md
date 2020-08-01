@@ -552,18 +552,18 @@ $ export ALM_W-ARPA=./lm.arpa
 
 ```json
 {
-  "alphabet": "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя",
-  "smoothing": "wittenbell",
+  "size": 3,
+  "debug": 1,
+  "allow-unk": true,
+  "interpolate": true,
   "method": "train",
-  "size": "3",
-  "debug": "1",
-  "w-arpa": "./lm.arpa",
   "w-map": "./lm.map",
+  "w-arpa": "./lm.arpa",
+  "corpus": "./text.txt",
   "w-vocab": "./lm.vocab",
   "w-ngram": "./lm.ngrams",
-  "allow-unk": "true",
-  "interpolate": "true",
-  "corpus": "./text.txt"
+  "smoothing": "wittenbell",
+  "alphabet": "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 }
 ```
 
@@ -577,7 +577,7 @@ $ export ALM_W-ARPA=./lm.arpa
 
 **Smoothing Algorithm: Witten-Bell, single-file build by JSON**
 ```bash
-$ ./alm -r-json ./meta.json
+$ ./alm -r-json ./config.json
 ```
 
 **Smoothing Algorithm: Witten-Bell, single-file build**

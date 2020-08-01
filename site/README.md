@@ -552,22 +552,20 @@ $ export ALM_W-ARPA=./lm.arpa
 
 ```json
 {
-  "alphabet": "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя",
-  "smoothing": "wittenbell",
+  "size": 3,
+  "debug": 1,
+  "allow-unk": true,
+  "interpolate": true,
   "method": "train",
-  "size": "3",
-  "debug": "1",
-  "w-arpa": "./lm.arpa",
   "w-map": "./lm.map",
+  "w-arpa": "./lm.arpa",
+  "corpus": "./text.txt",
   "w-vocab": "./lm.vocab",
   "w-ngram": "./lm.ngrams",
-  "allow-unk": "true",
-  "interpolate": "true",
-  "corpus": "./text.txt"
+  "smoothing": "wittenbell",
+  "alphabet": "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 }
 ```
-
-**P.S.** Значения ключей, должны быть исключительно строками!
 
 ---
 
@@ -579,7 +577,7 @@ $ export ALM_W-ARPA=./lm.arpa
 
 **Алгоритм сглаживания: Witten-Bell, сборка из одного файла, с помощью JSON параметров**
 ```bash
-$ ./alm -r-json ./meta.json
+$ ./alm -r-json ./config.json
 ```
 
 **Алгоритм сглаживания: Witten-Bell, сборка из одного файла**
