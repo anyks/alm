@@ -1617,6 +1617,11 @@ int main(int argc, char * argv[]) noexcept {
 								// Увеличиваем идентификатор документа
 								idd++;
 							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
 						}
 						// Если файл arpa для записи указан
 						if(env.is("w-arpa")){
@@ -1712,6 +1717,11 @@ int main(int argc, char * argv[]) noexcept {
 									}
 								}
 							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
 						}
 						// Если файл arpa для записи указан
 						if(env.is("w-arpa")){

@@ -669,43 +669,58 @@ namespace anyks {
 				const uintmax_t sizeDir = dsize(path, ext);
 				// Если размер каталога получен
 				if(sizeDir > 0){
-					// Открываем указанный каталог
-					DIR * dir = opendir(path.c_str());
-					// Если каталог открыт
-					if(dir != nullptr){
-						// Структура проверка статистики
-						struct stat info;
-						// Создаём объект алфавита
-						alphabet_t alphabet;
-						// Создаем указатель на содержимое каталога
-						struct dirent * ptr = nullptr;
-						// Выполняем чтение содержимого каталога
-						while((ptr = readdir(dir))){
-							// Пропускаем названия текущие "." и внешние "..", так как идет рекурсия
-							if(!strcmp(ptr->d_name, ".") || !strcmp(ptr->d_name, "..")) continue;
-							// Получаем адрес в виде строки
-							const string & address = alphabet.format("%s/%s", path.c_str(), ptr->d_name);
-							// Если статистика извлечена
-							if(!stat(address.c_str(), &info)){
-								// Если дочерний элемент является дирректорией
-								if(S_ISDIR(info.st_mode)) rdir(address, ext, callback);
-								// Если дочерний элемент является файлом то удаляем его
-								else {
-									// Получаем расширение файла
-									const string & extension = alphabet.format(".%s", ext.c_str());
-									// Получаем длину адреса
-									const size_t length = extension.length();
-									// Если расширение файла найдено
-									if(address.substr(address.length() - length, length).compare(extension) == 0){
-										// Выводим полный путь файла
-										callback(address, sizeDir);
+					/**
+					 * readFn Прототип функции запроса файлов в каталоге
+					 * @param путь до каталога
+					 * @param расширение файла по которому идет фильтрация
+					 */
+					function <void (const string &, const string &)> readFn;
+					/**
+					 * readFn Функция запроса файлов в каталоге
+					 * @param path путь до каталога
+					 * @param ext  расширение файла по которому идет фильтрация
+					 */
+					readFn = [&readFn, sizeDir, &callback](const string & path, const string & ext){
+						// Открываем указанный каталог
+						DIR * dir = opendir(path.c_str());
+						// Если каталог открыт
+						if(dir != nullptr){
+							// Структура проверка статистики
+							struct stat info;
+							// Создаём объект алфавита
+							alphabet_t alphabet;
+							// Создаем указатель на содержимое каталога
+							struct dirent * ptr = nullptr;
+							// Выполняем чтение содержимого каталога
+							while((ptr = readdir(dir))){
+								// Пропускаем названия текущие "." и внешние "..", так как идет рекурсия
+								if(!strcmp(ptr->d_name, ".") || !strcmp(ptr->d_name, "..")) continue;
+								// Получаем адрес в виде строки
+								const string & address = alphabet.format("%s/%s", path.c_str(), ptr->d_name);
+								// Если статистика извлечена
+								if(!stat(address.c_str(), &info)){
+									// Если дочерний элемент является дирректорией
+									if(S_ISDIR(info.st_mode)) readFn(address, ext);
+									// Если дочерний элемент является файлом то удаляем его
+									else {
+										// Получаем расширение файла
+										const string & extension = alphabet.format(".%s", ext.c_str());
+										// Получаем длину адреса
+										const size_t length = extension.length();
+										// Если расширение файла найдено
+										if(address.substr(address.length() - length, length).compare(extension) == 0){
+											// Выводим полный путь файла
+											callback(address, sizeDir);
+										}
 									}
 								}
 							}
+							// Закрываем открытый каталог
+							closedir(dir);
 						}
-						// Закрываем открытый каталог
-						closedir(dir);
-					}
+					};
+					// Запрашиваем данные первого каталога
+					readFn(path, ext);
 				// Сообщаем что каталог пустой
 				} else callback("", 0);
 			// Выводим сообщение об ошибке
