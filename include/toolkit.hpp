@@ -596,36 +596,20 @@ namespace anyks {
 			 * @param filename файл для чтения словаря
 			 * @param status   функция вывода статуса чтения
 			 */
-			void readVocab(const string & filename, function <void (const u_short)> status = nullptr) noexcept;
+			void readVocab(const string & filename, function <void (const string &, const u_short)> status = nullptr) noexcept;
 			/**
 			 * readNgram Метод чтения данных из файла ngrams
 			 * @param filename адрес файла для чтения
 			 * @param status   функция вывода статуса чтения
 			 */
-			void readNgram(const string & filename, function <void (const u_short)> status = nullptr) noexcept;
+			void readNgram(const string & filename, function <void (const string &, const u_short)> status = nullptr) noexcept;
 			/**
 			 * readMap Метод чтения карты последовательности из файла
 			 * @param filename адрес map файла карты последовательности
 			 * @param status   функция вывода статуса чтения
 			 * @param delim    разделитель последовательностей
 			 */
-			void readMap(const string & filename, function <void (const u_short)> status = nullptr, const string & delim = "|") noexcept;
-		public:
-			/**
-			 * readNgrams Метод чтения данных из каталога файлов ngrams
-			 * @param path   адрес где лежат ngrams файлы
-			 * @param ext    расширение файлов в каталоге
-			 * @param status функция вывода статуса чтения
-			 */
-			void readNgrams(const string & path, const string & ext, function <void (const u_short)> status = nullptr) noexcept;
-			/**
-			 * readMaps Метод добавления - объединения карт последовательностей
-			 * @param path   адрес где лежат map файлы
-			 * @param ext    расширение файлов в каталоге
-			 * @param status функция вывода статуса чтения
-			 * @param delim  разделитель последовательностей
-			 */
-			void readMaps(const string & path, const string & ext, function <void (const u_short)> status = nullptr, const string & delim = "|") noexcept;
+			void readMap(const string & filename, function <void (const string &, const u_short)> status = nullptr, const string & delim = "|") noexcept;
 		public:
 			/**
 			 * Toolkit Конструктор

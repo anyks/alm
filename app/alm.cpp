@@ -1868,7 +1868,7 @@ int main(int argc, char * argv[]) noexcept {
 			// Проверяем правильно ли указаны адреса файлов
 			} else if((env.is("r-map") && (env.is("r-vocab") || env.is("r-words"))) || env.is("r-ngram") || env.is("r-arpa") || !binDictFile.empty()) {
 				// Если требуется загрузить файл n-грамм
-				if(!env.is("method", "merge") && ((value = env.get("r-ngram")) != nullptr) && fsys_t::isfile(value)){
+				if((value = env.get("r-ngram")) != nullptr){
 					// Запоминаем адрес файла
 					const string & filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
@@ -1878,7 +1878,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Устанавливаем название файла
 						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read n-gram file", "Read n-gram file is done");
+						pss.title("Read n-gram", "Read n-gram is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -1886,40 +1886,9 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Выполняем загрузку файла n-грамм
-					toolkit.readNgram(filename, [debug, &pss](const u_short status) noexcept {
-						// Отображаем ход процесса
-						switch(debug){
-							case 1: pss.update(status); break;
-							case 2: pss.status(status); break;
-						}
-					});
-					// Отображаем ход процесса
-					switch(debug){
-						case 1: pss.update(100); break;
-						case 2: pss.status(100); break;
-					}
-				// Если требуется загрузить список файлов n-грамм
-				} else if(((value = env.get("r-ngram")) != nullptr) && fsys_t::isdir(value)) {
-					// Запоминаем каталог для загрузки
-					const string & path = realpath(value, nullptr);
-					// Расширение файлов текстового корпуса
-					const string ext = ((value = env.get("ext")) != nullptr ? value : "ngrams");
-					// Если отладка включена, выводим индикатор загрузки
-					if(debug > 0){
-						// Очищаем предыдущий прогресс-бар
-						pss.clear();
-						// Устанавливаем название файла
-						pss.description(path);
-						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read n-gram files", "Read n-gram files is done");
-						// Выводим индикатор прогресс-бара
-						switch(debug){
-							case 1: pss.update(); break;
-							case 2: pss.status(); break;
-						}
-					}
-					// Выполняем загрузку файлов n-грамм
-					toolkit.readNgrams(path, ext, [debug, &pss](const u_short status) noexcept {
+					toolkit.readNgram(filename, [debug, &pss](const string & filename, const u_short status) noexcept {
+						// Если отладка включена, устанавливаем название файла
+						if(debug > 0) pss.description(filename);
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
@@ -1965,7 +1934,7 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				}
 				// Если требуется загрузить файл словаря vocab
-				if(!env.is("method", "merge") && ((value = env.get("r-vocab")) != nullptr) && fsys_t::isfile(value)){
+				if((value = env.get("r-vocab")) != nullptr){
 					// Запоминаем адрес файла
 					const string & filename = realpath(value, nullptr);
 					// Если отладка включена, выводим индикатор загрузки
@@ -1975,7 +1944,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Устанавливаем название файла
 						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read vocab file", "Read vocab file is done");
+						pss.title("Read vocab", "Read vocab is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -1983,60 +1952,13 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Выполняем загрузку файла словаря vocab
-					toolkit.readVocab(filename, [debug, &pss](const u_short status) noexcept {
+					toolkit.readVocab(filename, [debug, &pss](const string & filename, const u_short status) noexcept {
+						// Если отладка включена, выводим имя файла
+						if(debug > 0) pss.description(filename);
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(status); break;
 							case 2: pss.status(status); break;
-						}
-					});
-					// Отображаем ход процесса
-					switch(debug){
-						case 1: pss.update(100); break;
-						case 2: pss.status(100); break;
-					}
-				// Если требуется загрузить список словарей
-				} else if(((value = env.get("r-vocab")) != nullptr) && fsys_t::isdir(value)) {
-					// Параметры индикаторы процесса
-					size_t size = 0, status = 0, rate = 0;
-					// Запоминаем каталог для загрузки
-					const string & path = realpath(value, nullptr);
-					// Расширение файлов текстового корпуса
-					const string ext = ((value = env.get("ext")) != nullptr ? value : "vocab");
-					// Если отладка включена, выводим индикатор загрузки
-					if(debug > 0){
-						// Очищаем предыдущий прогресс-бар
-						pss.clear();
-						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read vocab files", "Read vocab files is done");
-						// Выводим индикатор прогресс-бара
-						switch(debug){
-							case 1: pss.update(); break;
-							case 2: pss.status(); break;
-						}
-					}
-					// Переходим по всему списку словарей в каталоге
-					fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
-						// Выполняем загрузку файла словаря vocab
-						toolkit.readVocab(filename);
-						// Если отладка включена, выводим индикатор загрузки
-						if(debug > 0){
-							// Устанавливаем название файла
-							pss.description(filename);
-							// Общий полученный размер данных
-							size += fsys_t::fsize(filename);
-							// Подсчитываем статус выполнения
-							status = u_short(size / double(dirSize) * 100.0);
-							// Если процентное соотношение изменилось
-							if(rate != status){
-								// Запоминаем текущее процентное соотношение
-								rate = status;
-								// Отображаем ход процесса
-								switch(debug){
-									case 1: pss.update(status); break;
-									case 2: pss.status(status); break;
-								}
-							}
 						}
 					});
 					// Отображаем ход процесса
@@ -2156,7 +2078,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если требуется загрузить карту последовательности или список карт последовательностей
 				if(env.is("r-map") && env.is("r-vocab")){
 					// Если нужно загрузить карту последовательности
-					if(!env.is("method", "merge") && ((value = env.get("r-map")) != nullptr) && fsys_t::isfile(value)){
+					if((value = env.get("r-map")) != nullptr){
 						// Запоминаем адрес файла
 						const string & filename = realpath(value, nullptr);
 						// Если отладка включена, выводим индикатор загрузки
@@ -2166,7 +2088,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем название файла
 							pss.description(filename);
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Read map file", "Read map file is done");
+							pss.title("Read map", "Read map is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
@@ -2174,40 +2096,9 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 						// Считываем карту последовательности
-						toolkit.readMap(filename, [debug, &pss](const u_short status) noexcept {
-							// Отображаем ход процесса
-							switch(debug){
-								case 1: pss.update(status); break;
-								case 2: pss.status(status); break;
-							}
-						});
-						// Отображаем ход процесса
-						switch(debug){
-							case 1: pss.update(100); break;
-							case 2: pss.status(100); break;
-						}
-					// Если нужно загрузить список карт последовательностей
-					} else if(((value = env.get("r-map")) != nullptr) && fsys_t::isdir(value)){
-						// Запоминаем каталог для загрузки
-						const string & path = realpath(value, nullptr);
-						// Расширение файлов текстового корпуса
-						const string ext = ((value = env.get("ext")) != nullptr ? value : "map");
-						// Если отладка включена, выводим индикатор загрузки
-						if(debug > 0){
-							// Очищаем предыдущий прогресс-бар
-							pss.clear();
-							// Устанавливаем название файла
-							pss.description(path);
-							// Устанавливаем заголовки прогресс-бара
-							pss.title("Read map files", "Read map files is done");
-							// Выводим индикатор прогресс-бара
-							switch(debug){
-								case 1: pss.update(); break;
-								case 2: pss.status(); break;
-							}
-						}
-						// Считываем список карт последовательностей
-						toolkit.readMaps(path, ext, [debug, &pss](const u_short status) noexcept {
+						toolkit.readMap(filename, [debug, &pss](const string & filename, const u_short status) noexcept {
+							// Если отладка включена, устанавливаем название файла
+							if(debug > 0) pss.description(filename);
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;
