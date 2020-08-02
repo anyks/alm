@@ -483,7 +483,7 @@ namespace anyks {
 			 * @param dc     количество документов в которых встретилось слово
 			 * @param status статус прунинга словаря
 			 */
-			void pruneVocab(const double wltf = idw_t::NIDW, const size_t oc = 0, const size_t dc = 0, function <void (const u_short)> status = nullptr) noexcept;
+			void pruneVocab(const double wltf = 0.0, const size_t oc = 0, const size_t dc = 0, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * mix Метод интерполяции нескольких arpa
 			 * @param filenames список файлов arpa для объединения

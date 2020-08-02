@@ -2211,9 +2211,9 @@ int main(int argc, char * argv[]) noexcept {
 					// Получаем порог количества документов, где встретилось слово
 					const size_t dc = (((value = env.get("vprune-dc")) != nullptr) && alphabet.isNumber(alphabet.convert(value)) ? stoull(value) : 0);
 					// Получаем порог веса слова
-					const double wltf = (((value = env.get("vprune-wltf")) != nullptr) && alphabet.isDecimal(alphabet.convert(value)) ? stod(value) : idw_t::NIDW);
+					const double wltf = (((value = env.get("vprune-wltf")) != nullptr) && alphabet.isDecimal(alphabet.convert(value)) ? stod(value) : 0.0);
 					// Проверяем на правильность входных параметров
-					if((wltf != idw_t::NIDW) || (oc > 0) || (dc > 0)){
+					if((wltf != 0.0) || (oc > 0) || (dc > 0)){
 						// Если отладка включена, выводим индикатор прунинга
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар

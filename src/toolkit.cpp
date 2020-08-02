@@ -1587,7 +1587,7 @@ void anyks::Toolkit::prune(const double threshold, const u_short mingram, functi
  */
 void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t dc, function <void (const u_short)> status) noexcept {
 	// Если словарь не пустой
-	if(!this->vocab.empty() && ((wltf != idw_t::NIDW) || (oc > 0) || (dc > 0))){
+	if(!this->vocab.empty() && ((wltf != 0.0) || (oc > 0) || (dc > 0))){
 		// Количество извлечённых слов
 		size_t index = 0;
 		// Текущий и предыдущий статус
@@ -1595,7 +1595,7 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 		// Переходим по всему списку слов
 		for(auto it = this->vocab.begin(); it != this->vocab.end();){
 			// Если вес слова передан
-			if(wltf != idw_t::NIDW){
+			if(wltf != 0.0){
 				// Получаем метаданные слова
 				const auto & meta = it->second.calc(this->info.ad, this->info.cw);
 				// Если вес слова не ниже порогового значения
