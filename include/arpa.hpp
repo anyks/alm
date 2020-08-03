@@ -286,7 +286,7 @@ namespace anyks {
 			 * @param gram размер n-граммы список грамм которой нужно извлечь
 			 * @return     указатель на список запрашиваемых n-грамм
 			 */
-			list <data_t *> & get(const u_short gram) const noexcept;
+			list <data_t *> * get(const u_short gram) const noexcept;
 		protected:
 			/**
 			 * contextFn Метод получения контекста
