@@ -1606,8 +1606,12 @@ void anyks::Arpa::removeWord(const size_t idw) noexcept {
 		list <data_t *> ngrams;
 		// Переходим по всем n-граммам
 		for(u_short i = 1; i <= this->size; i++){
+			// Выполняем блокировку потока
+			this->locker.lock();
 			// Выполняем извлечение n-грамм
 			this->get(i, &ngrams);
+			// Выполняем разблокировку потока
+			this->locker.unlock();
 			// Если список n-грамм получен
 			if(!ngrams.empty()){
 				// Переходим по всему списку полученных n-грамм
