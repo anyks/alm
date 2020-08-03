@@ -1646,10 +1646,10 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 				}
 			}
 		}
-		// Обновляем количество уникальных слов
-		this->info.unq = this->vocab.size();
 		// Ожидаем завершения обработки
 		tpool.wait();
+		// Обновляем количество уникальных слов
+		this->info.unq = this->vocab.size();
 	}
 }
 /**

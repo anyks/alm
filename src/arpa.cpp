@@ -1587,12 +1587,8 @@ void anyks::Arpa::removeWord(const size_t idw) noexcept {
 		 * @param context позиция текущего контекста
 		 */
 		removeFn = [&removeFn, this](data_t * context) noexcept {
-			// Выполняем блокировку потока
-			this->locker.lock();
 			// Выполняем зануление текущего слова
 			context->weight = 0.0;
-			// Выполняем разблокировку потока
-			this->locker.unlock();
 			// Если список не пустой
 			if(!context->empty()){
 				// Переходим по всем n-граммам
