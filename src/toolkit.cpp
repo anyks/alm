@@ -1590,17 +1590,37 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 	if(!this->vocab.empty() && ((wltf != 0.0) || (oc > 0) || (dc > 0))){
 		// Создаем тредпул
 		tpool_t tpool;
-		// Количество извлечённых слов
-		size_t index = 0;
-		// Текущий и предыдущий статус
-		u_short actual = 0, past = 100;
+		// Количество всех слов для удаления
+		atomic <double> count{0};
+		// Количество удалённых слов
+		atomic <size_t> index{0};
+		// Текущий статус прогресс-бара
+		atomic <u_short> actual{0};
+		// Прошлый статус прогресс-бара
+		atomic <u_short> past{101};
 		/**
 		 * rmWordinArpaFn Функция удаления слова в ARPA
 		 * @param idw идентификатор слова для удаления
 		 */
-		auto rmWordinArpaFn = [this](const size_t idw) noexcept {
+		auto rmWordinArpaFn = [&](const size_t idw) noexcept {
+			// Получаем количество всех данных
+			if(status != nullptr) count.store(count + 1, memory_order_relaxed);
 			// Выполняем удаление слова в arpa
 			this->arpa->removeWord(idw);
+			// Если функция вывода статуса передана
+			if(status != nullptr){
+				// Общий полученный размер данных
+				index.store(index + 1, memory_order_relaxed);
+				// Подсчитываем статус выполнения
+				actual = u_short(index / double(count) * 100.0);
+				// Если процентное соотношение изменилось
+				if(actual != past){
+					// Запоминаем текущее процентное соотношение
+					past.store(actual, memory_order_relaxed);
+					// Выводим статус извлечения
+					status(actual);
+				}
+			}
 		};
 		// Выполняем инициализацию тредпула
 		tpool.init(thread::hardware_concurrency());
@@ -1630,20 +1650,6 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 					it = this->vocab.erase(it);
 				// Увеличиваем значение итератора
 				} else it++;
-			}
-			// Если функция вывода статуса передана
-			if(status != nullptr){
-				// Увеличиваем количество записанных слов
-				index++;
-				// Выполняем расчёт текущего статуса
-				actual = u_short(index / double(this->vocab.size()) * 100.0);
-				// Если статус обновился
-				if(actual != past){
-					// Запоминаем текущий статус
-					past = actual;
-					// Выводим статус извлечения
-					status(actual);
-				}
 			}
 		}
 		// Ожидаем завершения обработки

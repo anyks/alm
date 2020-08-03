@@ -18,6 +18,7 @@
 #include <limits>
 #include <bitset>
 #include <vector>
+#include <atomic>
 #include <fstream>
 #include <functional>
 #include <unordered_map>
