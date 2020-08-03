@@ -15,6 +15,7 @@
 #include <map>
 #include <set>
 #include <list>
+#include <mutex>
 #include <cmath>
 #include <ctime>
 #include <bitset>
@@ -158,6 +159,8 @@ namespace anyks {
 			// Размер текущей n-граммы
 			mutable u_short gram = 1;
 		private:
+			// Мютекс для блокировки потока
+			mutex locker;
 			// Флаги параметров
 			bitset <6> options;
 			// Словарь языковой модели
