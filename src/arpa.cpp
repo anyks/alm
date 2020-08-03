@@ -352,7 +352,7 @@ const double anyks::Arpa::backoff(const size_t idw, const data_t * context, cons
 				}
 			}
 		// Если данные не получены
-		} else result = (this->data.at(idw).weight + this->data.at(context->idw).backoff);
+		} else result = (this->data[idw].weight + this->data[context->idw].backoff);
 	}
 	// Выводим результат
 	return result;
@@ -476,7 +476,7 @@ list <anyks::Arpa::data_t *> * anyks::Arpa::get(const u_short gram) const noexce
 				// Если шаг не пустой
 				if(this->ngrams.count(gram) > 0){
 					// Переходим по всему словарю
-					for(auto & item : this->ngrams.at(gram)){
+					for(auto & item : this->ngrams[gram]){
 						// Если в n-грамме есть дочерные граммы
 						if(!item->empty()){
 							// Переходим по всему списку грамм
@@ -1599,7 +1599,7 @@ void anyks::Arpa::removeWord(const size_t idw) noexcept {
 			}
 		};
 		// Выполняем зануление дочерних n-грамм
-		removeFn(&this->data.at(idw));
+		removeFn(&this->data[idw]);
 		// Список n-грамм для работы
 		list <data_t *> * ngrams = this->get(1);
 		// Если количество N-грамм больше 1-й
@@ -2268,7 +2268,7 @@ void anyks::Arpa::set(const vector <seq_t> & seq) const noexcept {
 					// Добавляем в список регистр слова
 					obj->uppers.emplace(item.ups, 1);
 				// Иначе увеличиваем существующий регистр слова
-				else obj->uppers.at(item.ups)++;
+				else obj->uppers[item.ups]++;
 			}
 			// Если количество n-грамм достигло предела, выходим
 			if((++i) > (this->size - 1)) break;
@@ -2319,7 +2319,7 @@ void anyks::Arpa::set(const vector <pair_t> & seq, const size_t oc, const size_t
 					// Добавляем в список регистр слова
 					obj->uppers.emplace(item.second, 1);
 				// Иначе увеличиваем существующий регистр слова
-				else obj->uppers.at(item.second)++;
+				else obj->uppers[item.second]++;
 			}
 			// Если количество n-грамм достигло предела, выходим
 			if((++i) > (this->size - 1)) break;
@@ -2371,7 +2371,7 @@ void anyks::Arpa::set(const vector <pair_t> & seq, const double weight, const do
 					// Добавляем в список регистр слова
 					obj->uppers.emplace(item.second, 1);
 				// Иначе увеличиваем существующий регистр слова
-				else obj->uppers.at(item.second)++;
+				else obj->uppers[item.second]++;
 			}
 			// Если количество n-грамм достигло предела, выходим
 			if((++i) > (this->size - 1)) break;
@@ -2457,7 +2457,7 @@ void anyks::Arpa::add(const vector <pair_t> & seq, const size_t idd) const noexc
 							// Добавляем в список регистр слова
 							obj->uppers.emplace(seq.second, 1);
 						// Иначе увеличиваем существующий регистр слова
-						else obj->uppers.at(seq.second)++;
+						else obj->uppers[seq.second]++;
 					}
 					// Если количество n-грамм достигло предела, выходим
 					if((++i) > (this->size - 1)) break;
@@ -2552,7 +2552,7 @@ void anyks::Arpa::add(const vector <seq_t> & seq, const size_t idd, const bool r
 							// Добавляем в список регистр слова
 							obj->uppers.emplace((size_t) seq.ups, 1);
 						// Иначе увеличиваем существующий регистр слова
-						else obj->uppers.at(seq.ups)++;
+						else obj->uppers[seq.ups]++;
 					}
 					// Если количество n-грамм достигло предела, выходим
 					if((++i) > (this->size - 1)) break;
@@ -2794,7 +2794,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const noexcept {
 		/**
 		 * runFn Функция перехода по граммам
 		 */
-		runFn = [&]{
+		runFn = [&]() noexcept {
 			// Если дисконтирование включено, изменяем встречаемости
 			if(!this->nodiscount()) this->prepare(this->gram);
 			// Если это нулевая n-грамма
@@ -3002,7 +3002,7 @@ void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept 
 		/**
 		 * runFn Функция перехода по граммам
 		 */
-		runFn = [&]{
+		runFn = [&]() noexcept {
 			// Если это нулевая n-грамма
 			switch(this->gram){
 				// Если это юниграмма
@@ -3355,7 +3355,7 @@ void anyks::Arpa::mixForward(const Arpa * lm, const double lambda, function <voi
 								// Добавляем в список регистр слова
 								item.second.uppers.emplace(uppers, 1);
 							// Иначе увеличиваем существующий регистр слова
-							else item.second.uppers.at(uppers)++;
+							else item.second.uppers[uppers]++;
 						}
 						// Выполняем расчёт веса n-граммы
 						item.second.weight = mixLogFn(item.second.weight, it->second.weight);
@@ -3633,7 +3633,7 @@ void anyks::Arpa::mixBackward(const Arpa * lm, const double lambda, function <vo
 										// Добавляем в список регистр слова
 										value.second.uppers.emplace(uppers, 1);
 									// Иначе увеличиваем существующий регистр слова
-									else value.second.uppers.at(uppers)++;
+									else value.second.uppers[uppers]++;
 								}
 							}
 							// Выполняем расчёт веса последовательности
@@ -3913,7 +3913,7 @@ void anyks::Arpa::mixLoglinear(const vector <const Arpa *> & lms, const vector <
 									// Добавляем в список регистр слова
 									item.second.uppers.emplace(uppers, 1);
 								// Иначе увеличиваем существующий регистр слова
-								else item.second.uppers.at(uppers)++;
+								else item.second.uppers[uppers]++;
 							}
 							// Выполняем расчёт веса n-граммы
 							item.second.weight = probFn(&item.second);
@@ -4145,7 +4145,7 @@ void anyks::Arpa::mixBayes(const vector <const Arpa *> & lms, const vector <doub
 						 * Если мы вычисляем предельную вероятность контекста униграммы <s>,
 						 * мы должны искать </s> вместо неё, поскольку у начала предложения вес = 0.
 						 */
-						if(this->isStart(idw)) result += lm->data.at((size_t) token_t::finish).weight;
+						if(this->isStart(idw)) result += lm->data[(size_t) token_t::finish].weight;
 					}
 				}
 			}
@@ -4294,7 +4294,7 @@ void anyks::Arpa::mixBayes(const vector <const Arpa *> & lms, const vector <doub
 									// Добавляем в список регистр слова
 									item.second.uppers.emplace(uppers, 1);
 								// Иначе увеличиваем существующий регистр слова
-								else item.second.uppers.at(uppers)++;
+								else item.second.uppers[uppers]++;
 							}
 							// Выполняем расчёт веса n-граммы
 							item.second.weight = probFn(&item.second);
