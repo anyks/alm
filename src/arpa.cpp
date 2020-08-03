@@ -1586,8 +1586,12 @@ void anyks::Arpa::removeWord(const size_t idw) noexcept {
 		removeFn = [&removeFn, this](data_t * context) noexcept {
 			// Если контекст получен
 			if(context != nullptr){
+				// Выполняем блокировку потока
+				this->locker.lock();
 				// Выполняем зануление текущего слова
 				if(context->weight != 0.0) context->weight = 0.0;
+				// Выполняем разблокировку потока
+				this->locker.unlock();
 				// Если список не пустой
 				if(!context->empty()){
 					// Переходим по всем n-граммам
@@ -2596,15 +2600,18 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 			 * removeFn Функция зануления всех дочерних n-грамм
 			 * @param context позиция текущего контекста
 			 */
-			removeFn = [&removeFn](data_t * context) noexcept {
-				// Если список не пустой
-				if(!context->empty()){
-					// Переходим по всем n-граммам
-					for(auto & item : * context){
-						// Зануляем ненужную нам n-грамму
-						item.second.weight = 0.0;
-						// Если есть дочерние n-граммы зануляем и их
-						if(!item.second.empty()) removeFn(&item.second);
+			removeFn = [&removeFn, this](data_t * context) noexcept {
+				// Если контекст получен
+				if(context != nullptr){
+					// Выполняем зануление текущего слова
+					if(context->weight != 0.0) context->weight = 0.0;
+					// Если список не пустой
+					if(!context->empty()){
+						// Переходим по всем n-граммам
+						for(auto & item : * context){
+							// Удаляем все последующие N-граммы
+							if(item.second.weight != 0.0) removeFn(&item.second);
+						}
 					}
 				}
 			};
@@ -2638,8 +2645,6 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 										// Выводим статистику в сообщении
 										this->alphabet->log(message.c_str(), alphabet_t::log_t::info, this->logfile, this->context(&value.second).c_str(), value.second.weight, value.second.backoff);
 									}
-									// Зануляем ненужную нам n-грамму
-									value.second.weight = 0.0;
 									// Продолжаем зануление
 									removeFn(&value.second);
 								}
