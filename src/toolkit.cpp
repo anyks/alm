@@ -1591,7 +1591,7 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 		// Создаем тредпул
 		tpool_t tpool;
 		// Количество всех слов для удаления
-		atomic <double> count{0};
+		size_t count = 0;
 		// Количество удалённых слов
 		atomic <size_t> index{0};
 		// Текущий статус прогресс-бара
@@ -1603,8 +1603,6 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 		 * @param idw идентификатор слова для удаления
 		 */
 		auto rmWordinArpaFn = [&](const size_t idw) noexcept {
-			// Получаем количество всех данных
-			if(status != nullptr) count.store(count + 1, memory_order_relaxed);
 			// Выполняем удаление слова в arpa
 			this->arpa->removeWord(idw);
 			// Если функция вывода статуса передана
@@ -1622,6 +1620,25 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 				}
 			}
 		};
+		// Если функция вывода статуса передана
+		if(status != nullptr){
+			// Считаем количество слов для удаления
+			for(auto & item : this->vocab){
+				// Если вес слова передан
+				if(wltf != 0.0){
+					// Получаем метаданные слова
+					const auto & meta = item.second.calc(this->info.ad, this->info.cw);
+					// Если вес слова не ниже порогового значения
+					if(meta.wltf <= wltf) count++;
+				// Если слова фильтруются по встречаемости
+				} else {
+					// Получаем метаданные слова
+					const auto & meta = item.second.getmeta();
+					// Если вес слова не ниже порогового значения
+					if((oc > 0) && (dc > 0) ? (meta.oc <= oc) && (meta.dc <= dc) : (oc > 0 ? meta.oc <= oc : (dc > 0 ? meta.dc <= dc : false))) count++;
+				}
+			}
+		}
 		// Выполняем инициализацию тредпула
 		tpool.init(thread::hardware_concurrency());
 		// Переходим по всему списку слов
