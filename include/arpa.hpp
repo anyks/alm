@@ -159,12 +159,12 @@ namespace anyks {
 			// Размер текущей n-граммы
 			mutable u_short gram = 1;
 		private:
-			// Мютекс для блокировки потока
-			mutex locker;
 			// Флаги параметров
 			bitset <6> options;
 			// Словарь языковой модели
 			mutable data_t data;
+			// Мютекс для блокировки потоков
+			mutable mutex locker;
 			// Параметры расчёта
 			mutable param_t param;
 			// Блок шагов (список дочерних грамм для текущей n-граммы)
@@ -282,6 +282,13 @@ namespace anyks {
 			const bool compute(data_t * ngram, const u_short gram, double & numerator, double & denominator) const noexcept;
 		protected:
 			/**
+			 * get Метод извлечения списка n-грамм указанного размера
+			 * @param gram размер n-граммы список грамм которой нужно извлечь
+			 * @return     указатель на список запрашиваемых n-грамм
+			 */
+			list <data_t *> * get(const u_short gram) const noexcept;
+		protected:
+			/**
 			 * contextFn Метод получения контекста
 			 * @param context контекст n-граммы
 			 * @return        текст контекста n-граммы
@@ -316,12 +323,6 @@ namespace anyks {
 			 * @param uppers список регистров слова
 			 */
 			void uniUppers(multimap <size_t, size_t> & uppers) const noexcept;
-			/**
-			 * get Метод извлечения списка n-грамм указанного размера
-			 * @param gram   размер n-граммы список грамм которой нужно извлечь
-			 * @param ngrams указатель на список запрашиваемых n-грамм
-			 */
-			void get(const u_short gram, list <data_t *> * ngrams = nullptr) const noexcept;
 			/**
 			 * sequence Метод извлечения правильной последовательности, игнорирования <unk> токена
 			 * @param seq      последовательность для обработки

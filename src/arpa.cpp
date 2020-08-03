@@ -268,14 +268,12 @@ const bool anyks::Arpa::checkIdw(const size_t idw, const u_short gram) const noe
 	bool result = false;
 	// Если идентификатор и граммность переданы верно
 	if((idw > 0) && (gram > 1) && (gram <= this->size) && (this->size > 0)){
-		// Список n-грамм для работы
-		list <data_t *> ngrams;
 		// Выполняем извлечение n-грамм
-		this->get(gram, &ngrams);
+		auto ngrams = this->get(gram);
 		// Если список n-грамм получен
-		if(!ngrams.empty()){
+		if((ngrams != nullptr) && !ngrams->empty()){
 			// Переходим по всему списку полученных n-грамм
-			for(auto & item : ngrams){
+			for(auto & item : * ngrams){
 				// Если в n-грамме есть дочерные граммы
 				if(!item->empty() && !this->isStart(item->idw)){
 					// Ищем слово в последовательности
@@ -439,6 +437,81 @@ const bool anyks::Arpa::compute(data_t * ngram, const u_short gram, double & num
 		}
 	// Запоминаем что всё хорошо
 	} else result = true;
+	// Выводим результат
+	return result;
+}
+/**
+ * get Метод извлечения списка n-грамм указанного размера
+ * @param gram размер n-граммы список грамм которой нужно извлечь
+ * @return     указатель на список запрашиваемых n-грамм
+ */
+list <anyks::Arpa::data_t *> * anyks::Arpa::get(const u_short gram) const noexcept {
+	// Результат работы функции
+	list <data_t *> * result = nullptr;
+	/**
+	 * runFn Прототип функции перехода по граммам
+	 * @param размер текущей n-граммы
+	 */
+	function <void (const u_short)> runFn;
+	/**
+	 * runFn Функция перехода по граммам
+	 * @param gram размер текущей n-граммы
+	 */
+	runFn = [&](const u_short gram) noexcept {
+		// Параметры следующего шага
+		list <data_t *> tmp;
+		// Если это нулевая n-грамма
+		switch(gram){
+			// Если это юниграмма
+			case 0: {
+				// Добавляем в временный список юниграммы
+				tmp.push_back(&this->data);
+				// Добавляем в список юниграмм
+				this->ngrams.emplace(gram + 1, move(tmp));
+				// Продолжаем дальше
+				runFn(gram + 1);
+			} break;
+			// Если это биграмма или больше
+			default: {
+				// Если шаг не пустой
+				if(this->ngrams.count(gram) > 0){
+					// Переходим по всему словарю
+					for(auto & item : this->ngrams.at(gram)){
+						// Если в n-грамме есть дочерные граммы
+						if(!item->empty()){
+							// Переходим по всему списку грамм
+							for(auto & value : * item){
+								// Если еще есть граммы
+								if(!value.second.empty()) tmp.push_back(&value.second);
+							}
+						}
+					}
+					// Добавляем в список юниграмм
+					if(!tmp.empty()){
+						// Если биграмма существует
+						this->ngrams.emplace(gram + 1, move(tmp));
+						// Продолжаем дальше
+						runFn(gram + 1);
+					}
+				}
+			}
+		}
+	};
+	// Выполняем сбор данных
+	if(this->ngrams.count(gram) < 1){
+		// Выполняем блокировку потока
+		this->locker.lock();
+		// Очищаем список грамм
+		this->ngrams.clear();
+		// Выполняем сбор данных
+		runFn(0);
+		// Выполняем разблокировку потока
+		this->locker.unlock();
+	}
+	// Если список грамм получен
+	auto it = this->ngrams.find(gram);
+	// Если список n-грамм получен
+	if(it != this->ngrams.end()) result = &it->second;
 	// Выводим результат
 	return result;
 }
@@ -634,8 +707,6 @@ void anyks::Arpa::fixupProbs(const u_short gram) const noexcept {
 	if(gram <= this->size){
 		// Количество фейковых частот
 		size_t numFakes = 0;
-		// Список n-грамм для работы
-		list <data_t *> ngrams;
 		// Проверяем включён ли режим отладки
 		const bool debug = this->isOption(options_t::debug);
 		// Если это нулевая n-грамма
@@ -681,16 +752,16 @@ void anyks::Arpa::fixupProbs(const u_short gram) const noexcept {
 			// Если это биграмма или больше
 			default: {
 				// Выполняем извлечение n-грамм
-				this->get(gram, &ngrams);
+				auto ngrams = this->get(gram);
 				// Если список n-грамм получен
-				if(!ngrams.empty()){
+				if((ngrams != nullptr) && !ngrams->empty()){
 					/**
 					 * Для контекста abcd нам нужно создать вероятностные записи
 					 * P(d | abc), P(c | ab), P(b | a), P(a) если необходимо.
 					 * Если что-то из этого будет найдено в таком порядке,
 					 * мы можем остановиться, так-как предыдущий проход уже создал оставшиеся.
 					 */
-					for(auto & item : ngrams){
+					for(auto & item : * ngrams){
 						// Если в n-грамме есть дочерные граммы
 						if(!item->empty()){
 							// Переходим по всему списку юниграмм
@@ -739,16 +810,16 @@ void anyks::Arpa::fixupProbs(const u_short gram) const noexcept {
  * @param uppers список регистров слова
  */
 void anyks::Arpa::uniUppers(multimap <size_t, size_t> & uppers) const noexcept {
-	// Список n-грамм для работы
-	list <data_t *> ngrams;
+	// Список полученных N-грамм
+	list <data_t *> * ngrams = nullptr;
 	// Переходим по всем граммам корпуса
 	for(u_short i = 2; i <= this->size; i++){
 		// Выполняем запрос грамм
-		this->get(i, &ngrams);
+		ngrams = this->get(i);
 		// Если n-граммы получены
-		if(!ngrams.empty()){
+		if((ngrams != nullptr) && !ngrams->empty()){
 			// Переходим по всему списку полученных n-грамм
-			for(auto & item : ngrams){
+			for(auto & item : * ngrams){
 				// Переходим по всему списку слов
 				for(auto & value : * item){
 					// Если идентификатор слова соответствует
@@ -775,78 +846,6 @@ void anyks::Arpa::uniUppers(multimap <size_t, size_t> & uppers) const noexcept {
 				}
 			}
 		}
-	}
-}
-/**
- * get Метод извлечения списка n-грамм указанного размера
- * @param gram   размер n-граммы список грамм которой нужно извлечь
- * @param ngrams указатель на список запрашиваемых n-грамм
- */
-void anyks::Arpa::get(const u_short gram, list <data_t *> * ngrams) const noexcept {
-	/**
-	 * runFn Прототип функции перехода по граммам
-	 * @param размер текущей n-граммы
-	 */
-	function <void (const u_short)> runFn;
-	/**
-	 * runFn Функция перехода по граммам
-	 * @param gram размер текущей n-граммы
-	 */
-	runFn = [&](const u_short gram) noexcept {
-		// Параметры следующего шага
-		list <data_t *> tmp;
-		// Если это нулевая n-грамма
-		switch(gram){
-			// Если это юниграмма
-			case 0: {
-				// Добавляем в временный список юниграммы
-				tmp.push_back(&this->data);
-				// Добавляем в список юниграмм
-				this->ngrams.emplace(gram + 1, tmp);
-				// Продолжаем дальше
-				runFn(gram + 1);
-			} break;
-			// Если это биграмма или больше
-			default: {
-				// Если шаг не пустой
-				if(this->ngrams.count(gram) > 0){
-					// Переходим по всему словарю
-					for(auto & item : this->ngrams.at(gram)){
-						// Если в n-грамме есть дочерные граммы
-						if(!item->empty()){
-							// Переходим по всему списку грамм
-							for(auto & value : * item){
-								// Если еще есть граммы
-								if(!value.second.empty()) tmp.push_back(&value.second);
-							}
-						}
-					}
-					// Добавляем в список юниграмм
-					if(!tmp.empty()){
-						// Если биграмма существует
-						this->ngrams.emplace(gram + 1, tmp);
-						// Продолжаем дальше
-						runFn(gram + 1);
-					}
-				}
-			}
-		}
-	};
-	// Выполняем сбор данных
-	if(this->ngrams.count(gram) < 1){
-		// Очищаем список грамм
-		this->ngrams.clear();
-		// Выполняем сбор данных
-		runFn(0);
-	}
-	// Если список n-грамм для извлечения передан
-	if(ngrams != nullptr){
-		// Очищаем список ранее собранных n-грамм
-		ngrams->clear();
-		// Если список грамм получен
-		auto it = this->ngrams.find(gram);
-		// Если список n-грамм получен
-		if(it != this->ngrams.end()) (* ngrams) = it->second;
 	}
 }
 /**
@@ -1162,10 +1161,10 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 	if(!seq1.empty() && !seq2.empty() && (seq1.size() == seq2.size())){
 		// Проверяем на валидность контекста
 		if(this->isContext(seq1)){
-			// Список n-грамм для работы
-			list <data_t *> ngrams;
 			// Не существующий идентификатор
 			const size_t noid = idw_t::NIDW;
+			// Список n-грамм для работы
+			list <data_t *> * ngrams = nullptr;
 			// Список полученных последовательностей
 			std::map <size_t, vector <size_t>> variants;
 			/**
@@ -1200,15 +1199,15 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 			 * @param idw идентификатор родительской граммы
 			 * @param seq последовательность для удаления
 			 */
-			auto checkFn = [&ngrams, this](const size_t idw, const vector <size_t> & seq) noexcept {
+			auto checkFn = [ngrams, this](const size_t idw, const vector <size_t> & seq) noexcept {
 				// Результат работы функции
 				bool result = false;
 				// Если список n-грамм получен
-				if(!ngrams.empty()){
+				if((ngrams != nullptr) && !ngrams->empty()){
 					// Количество найденных грамм
 					u_short count = 0;
 					// Переходим по всему списку полученных n-грамм
-					for(auto & item : ngrams){
+					for(auto & item : * ngrams){
 						// Если в n-грамме есть дочерные граммы
 						if(!item->empty() && !this->isStart(item->idw)){
 							// Ищем первый элемент в списке
@@ -1416,9 +1415,9 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 			// Если варианты собраны
 			if(!variants.empty()){
 				// Выполняем извлечение n-грамм
-				this->get(2, &ngrams);
+				ngrams = this->get(2);
 				// Если список n-грамм получен
-				if(!ngrams.empty()){
+				if((ngrams != nullptr) && !ngrams->empty()){
 					// Переходим по всему списку вариантов
 					for(auto & item : variants){
 						// Выполняем проверку
@@ -1538,14 +1537,12 @@ const size_t anyks::Arpa::count(const u_short gram, const bool real) const noexc
 		}
 	// Если это n-грамма
 	} else {
-		// Список n-грамм для работы
-		list <data_t *> ngrams;
 		// Выполняем извлечение n-грамм
-		this->get(gram, &ngrams);
+		auto ngrams = this->get(gram);
 		// Если список n-грамм получен
-		if(!ngrams.empty()){
+		if((ngrams != nullptr) && !ngrams->empty()){
 			// Переходим по всему списку полученных n-грамм
-			for(auto & item : ngrams){
+			for(auto & item : * ngrams){
 				// Переходим по всему списку слов
 				for(auto & value : * item){
 					// Если n-грамма имеет вес
@@ -1598,30 +1595,26 @@ void anyks::Arpa::removeWord(const size_t idw) noexcept {
 				}
 			}
 		};
+		// Выполняем зануление дочерних n-грамм
+		removeFn(&this->data.at(idw));
 		// Список n-грамм для работы
-		list <data_t *> ngrams;
-		// Переходим по всем n-граммам
-		for(u_short i = 1; i <= this->size; i++){
-			// Выполняем блокировку потока
-			this->locker.lock();
-			// Выполняем извлечение n-грамм
-			this->get(i, &ngrams);
-			// Выполняем разблокировку потока
-			this->locker.unlock();
-			// Если список n-грамм получен
-			if(!ngrams.empty()){
-				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams){
-					// Если в n-грамме есть дочерные граммы
-					if(!item->empty()){
-						// Переходим по всему списку грамм
-						for(auto & value : * item){
-							// Если идентификатор соответствует слову, удаляем его
-							if(value.second.idw == idw){
-								// Выполняем зануление дочерних n-грамм
-								removeFn(&value.second);
-								// Если это юниграмма, выходим
-								if(i == 1) break;
+		list <data_t *> * ngrams = this->get(1);
+		// Если количество N-грамм больше 1-й
+		if(this->ngrams.size() > 1){
+			// Переходим по всем n-граммам
+			for(u_short i = 2; i <= this->size; i++){
+				// Выполняем извлечение n-грамм
+				ngrams = this->get(i);
+				// Если список n-грамм получен
+				if((ngrams != nullptr) && !ngrams->empty()){
+					// Переходим по всему списку полученных n-грамм
+					for(auto & item : * ngrams){
+						// Если в n-грамме есть дочерные граммы
+						if(!item->empty()){
+							// Переходим по всему списку грамм
+							for(auto & value : * item){
+								// Если идентификатор соответствует слову, удаляем его
+								if(value.first == idw) removeFn(&value.second);
 							}
 						}
 					}
@@ -1960,16 +1953,14 @@ void anyks::Arpa::arpa(const u_short gram, function <void (const string &)> call
 			}
 		// Если это n-грамма
 		} else {
-			// Список n-грамм для работы
-			list <data_t *> ngrams;
 			// Выполняем извлечение n-грамм
-			this->get(gram, &ngrams);
+			auto ngrams = this->get(gram);
 			// Если список n-грамм получен
-			if(!ngrams.empty()){
+			if((ngrams != nullptr) && !ngrams->empty()){
 				// Полученный контекст
 				string context = "";
 				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams){
+				for(auto & item : * ngrams){
 					// Переходим по всему списку слов
 					for(auto & value : * item){
 						// Если n-грамма имеет вес
@@ -2049,16 +2040,14 @@ void anyks::Arpa::grams(const u_short gram, function <void (const string &)> cal
 			}
 		// Если это n-грамма
 		} else {
-			// Список n-грамм для работы
-			list <data_t *> ngrams;
 			// Выполняем извлечение n-грамм
-			this->get(gram, &ngrams);
+			auto ngrams = this->get(gram);
 			// Если список n-грамм получен
-			if(!ngrams.empty()){
+			if((ngrams != nullptr) && !ngrams->empty()){
 				// Полученный контекст
 				string context = "";
 				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams){
+				for(auto & item : * ngrams){
 					// Переходим по всему списку слов
 					for(auto & value : * item){
 						// Если это верная n-грамма
@@ -2584,8 +2573,6 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 	const bool debug = this->isOption(options_t::debug);
 	// Если словарь не пустой
 	if(!this->data.empty()){
-		// Список n-грамм для работы
-		list <data_t *> ngrams;
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
 		// Количество n-грамм и индекс обработанной n-граммы
@@ -2618,14 +2605,16 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 					}
 				}
 			};
+			// Список n-грамм для работы
+			list <data_t *> * ngrams = nullptr;
 			// Переходим по всем n-граммам и удаляем те у которых слишком низкая частота
 			for(u_short i = (this->size - 1); i > 1; i--){
 				// Выполняем извлечение n-грамм
-				this->get(i, &ngrams);
+				ngrams = this->get(i);
 				// Если список n-грамм получен
-				if(!ngrams.empty()){
+				if((ngrams != nullptr) && !ngrams->empty()){
 					// Переходим по всему списку полученных n-грамм
-					for(auto & item : ngrams){
+					for(auto & item : * ngrams){
 						// Если в n-грамме есть дочерные граммы
 						if(!item->empty()){
 							// Переходим по всему списку грамм
@@ -2687,8 +2676,6 @@ void anyks::Arpa::train(function <void (const u_short)> status) const noexcept {
 	if(!this->data.empty() && !this->isOption(options_t::notTrain)){
 		// Сбрасываем текущую позицию n-граммы
 		this->gram = 1;
-		// Список n-грамм для работы
-		list <data_t *> ngrams;
 		// Количество n-грамм и индекс обработанной n-граммы
 		size_t count = 0, index = 0;
 		// Текущий и предыдущий статус
@@ -2848,11 +2835,11 @@ void anyks::Arpa::train(function <void (const u_short)> status) const noexcept {
 				// Если это биграмма или больше
 				default: {
 					// Выполняем извлечение n-грамм
-					this->get(this->gram, &ngrams);
+					auto ngrams = this->get(this->gram);
 					// Если список n-грамм получен
-					if(!ngrams.empty()){
+					if((ngrams != nullptr) && !ngrams->empty()){
 						// Переходим по всему списку полученных n-грамм
-						for(auto & item : ngrams){
+						for(auto & item : * ngrams){
 							// Если в n-грамме есть дочерные граммы
 							if(!item->empty()){
 								// Обнуляем встречаемость всех n-грамм
@@ -3001,8 +2988,6 @@ void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept 
 	if(!this->data.empty()){
 		// Сбрасываем текущую позицию n-граммы
 		this->gram = 1;
-		// Список n-грамм для работы
-		list <data_t *> ngrams;
 		// Количество n-грамм и индекс обработанной n-граммы
 		size_t count = 0, index = 0;
 		// Текущий и предыдущий статус
@@ -3047,11 +3032,11 @@ void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept 
 				// Если это биграмма или больше
 				default: {
 					// Выполняем извлечение n-грамм
-					this->get(this->gram, &ngrams);
+					auto ngrams = this->get(this->gram);
 					// Если список n-грамм получен
-					if(!ngrams.empty()){
+					if((ngrams != nullptr) && !ngrams->empty()){
 						// Переходим по всему списку полученных n-грамм
-						for(auto & item : ngrams){
+						for(auto & item : * ngrams){
 							// Если в n-грамме есть дочерные граммы
 							if(!item->empty()){
 								/**
@@ -3139,8 +3124,6 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
 			// Выводим результат
 			return result;
 		};
-		// Список n-грамм для работы
-		list <data_t *> ngrams;
 		// Количество n-грамм которые нужно обработать
 		size_t counts = 0, index = 0;
 		// Текущий и предыдущий статус
@@ -3156,16 +3139,18 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
 			// Получаем количество n-грамм
 			counts += this->count(i, true);
 		}
+		// Список n-грамм для работы
+		list <data_t *> * ngrams = nullptr;
 		// Переходим по всем n-граммам задом наперёд
 		for(u_short i = this->size; (i > 0) && (i >= gram); i--){
 			// Выполняем извлечение n-грамм
-			this->get(i, &ngrams);
+			ngrams = this->get(i);
 			// Если список n-грамм получен
-			if(!ngrams.empty()){
+			if((ngrams != nullptr) && !ngrams->empty()){
 				// Количество обработанных n-грамм
 				size_t prunedNgrams = 0;
 				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams){
+				for(auto & item : * ngrams){
 					// Если в n-грамме есть дочерные граммы
 					if(!item->empty()){
 						// Обнуляем нумератор
@@ -3292,11 +3277,11 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
 		 */
 		for(u_short i = 1; i <= this->size; i++){
 			// Выполняем извлечение n-грамм
-			this->get(i, &ngrams);
+			ngrams = this->get(i);
 			// Если список n-грамм получен
-			if(!ngrams.empty()){
+			if((ngrams != nullptr) && !ngrams->empty()){
 				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams){
+				for(auto & item : * ngrams){
 					// Если в n-грамме есть дочерные граммы
 					if(!item->empty()) this->backoffs(i - 1, item);
 				}
@@ -3491,8 +3476,6 @@ void anyks::Arpa::mixBackward(const Arpa * lm, const double lambda, function <vo
 		size_t count = 0, index = 0;
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
-		// Список n-грамм для работы
-		list <data_t *> ngrams1, ngrams2;
 		// Проверяем включён ли режим отладки
 		const bool debug = this->isOption(options_t::debug);
 		// Переходим по всем n-грамм
@@ -3613,19 +3596,21 @@ void anyks::Arpa::mixBackward(const Arpa * lm, const double lambda, function <vo
 		double weight = 0.0;
 		// Очищаем загруженный ранее список кэша
 		this->ngrams.clear();
+		// Список n-грамм для работы
+		list <data_t *> * ngrams1 = nullptr, * ngrams2 = nullptr;
 		// Переходим по всем n-грамм
 		for(u_short i = max(this->size, lm->size); i > 0; i--){
 			// Выполняем извлечение n-грамм текущей языковой модели
-			this->get(i, &ngrams1);
+			ngrams1 = this->get(i);
 			// Выполняем извлечение n-грамм второй языковой модели
-			lm->get(i, &ngrams2);
+			ngrams2 = lm->get(i);
 			/**
 			 * Первый этап, поиска одинаковых n-грамм
 			 */
 			// Если список n-грамм получен
-			if(!ngrams1.empty() && !ngrams2.empty()){
+			if((ngrams1 != nullptr) && (ngrams2 != nullptr) && !ngrams1->empty() && !ngrams2->empty()){
 				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams1){
+				for(auto & item : * ngrams1){
 					// Если в n-грамме есть дочерные граммы
 					if(!item->empty()){
 						// Переходим по всему слов в контексте
@@ -3685,9 +3670,9 @@ void anyks::Arpa::mixBackward(const Arpa * lm, const double lambda, function <vo
 			 * Второй этап, поиска не существующих n-грамм
 			 */
 			// Если список n-грамм получен
-			if(!ngrams2.empty()){
+			if(ngrams2 != nullptr){
 				// Переходим по всему списку полученных n-грамм
-				for(auto & item : ngrams2){
+				for(auto & item : * ngrams2){
 					// Если в n-грамме есть дочерные граммы
 					if(!item->empty()){
 						// Переходим по всему слов в контексте
@@ -3699,7 +3684,7 @@ void anyks::Arpa::mixBackward(const Arpa * lm, const double lambda, function <vo
 							// Выполняем расчёт частоты
 							weight = mixLogFn(value.second.weight, weightFn(seq, this, true));
 							// Если список n-грамм получен
-							if(!ngrams1.empty()){
+							if(ngrams1 != nullptr){
 								// Если n-грамма не соответствует
 								if(!checkFn(seq, this).first) this->set(seq, weight, 0.0);
 							// Просто вставляем новую n-грамму
@@ -4510,18 +4495,16 @@ const bool anyks::GoodTuring::estimate(const u_short gram) const noexcept {
 	vector <size_t> countOfCounts(maxCount + 2);
 	// Заполняем список встречаемости нулями
 	for(size_t i = 0; i <= (maxCount + 1); i++) countOfCounts[i] = 0;
-	// Список n-грамм для работы
-	list <data_t *> ngrams;
 	// Выполняем извлечение n-грамм
-	this->get(gram, &ngrams);
+	auto ngrams = this->get(gram);
 	// Если список n-грамм получен
-	if(!ngrams.empty()){
+	if((ngrams != nullptr) && !ngrams->empty()){
 		// Значение начальное n-граммы
 		size_t idw = 0;
 		// Проверяем включён ли режим отладки
 		const bool debug = this->isOption(options_t::debug);
 		// Переходим по всему списку полученных n-грамм
-		for(auto & item : ngrams){
+		for(auto & item : * ngrams){
 			// Если дочерние граммы существует
 			if(!item->empty()){
 				// Переходим по всем n-граммам
@@ -4838,20 +4821,18 @@ void anyks::KneserNey::prepare(const u_short gram) const noexcept {
 	const bool debug = this->isOption(options_t::debug);
 	// Если отладка включена, выводим сообщение в консоль
 	if(debug) this->alphabet->log("modifying %u-gram counts for Kneser-Ney smoothing", alphabet_t::log_t::info, this->logfile, gram);
-	// Список n-грамм для работы
-	list <data_t *> first, second;
 	// Выполняем извлечение n-грамм первой группы
-	this->get(gram, &first);
+	auto first = this->get(gram);
 	// Выполняем извлечение n-грамм второй группы
-	this->get(gram + 1, &second);
+	auto second = this->get(gram + 1);
 	// Если список n-грамм получен
-	if(!first.empty() && !second.empty()){
+	if((first != nullptr) && (second != nullptr) && !first->empty() && !second->empty()){
 		// Ключ искомого элемента
 		pair_t key;
 		// Список встречаемости предыдущих грамм
 		multimap <pair_t, data_t *> range;
 		// Переходим по всему списку полученных n-грамм и обнуляем их
-		for(auto & item : first){
+		for(auto & item : * first){
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Если это не безсобытийная грамма (Начальная)
@@ -4866,7 +4847,7 @@ void anyks::KneserNey::prepare(const u_short gram) const noexcept {
 			}
 		}
 		// Переходим по всему списку второй группы и считаем граммы
-		for(auto & item : second){
+		for(auto & item : * second){
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Формируем ключ записи
@@ -4892,18 +4873,16 @@ void anyks::KneserNey::prepare(const u_short gram) const noexcept {
 const bool anyks::KneserNey::estimate(const u_short gram) const noexcept {
 	// Если данные не расчитаны, расчитываем их
 	if(!this->prepares[gram]) this->prepare(gram);
-	// Список n-грамм для работы
-	list <data_t *> ngrams;
 	// Выполняем извлечение n-грамм
-	this->get(gram, &ngrams);
+	auto ngrams = this->get(gram);
 	// Если список n-грамм получен
-	if(!ngrams.empty()){
+	if((ngrams != nullptr) && !ngrams->empty()){
 		// Первый табулированный счетчик и идентификатор слова
 		size_t n1 = 0, n2 = 0, idw = 0;
 		// Проверяем включён ли режим отладки
 		const bool debug = this->isOption(options_t::debug);
 		// Переходим по всему списку полученных n-грамм
-		for(auto & item : ngrams){
+		for(auto & item : * ngrams){
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Получаем начальную n-грамму
@@ -5048,18 +5027,16 @@ void anyks::ModKneserNey::init() const noexcept {
 const bool anyks::ModKneserNey::estimate(const u_short gram) const noexcept {
 	// Если данные не расчитаны, расчитываем их
 	if(!this->prepares[gram]) this->prepare(gram);
-	// Список n-грамм для работы
-	list <data_t *> ngrams;
 	// Выполняем извлечение n-грамм
-	this->get(gram, &ngrams);
+	auto ngrams = this->get(gram);
 	// Если список n-грамм получен
-	if(!ngrams.empty()){
+	if((ngrams != nullptr) && !ngrams->empty()){
 		// Первый табулированный счетчик
 		size_t n1 = 0, n2 = 0, n3 = 0, n4 = 0, idw = 0;
 		// Проверяем включён ли режим отладки
 		const bool debug = this->isOption(options_t::debug);
 		// Переходим по всему списку полученных n-грамм
-		for(auto & item : ngrams){
+		for(auto & item : * ngrams){
 			// Переходим по всем n-граммам
 			for(auto & value : * item){
 				// Получаем начальную n-грамму
