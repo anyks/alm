@@ -1580,12 +1580,13 @@ void anyks::Toolkit::prune(const double threshold, const u_short mingram, functi
 }
 /**
  * pruneVocab Метод прунинга словаря
- * @param wltf   пороговый вес слова для прунинга
- * @param oc     встречаемость слова во всех документах
- * @param dc     количество документов в которых встретилось слово
- * @param status статус прунинга словаря
+ * @param wltf    пороговый вес слова для прунинга
+ * @param oc      встречаемость слова во всех документах
+ * @param dc      количество документов в которых встретилось слово
+ * @param threads количество потоков для работы
+ * @param status  статус прунинга словаря
  */
-void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t dc, function <void (const u_short)> status) noexcept {
+void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t dc, const size_t threads, function <void (const u_short)> status) noexcept {
 	// Если словарь не пустой
 	if(!this->vocab.empty() && ((wltf != 0.0) || (oc > 0) || (dc > 0))){
 		// Создаем тредпул
@@ -1640,7 +1641,7 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 			}
 		}
 		// Выполняем инициализацию тредпула
-		tpool.init(thread::hardware_concurrency());
+		tpool.init(threads > 0 ? threads : thread::hardware_concurrency());
 		// Переходим по всему списку слов
 		for(auto it = this->vocab.begin(); it != this->vocab.end();){
 			// Если вес слова передан

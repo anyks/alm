@@ -480,12 +480,13 @@ namespace anyks {
 			void prune(const double threshold, const u_short mingram, function <void (const u_short)> status = nullptr) const noexcept;
 			/**
 			 * pruneVocab Метод прунинга словаря
-			 * @param wltf   пороговый вес слова для прунинга
-			 * @param oc     встречаемость слова во всех документах
-			 * @param dc     количество документов в которых встретилось слово
-			 * @param status статус прунинга словаря
+			 * @param wltf    пороговый вес слова для прунинга
+			 * @param oc      встречаемость слова во всех документах
+			 * @param dc      количество документов в которых встретилось слово
+			 * @param threads количество потоков для работы
+			 * @param status  статус прунинга словаря
 			 */
-			void pruneVocab(const double wltf = 0.0, const size_t oc = 0, const size_t dc = 0, function <void (const u_short)> status = nullptr) noexcept;
+			void pruneVocab(const double wltf = 0.0, const size_t oc = 0, const size_t dc = 0, const size_t threads = 0, function <void (const u_short)> status = nullptr) noexcept;
 			/**
 			 * mix Метод интерполяции нескольких arpa
 			 * @param filenames список файлов arpa для объединения
