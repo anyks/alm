@@ -31,6 +31,7 @@
 #include <python.hpp>
 #include <alphabet.hpp>
 #include <app/alm.hpp>
+#include <threadpool.hpp>
 
 // Устанавливаем область видимости
 using namespace std;

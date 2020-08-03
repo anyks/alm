@@ -12,6 +12,7 @@
 /**
  * Стандартная библиотека
  */
+#include <stack>
 #include <cmath>
 #include <limits>
 #include <string>

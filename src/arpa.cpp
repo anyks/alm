@@ -1587,15 +1587,12 @@ void anyks::Arpa::removeWord(const size_t idw) noexcept {
 		 * @param context позиция текущего контекста
 		 */
 		removeFn = [&removeFn](data_t * context) noexcept {
+			// Выполняем зануление текущего слова
+			context->weight = 0.0;
 			// Если список не пустой
 			if(!context->empty()){
 				// Переходим по всем n-граммам
-				for(auto & item : * context){
-					// Зануляем ненужную нам n-грамму
-					item.second.weight = 0.0;
-					// Если есть дочерние n-граммы зануляем и их
-					if(!item.second.empty()) removeFn(&item.second);
-				}
+				for(auto & item : * context) removeFn(&item.second);
 			}
 		};
 		// Список n-грамм для работы
@@ -1614,10 +1611,10 @@ void anyks::Arpa::removeWord(const size_t idw) noexcept {
 						for(auto & value : * item){
 							// Если идентификатор соответствует слову, удаляем его
 							if(value.second.idw == idw){
-								// Выполняем зануление текущего слова
-								value.second.weight = 0.0;
 								// Выполняем зануление дочерних n-грамм
 								removeFn(&value.second);
+								// Если это юниграмма, выходим
+								if(i == 1) break;
 							}
 						}
 					}

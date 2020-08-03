@@ -1588,10 +1588,22 @@ void anyks::Toolkit::prune(const double threshold, const u_short mingram, functi
 void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t dc, function <void (const u_short)> status) noexcept {
 	// Если словарь не пустой
 	if(!this->vocab.empty() && ((wltf != 0.0) || (oc > 0) || (dc > 0))){
+		// Создаем тредпул
+		tpool_t tpool;
 		// Количество извлечённых слов
 		size_t index = 0;
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
+		/**
+		 * rmWordinArpaFn Функция удаления слова в ARPA
+		 * @param idw идентификатор слова для удаления
+		 */
+		auto rmWordinArpaFn = [this](const size_t idw) noexcept {
+			// Выполняем удаление слова в arpa
+			this->arpa->removeWord(idw);
+		};
+		// Выполняем инициализацию тредпула
+		tpool.init(thread::hardware_concurrency());
 		// Переходим по всему списку слов
 		for(auto it = this->vocab.begin(); it != this->vocab.end();){
 			// Если вес слова передан
@@ -1600,8 +1612,8 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 				const auto & meta = it->second.calc(this->info.ad, this->info.cw);
 				// Если вес слова не ниже порогового значения
 				if(meta.wltf <= wltf){
-					// Выполняем удаление слова в arpa
-					this->arpa->removeWord(it->first);
+					// Добавляем в тредпул новое задание на обработку
+					tpool.push(rmWordinArpaFn, it->first);
 					// Удаляем слово в алфавите
 					it = this->vocab.erase(it);
 				// Увеличиваем значение итератора
@@ -1612,8 +1624,8 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 				const auto & meta = it->second.getmeta();
 				// Если вес слова не ниже порогового значения
 				if((oc > 0) && (dc > 0) ? (meta.oc <= oc) && (meta.dc <= dc) : (oc > 0 ? meta.oc <= oc : (dc > 0 ? meta.dc <= dc : false))){
-					// Выполняем удаление слова в arpa
-					this->arpa->removeWord(it->first);
+					// Добавляем в тредпул новое задание на обработку
+					tpool.push(rmWordinArpaFn, it->first);
 					// Удаляем слово в алфавите
 					it = this->vocab.erase(it);
 				// Увеличиваем значение итератора
@@ -1636,6 +1648,8 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 		}
 		// Обновляем количество уникальных слов
 		this->info.unq = this->vocab.size();
+		// Ожидаем завершения обработки
+		tpool.wait();
 	}
 }
 /**
