@@ -446,8 +446,6 @@ const size_t anyks::Toolkit::getUserTokenId(const string & name) const noexcept 
 void anyks::Toolkit::clear() noexcept {
 	// Очищаем неизвестное слово
 	this->unknown = 0;
-	// Очищаем словарь arpa
-	this->arpa->clear();
 	// Очищаем словарь
 	this->vocab.clear();
 	// Очищаем список пользовательских токенов
@@ -462,6 +460,8 @@ void anyks::Toolkit::clear() noexcept {
 	this->tokenDisable.clear();
 	// Очищаем объект статистики
 	this->info = info_t();
+	// Очищаем словарь arpa
+	if(this->arpa != nullptr) this->arpa->clear();
 	// Если объект питона установлен внешний
 	if(this->notCleanPython){
 		// Зануляем объект питона
