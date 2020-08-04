@@ -1514,199 +1514,94 @@ int main(int argc, char * argv[]) noexcept {
 			// Сообщаем, что сглаживание выбрано не верно
 			} else if(!env.is("method", "mix")) print("smoothing is bad\r\n", env.get("log"));
 			// Если передан метод обучения
-			if(env.is("method", "train")){
-				// Если - это не чтение карты последовательности и не чтение словаря
-				if(!env.is("r-map") && !env.is("r-vocab")){
-					// Если нужно использовать бинарный контейнер
-					if(!binDictFile.empty() && env.is("w-arpa")){
-						// Если отладка включена, выводим индикатор загрузки
-						if(debug > 0){
-							// Очищаем предыдущий прогресс-бар
-							pss.clear();
-							// Устанавливаем заголовки прогресс-бара
-							pss.title("Train arpa", "Train arpa is done");
-							// Выводим индикатор прогресс-бара
-							switch(debug){
-								case 1: pss.update(); break;
-								case 2: pss.status(); break;
-							}
+			if(env.is("method", "train") && !env.is("r-map") && !env.is("r-vocab")){
+				// Если нужно использовать бинарный контейнер
+				if(!binDictFile.empty() && env.is("w-arpa")){
+					// Если отладка включена, выводим индикатор загрузки
+					if(debug > 0){
+						// Очищаем предыдущий прогресс-бар
+						pss.clear();
+						// Устанавливаем заголовки прогресс-бара
+						pss.title("Train arpa", "Train arpa is done");
+						// Выводим индикатор прогресс-бара
+						switch(debug){
+							case 1: pss.update(); break;
+							case 2: pss.status(); break;
 						}
-						// Выполняем обучение
-						toolkit.train([debug, &pss](const u_short status) noexcept {
-							// Отображаем ход процесса
-							switch(debug){
-								case 1: pss.update(status); break;
-								case 2: pss.status(status); break;
-							}
-						});
+					}
+					// Выполняем обучение
+					toolkit.train([debug, &pss](const u_short status) noexcept {
 						// Отображаем ход процесса
 						switch(debug){
-							case 1: pss.update(100); break;
-							case 2: pss.status(100); break;
+							case 1: pss.update(status); break;
+							case 2: pss.status(status); break;
 						}
-					// Иначе продолжаем стандартное обучение
-					} else {
-						// Если путь получен
-						if(((value = env.get("corpus")) != nullptr) && fsys_t::isdir(value)){
-							// Запоминаем путь к файлам
-							const string & path = realpath(value, nullptr);
-							// Расширение файлов текстового корпуса
-							const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
-							// Если количество ядер передано
-							if(((value = env.get("threads")) != nullptr) &&
-							alphabet.isNumber(alphabet.convert(value))){
-								// Объявляем объект коллектора
-								collector_t collector(&toolkit, &alphabet, &tokenizer, env.get("log"));
-								// Устанавливаем режим отладки
-								collector.setDebug(debug);
-								// Устанавливаем размер n-граммы
-								collector.setOrder(order);
-								// Устанавливаем количество потоков
-								collector.setThreads(stoi(value));
-								// Устанавливаем флаг автоочистки
-								collector.setIntermed(env.is("train-intermed"));
-								// Устанавливаем флаг сегментации
-								collector.setSegment(
-									env.is("train-segments"),
-									((value = env.get("train-segment-size")) != nullptr ? value : "auto")
-								);
-								// Устанавливаем путь назначения
-								if((value = env.get("train-intermed-dest")) != nullptr) collector.setDest(value);
-								// Выполняем чтение данных файла
-								collector.readDir(path, ext);
-							// Иначе выполняем сборку обычным способом
-							} else {
-								// Идентификатор документа
-								size_t idd = 0, size = 0;
-								// Статус и процентное соотношение
-								u_short status = 0, rate = 100;
-								// Если отладка включена, выводим индикатор загрузки
-								if(debug > 0){
-									// Устанавливаем заголовки прогресс-бара
-									pss.title("Load text corpus", "Load text corpus is done");
-									// Выводим индикатор прогресс-бара
-									switch(debug){
-										case 1: pss.update(); break;
-										case 2: pss.status(); break;
-									}
-								}
-								// Переходим по всему списку файлов в каталоге
-								fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
-									// Устанавливаем название файла
-									if(debug > 0) pss.description(filename);
-									// Выполняем считывание всех строк текста
-									fsys_t::rfile2(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
-										// Если текст получен
-										if(!text.empty()) toolkit.addText(text, idd);
-										// Если отладка включена
-										if(debug > 0){
-											// Общий полученный размер данных
-											size += text.size();
-											// Подсчитываем статус выполнения
-											status = u_short(size / double(dirSize) * 100.0);
-											// Если процентное соотношение изменилось
-											if(rate != status){
-												// Запоминаем текущее процентное соотношение
-												rate = status;
-												// Отображаем ход процесса
-												switch(debug){
-													case 1: pss.update(status); break;
-													case 2: pss.status(status); break;
-												}
-											}
-										}
-									});
-									// Увеличиваем идентификатор документа
-									idd++;
-								});
-								// Отображаем ход процесса
+					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
+				// Иначе продолжаем стандартное обучение
+				} else {
+					// Если путь получен
+					if(((value = env.get("corpus")) != nullptr) && fsys_t::isdir(value)){
+						// Запоминаем путь к файлам
+						const string & path = realpath(value, nullptr);
+						// Расширение файлов текстового корпуса
+						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
+						// Если количество ядер передано
+						if(((value = env.get("threads")) != nullptr) &&
+						alphabet.isNumber(alphabet.convert(value))){
+							// Объявляем объект коллектора
+							collector_t collector(&toolkit, &alphabet, &tokenizer, env.get("log"));
+							// Устанавливаем режим отладки
+							collector.setDebug(debug);
+							// Устанавливаем размер n-граммы
+							collector.setOrder(order);
+							// Устанавливаем количество потоков
+							collector.setThreads(stoi(value));
+							// Устанавливаем флаг автоочистки
+							collector.setIntermed(env.is("train-intermed"));
+							// Устанавливаем флаг сегментации
+							collector.setSegment(
+								env.is("train-segments"),
+								((value = env.get("train-segment-size")) != nullptr ? value : "auto")
+							);
+							// Устанавливаем путь назначения
+							if((value = env.get("train-intermed-dest")) != nullptr) collector.setDest(value);
+							// Выполняем чтение данных файла
+							collector.readDir(path, ext);
+						// Иначе выполняем сборку обычным способом
+						} else {
+							// Идентификатор документа
+							size_t idd = 0, size = 0;
+							// Статус и процентное соотношение
+							u_short status = 0, rate = 100;
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Load text corpus", "Load text corpus is done");
+								// Выводим индикатор прогресс-бара
 								switch(debug){
-									case 1: pss.update(100); break;
-									case 2: pss.status(100); break;
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
 								}
 							}
-							// Если файл arpa для записи указан
-							if(env.is("w-arpa")){
-								// Если отладка включена, выводим индикатор загрузки
-								if(debug > 0){
-									// Очищаем предыдущий прогресс-бар
-									pss.clear();
-									// Устанавливаем заголовки прогресс-бара
-									pss.title("Train arpa", "Train arpa is done");
-									// Выводим индикатор прогресс-бара
-									switch(debug){
-										case 1: pss.update(); break;
-										case 2: pss.status(); break;
-									}
-								}
-								// Выполняем обучение
-								toolkit.train([debug, &pss](const u_short status) noexcept {
-									// Отображаем ход процесса
-									switch(debug){
-										case 1: pss.update(status); break;
-										case 2: pss.status(status); break;
-									}
-								});
-								// Отображаем ход процесса
-								switch(debug){
-									case 1: pss.update(100); break;
-									case 2: pss.status(100); break;
-								}
-							}
-						// Если файл корпуса получен
-						} else if(((value = env.get("corpus")) != nullptr) && fsys_t::isfile(value)){
-							// Запоминаем адрес файла
-							const string & filename = realpath(value, nullptr);
-							// Если количество ядер передано
-							if(((value = env.get("threads")) != nullptr) &&
-							alphabet.isNumber(alphabet.convert(value))){
-								// Объявляем объект коллектора
-								collector_t collector(&toolkit, &alphabet, &tokenizer, env.get("log"));
-								// Устанавливаем режим отладки
-								collector.setDebug(debug);
-								// Устанавливаем размер n-граммы
-								collector.setOrder(order);
-								// Устанавливаем количество потоков
-								collector.setThreads(stoi(value));
-								// Устанавливаем флаг автоочистки
-								collector.setIntermed(env.is("train-intermed"));
-								// Устанавливаем флаг сегментации
-								collector.setSegment(
-									env.is("train-segments"),
-									((value = env.get("train-segment-size")) != nullptr ? value : "auto")
-								);
-								// Устанавливаем путь назначения
-								if((value = env.get("train-intermed-dest")) != nullptr) collector.setDest(value);
-								// Выполняем чтение данных файла
-								collector.readFile(filename);
-							// Иначе выполняем сборку обычным способом
-							} else {
-								// Идентификатор документа
-								size_t size = 0;
-								// Статус и процентное соотношение
-								u_short status = 0, rate = 100;
-								// Если отладка включена, выводим индикатор загрузки
-								if(debug > 0){
-									// Устанавливаем название файла
-									pss.description(filename);
-									// Устанавливаем заголовки прогресс-бара
-									pss.title("Load text corpus", "Load text corpus is done");
-									// Выводим индикатор прогресс-бара
-									switch(debug){
-										case 1: pss.update(); break;
-										case 2: pss.status(); break;
-									}
-								}
+							// Переходим по всему списку файлов в каталоге
+							fsys_t::rdir(path, ext, [&](const string & filename, const uintmax_t dirSize) noexcept {
+								// Устанавливаем название файла
+								if(debug > 0) pss.description(filename);
 								// Выполняем считывание всех строк текста
-								fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+								fsys_t::rfile2(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
 									// Если текст получен
-									if(!text.empty()) toolkit.addText(text, 0);
+									if(!text.empty()) toolkit.addText(text, idd);
 									// Если отладка включена
 									if(debug > 0){
 										// Общий полученный размер данных
 										size += text.size();
 										// Подсчитываем статус выполнения
-										status = u_short(size / double(fileSize) * 100.0);
+										status = u_short(size / double(dirSize) * 100.0);
 										// Если процентное соотношение изменилось
 										if(rate != status){
 											// Запоминаем текущее процентное соотношение
@@ -1719,43 +1614,145 @@ int main(int argc, char * argv[]) noexcept {
 										}
 									}
 								});
-								// Отображаем ход процесса
+								// Увеличиваем идентификатор документа
+								idd++;
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+						}
+						// Если файл arpa для записи указан
+						if(env.is("w-arpa")){
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Train arpa", "Train arpa is done");
+								// Выводим индикатор прогресс-бара
 								switch(debug){
-									case 1: pss.update(100); break;
-									case 2: pss.status(100); break;
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
 								}
 							}
-							// Если файл arpa для записи указан
-							if(env.is("w-arpa")){
-								// Если отладка включена, выводим индикатор загрузки
+							// Выполняем обучение
+							toolkit.train([debug, &pss](const u_short status) noexcept {
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(status); break;
+									case 2: pss.status(status); break;
+								}
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+						}
+					// Если файл корпуса получен
+					} else if(((value = env.get("corpus")) != nullptr) && fsys_t::isfile(value)){
+						// Запоминаем адрес файла
+						const string & filename = realpath(value, nullptr);
+						// Если количество ядер передано
+						if(((value = env.get("threads")) != nullptr) &&
+						alphabet.isNumber(alphabet.convert(value))){
+							// Объявляем объект коллектора
+							collector_t collector(&toolkit, &alphabet, &tokenizer, env.get("log"));
+							// Устанавливаем режим отладки
+							collector.setDebug(debug);
+							// Устанавливаем размер n-граммы
+							collector.setOrder(order);
+							// Устанавливаем количество потоков
+							collector.setThreads(stoi(value));
+							// Устанавливаем флаг автоочистки
+							collector.setIntermed(env.is("train-intermed"));
+							// Устанавливаем флаг сегментации
+							collector.setSegment(
+								env.is("train-segments"),
+								((value = env.get("train-segment-size")) != nullptr ? value : "auto")
+							);
+							// Устанавливаем путь назначения
+							if((value = env.get("train-intermed-dest")) != nullptr) collector.setDest(value);
+							// Выполняем чтение данных файла
+							collector.readFile(filename);
+						// Иначе выполняем сборку обычным способом
+						} else {
+							// Идентификатор документа
+							size_t size = 0;
+							// Статус и процентное соотношение
+							u_short status = 0, rate = 100;
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Устанавливаем название файла
+								pss.description(filename);
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Load text corpus", "Load text corpus is done");
+								// Выводим индикатор прогресс-бара
+								switch(debug){
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
+								}
+							}
+							// Выполняем считывание всех строк текста
+							fsys_t::rfile(filename, [&](const string & text, const uintmax_t fileSize) noexcept {
+								// Если текст получен
+								if(!text.empty()) toolkit.addText(text, 0);
+								// Если отладка включена
 								if(debug > 0){
-									// Очищаем предыдущий прогресс-бар
-									pss.clear();
-									// Устанавливаем заголовки прогресс-бара
-									pss.title("Train arpa", "Train arpa is done");
-									// Выводим индикатор прогресс-бара
-									switch(debug){
-										case 1: pss.update(); break;
-										case 2: pss.status(); break;
+									// Общий полученный размер данных
+									size += text.size();
+									// Подсчитываем статус выполнения
+									status = u_short(size / double(fileSize) * 100.0);
+									// Если процентное соотношение изменилось
+									if(rate != status){
+										// Запоминаем текущее процентное соотношение
+										rate = status;
+										// Отображаем ход процесса
+										switch(debug){
+											case 1: pss.update(status); break;
+											case 2: pss.status(status); break;
+										}
 									}
 								}
-								// Выполняем обучение
-								toolkit.train([debug, &pss](const u_short status) noexcept {
-									// Отображаем ход процесса
-									switch(debug){
-										case 1: pss.update(status); break;
-										case 2: pss.status(status); break;
-									}
-								});
-								// Отображаем ход процесса
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+						}
+						// Если файл arpa для записи указан
+						if(env.is("w-arpa")){
+							// Если отладка включена, выводим индикатор загрузки
+							if(debug > 0){
+								// Очищаем предыдущий прогресс-бар
+								pss.clear();
+								// Устанавливаем заголовки прогресс-бара
+								pss.title("Train arpa", "Train arpa is done");
+								// Выводим индикатор прогресс-бара
 								switch(debug){
-									case 1: pss.update(100); break;
-									case 2: pss.status(100); break;
+									case 1: pss.update(); break;
+									case 2: pss.status(); break;
 								}
 							}
-						// Если путь не указан
-						} else print("path or file with corpus texts is not specified\r\n", env.get("log"));
-					}
+							// Выполняем обучение
+							toolkit.train([debug, &pss](const u_short status) noexcept {
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(status); break;
+									case 2: pss.status(status); break;
+								}
+							});
+							// Отображаем ход процесса
+							switch(debug){
+								case 1: pss.update(100); break;
+								case 2: pss.status(100); break;
+							}
+						}
+					// Если путь не указан
+					} else print("path or file with corpus texts is not specified\r\n", env.get("log"));
 				}
 			// Если передан метод интерполяции
 			} else if(env.is("method", "mix") && ((value = env.get("r-arpa")) != nullptr)) {
