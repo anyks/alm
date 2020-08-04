@@ -9,6 +9,55 @@
 #include <progress.hpp>
 
 /**
+ * dimension Метод получения типа оставшегося времени
+ * @param sec время для расчёта в секундах
+ * @return    значение оставшегося времени
+ */
+const pair <time_t, string> anyks::Progress::dimension(const time_t sec) const noexcept {
+	// Результат работы функции
+	pair <time_t, string> result = {sec, "seconds"};
+	// Если секунды переданы
+	if(result.first > 0){
+		// Если это минуты, переводим секунды в минуты
+		if(result.first >= 60){
+			// Переводим секунды в минуты
+			result.first /= 60;
+			// Меняем индикатор размерности
+			result.second = "minutes";
+			// Если это часы
+			if(result.first >= 60){
+				// Переводим минуты в часы
+				result.first /= 60;
+				// Меняем индикатор размерности
+				result.second = "hours";
+				// Если это дни
+				if(result.first >= 24){
+					// Переводим минуты в дни
+					result.first /= 24;
+					// Меняем индикатор размерности
+					result.second = "days";
+					// Если это месяцы
+					if(result.first >= 31){
+						// Переводим минуты в месяцы
+						result.first /= 31;
+						// Меняем индикатор размерности
+						result.second = "months";
+						// Если это годы
+						if(result.first >= 12){
+							// Переводим минуты в годы
+							result.first /= 12;
+							// Меняем индикатор размерности
+							result.second = "years";
+						}
+					}
+				}
+			}
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * clear Метод сброса данных
  */
 void anyks::Progress::clear() noexcept {
@@ -37,30 +86,15 @@ void anyks::Progress::status(const u_short status) noexcept {
 			if((status == 0) || (this->startTime == 0)) printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%%\r\n", this->title1.c_str(), status);
 			// Выводим примерное время завершения работы
 			else if(this->startTime > 0) {
-				// Строка индикатора размерности
-				const char * dimension = "s";
 				// Выполняем расчёт оставшихся секунд
-				time_t elapses = ((100 - status) * ((time(nullptr) - this->startTime) / double(status)));
-				// Если это минуты, переводим секунды в минуты
-				if(elapses >= 60){
-					// Переводим секунды в минуты
-					elapses /= 60;
-					// Меняем индикатор размерности
-					dimension = "m";
-					// Если это часы
-					if(elapses >= 60){
-						// Переводим минуты в часы
-						elapses /= 60;
-						// Меняем индикатор размерности
-						dimension = "h";
-					}
-				}
+				// Получаем оставшееся время
+				auto dimension = this->dimension((100 - status) * ((time(nullptr) - this->startTime) / double(status)));
 				// Если описание передано
 				if(!this->desc.empty()){
 					// Выводим заголовок индикатора загрузки с описанием
-					printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld%s]: %s\r\n", this->title1.c_str(), status, elapses, dimension, this->desc.c_str());
+					printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s]: %s\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), this->desc.c_str());
 				// Выводим заголовок индикатора загрузки без описания
-				} else printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld%s]\r\n", this->title1.c_str(), status, elapses, dimension);
+				} else printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s]\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str());
 			}
 		}
 		// Запоминаем текущий статус

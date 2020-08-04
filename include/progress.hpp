@@ -40,6 +40,13 @@ namespace anyks {
 			const char * litem = "|";
 			// Заголовки и описание при работе прогресса
 			string title1 = "", title2 = "", desc = "";
+		private:
+			/**
+			 * dimension Метод получения типа оставшегося времени
+			 * @param sec время для расчёта в секундах
+			 * @return    значение оставшегося времени
+			 */
+			const pair <time_t, string> dimension(const time_t sec) const noexcept;
 		public:
 			/**
 			 * clear Метод сброса данных

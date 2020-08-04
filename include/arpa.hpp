@@ -15,7 +15,6 @@
 #include <map>
 #include <set>
 #include <list>
-#include <mutex>
 #include <cmath>
 #include <ctime>
 #include <bitset>
@@ -163,10 +162,10 @@ namespace anyks {
 			bitset <6> options;
 			// Словарь языковой модели
 			mutable data_t data;
-			// Мютекс для блокировки потоков
-			mutable mutex locker;
 			// Параметры расчёта
 			mutable param_t param;
+			// Список удалённых слов
+			mutable std::set <size_t> delwords;
 			// Блок шагов (список дочерних грамм для текущей n-граммы)
 			mutable std::map <u_short, list <data_t *>> ngrams;
 		private:
@@ -221,17 +220,17 @@ namespace anyks {
 			 */
 			const bool isStart(const size_t idw) const noexcept;
 			/**
-			 * isWeight Метод проверки на валидность веса
-			 * @param weight вес для проверки
-			 * @return       результат проверки
-			 */
-			const bool isWeight(const double weight) const noexcept;
-			/**
-			 * isWeights Метод проверки существования дочерних n-грамм
+			 * isWord Метод проверки на валидность слова
 			 * @param ngram контекст для проверки
 			 * @return      результат проверки
 			 */
-			const bool isWeights(const data_t * ngram) const noexcept;
+			const bool isWord(const data_t * ngram) const noexcept;
+			/**
+			 * isWords Метод проверки существования дочерних n-грамм
+			 * @param ngram контекст для проверки
+			 * @return      результат проверки
+			 */
+			const bool isWords(const data_t * ngram) const noexcept;
 			/**
 			 * isOption Метод проверки наличия опции
 			 * @param option опция для проверки

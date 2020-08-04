@@ -108,20 +108,32 @@ const bool anyks::Arpa::isStart(const size_t idw) const noexcept {
 	return (idw == size_t(token_t::start));
 }
 /**
- * isWeight Метод проверки на валидность веса
- * @param weight вес для проверки
- * @return       результат проверки
- */
-const bool anyks::Arpa::isWeight(const double weight) const noexcept {
-	// Выводим результат проверки
-	return ((weight != 0.0) && !isnan(weight) && ((weight == this->zero) || !isinf(weight)));
-}
-/**
- * isWeights Метод проверки существования дочерних n-грамм
+ * isWord Метод проверки на валидность слова
  * @param ngram контекст для проверки
  * @return      результат проверки
  */
-const bool anyks::Arpa::isWeights(const data_t * ngram) const noexcept {
+const bool anyks::Arpa::isWord(const data_t * ngram) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если N-грамма передана
+	if(ngram != nullptr){
+		// Выводим результат проверки
+		result = (
+			(this->delwords.count(ngram->idw) < 1) &&
+			(ngram->weight != 0.0) &&
+			!isnan(ngram->weight) &&
+			((ngram->weight == this->zero) || !isinf(ngram->weight))
+		);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * isWords Метод проверки существования дочерних n-грамм
+ * @param ngram контекст для проверки
+ * @return      результат проверки
+ */
+const bool anyks::Arpa::isWords(const data_t * ngram) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если список n-грамм получен
@@ -129,7 +141,7 @@ const bool anyks::Arpa::isWeights(const data_t * ngram) const noexcept {
 		// Переходим по всему списку слов
 		for(auto & value : * ngram){
 			// Если хотя бы один элемент не нулевой
-			if((result = this->isWeight(value.second.weight))) break;
+			if((result = this->isWord(&value.second))) break;
 		}
 	}
 	// Выводим результат
@@ -161,7 +173,7 @@ const bool anyks::Arpa::isContext(const data_t * context) const noexcept {
 		// Извлекаем предшествующую n-грамму
 		while(context->father != nullptr){
 			// Если вес правильный
-			if((result = this->isWeight(context->weight)))
+			if((result = this->isWord(context)))
 				// Выполняем смещение
 				context = context->father;
 			// Выходим из цикла
@@ -279,7 +291,7 @@ const bool anyks::Arpa::checkIdw(const size_t idw, const u_short gram) const noe
 					// Ищем слово в последовательности
 					auto it = item->find(idw);
 					// Если последовательность найдена и она пустая, зануляем её
-					result = ((it != item->end()) && this->isWeight(it->second.weight));
+					result = ((it != item->end()) && this->isWord(&it->second));
 					// Выходим из цикла
 					if(result) break;
 				}
@@ -383,7 +395,7 @@ const bool anyks::Arpa::compute(data_t * ngram, const u_short gram, double & num
 	// Переходим по всему слов в контексте
 	for(auto & item : * ngram){
 		// Если частота n-граммы существует
-		if(this->isWeight(item.second.weight)){
+		if(this->isWord(&item.second)){
 			// Считаем нуминатор
 			numerator -= pow(10, item.second.weight);
 			// Считаем денуминатор
@@ -407,7 +419,7 @@ const bool anyks::Arpa::compute(data_t * ngram, const u_short gram, double & num
 		// Переходим по всему слов в контексте
 		for(auto & item : * ngram){
 			// Если частота n-граммы существует
-			if(this->isWeight(item.second.weight)){
+			if(this->isWord(&item.second)){
 				// Выполняем пересчёт веса n-граммы
 				item.second.weight += scale;
 			}
@@ -530,7 +542,7 @@ const string anyks::Arpa::context(const data_t * context) const noexcept {
 		// Извлекаем предшествующую n-грамму
 		while(context->father != nullptr){
 			// Получаем слово для добавления в строку
-			word = (this->isWeight(context->weight) ? this->word(context->idw, this->uppers(context).first) : "");
+			word = (this->isWord(context) ? this->word(context->idw, this->uppers(context).first) : "");
 			// Если слово получено
 			if(!word.empty()){
 				// Если строка не пустая, добавляем пробел
@@ -649,7 +661,7 @@ void anyks::Arpa::distribute(const double mass) const noexcept {
 				// Считаем количество слов
 				numWords++;
 				// Если частота нулевая, преобразуем частоту в псевдоноль
-				if(!this->isWeight(item.second.weight)) item.second.weight = this->zero;
+				if(!this->isWord(&item.second)) item.second.weight = this->zero;
 				// Увеличиваем количество нулевых весов
 				if(item.second.weight == this->zero) numZeroProbs++;
 			}
@@ -1525,7 +1537,7 @@ const size_t anyks::Arpa::count(const u_short gram, const bool real) const noexc
 		// Переходим по всему списку юниграмм
 		for(auto & value : this->data){
 			// Если n-грамма имеет вес
-			if(this->isWeight(value.second.weight)){
+			if(this->isWord(&value.second)){
 				// Считаем только одно слово
 				result++;
 				// Если это нормальное слово
@@ -1564,6 +1576,8 @@ void anyks::Arpa::clear() noexcept {
 	this->data.clear();
 	// Очищаем список собранных грамм
 	this->ngrams.clear();
+	// Очищаем список удалённых слов
+	this->delwords.clear();
 	// Сбрасываем параметры расчёта
 	this->param = param_t();
 }
@@ -1574,15 +1588,18 @@ void anyks::Arpa::clear() noexcept {
 void anyks::Arpa::removeWord(const size_t idw) noexcept {
 	// Если слово найдено
 	if((idw > 0) && (this->data.count(idw) > 0)){
+		// Добавляем слово в список для удаления
+		this->delwords.emplace(idw);
 		/**
 		 * removeFn Прототип функции зануления всех дочерних n-грамм
 		 * @param позиция текущего контекста
 		 */
-		function <void (data_t *)> removeFn;
+		// function <void (data_t *)> removeFn;
 		/**
 		 * removeFn Функция зануления всех дочерних n-грамм
 		 * @param context позиция текущего контекста
 		 */
+		/*
 		removeFn = [&removeFn, this](data_t * context) noexcept {
 			// Если контекст получен
 			if(context != nullptr){
@@ -1628,6 +1645,7 @@ void anyks::Arpa::removeWord(const size_t idw) noexcept {
 				}
 			}
 		}
+		*/
 	}
 }
 /**
@@ -1903,7 +1921,7 @@ void anyks::Arpa::arpa(const u_short gram, function <void (const string &)> call
 				// Очищаем предыдущие граммы
 				result.clear();
 				// Если n-грамма имеет вес
-				if(this->isWeight(value.second.weight)){
+				if(this->isWord(&value.second)){
 					// Если это -Infinity или псевдо-ноль
 					if((value.second.weight == this->zero) || (value.second.weight == this->pseudoZero))
 						// Устанавливаем вес равный псевдо-нулю
@@ -1911,7 +1929,7 @@ void anyks::Arpa::arpa(const u_short gram, function <void (const string &)> call
 					// Если это нормальный вес
 					else weight = to_string(value.second.weight);
 					// Если слово имеет частоту отката
-					if((gram < this->size) && ((value.second.backoff != this->zero) && this->isWeights(&value.second))){
+					if((gram < this->size) && ((value.second.backoff != this->zero) && this->isWords(&value.second))){
 						// Получаем обратную частоту модели
 						backoff = (isnormal(value.second.backoff) && (fabs(value.second.backoff) > 0.000001) ? to_string(value.second.backoff) : "0");
 					// Иначе очищаем обратную частоту документа
@@ -1971,7 +1989,7 @@ void anyks::Arpa::arpa(const u_short gram, function <void (const string &)> call
 					// Переходим по всему списку слов
 					for(auto & value : * item){
 						// Если n-грамма имеет вес
-						if(this->isWeight(value.second.weight)){
+						if(this->isWord(&value.second)){
 							// Если это -Infinity или псевдо-ноль
 							if((value.second.weight == this->zero) || (value.second.weight == this->pseudoZero))
 								// Устанавливаем вес равный псевдо-нулю
@@ -1987,7 +2005,7 @@ void anyks::Arpa::arpa(const u_short gram, function <void (const string &)> call
 								// Если контекст существует
 								if(!result.empty()){
 									// Если слово имеет частоту отката
-									if((gram < this->size) && ((value.second.backoff != this->zero) && this->isWeights(&value.second))){
+									if((gram < this->size) && ((value.second.backoff != this->zero) && this->isWords(&value.second))){
 										// Добавляем разделитель
 										result.append("\t");
 										// Получаем обратную частоту модели
@@ -2026,7 +2044,7 @@ void anyks::Arpa::grams(const u_short gram, function <void (const string &)> cal
 			// Переходим по всему списку юниграмм
 			for(auto & value : this->data){
 				// Если n-грамма имеет вес
-				if(this->isWeight(value.second.weight)){
+				if(this->isWord(&value.second)){
 					// Если регистры слова существуют
 					if(uppers.count(value.second.idw) > 0){
 						// Получаем диапазон регистров слова
@@ -2058,7 +2076,7 @@ void anyks::Arpa::grams(const u_short gram, function <void (const string &)> cal
 					// Переходим по всему списку слов
 					for(auto & value : * item){
 						// Если это верная n-грамма
-						if(this->isWeight(value.second.weight)){
+						if(this->isWord(&value.second)){
 							// Получаем данные контекста
 							context = this->context(&value.second);
 							// Формируем результат с учётом регистра
@@ -2127,13 +2145,13 @@ void anyks::Arpa::getBin(const bool arpa, function <void (const vector <char> &,
 			// Получаем объект данных
 			const data_t * obj = (ngrams != nullptr ? ngrams : &this->data);
 			// Если есть смысл обрабатывать варианты
-			if(this->isWeights(obj)){
+			if(this->isWords(obj)){
 				// Переходим по всему объекту с данными
 				for(auto & item : * obj){
 					// Увеличиваем индекс если это юниграмма
 					if(ngrams == nullptr) index++;
 					// Если это верная n-грамма
-					if(this->isWeight(item.second.weight)){
+					if(this->isWord(&item.second)){
 						// Получаем лучший регистр слова
 						uppers = this->uppers(item.second.uppers, item.second.oc);
 						// Формируем блок слова
@@ -2195,7 +2213,7 @@ void anyks::Arpa::map(function <void (const string &, const u_short)> callback, 
 			// Получаем объект данных
 			const data_t * obj = (ngrams != nullptr ? ngrams : &this->data);
 			// Если есть смысл обрабатывать варианты
-			if(this->isWeights(obj)){
+			if(this->isWords(obj)){
 				// Переходим по всему объекту с данными
 				for(auto & item : * obj){
 					// Получаем данные строки
@@ -2203,7 +2221,7 @@ void anyks::Arpa::map(function <void (const string &, const u_short)> callback, 
 					// Увеличиваем индекс если это юниграмма
 					if(ngrams == nullptr) index++;
 					// Если это верная n-грамма
-					if(this->isWeight(item.second.weight)){
+					if(this->isWord(&item.second)){
 						// Добавляем разделитель
 						if(!data.empty()) data.append(delim);
 						// Получаем лучший регистр слова
@@ -2603,12 +2621,8 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 			removeFn = [&removeFn, this](data_t * context) noexcept {
 				// Если контекст получен
 				if(context != nullptr){
-					// Выполняем блокировку потока
-					this->locker.lock();
 					// Выполняем зануление текущего слова
 					if(context->weight != 0.0) context->weight = 0.0;
-					// Выполняем разблокировку потока
-					this->locker.unlock();
 					// Если список не пустой
 					if(!context->empty()){
 						// Переходим по всем n-граммам
@@ -2634,7 +2648,7 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 							// Переходим по всему списку грамм
 							for(auto & value : * item){
 								// Если частота n-граммы меньше её частоты отката, удаляем n-грамму
-								if(!this->isWeight(value.second.father->weight) || (value.second.weight < value.second.backoff) || (value.second.backoff == this->zero)){
+								if(!this->isWord(value.second.father) || (value.second.weight < value.second.backoff) || (value.second.backoff == this->zero)){
 									// Считаем количество удалённых n-грамм
 									erased++;
 									// Выводим результат
@@ -3190,7 +3204,7 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
 							// Переходим по всему слов в контексте
 							for(auto & value : * item){
 								// Если частота n-граммы существует
-								if(this->isWeight(value.second.weight)){
+								if(this->isWord(&value.second)){
 									// Генерируем обратную частоту n-граммы
 									double bow = this->backoff(value.second.idw, item, i - 2);
 									// Расчитываем новую обратную частоту документа
@@ -3221,7 +3235,7 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
 									 * Убеждаемся, что мы не удаляем n-граммы,
 									 * чьи частоты отката нам необходимы ...
 									 */
-									if(pruned && ((value.second.backoff != this->zero) && this->isWeights(&value.second))) pruned = false;
+									if(pruned && ((value.second.backoff != this->zero) && this->isWords(&value.second))) pruned = false;
 									// Если отладка включена
 									if(debug){
 										// Выводим статистику в сообщении
@@ -3269,7 +3283,7 @@ void anyks::Arpa::prune(const double threshold, const u_short mingram, function 
 							 * мы можем удалить сам контекст,
 							 * но только если текущий контекст не является префиксом более длинного.
 							 */
-							if(allPruned && !this->isWeights(item)) item->backoff = this->zero;
+							if(allPruned && !this->isWords(item)) item->backoff = this->zero;
 						}
 					}
 				}
