@@ -1582,67 +1582,8 @@ void anyks::Arpa::clear() noexcept {
  * @param idw идентификатор слова
  */
 void anyks::Arpa::removeWord(const size_t idw) noexcept {
-	// Если слово найдено
-	if((idw > 0) && (this->data.count(idw) > 0)){
-		// Добавляем слово в список для удаления
-		this->delwords.emplace(idw);
-		/**
-		 * removeFn Прототип функции зануления всех дочерних n-грамм
-		 * @param позиция текущего контекста
-		 */
-		// function <void (data_t *)> removeFn;
-		/**
-		 * removeFn Функция зануления всех дочерних n-грамм
-		 * @param context позиция текущего контекста
-		 */
-		/*
-		removeFn = [&removeFn, this](data_t * context) noexcept {
-			// Если контекст получен
-			if(context != nullptr){
-				// Выполняем блокировку потока
-				this->locker.lock();
-				// Выполняем зануление текущего слова
-				if(context->weight != 0.0) context->weight = 0.0;
-				// Выполняем разблокировку потока
-				this->locker.unlock();
-				// Если список не пустой
-				if(!context->empty()){
-					// Переходим по всем n-граммам
-					for(auto & item : * context){
-						// Удаляем все последующие N-граммы
-						if(item.second.weight != 0.0) removeFn(&item.second);
-					}
-				}
-			}
-		};
-		// Выполняем зануление дочерних n-грамм
-		removeFn(&this->data[idw]);
-		// Список n-грамм для работы
-		list <data_t *> * ngrams = this->get(1);
-		// Если количество N-грамм больше 1-й
-		if(this->ngrams.size() > 1){
-			// Переходим по всем n-граммам
-			for(u_short i = 2; i <= this->size; i++){
-				// Выполняем извлечение n-грамм
-				ngrams = this->get(i);
-				// Если список n-грамм получен
-				if((ngrams != nullptr) && !ngrams->empty()){
-					// Переходим по всему списку полученных n-грамм
-					for(auto & item : * ngrams){
-						// Если в n-грамме есть дочерные граммы
-						if(!item->empty()){
-							// Переходим по всему списку грамм
-							for(auto & value : * item){
-								// Если идентификатор соответствует слову, удаляем его
-								if(value.first == idw) removeFn(&value.second);
-							}
-						}
-					}
-				}
-			}
-		}
-		*/
-	}
+	// Если слово найдено, добавляем слово в список для удаления
+	if((idw > 0) && (this->data.count(idw) > 0)) this->delwords.emplace(idw);
 }
 /**
  * setSize Метод установки максимального размера n-граммы
