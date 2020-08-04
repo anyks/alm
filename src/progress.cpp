@@ -128,26 +128,10 @@ void anyks::Progress::update(const u_short status) noexcept {
 			if((status == 0) || (this->startTime == 0)) printf("\r\n \x1B[36m\x1B[1m%s:\x1B[0m \x1B[32m\x1B[1m%u%%\x1B[0m\r\n ", this->title1.c_str(), status);
 			// Выводим примерное время завершения работы
 			else if(this->startTime > 0) {
-				// Строка индикатора размерности
-				const char * dimension = "s";
-				// Выполняем расчёт оставшихся секунд
-				time_t elapses = ((100 - status) * ((time(nullptr) - this->startTime) / double(status)));
-				// Если это минуты, переводим секунды в минуты
-				if(elapses >= 60){
-					// Переводим секунды в минуты
-					elapses /= 60;
-					// Меняем индикатор размерности
-					dimension = "m";
-					// Если это часы
-					if(elapses >= 60){
-						// Переводим минуты в часы
-						elapses /= 60;
-						// Меняем индикатор размерности
-						dimension = "h";
-					}
-				}
+				// Получаем оставшееся время
+				auto dimension = this->dimension((100 - status) * ((time(nullptr) - this->startTime) / double(status)));
 				// Выводим заголовок индикатора загрузки
-				printf("\r\n \x1B[36m\x1B[1m%s:\x1B[0m \x1B[32m\x1B[1m%u%%\x1B[0m \x1B[33m\x1B[1m[%ld%s]\x1B[0m\r\n ", this->title1.c_str(), status, elapses, dimension);
+				printf("\r\n \x1B[36m\x1B[1m%s:\x1B[0m \x1B[32m\x1B[1m%u%%\x1B[0m \x1B[33m\x1B[1m[%ld %s]\x1B[0m\r\n ", this->title1.c_str(), status, dimension.first, dimension.second.c_str());
 			}
 		}
 		// Запоминаем текущий статус

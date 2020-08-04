@@ -2214,15 +2214,6 @@ int main(int argc, char * argv[]) noexcept {
 					const double wltf = (((value = env.get("vprune-wltf")) != nullptr) && alphabet.isDecimal(alphabet.convert(value)) ? stod(value) : 0.0);
 					// Проверяем на правильность входных параметров
 					if((wltf != 0.0) || (oc > 0) || (dc > 0)){
-						// Количество потоков для работы
-						size_t threads = 0;
-						// Если количество ядер передано
-						if(((value = env.get("threads")) != nullptr) &&
-						alphabet.isNumber(alphabet.convert(value))){
-							// Устанавливаем количество потоков
-							threads = stoi(value);
-						// Иначе устанавливаем 1 поток
-						} else threads = 1;
 						// Если отладка включена, выводим индикатор прунинга
 						if(debug > 0){
 							// Очищаем предыдущий прогресс-бар
@@ -2236,7 +2227,7 @@ int main(int argc, char * argv[]) noexcept {
 							}
 						}
 						// Выполняем прунинг словаря
-						toolkit.pruneVocab(wltf, oc, dc, threads, [debug, &pss](const u_short status) noexcept {
+						toolkit.pruneVocab(wltf, oc, dc, [debug, &pss](const u_short status) noexcept {
 							// Отображаем ход процесса
 							switch(debug){
 								case 1: pss.update(status); break;

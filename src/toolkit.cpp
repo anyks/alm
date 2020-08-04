@@ -1580,68 +1580,18 @@ void anyks::Toolkit::prune(const double threshold, const u_short mingram, functi
 }
 /**
  * pruneVocab Метод прунинга словаря
- * @param wltf    пороговый вес слова для прунинга
- * @param oc      встречаемость слова во всех документах
- * @param dc      количество документов в которых встретилось слово
- * @param threads количество потоков для работы
- * @param status  статус прунинга словаря
+ * @param wltf   пороговый вес слова для прунинга
+ * @param oc     встречаемость слова во всех документах
+ * @param dc     количество документов в которых встретилось слово
+ * @param status статус прунинга словаря
  */
-void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t dc, const size_t threads, function <void (const u_short)> status) noexcept {
+void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t dc, function <void (const u_short)> status) noexcept {
 	// Если словарь не пустой
 	if(!this->vocab.empty() && ((wltf != 0.0) || (oc > 0) || (dc > 0))){
-		// Создаем тредпул
-		tpool_t tpool;
-		// Количество всех слов для удаления
-		size_t count = 0;
-		// Количество удалённых слов
-		atomic <size_t> index{0};
-		// Текущий статус прогресс-бара
-		atomic <u_short> actual{0};
-		// Прошлый статус прогресс-бара
-		atomic <u_short> past{101};
-		/**
-		 * rmWordinArpaFn Функция удаления слова в ARPA
-		 * @param idw идентификатор слова для удаления
-		 */
-		auto rmWordinArpaFn = [&](const size_t idw) noexcept {
-			// Выполняем удаление слова в arpa
-			this->arpa->removeWord(idw);
-			// Если функция вывода статуса передана
-			if(status != nullptr){
-				// Общий полученный размер данных
-				index.store(index + 1, memory_order_relaxed);
-				// Подсчитываем статус выполнения
-				actual = u_short(index / double(count) * 100.0);
-				// Если процентное соотношение изменилось
-				if(actual != past){
-					// Запоминаем текущее процентное соотношение
-					past.store(actual, memory_order_relaxed);
-					// Выводим статус извлечения
-					status(actual);
-				}
-			}
-		};
-		// Если функция вывода статуса передана
-		if(status != nullptr){
-			// Считаем количество слов для удаления
-			for(auto & item : this->vocab){
-				// Если вес слова передан
-				if(wltf != 0.0){
-					// Получаем метаданные слова
-					const auto & meta = item.second.calc(this->info.ad, this->info.cw);
-					// Если вес слова не ниже порогового значения
-					if(meta.wltf <= wltf) count++;
-				// Если слова фильтруются по встречаемости
-				} else {
-					// Получаем метаданные слова
-					const auto & meta = item.second.getmeta();
-					// Если вес слова не ниже порогового значения
-					if((oc > 0) && (dc > 0) ? (meta.oc <= oc) && (meta.dc <= dc) : (oc > 0 ? meta.oc <= oc : (dc > 0 ? meta.dc <= dc : false))) count++;
-				}
-			}
-		}
-		// Выполняем инициализацию тредпула
-		tpool.init(threads > 0 ? threads : thread::hardware_concurrency());
+		// Количество извлечённых слов
+		size_t index = 0;
+		// Текущий и предыдущий статус
+		u_short actual = 0, past = 100;
 		// Переходим по всему списку слов
 		for(auto it = this->vocab.begin(); it != this->vocab.end();){
 			// Если вес слова передан
@@ -1650,8 +1600,8 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 				const auto & meta = it->second.calc(this->info.ad, this->info.cw);
 				// Если вес слова не ниже порогового значения
 				if(meta.wltf <= wltf){
-					// Добавляем в тредпул новое задание на обработку
-					tpool.push(rmWordinArpaFn, it->first);
+					// Выполняем удаление слова в arpa
+					this->arpa->removeWord(it->first);
 					// Удаляем слово в алфавите
 					it = this->vocab.erase(it);
 				// Увеличиваем значение итератора
@@ -1662,16 +1612,28 @@ void anyks::Toolkit::pruneVocab(const double wltf, const size_t oc, const size_t
 				const auto & meta = it->second.getmeta();
 				// Если вес слова не ниже порогового значения
 				if((oc > 0) && (dc > 0) ? (meta.oc <= oc) && (meta.dc <= dc) : (oc > 0 ? meta.oc <= oc : (dc > 0 ? meta.dc <= dc : false))){
-					// Добавляем в тредпул новое задание на обработку
-					tpool.push(rmWordinArpaFn, it->first);
+					// Выполняем удаление слова в arpa
+					this->arpa->removeWord(it->first);
 					// Удаляем слово в алфавите
 					it = this->vocab.erase(it);
 				// Увеличиваем значение итератора
 				} else it++;
 			}
+			// Если функция вывода статуса передана
+			if(status != nullptr){
+				// Увеличиваем количество записанных слов
+				index++;
+				// Выполняем расчёт текущего статуса
+				actual = u_short(index / double(this->vocab.size()) * 100.0);
+				// Если статус обновился
+				if(actual != past){
+					// Запоминаем текущий статус
+					past = actual;
+					// Выводим статус извлечения
+					status(actual);
+				}
+			}
 		}
-		// Ожидаем завершения обработки
-		tpool.wait();
 		// Обновляем количество уникальных слов
 		this->info.unq = this->vocab.size();
 	}
