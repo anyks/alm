@@ -55,6 +55,11 @@ const json anyks::Env::getJson() const noexcept {
 				} else if(this->alphabet->isDecimal(value)) {
 					// Выполняем конвертирование в дробное число
 					result[item.first] = stod(value);
+				// Если это массив или объект
+				} else if(((item.second.front() == '{') && (item.second.back() == '}')) ||
+				((item.second.front() == '[') && (item.second.back() == ']'))) {
+					// Устанавливаем значение в виде объекта
+					result[item.first] = json::parse(item.second);
 				// Иначе добавляем значение - как оно есть
 				} else result[item.first] = item.second;
 			}
@@ -138,22 +143,28 @@ void anyks::Env::autoRead(const bool flag) noexcept {
 void anyks::Env::setJson(const json & data) noexcept {
 	// Если данные переданы
 	if(!data.empty()){
-		// Значение ключа
-		string val = "";
+		// Ключ и значение ключа
+		string key = "", val = "";
 		// Переходим по всем ключам и добавляем всё в базу данных
 		for(auto & el : data.items()){
+			// Получаем ключ
+			key = el.key();
+			// Если это пустой объект
+			if(data.at(key).is_null()) continue;
 			// Если это булевое значение
-			if(data.at(el.key()).is_boolean()){
+			if(data.at(key).is_boolean()){
 				// Если это положительное булевое значение
 				if(el.value()) val = "-yes-";
 				// Если это отрицательное булевое значение
 				else continue;
 			// Если это чило
-			} else if(data.at(el.key()).is_number()) val = to_string(el.value());
+			} else if(data.at(key).is_number()) val = to_string(el.value());
+			// Если это массив или объект
+			else if(data.at(key).is_object() || data.at(key).is_array()) val = data.at(key).dump();
 			// Иначе это обычная строка
 			else val = el.value();
 			// Добавляем значение ключа в базу параметров
-			if(!val.empty()) this->data.emplace(el.key(), val);
+			if(!val.empty()) this->data.emplace(key, val);
 		}
 	}
 }
