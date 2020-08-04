@@ -2555,7 +2555,7 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 			 * removeFn Функция зануления всех дочерних n-грамм
 			 * @param context позиция текущего контекста
 			 */
-			removeFn = [&removeFn, this](data_t * context) noexcept {
+			removeFn = [&removeFn](data_t * context) noexcept {
 				// Если контекст получен
 				if(context != nullptr){
 					// Выполняем зануление текущего слова
