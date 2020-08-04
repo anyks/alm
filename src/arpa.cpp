@@ -511,14 +511,10 @@ list <anyks::Arpa::data_t *> * anyks::Arpa::get(const u_short gram) const noexce
 	};
 	// Выполняем сбор данных
 	if(this->ngrams.count(gram) < 1){
-		// Выполняем блокировку потока
-		this->locker.lock();
 		// Очищаем список грамм
 		this->ngrams.clear();
 		// Выполняем сбор данных
 		runFn(0);
-		// Выполняем разблокировку потока
-		this->locker.unlock();
 	}
 	// Если список грамм получен
 	auto it = this->ngrams.find(gram);
