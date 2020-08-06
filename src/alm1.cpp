@@ -679,16 +679,12 @@ void anyks::Alm1::getBin(function <void (const vector <char> &, const u_short)> 
 		 * @param ngrams словарь для извлечения слова с его параметрами
 		 */
 		runFn = [&](const arpa_t * ngrams) noexcept {
-			// Идентификатор полученного и добавленного слова
-			size_t idw = idw_t::NIDW, aidw = 0;
 			// Получаем объект данных
 			const arpa_t * obj = (ngrams != nullptr ? ngrams : &this->arpa);
 			// Переходим по всему объекту с данными
 			for(auto & item : * obj){
 				// Увеличиваем индекс если это юниграмма
 				if(ngrams == nullptr) index++;
-				// Запоминаем идентификатор добавленного слова
-				idw = sequence.idw;
 				// Извлекаем основные данные
 				sequence.idw     = item.first;
 				sequence.ups     = item.second.uppers;
@@ -699,12 +695,7 @@ void anyks::Alm1::getBin(function <void (const vector <char> &, const u_short)> 
 				// Если еще есть продолжение граммы
 				if(!item.second.empty()) runFn(&item.second);
 				// Иначе выводим то что есть
-				else if(idw != aidw) {
-					// Запоминаем идентификатор добавленного слова
-					aidw = idw;
-					// Выводим результат
-					resultFn();
-				}
+				else resultFn();
 				// Удаляем последний элемент в списке
 				seq.pop_back();
 			}
