@@ -28,11 +28,13 @@
 #define MAX_SEQ_LENGTH 50
 // Максимальная длина слова
 #define MAX_WORD_LENGTH 35
-// Максимальная длина строки 100mb
-#define MAX_STRING_BYTES 0x19990
+// Максимальная длина строки 103kb
+#define MAX_STRING_BYTES 0x19C00
 
 /** ПАРАМЕТРЫ ПРОЧИЕ **/
 // Длина n-грамм по умолчанию
 #define DEFNGRAM 3
 // Размер чанка буфера для чтения из файла
-#define BUFFER_CHUNK 0x19990 // 0x3000
+#define BUFFER_CHUNK 0x19C00
+// Размер бинарного буфера языковой модели
+#define BUFFER_SIZE 0x6400000

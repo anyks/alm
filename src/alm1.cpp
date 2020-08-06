@@ -600,33 +600,38 @@ const pair <bool, size_t> anyks::Alm1::check(const vector <size_t> & seq, const 
 void anyks::Alm1::setBin(const vector <char> & buffer) const noexcept {
 	// Если буфер передан
 	if(!buffer.empty()){
+		// Полученная последовательность
+		seq_t sequence;
 		// Количество слов в последовательности
 		u_short count = 0;
 		// Смещение в буфере
 		size_t offset = 0;
+		// Полученные данные последовательности
+		vector <seq_t> seq;
 		// Получаем данные буфера
 		const char * data = buffer.data();
-		// Извлекаем количество слов в последовательности
-		memcpy(&count, data + offset, sizeof(count));
-		// Увеличиваем смещение
-		offset += sizeof(count);
-		// Если последовательность получена
-		if(count > 0){
-			// Полученная последовательность
-			seq_t sequence;
-			// Полученные данные последовательности
-			vector <seq_t> seq(count);
-			// Переходим по всем словам последовательности
-			for(u_short i = 0; i < count; i++){
-				// Извлекаем данные слова
-				memcpy(&sequence, data + offset, sizeof(sequence));
-				// Добавляем последовательность в список
-				seq[i] = sequence;
-				// Увеличиваем смещение
-				offset += sizeof(sequence);
+		// Выполняем перебор данных всего буфера
+		while(offset < buffer.size()){
+			// Извлекаем количество слов в последовательности
+			memcpy(&count, data + offset, sizeof(count));
+			// Увеличиваем смещение
+			offset += sizeof(count);
+			// Если последовательность получена
+			if(count > 0){
+				// Очищаем последовательность
+				seq.clear();
+				// Переходим по всем словам последовательности
+				for(u_short i = 0; i < count; i++){
+					// Извлекаем данные слова
+					memcpy(&sequence, data + offset, sizeof(sequence));
+					// Добавляем последовательность в список
+					seq.push_back(sequence);
+					// Увеличиваем смещение
+					offset += sizeof(sequence);
+				}
+				// Если нужно установить исходные данные
+				if(!seq.empty()) this->set(seq);
 			}
-			// Если нужно установить исходные данные
-			if(!seq.empty()) this->set(seq);
 		}
 	}
 }
@@ -647,8 +652,10 @@ void anyks::Alm1::getBin(function <void (const vector <char> &, const u_short)> 
 		vector <char> buffer;
 		/**
 		 * resultFn Метод формирования результата
+		 * @param index индекс обработанного буфера
+		 * @param seq   список собранной последовательности
 		 */
-		auto resultFn = [&buffer, &seq, &index, &callback, this]() noexcept {
+		auto resultFn = [&buffer, &callback, this](const size_t index, const vector <seq_t> & seq) noexcept {
 			// Если последовательность не пустая
 			if(!seq.empty()){
 				// Получаем количество n-грамм в списке
@@ -664,10 +671,13 @@ void anyks::Alm1::getBin(function <void (const vector <char> &, const u_short)> 
 					// Добавляем в буфер бинарные данные последовательности
 					buffer.insert(buffer.end(), bin, bin + sizeof(item));
 				}
-				// Выводим собранную последовательность
-				callback(buffer, u_short(index / double(this->arpa.size()) * 100.0));
-				// Очищаем полученный буфер n-граммы
-				buffer.clear();
+				// Если буфер имеет размер в 100Mb
+				if(buffer.size() >= BUFFER_SIZE){
+					// Выводим собранную последовательность
+					callback(buffer, u_short(index / double(this->arpa.size()) * 100.0));
+					// Очищаем полученный буфер n-граммы
+					buffer.clear();
+				}
 			}
 		};
 		/**
@@ -696,13 +706,22 @@ void anyks::Alm1::getBin(function <void (const vector <char> &, const u_short)> 
 				// Если еще есть продолжение граммы
 				if(!item.second.empty()) runFn(&item.second);
 				// Иначе выводим то что есть
-				else resultFn();
+				else resultFn(index, seq);
 				// Удаляем последний элемент в списке
 				seq.pop_back();
 			}
 		};
 		// Запускаем извлечение данных
 		runFn(nullptr);
+		// Если буфер не пустой
+		if(!buffer.empty()){
+			// Выводим собранную последовательность
+			callback(buffer, u_short(index / double(this->arpa.size()) * 100.0));
+			// Очищаем полученный буфер n-граммы
+			buffer.clear();
+			// Освобождаем выделенную память
+			vector <char> ().swap(buffer);
+		}
 	// Выводим пустой результат
 	} else callback({}, 0);
 }
