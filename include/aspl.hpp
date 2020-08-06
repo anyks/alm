@@ -1105,7 +1105,7 @@ namespace anyks {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
-				if(!key.empty()){
+				if(!key.empty() && !value.empty()){
 					// Получаем идентификатор ключа
 					const size_t idw = this->idw(key);
 					// Если текущая запись не найдена
@@ -1141,7 +1141,7 @@ namespace anyks {
 				// Результат работы функции
 				int result = -1;
 				// Если ключ передан
-				if(!key.empty()){
+				if(!key.empty() && !value.empty()){
 					// Получаем идентификатор ключа
 					const size_t idw = this->idw(key);
 					// Если текущая запись не найдена

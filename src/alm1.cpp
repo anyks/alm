@@ -604,8 +604,6 @@ void anyks::Alm1::setBin(const vector <char> & buffer) const noexcept {
 		u_short count = 0;
 		// Смещение в буфере
 		size_t offset = 0;
-		// Полученные данные последовательности
-		vector <seq_t> seq;
 		// Получаем данные буфера
 		const char * data = buffer.data();
 		// Извлекаем количество слов в последовательности
@@ -616,8 +614,8 @@ void anyks::Alm1::setBin(const vector <char> & buffer) const noexcept {
 		if(count > 0){
 			// Полученная последовательность
 			seq_t sequence;
-			// Выделяем память для последовательности
-			seq.resize(count);
+			// Полученные данные последовательности
+			vector <seq_t> seq(count);
 			// Переходим по всем словам последовательности
 			for(u_short i = 0; i < count; i++){
 				// Извлекаем данные слова
@@ -628,7 +626,7 @@ void anyks::Alm1::setBin(const vector <char> & buffer) const noexcept {
 				offset += sizeof(sequence);
 			}
 			// Если нужно установить исходные данные
-			this->set(seq);
+			if(!seq.empty()) this->set(seq);
 		}
 	}
 }
@@ -651,23 +649,26 @@ void anyks::Alm1::getBin(function <void (const vector <char> &, const u_short)> 
 		 * resultFn Метод формирования результата
 		 */
 		auto resultFn = [&buffer, &seq, &index, &callback, this]() noexcept {
-			// Получаем количество n-грамм в списке
-			u_short count = seq.size();
-			// Получаем бинарные данные количества слов
-			const char * bin = reinterpret_cast <const char *> (&count);
-			// Добавляем в буфер количество слов
-			buffer.insert(buffer.end(), bin, bin + sizeof(count));
-			// Переходим по всему списку последовательности
-			for(auto & item : seq){
-				// Получаем бинарные данные последовательности
-				bin = reinterpret_cast <const char *> (&item);
-				// Добавляем в буфер бинарные данные последовательности
-				buffer.insert(buffer.end(), bin, bin + sizeof(item));
+			// Если последовательность не пустая
+			if(!seq.empty()){
+				// Получаем количество n-грамм в списке
+				u_short count = seq.size();
+				// Получаем бинарные данные количества слов
+				const char * bin = reinterpret_cast <const char *> (&count);
+				// Добавляем в буфер количество слов
+				buffer.insert(buffer.end(), bin, bin + sizeof(count));
+				// Переходим по всему списку последовательности
+				for(auto & item : seq){
+					// Получаем бинарные данные последовательности
+					bin = reinterpret_cast <const char *> (&item);
+					// Добавляем в буфер бинарные данные последовательности
+					buffer.insert(buffer.end(), bin, bin + sizeof(item));
+				}
+				// Выводим собранную последовательность
+				callback(buffer, u_short(index / double(this->arpa.size()) * 100.0));
+				// Очищаем полученный буфер n-граммы
+				buffer.clear();
 			}
-			// Выводим собранную последовательность
-			callback(buffer, u_short(index / double(this->arpa.size()) * 100.0));
-			// Очищаем полученный буфер n-граммы
-			buffer.clear();
 		};
 		/**
 		 * runFn Прототип функции запуска формирования map карты последовательностей
