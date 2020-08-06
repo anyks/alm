@@ -1114,14 +1114,18 @@ namespace anyks {
 						if(!this->ofs.is_open()) this->open(method_t::write, true);
 						// Если нужно зашифровать данные
 						if(encrypt){
+							// Получаем буфер данных
+							const char * buffer = value.data();
+							// Получаем md5 хэш
+							const string & md5 = this->md5(vector <char> (buffer, buffer + value.size()));
 							// Выполняем шифрование данных
-							const vector <char> & data = this->encrypt(value.data(), value.size());
-							// Если данные получены
-							if(!data.empty()){
-								// Получаем данные для записи
-								const string & value = string(data.data(), data.size());
-								// Выполняем шифрование данных
-								result = setdat(idw, this->rawpos, this->keys, this->ofs, value);
+							auto res = this->encrypt(value.data(), value.size());
+							// Если данные зашифрованы
+							if(!res.empty()){
+								// Сжимаем данные перед записью
+								auto data = this->compress(res.data(), res.size());
+								// Выполняем установку данных в файл
+								result = setdat(idw, this->rawpos, this->keys, this->ofs, data, md5);
 							}
 						// Выполняем установку данных в файл
 						} else result = setdat(idw, this->rawpos, this->keys, this->ofs, value);
@@ -1324,10 +1328,22 @@ namespace anyks {
 						result = getdat(this->address + pos, this->ifs, value, md5);
 						// Если нужно дешифровать данные
 						if(decrypt){
-							// Выполняем расшифровку данных
-							auto res = this->decrypt(value.data(), value.size());
-							// Если результат получен
-							if(!res.empty()) value.assign(res.data(), res.size());
+							// Выполняем декомпрессию данных
+							auto data = this->decompress(value.data(), value.size());
+							// Если декомпрессия получилсь
+							if(!data.empty()){
+								// Выполняем расшифровку данных
+								auto res = this->decrypt(data.data(), data.size());
+								// Если данные расшифрованны
+								if(!res.empty()){
+									// Если хэш md5 совпадает
+									if(md5.empty() || (this->md5(res).compare(md5) == 0)){
+										// Выполняем обновление полученного буфера
+										value.assign(res.data(), res.size());
+									// Если хэш не совпадает выводим сообщение об ошибке
+									} else printf("Data is broken: %s\r\n", key.c_str());
+								}
+							}
 						}
 						// Закрываем файл
 						this->close();
