@@ -12,6 +12,7 @@
 /**
  * Стандартная библиотека
  */
+#include <set>
 #include <ctime>
 #include <string>
 #include <iostream>

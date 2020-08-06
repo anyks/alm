@@ -14,8 +14,16 @@
  * @return    значение оставшегося времени
  */
 const pair <time_t, string> anyks::Progress::dimension(const time_t sec) const noexcept {
+	// Диапазон единичных значений
+	set <time_t> dipaz = {
+		1, 21, 31, 41, 51, 61, 71, 81, 91, 101, 121, 131, 141,
+		151, 161, 171, 181, 191, 201, 221, 231, 241, 251, 161,
+		271, 281, 291, 301, 321, 331, 341, 351, 361, 371, 381, 391
+	};
+	// Получаем описание времени
+	const string description = (dipaz.count(sec) > 0 ? "second" : "seconds");
 	// Результат работы функции
-	pair <time_t, string> result = {sec, "seconds"};
+	pair <time_t, string> result = {sec, description};
 	// Если секунды переданы
 	if(result.first > 0){
 		// Если это минуты, переводим секунды в минуты
@@ -23,31 +31,31 @@ const pair <time_t, string> anyks::Progress::dimension(const time_t sec) const n
 			// Переводим секунды в минуты
 			result.first /= 60;
 			// Меняем индикатор размерности
-			result.second = "minutes";
+			result.second = (dipaz.count(result.first) > 0 ? "minute" : "minutes");
 			// Если это часы
 			if(result.first >= 60){
 				// Переводим минуты в часы
 				result.first /= 60;
 				// Меняем индикатор размерности
-				result.second = "hours";
+				result.second = (dipaz.count(result.first) > 0 ? "hour" : "hours");
 				// Если это дни
 				if(result.first >= 24){
 					// Переводим минуты в дни
 					result.first /= 24;
 					// Меняем индикатор размерности
-					result.second = "days";
+					result.second = (dipaz.count(result.first) > 0 ? "day" : "days");
 					// Если это месяцы
 					if(result.first >= 31){
 						// Переводим минуты в месяцы
 						result.first /= 31;
 						// Меняем индикатор размерности
-						result.second = "months";
+						result.second = (dipaz.count(result.first) > 0 ? "month" : "months");
 						// Если это годы
 						if(result.first >= 12){
 							// Переводим минуты в годы
 							result.first /= 12;
 							// Меняем индикатор размерности
-							result.second = "years";
+							result.second = (dipaz.count(result.first) > 0 ? "year" : "years");
 						}
 					}
 				}
