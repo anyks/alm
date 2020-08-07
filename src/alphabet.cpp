@@ -681,7 +681,7 @@ const bool anyks::Alphabet::isMath(const wchar_t letter) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если слово передано
-	if(letter > 0) result = (this->mathSymbols.count(letter) > 0);
+	if(letter > 0) result = ((this->letters.count(letter) < 1) && (this->mathSymbols.count(letter) > 0));
 	// Выводим результат
 	return result;
 }
@@ -870,8 +870,12 @@ const bool anyks::Alphabet::isLatian(const wstring & str) const noexcept {
  * @return        результат проверки
  */
 const bool anyks::Alphabet::isPunct(const wchar_t letter) const noexcept {
+	// Результат работы функции
+	bool result = false;
 	// Проверяем на знак пунктуации
-	return (this->punctsSymbols.count(letter) > 0);
+	if(letter > 0) result = ((this->letters.count(letter) < 1) && (this->punctsSymbols.count(letter) > 0));
+	// Выводим результат
+	return result;
 }
 /**
  * isSpace Метод проверки является ли буква, пробелом
@@ -892,8 +896,8 @@ const bool anyks::Alphabet::isSpace(const wchar_t letter) const noexcept {
 const bool anyks::Alphabet::isGreek(const wchar_t letter) const noexcept {
 	// Результат работы функции
 	bool result = false;
-	// Если слово передано
-	if(letter > 0) result = (this->greekSymbols.count(letter) > 0);
+	// Проверяем на греческий символ
+	if(letter > 0) result = ((this->letters.count(letter) < 1) && (this->greekSymbols.count(letter) > 0));
 	// Выводим результат
 	return result;
 }
@@ -905,8 +909,8 @@ const bool anyks::Alphabet::isGreek(const wchar_t letter) const noexcept {
 const bool anyks::Alphabet::isRoute(const wchar_t letter) const noexcept {
 	// Результат работы функции
 	bool result = false;
-	// Если слово передано
-	if(letter > 0) result = (this->routeSymbols.count(letter) > 0);
+	// Проверяем на наличие стрелки
+	if(letter > 0) result = ((this->letters.count(letter) < 1) && (this->routeSymbols.count(letter) > 0));
 	// Выводим результат
 	return result;
 }
@@ -1084,8 +1088,8 @@ const bool anyks::Alphabet::isAllowed(const wstring & word) const noexcept {
 const bool anyks::Alphabet::isSpecial(const wchar_t letter) const noexcept {
 	// Результат работы функции
 	bool result = false;
-	// Если слово передано
-	if(letter > 0) result = (this->specialSymbols.count(letter) > 0);
+	// Проверяем на спец-символ
+	if(letter > 0) result = ((this->letters.count(letter) < 1) && (this->specialSymbols.count(letter) > 0));
 	// Выводим результат
 	return result;
 }
@@ -1097,8 +1101,8 @@ const bool anyks::Alphabet::isSpecial(const wchar_t letter) const noexcept {
 const bool anyks::Alphabet::isCurrency(const wchar_t letter) const noexcept {
 	// Результат работы функции
 	bool result = false;
-	// Если слово передано
-	if(letter > 0) result = (this->currencySymbols.count(letter) > 0);
+	// Проверяем на наличие символа курсовой валюты
+	if(letter > 0) result = ((this->letters.count(letter) < 1) && (this->currencySymbols.count(letter) > 0));
 	// Выводим результат
 	return result;
 }
@@ -1110,8 +1114,8 @@ const bool anyks::Alphabet::isCurrency(const wchar_t letter) const noexcept {
 const bool anyks::Alphabet::isPlayCards(const wchar_t letter) const noexcept {
 	// Результат работы функции
 	bool result = false;
-	// Если слово передано
-	if(letter > 0) result = (this->playCardsSymbols.count(letter) > 0);
+	// Проверяем на наличие символа игральной карты
+	if(letter > 0) result = ((this->letters.count(letter) < 1) && (this->playCardsSymbols.count(letter) > 0));
 	// Выводим результат
 	return result;
 }
@@ -1123,8 +1127,8 @@ const bool anyks::Alphabet::isPlayCards(const wchar_t letter) const noexcept {
 const bool anyks::Alphabet::isIsolation(const wchar_t letter) const noexcept {
 	// Результат работы функции
 	bool result = false;
-	// Если слово передано
-	if(letter > 0) result = (this->isolationSymbols.count(letter) > 0);
+	// Проверяем на наличие символа изоляции
+	if(letter > 0) result = ((this->letters.count(letter) < 1) && (this->isolationSymbols.count(letter) > 0));
 	// Выводим результат
 	return result;
 }
