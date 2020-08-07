@@ -969,10 +969,10 @@ int main(int argc, char * argv[]) noexcept {
 				}
 				// Если режим отладки включён
 				if(debug > 0){
-					// Формируем строку результата времени работы
-					const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+					// Получаем диапазон времени
+					auto dimension = pss.dimension(chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 					// Выводим результат
-					print(result, env.get("log"), alphabet_t::log_t::info);
+					print(alphabet.format("work time shifting: %lld %s\r\n", dimension.first, dimension.second.c_str()), env.get("log"), alphabet_t::log_t::info);
 				// Выходим из приложения
 				} else exit(0);
 			}
@@ -1109,10 +1109,10 @@ int main(int argc, char * argv[]) noexcept {
 					ablm.info();
 					// Если режим отладки включён
 					if(debug > 0){
-						// Формируем строку результата времени работы
-						const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+						// Получаем диапазон времени
+						auto dimension = pss.dimension(chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 						// Выводим результат
-						print(result, env.get("log"), alphabet_t::log_t::info);
+						print(alphabet.format("work time shifting: %lld %s\r\n", dimension.first, dimension.second.c_str()), env.get("log"), alphabet_t::log_t::info);
 					// Выходим из приложения
 					} else exit(0);
 				}
@@ -1475,10 +1475,10 @@ int main(int argc, char * argv[]) noexcept {
 				} else print("text corpus for tokenization is not found\r\n", env.get("log"));
 				// Если режим отладки включён
 				if(debug > 0){
-					// Формируем строку результата времени работы
-					const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+					// Получаем диапазон времени
+					auto dimension = pss.dimension(chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 					// Выводим результат
-					print(result, env.get("log"), alphabet_t::log_t::info);
+					print(alphabet.format("work time shifting: %lld %s\r\n", dimension.first, dimension.second.c_str()), env.get("log"), alphabet_t::log_t::info);
 				// Выходим из приложения
 				} else exit(0);
 			// Иначе выполняем инициализацию алгоритма сглаживания
@@ -2579,10 +2579,10 @@ int main(int argc, char * argv[]) noexcept {
 			}
 			// Если режим отладки включён
 			if(debug > 0){
-				// Формируем строку результата времени работы
-				const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
+				// Получаем диапазон времени
+				auto dimension = pss.dimension(chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 				// Выводим результат
-				print(result, env.get("log"), alphabet_t::log_t::info);
+				print(alphabet.format("work time shifting: %lld %s\r\n", dimension.first, dimension.second.c_str()), env.get("log"), alphabet_t::log_t::info);
 			}
 		// Сообщаем, что файл алфавита не найден
 		} else print("file alphabet not found\r\n", env.get("log"));
