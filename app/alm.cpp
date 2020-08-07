@@ -972,10 +972,9 @@ int main(int argc, char * argv[]) noexcept {
 					// Формируем строку результата времени работы
 					const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 					// Выводим результат
-					print(result, env.get("log"), alphabet_t::log_t::info, false);
-				}
+					print(result, env.get("log"), alphabet_t::log_t::info);
 				// Выходим из приложения
-				exit(0);
+				} else exit(0);
 			}
 			// Создаём объект тулкита языковой модели
 			toolkit_t toolkit(&alphabet, &tokenizer, order);
@@ -1113,10 +1112,9 @@ int main(int argc, char * argv[]) noexcept {
 						// Формируем строку результата времени работы
 						const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 						// Выводим результат
-						print(result, env.get("log"), alphabet_t::log_t::info, false);
-					}
-					// Выходим из приложения∂
-					exit(0);
+						print(result, env.get("log"), alphabet_t::log_t::info);
+					// Выходим из приложения
+					} else exit(0);
 				}
 			// Если это метод токенизации
 			} else if(env.is("method", "tokens")) {
@@ -1480,10 +1478,9 @@ int main(int argc, char * argv[]) noexcept {
 					// Формируем строку результата времени работы
 					const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 					// Выводим результат
-					print(result, env.get("log"), alphabet_t::log_t::info, false);
-				}
+					print(result, env.get("log"), alphabet_t::log_t::info);
 				// Выходим из приложения
-				exit(0);
+				} else exit(0);
 			// Иначе выполняем инициализацию алгоритма сглаживания
 			} else if(env.is("smoothing")) {
 				// Дополнительный коэффициент алгоритма сглаживания
@@ -2585,7 +2582,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Формируем строку результата времени работы
 				const string & result = alphabet.format("work time shifting: %llds\r\n", chrono::duration_cast <chrono::seconds> (chrono::system_clock::now() - timeShifting).count());
 				// Выводим результат
-				print(result, env.get("log"), alphabet_t::log_t::info, false);
+				print(result, env.get("log"), alphabet_t::log_t::info);
 			}
 		// Сообщаем, что файл алфавита не найден
 		} else print("file alphabet not found\r\n", env.get("log"));
