@@ -2413,8 +2413,7 @@ const size_t anyks::Alm::getIdw(const wstring & word, const bool check) const no
 							}
 						}
 						// Проверяем есть ли изоляционный знак и количество дефисов в слове больше 2-х
-						if(
-							this->alphabet->isIsolation(tmp.back()) ||
+						if(this->alphabet->isIsolation(tmp.back()) ||
 							this->alphabet->isIsolation(tmp.front()) ||
 							((hyphenCounts = this->alphabet->countLetter(tmp, L'-')) > 2)
 						) result = (size_t) token_t::unk;
