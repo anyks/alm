@@ -2283,179 +2283,183 @@ const size_t anyks::Alm::getIdw(const wstring & word, const bool check) const no
 	size_t result = idw_t::NIDW;
 	// Если слово передано
 	if(!word.empty()){
-		// Проверяем является ли слово, началом предложения
-		if(word.compare(L"<s>") == 0) result = (size_t) token_t::start;
-		// Проверяем является ли слово числом
-		else if(word.compare(L"<num>") == 0) result = (size_t) token_t::num;
-		// Проверяем является ли слово неизвестным
-		else if(word.compare(L"<unk>") == 0) result = (size_t) token_t::unk;
-		// Проверяем является ли слово url адресом
-		else if(word.compare(L"<url>") == 0) result = (size_t) token_t::url;
-		// Проверяем является ли слово аббревиатурой
-		else if(word.compare(L"<abbr>") == 0) result = (size_t) token_t::abbr;
-		// Проверяем является ли слово датой
-		else if(word.compare(L"<date>") == 0) result = (size_t) token_t::date;
-		// Проверяем является ли слово временем
-		else if(word.compare(L"<time>") == 0) result = (size_t) token_t::time;
-		// Проверяем является ли слово псевдо-числом
-		else if(word.compare(L"<anum>") == 0) result = (size_t) token_t::anum;
-		// Проверяем является ли слово концом предложения
-		else if(word.compare(L"</s>") == 0) result = (size_t) token_t::finish;
-		// Проверяем является ли слово математической операцией
-		else if(word.compare(L"<math>") == 0) result = (size_t) token_t::math;
-		// Проверяем является ли слово спец-символом
-		else if(word.compare(L"<specl>") == 0) result = (size_t) token_t::specl;
-		// Проверяем является ли слово диапазоном чисел
-		else if(word.compare(L"<range>") == 0) result = (size_t) token_t::range;
 		// Проверяем является ли слово знаком пунктуации
-		else if(word.compare(L"<punct>") == 0) result = (size_t) token_t::punct;
-		// Проверяем является ли слово приблизительным числом
-		else if(word.compare(L"<aprox>") == 0) result = (size_t) token_t::aprox;
-		// Проверяем является ли слово числовым счётом
-		else if(word.compare(L"<score>") == 0) result = (size_t) token_t::score;
-		// Проверяем является ли слово габаритными размерами
-		else if(word.compare(L"<dimen>") == 0) result = (size_t) token_t::dimen;
-		// Проверяем является ли слово числовой дробью
-		else if(word.compare(L"<fract>") == 0) result = (size_t) token_t::fract;
-		// Проверяем является ли слово греческим символом
-		else if(word.compare(L"<greek>") == 0) result = (size_t) token_t::greek;
-		// Проверяем является ли слово знаком направления (стрелкой)
-		else if(word.compare(L"<route>") == 0) result = (size_t) token_t::route;
-		// Проверяем является ли слово знаком изоляции
-		else if(word.compare(L"<isolat>") == 0) result = (size_t) token_t::isolat;
-		// Проверяем является ли слово знаком игральной карты
-		else if(word.compare(L"<pcards>") == 0) result = (size_t) token_t::pcards;
-		// Проверяем является ли слово знаком мировой валюты
-		else if(word.compare(L"<currency>") == 0) result = (size_t) token_t::currency;
-		// Если это другое слово
-		else {
+		if(word.length() == 1){
+			// Получаем букву для проверки
+			const wchar_t letter = this->alphabet->toLower(word.front());
+			// Если это знак пунктуации
+			if(this->alphabet->isPunct(letter)){
+				// Если идентифицирование токена не отключено
+				if(this->tokenDisable.count(token_t::punct) < 1) result = (size_t) token_t::punct;
+				// Устанавливаем токен неизвестного слова
+				if(this->tokenUnknown.count(token_t::punct) > 0) result = (size_t) token_t::unk;
+			// Если буква является арабским числом
+			} else if(this->alphabet->isNumber({letter})) {
+				// Если идентифицирование токена не отключено
+				if(this->tokenDisable.count(token_t::num) < 1) result = (size_t) token_t::num;
+				// Устанавливаем токен неизвестного слова
+				if(this->tokenUnknown.count(token_t::num) > 0) result = (size_t) token_t::unk;
+			// Если это символ математической операции
+			} else if(this->alphabet->isMath(letter)) {
+				// Если идентифицирование токена не отключено
+				if(this->tokenDisable.count(token_t::math) < 1) result = (size_t) token_t::math;
+				// Устанавливаем токен неизвестного слова
+				if(this->tokenUnknown.count(token_t::math) > 0) result = (size_t) token_t::unk;
+			// Если это символ греческого алфавита
+			} else if(this->alphabet->isGreek(letter)) {
+				// Если идентифицирование токена не отключено
+				if(this->tokenDisable.count(token_t::greek) < 1) result = (size_t) token_t::greek;
+				// Устанавливаем токен неизвестного слова
+				if(this->tokenUnknown.count(token_t::greek) > 0) result = (size_t) token_t::unk;
+			// Если это символ направления (стрелка)
+			} else if(this->alphabet->isRoute(letter)) {
+				// Если идентифицирование токена не отключено
+				if(this->tokenDisable.count(token_t::route) < 1) result = (size_t) token_t::route;
+				// Устанавливаем токен неизвестного слова
+				if(this->tokenUnknown.count(token_t::route) > 0) result = (size_t) token_t::unk;
+			// Если это спец-символ
+			} else if(this->alphabet->isSpecial(letter)) {
+				// Если идентифицирование токена не отключено
+				if(this->tokenDisable.count(token_t::specl) < 1) result = (size_t) token_t::specl;
+				// Устанавливаем токен неизвестного слова
+				if(this->tokenUnknown.count(token_t::specl) > 0) result = (size_t) token_t::unk;
+			// Если это знак изоляции
+			} else if(this->alphabet->isIsolation(letter)) {
+				// Если идентифицирование токена не отключено
+				if(this->tokenDisable.count(token_t::isolat) < 1) result = (size_t) token_t::isolat;
+				// Устанавливаем токен неизвестного слова
+				if(this->tokenUnknown.count(token_t::isolat) > 0) result = (size_t) token_t::unk;
+			// Если это символ игральных карт
+			} else if(this->alphabet->isPlayCards(letter)) {
+				// Если идентифицирование токена не отключено
+				if(this->tokenDisable.count(token_t::pcards) < 1) result = (size_t) token_t::pcards;
+				// Устанавливаем токен неизвестного слова
+				if(this->tokenUnknown.count(token_t::pcards) > 0) result = (size_t) token_t::unk;
+			// Если это знак мировой валюты
+			} else if(this->alphabet->isCurrency(letter)) {
+				// Если идентифицирование токена не отключено
+				if(this->tokenDisable.count(token_t::currency) < 1) result = (size_t) token_t::currency;
+				// Устанавливаем токен неизвестного слова
+				if(this->tokenUnknown.count(token_t::currency) > 0) result = (size_t) token_t::unk;
 			// Формируем идентификатор слова
-			result = this->tokenizer->idw(word);
-			// Если нужно выполнить проверку слов
-			if(check){
-				// Проверяем является ли слово хорошим
-				if(this->goodwords.empty() || (this->goodwords.count(result) < 1)){
-					// Получаем временное слово
-					wstring tmp = word;
-					// Подсчитываем количество дефисов
-					u_short hyphenCounts = 0;
-					// Если нужно проверить пользовательские токены
-					if(!this->utokens.empty()){
-						// Переходим по всему списку пользовательских токенов
-						for(auto & token : this->utokens){
-							// Если сработал пользовательский токен
-							if(token.second.test(
-								token.second.name.real(),
-								this->alphabet->convert(tmp)
-							)) return token.first;
-						}
-					}
-					// Проверяем является ли слово знаком пунктуации
-					if(tmp.length() == 1){
-						// Получаем букву для проверки
-						const wchar_t letter = tmp.front();
-						// Если это знак пунктуации
-						if(this->alphabet->isPunct(letter)){
-							// Если идентифицирование токена не отключено
-							if(this->tokenDisable.count(token_t::punct) < 1) result = (size_t) token_t::punct;
-							// Устанавливаем токен неизвестного слова
-							if(this->tokenUnknown.count(token_t::punct) > 0) result = (size_t) token_t::unk;
-						// Если буква является арабским числом
-						} else if(this->alphabet->isNumber({letter})) {
-							// Если идентифицирование токена не отключено
-							if(this->tokenDisable.count(token_t::num) < 1) result = (size_t) token_t::num;
-							// Устанавливаем токен неизвестного слова
-							if(this->tokenUnknown.count(token_t::num) > 0) result = (size_t) token_t::unk;
-						// Если это символ математической операции
-						} else if(this->alphabet->isMath(letter)) {
-							// Если идентифицирование токена не отключено
-							if(this->tokenDisable.count(token_t::math) < 1) result = (size_t) token_t::math;
-							// Устанавливаем токен неизвестного слова
-							if(this->tokenUnknown.count(token_t::math) > 0) result = (size_t) token_t::unk;
-						// Если это символ греческого алфавита
-						} else if(this->alphabet->isGreek(letter)) {
-							// Если идентифицирование токена не отключено
-							if(this->tokenDisable.count(token_t::greek) < 1) result = (size_t) token_t::greek;
-							// Устанавливаем токен неизвестного слова
-							if(this->tokenUnknown.count(token_t::greek) > 0) result = (size_t) token_t::unk;
-						// Если это символ направления (стрелка)
-						} else if(this->alphabet->isRoute(letter)) {
-							// Если идентифицирование токена не отключено
-							if(this->tokenDisable.count(token_t::route) < 1) result = (size_t) token_t::route;
-							// Устанавливаем токен неизвестного слова
-							if(this->tokenUnknown.count(token_t::route) > 0) result = (size_t) token_t::unk;
-						// Если это спец-символ
-						} else if(this->alphabet->isSpecial(letter)) {
-							// Если идентифицирование токена не отключено
-							if(this->tokenDisable.count(token_t::specl) < 1) result = (size_t) token_t::specl;
-							// Устанавливаем токен неизвестного слова
-							if(this->tokenUnknown.count(token_t::specl) > 0) result = (size_t) token_t::unk;
-						// Если это знак изоляции
-						} else if(this->alphabet->isIsolation(letter)) {
-							// Если идентифицирование токена не отключено
-							if(this->tokenDisable.count(token_t::isolat) < 1) result = (size_t) token_t::isolat;
-							// Устанавливаем токен неизвестного слова
-							if(this->tokenUnknown.count(token_t::isolat) > 0) result = (size_t) token_t::unk;
-						// Если это символ игральных карт
-						} else if(this->alphabet->isPlayCards(letter)) {
-							// Если идентифицирование токена не отключено
-							if(this->tokenDisable.count(token_t::pcards) < 1) result = (size_t) token_t::pcards;
-							// Устанавливаем токен неизвестного слова
-							if(this->tokenUnknown.count(token_t::pcards) > 0) result = (size_t) token_t::unk;
-						// Если это знак мировой валюты
-						} else if(this->alphabet->isCurrency(letter)) {
-							// Если идентифицирование токена не отключено
-							if(this->tokenDisable.count(token_t::currency) < 1) result = (size_t) token_t::currency;
-							// Устанавливаем токен неизвестного слова
-							if(this->tokenUnknown.count(token_t::currency) > 0) result = (size_t) token_t::unk;
-						}
-					// Проверяем есть ли изоляционный знак и количество дефисов в слове больше 2-х
-					} else if(
-						this->alphabet->isIsolation(tmp.back()) ||
-						this->alphabet->isIsolation(tmp.front()) ||
-						((hyphenCounts = this->alphabet->countLetter(tmp, L'-')) > 2)
-					) result = (size_t) token_t::unk;
-					// Если идентификатор определить не удалось
-					else {
-						// Идентификатор токена слова
-						token_t idt = token_t::null;
-						// Получаем идентификатор токена слова
-						const token_t token = this->tokenizer->idt(tmp);
-						// Пытаемся определить идентификатор слова
-						switch((u_short) token){
-							// Если это токен неизвестного слова
-							case (u_short) token_t::unk: idt = token; break;
-							// Если это токен числа, запоминаем его
-							case (u_short) token_t::num: {
-								// Если идентифицирование токена не отключено
-								if(this->tokenDisable.count(token) < 1) idt = token;
-								// Устанавливаем токен неизвестного слова
-								if(this->tokenUnknown.count(token) > 0) idt = token_t::unk;
-							} break;
-							// Если токен определён как слово
-							case (u_short) token_t::null: if(this->isOption(options_t::onlyGood)) idt = token_t::unk; break;
-							// Если это другие токены
-							default: {
-								// Если идентифицирование токена не отключено
-								if(this->tokenDisable.count(token) < 1) idt = token;
-								// Устанавливаем токен неизвестного слова
-								if(this->tokenUnknown.count(token) > 0) idt = token_t::unk;
+			} else result = this->tokenizer->idw(word);
+		// Если слово длиннее одного символа
+		} else {
+			// Проверяем является ли слово, началом предложения
+			if(word.compare(L"<s>") == 0) result = (size_t) token_t::start;
+			// Проверяем является ли слово числом
+			else if(word.compare(L"<num>") == 0) result = (size_t) token_t::num;
+			// Проверяем является ли слово неизвестным
+			else if(word.compare(L"<unk>") == 0) result = (size_t) token_t::unk;
+			// Проверяем является ли слово url адресом
+			else if(word.compare(L"<url>") == 0) result = (size_t) token_t::url;
+			// Проверяем является ли слово аббревиатурой
+			else if(word.compare(L"<abbr>") == 0) result = (size_t) token_t::abbr;
+			// Проверяем является ли слово датой
+			else if(word.compare(L"<date>") == 0) result = (size_t) token_t::date;
+			// Проверяем является ли слово временем
+			else if(word.compare(L"<time>") == 0) result = (size_t) token_t::time;
+			// Проверяем является ли слово псевдо-числом
+			else if(word.compare(L"<anum>") == 0) result = (size_t) token_t::anum;
+			// Проверяем является ли слово концом предложения
+			else if(word.compare(L"</s>") == 0) result = (size_t) token_t::finish;
+			// Проверяем является ли слово математической операцией
+			else if(word.compare(L"<math>") == 0) result = (size_t) token_t::math;
+			// Проверяем является ли слово спец-символом
+			else if(word.compare(L"<specl>") == 0) result = (size_t) token_t::specl;
+			// Проверяем является ли слово диапазоном чисел
+			else if(word.compare(L"<range>") == 0) result = (size_t) token_t::range;
+			// Проверяем является ли слово знаком пунктуации
+			else if(word.compare(L"<punct>") == 0) result = (size_t) token_t::punct;
+			// Проверяем является ли слово приблизительным числом
+			else if(word.compare(L"<aprox>") == 0) result = (size_t) token_t::aprox;
+			// Проверяем является ли слово числовым счётом
+			else if(word.compare(L"<score>") == 0) result = (size_t) token_t::score;
+			// Проверяем является ли слово габаритными размерами
+			else if(word.compare(L"<dimen>") == 0) result = (size_t) token_t::dimen;
+			// Проверяем является ли слово числовой дробью
+			else if(word.compare(L"<fract>") == 0) result = (size_t) token_t::fract;
+			// Проверяем является ли слово греческим символом
+			else if(word.compare(L"<greek>") == 0) result = (size_t) token_t::greek;
+			// Проверяем является ли слово знаком направления (стрелкой)
+			else if(word.compare(L"<route>") == 0) result = (size_t) token_t::route;
+			// Проверяем является ли слово знаком изоляции
+			else if(word.compare(L"<isolat>") == 0) result = (size_t) token_t::isolat;
+			// Проверяем является ли слово знаком игральной карты
+			else if(word.compare(L"<pcards>") == 0) result = (size_t) token_t::pcards;
+			// Проверяем является ли слово знаком мировой валюты
+			else if(word.compare(L"<currency>") == 0) result = (size_t) token_t::currency;
+			// Если это другое слово
+			else {
+				// Формируем идентификатор слова
+				result = this->tokenizer->idw(word);
+				// Если нужно выполнить проверку слов
+				if(check){
+					// Проверяем является ли слово хорошим
+					if(this->goodwords.empty() || (this->goodwords.count(result) < 1)){
+						// Получаем временное слово
+						wstring tmp = word;
+						// Подсчитываем количество дефисов
+						u_short hyphenCounts = 0;
+						// Если нужно проверить пользовательские токены
+						if(!this->utokens.empty()){
+							// Переходим по всему списку пользовательских токенов
+							for(auto & token : this->utokens){
+								// Если сработал пользовательский токен
+								if(token.second.test(
+									token.second.name.real(),
+									this->alphabet->convert(tmp)
+								)) return token.first;
 							}
 						}
-						// Если слово определено как число но это не число, значит это римское число
-						if((idt == token_t::num) && !this->alphabet->isNumber({tmp.back()})){
-							// Если идентифицирование токена не отключено
-							if(this->tokenDisable.count(token_t::rnum) < 1) result = (size_t) token_t::num;
-							// Устанавливаем токен неизвестного слова
-							if(this->tokenUnknown.count(token_t::rnum) > 0) result = (size_t) token_t::unk;
-						// Иначе запоминаем идентификатор так-как он передан
-						} else if(idt != token_t::null) result = (size_t) idt;
-						// Если разрешено детектировать слова из смешанных словарей
-						else if(this->isOption(options_t::mixdicts)){
-							// Пытаемся детектировать слово со смешанными буквами
-							if(this->alphabet->rest(tmp)) result = (size_t) token_t::unk;
-							// Если слова отличаются, получаем новый идентификатор
-							else if(tmp.compare(word) != 0) result = this->tokenizer->idw(tmp);
+						// Проверяем есть ли изоляционный знак и количество дефисов в слове больше 2-х
+						if(
+							this->alphabet->isIsolation(tmp.back()) ||
+							this->alphabet->isIsolation(tmp.front()) ||
+							((hyphenCounts = this->alphabet->countLetter(tmp, L'-')) > 2)
+						) result = (size_t) token_t::unk;
+						// Если идентификатор определить не удалось
+						else {
+							// Идентификатор токена слова
+							token_t idt = token_t::null;
+							// Получаем идентификатор токена слова
+							const token_t token = this->tokenizer->idt(tmp);
+							// Пытаемся определить идентификатор слова
+							switch((u_short) token){
+								// Если это токен неизвестного слова
+								case (u_short) token_t::unk: idt = token; break;
+								// Если это токен числа, запоминаем его
+								case (u_short) token_t::num: {
+									// Если идентифицирование токена не отключено
+									if(this->tokenDisable.count(token) < 1) idt = token;
+									// Устанавливаем токен неизвестного слова
+									if(this->tokenUnknown.count(token) > 0) idt = token_t::unk;
+								} break;
+								// Если токен определён как слово
+								case (u_short) token_t::null: if(this->isOption(options_t::onlyGood)) idt = token_t::unk; break;
+								// Если это другие токены
+								default: {
+									// Если идентифицирование токена не отключено
+									if(this->tokenDisable.count(token) < 1) idt = token;
+									// Устанавливаем токен неизвестного слова
+									if(this->tokenUnknown.count(token) > 0) idt = token_t::unk;
+								}
+							}
+							// Если слово определено как число но это не число, значит это римское число
+							if((idt == token_t::num) && !this->alphabet->isNumber({tmp.back()})){
+								// Если идентифицирование токена не отключено
+								if(this->tokenDisable.count(token_t::rnum) < 1) result = (size_t) token_t::num;
+								// Устанавливаем токен неизвестного слова
+								if(this->tokenUnknown.count(token_t::rnum) > 0) result = (size_t) token_t::unk;
+							// Иначе запоминаем идентификатор так-как он передан
+							} else if(idt != token_t::null) result = (size_t) idt;
+							// Если разрешено детектировать слова из смешанных словарей
+							else if(this->isOption(options_t::mixdicts)){
+								// Пытаемся детектировать слово со смешанными буквами
+								if(this->alphabet->rest(tmp)) result = (size_t) token_t::unk;
+								// Если слова отличаются, получаем новый идентификатор
+								else if(tmp.compare(word) != 0) result = this->tokenizer->idw(tmp);
+							}
 						}
 					}
 				}
