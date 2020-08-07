@@ -191,6 +191,75 @@ void anyks::Alm2::clear(){
 	reinterpret_cast <alm_t *> (this)->clear();
 }
 /**
+ * checkBiM Метод проверки существования последовательности, по биграммам
+ * @param seq список слов последовательности
+ * @return    результат проверки
+ */
+const bool anyks::Alm2::checkBiM(const vector <size_t> & seq) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если последовательность передана
+	if(!seq.empty() && (seq.size() > 1) && !this->arpa.empty()){
+		// Временная последовательность
+		vector <size_t> tmp, sequence;
+		// Если последовательность не экранированна
+		if((seq.back() == size_t(token_t::finish)) &&
+		(seq.front() == size_t(token_t::start))) sequence.assign(seq.begin() + 1, seq.end() - 1);
+		else if(seq.back() == size_t(token_t::finish)) sequence.assign(seq.begin(), seq.end() - 1);
+		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
+		else sequence.assign(seq.begin(), seq.end());
+		/**
+		 * checkFn Функция проверки существования последовательности
+		 * @param seq список слов последовательности
+		 * @return    результат проверки
+		 */
+		auto checkFn = [this](const vector <size_t> & seq) noexcept {
+			// Регистры слова в последовательности
+			bool result = false;
+			// Если список последовательностей передан
+			if(!seq.empty() && (this->size > 0)){
+				// Получаем размер N-граммы
+				const u_short size = seq.size();
+				// Выполняем поиск списка N-грамм
+				auto it = this->arpa.find(size);
+				// Если список N-грамм получен
+				if(it != this->arpa.end()){
+					// Получаем идентификатор последовательности
+					const size_t ids = (size > 1 ? this->tokenizer->ids(seq) : seq.front());
+					// Выполняем проверку существования последовательности
+					auto jt = it->second.find(ids);
+					// Если последовательность существует
+					result = (jt != it->second.end());
+				}
+			}
+			// Выводим результат
+			return result;
+		};
+		// Количество переданных последовательностей
+		const size_t count = sequence.size();
+		// Определяем смещение в последовательности
+		size_t offset1 = 0, offset2 = (count > 2 ? 2 : count);
+		// Выполняем извлечение данных
+		while(offset2 < (count + 1)){
+			// Получаем первую часть последовательности
+			tmp.assign(sequence.begin() + offset1, sequence.begin() + offset2);
+			// Если последовательность получена
+			if(!tmp.empty()){
+				// Получаем регистр слова
+				result = checkFn(tmp);
+				// Если последовательность не найдена, выходим
+				if(!result) break;
+			// Выходим из цикла
+			} else break;
+			// Увеличиваем смещение
+			offset1++;
+			offset2++;
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * perplexity Метод расчёта перплексии
  * @param  seq список последовательностей
  * @return     результат расчёта
@@ -494,8 +563,8 @@ const pair <bool, size_t> anyks::Alm2::check(const vector <size_t> & seq, const 
 		// Если последовательность не экранированна
 		if((seq.back() == size_t(token_t::finish)) &&
 		(seq.front() == size_t(token_t::start))) sequence.assign(seq.begin() + 1, seq.end() - 1);
-		else if(seq.back() == size_t(token_t::finish)) sequence.assign(seq.begin() + 1, seq.end());
-		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin(), seq.end() - 1);
+		else if(seq.back() == size_t(token_t::finish)) sequence.assign(seq.begin(), seq.end() - 1);
+		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
 		else sequence.assign(seq.begin(), seq.end());
 		/**
 		 * checkFn Прототип функции проверки существования последовательности

@@ -281,6 +281,36 @@ namespace anyks {
 			const ppl_t pplByFiles(const string & path, function <void (const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
 		public:
 			/**
+			 * checkBiM Метод проверки существования последовательности, по биграммам
+			 * @param текст для проверки существования
+			 * @return      результат проверки
+			 */
+			const bool checkBiM(const string & text) const noexcept;
+			/**
+			 * checkBiM Метод проверки существования последовательности, по биграммам
+			 * @param текст для проверки существования
+			 * @return      результат проверки
+			 */
+			const bool checkBiM(const wstring & text) const noexcept;
+			/**
+			 * checkBiM Метод проверки существования последовательности, по биграммам
+			 * @param seq список слов последовательности
+			 * @return    результат проверки
+			 */
+			const bool checkBiM(const vector <string> & seq) const noexcept;
+			/**
+			 * checkBiM Метод проверки существования последовательности, по биграммам
+			 * @param seq список слов последовательности
+			 * @return    результат проверки
+			 */
+			const bool checkBiM(const vector <wstring> & seq) const noexcept;
+			/**
+			 * checkBiM Метод проверки существования последовательности, по биграммам
+			 * @param seq список слов последовательности
+			 * @return    результат проверки
+			 */
+			virtual const bool checkBiM(const vector <size_t> & seq) const noexcept;
+			/**
 			 * check Метод проверки существования последовательности
 			 * @param text     текст для проверки существования
 			 * @param accurate режим точной проверки
@@ -827,6 +857,12 @@ namespace anyks {
 			virtual void clear();
 		public:
 			/**
+			 * checkBiM Метод проверки существования последовательности, по биграммам
+			 * @param seq список слов последовательности
+			 * @return    результат проверки
+			 */
+			virtual const bool checkBiM(const vector <size_t> & seq) const noexcept;
+			/**
 			 * perplexity Метод расчёта перплексии
 			 * @param  seq список последовательностей
 			 * @return     результат расчёта
@@ -974,6 +1010,12 @@ namespace anyks {
 			 */
 			void clear();
 		public:
+			/**
+			 * checkBiM Метод проверки существования последовательности, по биграммам
+			 * @param seq список слов последовательности
+			 * @return    результат проверки
+			 */
+			const bool checkBiM(const vector <size_t> & seq) const noexcept;
 			/**
 			 * perplexity Метод расчёта перплексии
 			 * @param  seq список последовательностей

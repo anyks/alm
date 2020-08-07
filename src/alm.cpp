@@ -253,7 +253,9 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 						// Блокируем поток
 						this->locker.lock();
 						// Выполняем внешний python скрипт
-						tmp = this->python->run(it->second.second, {tmp.real()}, ctx);
+						const auto & res = this->python->run(it->second.second, {tmp.real()}, ctx);
+						// Если результат получен
+						if(!res.empty()) tmp = res;
 						// Разблокируем поток
 						this->locker.unlock();
 					}
@@ -265,16 +267,20 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 				else if(!tmp.empty()) {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
+					// Выполняем проверку на плохое слово
+					const bool isBad = (this->badwords.count(idw) > 0);
 					// Если это плохое слово, заменяем его на неизвестное
-					if((idw == 0) || (idw == idw_t::NIDW) || (this->badwords.count(idw) > 0)) unkFn(word);
+					if(isBad || (idw == 0) || (idw == idw_t::NIDW)) unkFn(word);
 					// Иначе продолжаем дальше
 					else {
 						// Проверяем является ли строка словом
 						const bool isWord = this->event(idw);
 						// Если это неизвестное слово
-						if((idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn(word); 
+						if(isBad || (idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn(word);
 						// Иначе добавляем слово
-						else if(!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)) seq.push_back(idw);
+						else if(!isBad && (!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)))
+							// Собираем последовательность
+							seq.push_back(idw);
 						// Отправляем слово как неизвестное
 						else unkFn(word);
 					}
@@ -484,6 +490,179 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 	return result;
 }
 /**
+ * checkBiM Метод проверки существования последовательности, по биграммам
+ * @param текст для проверки существования
+ * @return      результат проверки
+ */
+const bool anyks::Alm::checkBiM(const string & text) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(!text.empty()) result = this->checkBiM(this->alphabet->convert(text));
+	// Выводим результат
+	return result;
+}
+/**
+ * checkBiM Метод проверки существования последовательности, по биграммам
+ * @param текст для проверки существования
+ * @return      результат проверки
+ */
+const bool anyks::Alm::checkBiM(const wstring & text) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(!text.empty()){
+		// Список последовательностей для обучения
+		vector <size_t> seq = {};
+		// Идентификатор неизвестного слова
+		const size_t uid = (size_t) token_t::unk;
+		/**
+		 * unkFn Функция установки неизвестного слова в последовательность
+		 * @return нужно ли остановить сбор последовательности
+		 */
+		auto unkFn = [&seq, uid, this]() noexcept {
+			// Если неизвестное слово не установлено
+			if(this->unknown == 0) seq.push_back(uid);
+			// Если неизвестное слово установлено
+			else seq.push_back(this->unknown);
+		};
+		/**
+		 * resFn Функция вывода результата
+		 */
+		auto resFn = [&result, &seq, this]() noexcept {
+			/**
+			 * Если слова всего два, значит это начало и конец предложения
+			 * Нам же нужны только нормальные n-граммы
+			 */
+			if(seq.size() > 2) result = this->checkBiM(seq);
+			// Очищаем список последовательностей
+			seq.clear();
+		};
+		/**
+		 * modeFn Функция обработки разбитого текста
+		 * @param word  слово для обработки
+		 * @param ctx   контекст к которому принадлежит слово
+		 * @param reset флаг сброса контекста
+		 * @param stop  флаг завершения обработки
+		 */
+		auto modeFn = [&](const wstring & word, const vector <string> & ctx, const bool reset, const bool stop) noexcept {
+			// Если это сброс контекста, отправляем результат
+			if(reset) resFn();
+			// Если слово передано
+			if(!word.empty()){
+				// Получаем данные слова
+				word_t tmp = word;
+				// Если модуль питона активирован
+				if(this->python != nullptr){
+					// Ищем скрипт обработки слов
+					auto it = this->scripts.find(1);
+					// Если скрипт обработки слов установлен
+					if(it != this->scripts.end()){
+						// Блокируем поток
+						this->locker.lock();
+						// Выполняем внешний python скрипт
+						const auto & res = this->python->run(it->second.second, {tmp.real()}, ctx);
+						// Если результат получен
+						if(!res.empty()) tmp = res;
+						// Разблокируем поток
+						this->locker.unlock();
+					}
+				// Если модуль предобработки слов, существует
+				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
+				// Если слово не разрешено
+				if(tmp.length() >= MAX_WORD_LENGTH) unkFn();
+				// Если слово разрешено
+				else if(!tmp.empty()) {
+					// Получаем идентификатор слова
+					const size_t idw = this->getIdw(tmp);
+					// Выполняем проверку на плохое слово
+					const bool isBad = (this->badwords.count(idw) > 0);
+					// Если это плохое слово, заменяем его на неизвестное
+					if(isBad || (idw == 0) || (idw == idw_t::NIDW)) unkFn();
+					// Иначе продолжаем дальше
+					else {
+						// Проверяем является ли строка словом
+						const bool isWord = this->event(idw);
+						// Если это неизвестное слово
+						if(isBad || (idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn();
+						// Иначе добавляем слово
+						else if(!isBad && (!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)))
+							// Собираем последовательность
+							seq.push_back(idw);
+						// Отправляем слово как неизвестное
+						else unkFn();
+					}
+				}
+			}
+			// Если это конец, отправляем результат
+			if(stop) resFn();
+			// Выводим результат
+			return true;
+		};
+		// Выполняем разбивку текста на токены
+		this->tokenizer->run(text, modeFn);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * checkBiM Метод проверки существования последовательности, по биграммам
+ * @param seq список слов последовательности
+ * @return    результат проверки
+ */
+const bool anyks::Alm::checkBiM(const vector <string> & seq) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если последовательность получена
+	if(!seq.empty()){
+		// Список последовательности для проверки
+		vector <size_t> tmp(seq.size());
+		// Переходим по всей последовательности
+		for(size_t i = 0; i < seq.size(); i++){
+			// Устанавливаем полученное слово
+			tmp.at(i) = this->getIdw(this->alphabet->convert(seq.at(i)));
+		}
+		// Получаем результат
+		result = this->checkBiM(tmp);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * checkBiM Метод проверки существования последовательности, по биграммам
+ * @param seq список слов последовательности
+ * @return    результат проверки
+ */
+const bool anyks::Alm::checkBiM(const vector <wstring> & seq) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если последовательность получена
+	if(!seq.empty()){
+		// Список последовательности для проверки
+		vector <size_t> tmp(seq.size());
+		// Переходим по всей последовательности
+		for(size_t i = 0; i < seq.size(); i++){
+			// Устанавливаем полученное слово
+			tmp.at(i) = this->getIdw(seq.at(i));
+		}
+		// Получаем результат
+		result = this->checkBiM(tmp);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * checkBiM Метод проверки существования последовательности, по биграммам
+ * @param seq список слов последовательности
+ * @return    результат проверки
+ */
+const bool anyks::Alm::checkBiM(const vector <size_t> & seq) const noexcept {
+	// Блокируем варнинг
+	(void) seq;
+	// Выводим результат
+	return false;
+}
+/**
  * check Метод проверки существования последовательности
  * @param text     текст для проверки существования
  * @param accurate режим точной проверки
@@ -557,7 +736,9 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text, const bool acc
 						// Блокируем поток
 						this->locker.lock();
 						// Выполняем внешний python скрипт
-						tmp = this->python->run(it->second.second, {tmp.real()}, ctx);
+						const auto & res = this->python->run(it->second.second, {tmp.real()}, ctx);
+						// Если результат получен
+						if(!res.empty()) tmp = res;
 						// Разблокируем поток
 						this->locker.unlock();
 					}
@@ -569,16 +750,20 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text, const bool acc
 				else if(!tmp.empty()) {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
+					// Выполняем проверку на плохое слово
+					const bool isBad = (this->badwords.count(idw) > 0);
 					// Если это плохое слово, заменяем его на неизвестное
-					if((idw == 0) || (idw == idw_t::NIDW) || (this->badwords.count(idw) > 0)) unkFn();
+					if(isBad || (idw == 0) || (idw == idw_t::NIDW)) unkFn();
 					// Иначе продолжаем дальше
 					else {
 						// Проверяем является ли строка словом
 						const bool isWord = this->event(idw);
 						// Если это неизвестное слово
-						if((idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn();
+						if(isBad || (idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn();
 						// Иначе добавляем слово
-						else if(!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)) seq.push_back(idw);
+						else if(!isBad && (!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)))
+							// Собираем последовательность
+							seq.push_back(idw);
 						// Отправляем слово как неизвестное
 						else unkFn();
 					}
@@ -613,8 +798,8 @@ const pair <bool, size_t> anyks::Alm::check(const vector <string> & seq, const b
 			// Устанавливаем полученное слово
 			tmp.at(i) = this->getIdw(this->alphabet->convert(seq.at(i)));
 		}
-		// Выводим результат
-		return this->check(tmp, accurate);
+		// Получаем результат
+		result = this->check(tmp, accurate);
 	}
 	// Выводим результат
 	return result;
@@ -637,8 +822,8 @@ const pair <bool, size_t> anyks::Alm::check(const vector <wstring> & seq, const 
 			// Устанавливаем полученное слово
 			tmp.at(i) = this->getIdw(seq.at(i));
 		}
-		// Выводим результат
-		return this->check(tmp, accurate);
+		// Получаем результат
+		result = this->check(tmp, accurate);
 	}
 	// Выводим результат
 	return result;
@@ -747,7 +932,9 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 						// Блокируем поток
 						this->locker.lock();
 						// Выполняем внешний python скрипт
-						tmp = this->python->run(it->second.second, {tmp.real()}, ctx);
+						const auto & res = this->python->run(it->second.second, {tmp.real()}, ctx);
+						// Если результат получен
+						if(!res.empty()) tmp = res;
 						// Разблокируем поток
 						this->locker.unlock();
 					}
@@ -759,16 +946,20 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 				else if(!tmp.empty()) {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
+					// Выполняем проверку на плохое слово
+					const bool isBad = (this->badwords.count(idw) > 0);
 					// Если это плохое слово, заменяем его на неизвестное
-					if((idw == 0) || (idw == idw_t::NIDW) || (this->badwords.count(idw) > 0)) resFn(tmp);
+					if(isBad || (idw == 0) || (idw == idw_t::NIDW)) resFn(tmp);
 					// Иначе продолжаем дальше
 					else {
 						// Проверяем является ли строка словом
 						const bool isWord = this->event(idw);
 						// Если это неизвестное слово
-						if((idw == uid) || (isWord && (this->getWord(idw) == nullptr))) resFn(tmp, idw);
+						if(isBad || (idw == uid) || (isWord && (this->getWord(idw) == nullptr))) resFn(tmp, idw);
 						// Иначе добавляем слово
-						else if(isWord && this->alphabet->isAllowed(tmp)) seq.push_back(idw);
+						else if(!isBad && (!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)))
+							// Собираем последовательность
+							seq.push_back(idw);
 						// Отправляем слово как неизвестное
 						else resFn(tmp, idw);
 					}
