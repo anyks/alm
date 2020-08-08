@@ -490,24 +490,26 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 	return result;
 }
 /**
- * checkBiM Метод проверки существования последовательности, по биграммам
- * @param текст для проверки существования
- * @return      результат проверки
+ * check Метод проверки существования последовательности, с указанным шагом
+ * @param text текст для проверки существования
+ * @param size размер шаговой n-граммы
+ * @return     результат проверки
  */
-const bool anyks::Alm::checkBiM(const string & text) const noexcept {
+const bool anyks::Alm::check(const string & text, const u_short size) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если слово передано
-	if(!text.empty()) result = this->checkBiM(this->alphabet->convert(text));
+	if(!text.empty()) result = this->check(this->alphabet->convert(text), size);
 	// Выводим результат
 	return result;
 }
 /**
- * checkBiM Метод проверки существования последовательности, по биграммам
- * @param текст для проверки существования
- * @return      результат проверки
+ * check Метод проверки существования последовательности, с указанным шагом
+ * @param text текст для проверки существования
+ * @param size размер шаговой n-граммы
+ * @return     результат проверки
  */
-const bool anyks::Alm::checkBiM(const wstring & text) const noexcept {
+const bool anyks::Alm::check(const wstring & text, const u_short size) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если слово передано
@@ -529,12 +531,12 @@ const bool anyks::Alm::checkBiM(const wstring & text) const noexcept {
 		/**
 		 * resFn Функция вывода результата
 		 */
-		auto resFn = [&result, &seq, this]() noexcept {
+		auto resFn = [&result, &seq, size, this]() noexcept {
 			/**
 			 * Если слова всего два, значит это начало и конец предложения
 			 * Нам же нужны только нормальные n-граммы
 			 */
-			if(seq.size() > 2) result = this->checkBiM(seq);
+			if(seq.size() > 2) result = this->check(seq, size);
 			// Очищаем список последовательностей
 			seq.clear();
 		};
@@ -606,11 +608,12 @@ const bool anyks::Alm::checkBiM(const wstring & text) const noexcept {
 	return result;
 }
 /**
- * checkBiM Метод проверки существования последовательности, по биграммам
- * @param seq список слов последовательности
- * @return    результат проверки
+ * check Метод проверки существования последовательности, с указанным шагом
+ * @param seq  список слов последовательности
+ * @param size размер шаговой n-граммы
+ * @return     результат проверки
  */
-const bool anyks::Alm::checkBiM(const vector <string> & seq) const noexcept {
+const bool anyks::Alm::check(const vector <string> & seq, const u_short size) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если последовательность получена
@@ -623,17 +626,18 @@ const bool anyks::Alm::checkBiM(const vector <string> & seq) const noexcept {
 			tmp.at(i) = this->getIdw(this->alphabet->convert(seq.at(i)));
 		}
 		// Получаем результат
-		result = this->checkBiM(tmp);
+		result = this->check(tmp, size);
 	}
 	// Выводим результат
 	return result;
 }
 /**
- * checkBiM Метод проверки существования последовательности, по биграммам
- * @param seq список слов последовательности
- * @return    результат проверки
+ * check Метод проверки существования последовательности, с указанным шагом
+ * @param seq  список слов последовательности
+ * @param size размер шаговой n-граммы
+ * @return     результат проверки
  */
-const bool anyks::Alm::checkBiM(const vector <wstring> & seq) const noexcept {
+const bool anyks::Alm::check(const vector <wstring> & seq, const u_short size) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если последовательность получена
@@ -646,19 +650,21 @@ const bool anyks::Alm::checkBiM(const vector <wstring> & seq) const noexcept {
 			tmp.at(i) = this->getIdw(seq.at(i));
 		}
 		// Получаем результат
-		result = this->checkBiM(tmp);
+		result = this->check(tmp, size);
 	}
 	// Выводим результат
 	return result;
 }
 /**
- * checkBiM Метод проверки существования последовательности, по биграммам
- * @param seq список слов последовательности
- * @return    результат проверки
+ * check Метод проверки существования последовательности, с указанным шагом
+ * @param seq  список слов последовательности
+ * @param size размер шаговой n-граммы
+ * @return     результат проверки
  */
-const bool anyks::Alm::checkBiM(const vector <size_t> & seq) const noexcept {
+const bool anyks::Alm::check(const vector <size_t> & seq, const u_short size) const noexcept {
 	// Блокируем варнинг
 	(void) seq;
+	(void) size;
 	// Выводим результат
 	return false;
 }
@@ -2144,6 +2150,89 @@ void anyks::Alm::countsByFiles(const string & path, const string & filename, con
 		this->alphabet->log("Counts %hugrams: %zu\r\n", alphabet_t::log_t::null, nullptr, (ngrams == 1 ? this->size : ngrams), count);
 		// Выводим сообщение об общем количестве обработанных n-грамм в файл
 		this->alphabet->log("Counts %hugrams: %zu\r\n", alphabet_t::log_t::null, filename.c_str(), (ngrams == 1 ? this->size : ngrams), count);
+	}
+}
+/**
+ * checkByFiles Метод проверки существования последовательности в текстовом файле
+ * @param path     адрес каталога или файла для обработки
+ * @param filename адрес файла для записи результата
+ * @param step     шаг размера N-граммы для перебора текста
+ * @param status   функция вывода статуса
+ * @param ext      расширение файлов в каталоге (если адрес передан каталога)
+ */
+void anyks::Alm::checkByFiles(const string & path, const string & filename, const u_short step, function <void (const string &, const u_short)> status, const string & ext) const noexcept {
+	// Если данные переданы
+	if(!path.empty() && !filename.empty() && (this->size >= step)){
+		// Статус и процентное соотношение
+		u_short actual = 0, rate = 100;
+		// Общий размер полученных данных
+		size_t csize = 0, count = 0, exists = 0;
+		/**
+		 * runFn Функция запусука проверки n-грамм
+		 * @param text текст для обработки
+		 * @param readfile обрабатываемый в данный момент файл
+		 * @param size     размер обрабатываемого файла
+		 */
+		auto runFn = [&](const string & text, const string & readfile, const size_t size){
+			// Если текст получен
+			if(!text.empty()){
+				// Выполняем првоерку текста
+				const bool check = this->check(text, u_short(step < 2 ? 2 : step));
+				// Выполняем блокировку потока
+				this->locker.lock();
+				// Считаем количество обработанных предложений
+				count++;
+				// Если слово найдено считаем количество предложений
+				if(check) exists++;
+				// Выполняем запись в файл
+				this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::null, filename.c_str(), count, (check ? "YES" : "NO"), text.c_str());
+				// Выводим результат
+				if(this->isOption(options_t::debug)) this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::info, nullptr, count, (check ? "YES" : "NO"), text.c_str());
+				// Выполняем разблокировку потока
+				this->locker.unlock();
+			}
+			// Если отладка включена
+			if(status != nullptr){
+				// Выполняем блокировку потока
+				this->locker.lock();
+				// Общий полученный размер данных
+				csize += text.size();
+				// Подсчитываем статус выполнения
+				actual = u_short(csize / double(size) * 100.0);
+				// Если процентное соотношение изменилось
+				if(rate != actual){
+					// Запоминаем текущее процентное соотношение
+					rate = actual;
+					// Выводим результат
+					status(readfile, actual);
+				}
+				// Выполняем разблокировку потока
+				this->locker.unlock();
+			}
+		};
+		// Выполняем инициализацию тредпула
+		this->tpool.init(this->threads);
+		// Если это файл
+		if(fsys_t::isfile(path)){
+			// Выполняем считывание всех строк текста
+			fsys_t::rfile(path, [&path, &runFn, this](const string & text, const uintmax_t fileSize) noexcept {
+				// Выполняем обработку
+				this->tpool.push(runFn, text, path, fileSize);
+			});
+		// Если это каталог
+		} else if(fsys_t::isdir(path)) {
+			// Выполняем загрузку каталога с текстовыми файлами
+			fsys_t::rfdir(path, ext, [&](const string & text, const string & filename, const uintmax_t fileSize, const uintmax_t dirSize) noexcept {
+				// Выполняем обработку
+				this->tpool.push(runFn, text, filename, dirSize);
+			});
+		}
+		// Ожидаем завершения обработки
+		this->tpool.wait();
+		// Выводим сообщение об общем количестве обработанных предложений
+		this->alphabet->log("All texts: %zu\r\nExists texts: %zu\r\nNot exists texts: %zu\r\n", alphabet_t::log_t::null, nullptr, count, exists, count - exists);
+		// Выполняем запись в файл
+		this->alphabet->log("All texts: %zu\r\nExists texts: %zu\r\nNot exists texts: %zu\r\n", alphabet_t::log_t::null, filename.c_str(), count, exists, count - exists);
 	}
 }
 /**

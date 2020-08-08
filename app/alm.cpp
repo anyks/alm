@@ -118,6 +118,7 @@ void help() noexcept {
 	"\x1B[34m\x1B[1m[ARGS]\x1B[0m\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-log <value> | --log=<value>]                                               address of log file\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-size <value> | --size=<value>]                                             size n-grams of language model\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-step <value> | --step=<value>]                                             step size n-grams of language model\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-alphabet <value> | --alphabet=<value>]                                     list letters alphabet (file or value)\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-badwords <value> | --badwords=<value>]                                     file address of blacklist words\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-goodwords <value> | --goodwords=<value>]                                   file address of whitelist words\r\n"
@@ -824,10 +825,21 @@ int main(int argc, char * argv[]) noexcept {
 				} else if(env.is("method", "checktext")){
 					// Если текст передан
 					if((value = env.get("text")) != nullptr){
-						// Выполняем првоерку текста
-						auto res = alm->check(value, env.is("accurate"));
-						// Выводим результат
-						alphabet.log("%s | %s\r\n", alphabet_t::log_t::null, nullptr, (res.first ? "YES" : "NO"), value);
+						// Получаем данные текста
+						const string text = value;
+						// Если нужно выполнить проверку текста с точным соответствием
+						if(env.is("accurate")){
+							// Выполняем првоерку текста
+							auto res = alm->check(text, true);
+							// Выводим результат
+							alphabet.log("%s | %s\r\n", alphabet_t::log_t::null, nullptr, (res.first ? "YES" : "NO"), text.c_str());
+						// Если нужно выполнить проверку текста с указанным шагом N-граммы
+						} else {
+							// Получаем шаг N-граммы
+							const u_short step = ((value = env.get("step")) != nullptr ? ((stoi(value) < 2) ? 2 : stoi(value)) : 2);
+							// Выводим результат
+							alphabet.log("%s | %s\r\n", alphabet_t::log_t::null, nullptr, (alm->check(text, step) ? "YES" : "NO"), text.c_str());
+						}
 					// Если адрес текстового файла или каталог передан
 					} else if(((value = env.get("r-text")) != nullptr) && (fsys_t::isfile(value) || fsys_t::isdir(value)) && env.is("w-text")){
 						// Запоминаем файл для записи данных
@@ -850,16 +862,33 @@ int main(int argc, char * argv[]) noexcept {
 								case 2: pss.status(); break;
 							}
 						}
-						// Выполняем обработку текстовых данных
-						alm->checkByFiles(path, writefile, env.is("accurate"), [debug, &pss, &writefile](const string & filename, const u_short status){
-							// Устанавливаем название файла
-							if(debug > 0) pss.description(filename + string(" -> ") + writefile);
-							// Отображаем ход процесса
-							switch(debug){
-								case 1: pss.update(status); break;
-								case 2: pss.status(status); break;
-							}
-						}, ext);
+						// Если нужно выполнить проверку текста с точным соответствием
+						if(env.is("accurate")){
+							// Выполняем обработку текстовых данных
+							alm->checkByFiles(path, writefile, true, [debug, &pss, &writefile](const string & filename, const u_short status){
+								// Устанавливаем название файла
+								if(debug > 0) pss.description(filename + string(" -> ") + writefile);
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(status); break;
+									case 2: pss.status(status); break;
+								}
+							}, ext);
+						// Если нужно выполнить проверку текста с указанным шагом N-граммы
+						} else {
+							// Получаем шаг N-граммы
+							const u_short step = ((value = env.get("step")) != nullptr ? ((stoi(value) < 2) ? 2 : stoi(value)) : 2);
+							// Выполняем обработку текстовых данных
+							alm->checkByFiles(path, writefile, step, [debug, &pss, &writefile](const string & filename, const u_short status){
+								// Устанавливаем название файла
+								if(debug > 0) pss.description(filename + string(" -> ") + writefile);
+								// Отображаем ход процесса
+								switch(debug){
+									case 1: pss.update(status); break;
+									case 2: pss.status(status); break;
+								}
+							}, ext);
+						}
 						// Отображаем ход процесса
 						switch(debug){
 							case 1: pss.update(100); break;

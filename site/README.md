@@ -810,6 +810,11 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ echo "<s> Сегодня сыграл и в Олега ударил яркий прожектор патрульный трактор с корпоративным сектором </s>" | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence
 ```
 
+**Умная проверка c шагом N-граммы 3**
+```bash
+$ echo "<s> Сегодня сыграл и в Олега ударил яркий прожектор патрульный трактор с корпоративным сектором </s>" | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -step 3 -r-arpa ./lm.arpa -confidence
+```
+
 **Точная проверка**
 ```bash
 $ echo "<s> в Олега ударил яркий </s>" | ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence -accurate
@@ -817,7 +822,11 @@ $ echo "<s> в Олега ударил яркий </s>" | ./alm -alphabet "abcde
 
 **Проверка по файлу**
 ```bash
-$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -confidence -r-text ./text.txt -w-text ./checks.txt -threads 0
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -step 3 -confidence -r-text ./text.txt -w-text ./checks.txt -threads 0
+```
+
+```bash
+$ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -method checktext -debug 1 -r-arpa ./lm.arpa -accurate -confidence -r-text ./text.txt -w-text ./checks.txt -threads 0
 ```
 
 ### Исправление регистров слов

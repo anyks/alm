@@ -191,15 +191,16 @@ void anyks::Alm2::clear(){
 	reinterpret_cast <alm_t *> (this)->clear();
 }
 /**
- * checkBiM Метод проверки существования последовательности, по биграммам
- * @param seq список слов последовательности
- * @return    результат проверки
+ * check Метод проверки существования последовательности, с указанным шагом
+ * @param seq  список слов последовательности
+ * @param size размер шаговой n-граммы
+ * @return     результат проверки
  */
-const bool anyks::Alm2::checkBiM(const vector <size_t> & seq) const noexcept {
+const bool anyks::Alm2::check(const vector <size_t> & seq, const u_short size) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если последовательность передана
-	if(!seq.empty() && (seq.size() > 1) && !this->arpa.empty()){
+	if(!seq.empty() && (seq.size() >= size) && (this->size >= size) && !this->arpa.empty()){
 		// Временная последовательность
 		vector <size_t> tmp, sequence;
 		// Если последовательность не экранированна
@@ -238,7 +239,7 @@ const bool anyks::Alm2::checkBiM(const vector <size_t> & seq) const noexcept {
 		// Количество переданных последовательностей
 		const size_t count = sequence.size();
 		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > 2 ? 2 : count);
+		size_t offset1 = 0, offset2 = (count > size ? (size < 2 ? 2 : size) : count);
 		// Выполняем извлечение данных
 		while(offset2 < (count + 1)){
 			// Получаем первую часть последовательности

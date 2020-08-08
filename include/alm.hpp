@@ -281,35 +281,40 @@ namespace anyks {
 			const ppl_t pplByFiles(const string & path, function <void (const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
 		public:
 			/**
-			 * checkBiM Метод проверки существования последовательности, по биграммам
-			 * @param текст для проверки существования
-			 * @return      результат проверки
+			 * check Метод проверки существования последовательности, с указанным шагом
+			 * @param text текст для проверки существования
+			 * @param size размер шаговой n-граммы
+			 * @return     результат проверки
 			 */
-			const bool checkBiM(const string & text) const noexcept;
+			const bool check(const string & text, const u_short size) const noexcept;
 			/**
-			 * checkBiM Метод проверки существования последовательности, по биграммам
-			 * @param текст для проверки существования
-			 * @return      результат проверки
+			 * check Метод проверки существования последовательности, с указанным шагом
+			 * @param text текст для проверки существования
+			 * @param size размер шаговой n-граммы
+			 * @return     результат проверки
 			 */
-			const bool checkBiM(const wstring & text) const noexcept;
+			const bool check(const wstring & text, const u_short size) const noexcept;
 			/**
-			 * checkBiM Метод проверки существования последовательности, по биграммам
-			 * @param seq список слов последовательности
-			 * @return    результат проверки
+			 * check Метод проверки существования последовательности, с указанным шагом
+			 * @param seq  список слов последовательности
+			 * @param size размер шаговой n-граммы
+			 * @return     результат проверки
 			 */
-			const bool checkBiM(const vector <string> & seq) const noexcept;
+			const bool check(const vector <string> & seq, const u_short size) const noexcept;
 			/**
-			 * checkBiM Метод проверки существования последовательности, по биграммам
-			 * @param seq список слов последовательности
-			 * @return    результат проверки
+			 * check Метод проверки существования последовательности, с указанным шагом
+			 * @param seq  список слов последовательности
+			 * @param size размер шаговой n-граммы
+			 * @return     результат проверки
 			 */
-			const bool checkBiM(const vector <wstring> & seq) const noexcept;
+			const bool check(const vector <wstring> & seq, const u_short size) const noexcept;
 			/**
-			 * checkBiM Метод проверки существования последовательности, по биграммам
-			 * @param seq список слов последовательности
-			 * @return    результат проверки
+			 * check Метод проверки существования последовательности, с указанным шагом
+			 * @param seq  список слов последовательности
+			 * @param size размер шаговой n-граммы
+			 * @return     результат проверки
 			 */
-			virtual const bool checkBiM(const vector <size_t> & seq) const noexcept;
+			virtual const bool check(const vector <size_t> & seq, const u_short size) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности
 			 * @param text     текст для проверки существования
@@ -632,6 +637,16 @@ namespace anyks {
 			 * @param ext      расширение файлов в каталоге (если адрес передан каталога)
 			 */
 			void countsByFiles(const string & path, const string & filename, const u_short ngrams = 0, function <void (const string &, const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
+		public:
+			/**
+			 * checkByFiles Метод проверки существования последовательности в текстовом файле
+			 * @param path     адрес каталога или файла для обработки
+			 * @param filename адрес файла для записи результата
+			 * @param step     шаг размера N-граммы для перебора текста
+			 * @param status   функция вывода статуса
+			 * @param ext      расширение файлов в каталоге (если адрес передан каталога)
+			 */
+			void checkByFiles(const string & path, const string & filename, const u_short step, function <void (const string &, const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
 			/**
 			 * checkByFiles Метод проверки существования последовательности в текстовом файле
 			 * @param path     адрес каталога или файла для обработки
@@ -857,17 +872,18 @@ namespace anyks {
 			virtual void clear();
 		public:
 			/**
-			 * checkBiM Метод проверки существования последовательности, по биграммам
-			 * @param seq список слов последовательности
-			 * @return    результат проверки
-			 */
-			virtual const bool checkBiM(const vector <size_t> & seq) const noexcept;
-			/**
 			 * perplexity Метод расчёта перплексии
 			 * @param  seq список последовательностей
 			 * @return     результат расчёта
 			 */
 			virtual const ppl_t perplexity(const vector <size_t> & seq) const noexcept;
+			/**
+			 * check Метод проверки существования последовательности, с указанным шагом
+			 * @param seq  список слов последовательности
+			 * @param size размер шаговой n-граммы
+			 * @return     результат проверки
+			 */
+			virtual const bool check(const vector <size_t> & seq, const u_short size) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности
 			 * @param seq      список слов последовательности
@@ -1011,17 +1027,18 @@ namespace anyks {
 			void clear();
 		public:
 			/**
-			 * checkBiM Метод проверки существования последовательности, по биграммам
-			 * @param seq список слов последовательности
-			 * @return    результат проверки
-			 */
-			const bool checkBiM(const vector <size_t> & seq) const noexcept;
-			/**
 			 * perplexity Метод расчёта перплексии
 			 * @param  seq список последовательностей
 			 * @return     результат расчёта
 			 */
 			const ppl_t perplexity(const vector <size_t> & seq) const noexcept;
+			/**
+			 * check Метод проверки существования последовательности, с указанным шагом
+			 * @param seq  список слов последовательности
+			 * @param size размер шаговой n-граммы
+			 * @return     результат проверки
+			 */
+			const bool check(const vector <size_t> & seq, const u_short size) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности
 			 * @param seq      список слов последовательности

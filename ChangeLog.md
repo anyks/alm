@@ -1,5 +1,11 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
+## [3.2.7](https://github.com/anyks/alm/archive/v3.2.7.tar.gz) Bug fixes and new method
+### Method
+- **check** - text validation method with a specified step of n-gram size
+### Params
+- step size n-grams of language model
+
 ## [3.2.6](https://github.com/anyks/alm/archive/v3.2.6.tar.gz) Other optimization
 
 ## [3.2.5](https://github.com/anyks/alm/archive/v3.2.5.tar.gz) Bug fixes
