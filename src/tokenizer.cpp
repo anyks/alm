@@ -102,6 +102,15 @@ const size_t anyks::Tokenizer::fti(const double num, const u_short count) const 
 	return result;
 }
 /**
+ * isToken Метод проверки идентификатора на токен
+ * @param idw идентификатор слова для проверки
+ * @return    результат проверки
+ */
+const bool anyks::Tokenizer::isToken(const size_t idw) const noexcept {
+	// Выводим результат првоерки
+	return (idw < size_t(token_t::endtoken));
+}
+/**
  * isAbbr Метод проверки слова на соответствие аббревиатуры
  * @param  word слово для проверки
  * @return      результат проверки
@@ -923,7 +932,7 @@ void anyks::Tokenizer::clear() noexcept {
  */
 void anyks::Tokenizer::update() noexcept {
 	// Устанавливаем алфавит и смещение в 23 позиций (количество системных токенов arpa)
-	this->wrdId.set(this->alphabet, 23);
+	this->wrdId.set(this->alphabet, u_short(token_t::endtoken) - 1);
 }
 /**
  * setExternal Метод установки внешней функции токенизатора
