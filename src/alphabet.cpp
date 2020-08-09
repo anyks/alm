@@ -493,7 +493,7 @@ const u_short anyks::Alphabet::errors(const wstring & word) const noexcept {
 		// result = (length >= 9 ? 4 : (length > 5 ? 3 : (length > 3 ? 2 : (length > 2 ? 1 : 0))));
 		// result = (length >= 9 ? 4 : (length >= 5 ? 3 : (length > 2 ? 1 : 0)));
 		// result = (length >= 9 ? 4 : (length > 6 ? 3 : (length > 4 ? 2 : (length > 2 ? 1 : 0))));
-		result = (length >= 9 ? 4 : (length > 6 ? 3 : (length > 2 ? 2 : (length > 1 ? 1 : 0))));
+		result = (length > 9 ? 4 : (length > 6 ? 3 : (length > 2 ? 2 : (length > 1 ? 1 : 0))));
 		// result = (length >= 9 ? 3 : (length > 6 ? 3 : (length > 2 ? 1 : 0)));
 	}
 	// Выводим результат
