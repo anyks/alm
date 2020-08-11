@@ -563,15 +563,22 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 					// Если это число
 					case (u_short) type_t::num:
 					// Если это математическая операция
-					case (u_short) type_t::math:
-					// Если это символ игральных карт
-					case (u_short) type_t::currency: {
-						// Если предыдущий символ не является числом, математической операцией и пробелом
+					case (u_short) type_t::math: {
+						// Если предыдущий символ не является математической операцией и пробелом
 						if((typeContext.empty() ||
 						((token.front() == L'=') && (text.back() != L'=')) ||
 						((token.front() != L'=') && (text.back() == L'=')) ||
+						((typeContext.top() != type_t::open) &&
+						(typeContext.top() != type_t::space))) &&
+						(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
+						// Добавляем слово
+						text.append(token);
+					} break;
+					// Если это символ мировых валют
+					case (u_short) type_t::currency: {
+						// Если предыдущий символ не является числом и пробелом
+						if((typeContext.empty() ||
 						((typeContext.top() != type_t::num) &&
-						(typeContext.top() != type_t::math) &&
 						(typeContext.top() != type_t::open) &&
 						(typeContext.top() != type_t::space))) &&
 						(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
@@ -801,7 +808,7 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					case (u_short) type_t::num:
 					// Если это математическая операция
 					case (u_short) type_t::math: {
-						// Если предыдущий символ не является числом, математической операцией и пробелом
+						// Если предыдущий символ не является математической операцией и пробелом
 						if((typeContext.empty() ||
 						((token.front() == L'=') && (result.back() != L'=')) ||
 						((token.front() != L'=') && (result.back() == L'=')) ||
@@ -813,12 +820,9 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					} break;
 					// Если это символ мировых валют
 					case (u_short) type_t::currency: {
-						// Если предыдущий символ не является числом, математической операцией и пробелом
+						// Если предыдущий символ не является числом и пробелом
 						if((typeContext.empty() ||
-						((token.front() == L'=') && (result.back() != L'=')) ||
-						((token.front() != L'=') && (result.back() == L'=')) ||
 						((typeContext.top() != type_t::num) &&
-						(typeContext.top() != type_t::math) &&
 						(typeContext.top() != type_t::open) &&
 						(typeContext.top() != type_t::space))) &&
 						(!this->alphabet->isSpace(result.back()))) result.append(1, L' ');
