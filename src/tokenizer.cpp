@@ -223,15 +223,12 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 						result = token_t::currency;
 					// Сообщаем что это псевдо-число
 					else result = token_t::anum;
-				// Если - это не число и не мировая валюта
-				} else {
-					// Если это аббревиатура, запоминаем тип токена
-					if(this->alphabet->isAbbr(word))
-						// Запоминаем что это аббревиатура
-						result = token_t::abbr;
-					// Иначе - это просто, псевдо-число
-					else result = token_t::anum;
-				}
+				// Если это аббревиатура, запоминаем тип токена
+				} else if(this->alphabet->isAbbr(word))
+					// Запоминаем что это аббревиатура
+					result = token_t::abbr;
+				// Иначе - это просто, псевдо-число
+				else result = token_t::anum;
 			// Если оба символа являются числом (5353, 5353.243, 3:4, 18:00, 18:00:01, 18.02.2012, 18/02/2012, 2/3, 3х10, 3~4)
 			} else if(frontNum && backNum) {
 				// Если это число
