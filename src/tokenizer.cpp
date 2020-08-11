@@ -800,8 +800,18 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					// Если это число
 					case (u_short) type_t::num:
 					// Если это математическая операция
-					case (u_short) type_t::math:
-					// Если это символ игральных карт
+					case (u_short) type_t::math: {
+						// Если предыдущий символ не является числом, математической операцией и пробелом
+						if((typeContext.empty() ||
+						((token.front() == L'=') && (result.back() != L'=')) ||
+						((token.front() != L'=') && (result.back() == L'=')) ||
+						((typeContext.top() != type_t::open) &&
+						(typeContext.top() != type_t::space))) &&
+						(!this->alphabet->isSpace(result.back()))) result.append(1, L' ');
+						// Добавляем слово
+						result.append(token);
+					} break;
+					// Если это символ мировых валют
 					case (u_short) type_t::currency: {
 						// Если предыдущий символ не является числом, математической операцией и пробелом
 						if((typeContext.empty() ||
