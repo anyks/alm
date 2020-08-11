@@ -225,39 +225,12 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 					else result = token_t::anum;
 				// Если - это не число и не мировая валюта
 				} else {
-					// Ищем дефис в конце слова
-					size_t pos = word.rfind(L'-');
-					// Проверяем является ли слово сокращением (не 25TM)
-					if(pos != wstring::npos){
-						// Получаем новое слово для проверки
-						const wstring & tmp = word.substr(pos + 1);
-						// Если слово существует
-						if(tmp.size() > 1){
-							// Если это не псевдо-число (не 2-15tm)
-							if(!this->alphabet->isANumber(tmp)){
-								// Слово запрещено для использования
-								bool noallow = false;
-								// Длина переданного слова
-								const size_t size = tmp.size();
-								// Переходим по всему списку
-								for(size_t i = 0, j = size - 1; j > (size / 2); i++, j--){
-									// Проверяем является ли слово арабским числом
-									noallow = (i == j ? !this->alphabet->check(tmp.at(i)) : !this->alphabet->check(tmp.at(i)) || !this->alphabet->check(tmp.at(j)));
-									// Если хоть один символ является числом, выходим
-									if(noallow) break;
-								}
-								// Если слово разрешено, значит это аббревиатура
-								if(!noallow && this->alphabet->isNumber(word.substr(0, pos))){
-									// Запоминаем что это аббревиатура
-									result = token_t::abbr;
-								// Иначе запоминаем что это неизвестный символ (2-@tm)
-								} else result = token_t::anum;
-							// Сообщаем что это псевдо-число
-							} else result = token_t::anum;
-						// Сообщаем что это псевдо-число
-						} else result = token_t::anum;
-					// Сообщаем что это псевдо-число
-					} else result = token_t::anum;
+					// Если это аббревиатура, запоминаем тип токена
+					if(this->alphabet->isAbbr(word))
+						// Запоминаем что это аббревиатура
+						result = token_t::abbr;
+					// Иначе - это просто, псевдо-число
+					else result = token_t::anum;
 				}
 			// Если оба символа являются числом (5353, 5353.243, 3:4, 18:00, 18:00:01, 18.02.2012, 18/02/2012, 2/3, 3х10, 3~4)
 			} else if(frontNum && backNum) {
