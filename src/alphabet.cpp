@@ -490,7 +490,7 @@ const u_short anyks::Alphabet::errors(const wstring & word) const noexcept {
 		// Получаем длину слова
 		const size_t length = word.length();
 		// Выполняем расчёт количества ошибок разрешённых для данного слова
-		result = (length > 9 ? 4 : (length > 6 ? 3 : (length > 4 ? 2 : (length > 1 ? 1 : 0))));
+		result = (length >= 9 ? 4 : (length > 6 ? 3 : (length > 4 ? 2 : (length > 1 ? 1 : 0))));
 	}
 	// Выводим результат
 	return result;
