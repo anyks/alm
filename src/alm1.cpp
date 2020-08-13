@@ -669,6 +669,9 @@ const pair <bool, size_t> anyks::Alm1::check(const vector <size_t> & seq, const 
 	// Выводим результат
 	return result;
 }
+
+size_t kml = 0;
+
 /**
  * setBin Метод установки бинарных данных в словарь
  * @param buffer буфер с бинарными данными
@@ -706,10 +709,16 @@ void anyks::Alm1::setBin(const vector <char> & buffer) const noexcept {
 					offset += sizeof(sequence);
 				}
 				// Если нужно установить исходные данные
-				if(!seq.empty()) this->set(seq);
+				if(!seq.empty()){
+					this->set(seq);
+
+					kml++;
+				}
 			}
 		}
 	}
+
+	cout << " +++++++++++++++++ " << kml << endl;
 }
 /**
  * getBin Метод извлечения данных arpa в бинарном виде
