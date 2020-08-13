@@ -9,38 +9,6 @@
 #include <alm.hpp>
 
 /**
- * event Метод проверки на спец-слово
- * @param idw идентификатор слова для проверки
- * @return    результат проверки
- */
-const bool anyks::Alm::event(const size_t idw) const noexcept {
-	// Выводим результат
-	return (
-		(idw != size_t(token_t::num)) &&
-		(idw != size_t(token_t::unk)) &&
-		(idw != size_t(token_t::url)) &&
-		(idw != size_t(token_t::abbr)) &&
-		(idw != size_t(token_t::date)) &&
-		(idw != size_t(token_t::time)) &&
-		(idw != size_t(token_t::anum)) &&
-		(idw != size_t(token_t::math)) &&
-		(idw != size_t(token_t::specl)) &&
-		(idw != size_t(token_t::aprox)) &&
-		(idw != size_t(token_t::start)) &&
-		(idw != size_t(token_t::range)) &&
-		(idw != size_t(token_t::score)) &&
-		(idw != size_t(token_t::punct)) &&
-		(idw != size_t(token_t::greek)) &&
-		(idw != size_t(token_t::route)) &&
-		(idw != size_t(token_t::dimen)) &&
-		(idw != size_t(token_t::fract)) &&
-		(idw != size_t(token_t::isolat)) &&
-		(idw != size_t(token_t::finish)) &&
-		(idw != size_t(token_t::pcards)) &&
-		(idw != size_t(token_t::currency))
-	);
-}
-/**
  * isOption Метод проверки наличия опции
  * @param option опция для проверки
  * @return       результат проверки
@@ -274,7 +242,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 					// Иначе продолжаем дальше
 					else {
 						// Проверяем является ли строка словом
-						const bool isWord = this->event(idw);
+						const bool isWord = !this->tokenizer->isToken(idw);
 						// Если это неизвестное слово
 						if(isBad || (idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn(word);
 						// Иначе добавляем слово
@@ -584,7 +552,7 @@ const bool anyks::Alm::check(const wstring & text, const u_short size) const noe
 					// Иначе продолжаем дальше
 					else {
 						// Проверяем является ли строка словом
-						const bool isWord = this->event(idw);
+						const bool isWord = !this->tokenizer->isToken(idw);
 						// Если это неизвестное слово
 						if(isBad || (idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn();
 						// Иначе добавляем слово
@@ -763,7 +731,7 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text, const bool acc
 					// Иначе продолжаем дальше
 					else {
 						// Проверяем является ли строка словом
-						const bool isWord = this->event(idw);
+						const bool isWord = !this->tokenizer->isToken(idw);
 						// Если это неизвестное слово
 						if(isBad || (idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn();
 						// Иначе добавляем слово
@@ -959,7 +927,7 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 					// Иначе продолжаем дальше
 					else {
 						// Проверяем является ли строка словом
-						const bool isWord = this->event(idw);
+						const bool isWord = !this->tokenizer->isToken(idw);
 						// Если это неизвестное слово
 						if(isBad || (idw == uid) || (isWord && (this->getWord(idw) == nullptr))) resFn(tmp, idw);
 						// Иначе добавляем слово
@@ -1792,7 +1760,7 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 									// Добавляем последовательность в словарь
 									if(!seq.empty()){
 										// Проверяем отсутствует ли слово в списке запрещённых слов
-										if(this->event(idw) && (this->badwords.count(idw) < 1)) this->addWord(idw, word);
+										if(!this->tokenizer->isToken(idw) && (this->badwords.count(idw) < 1)) this->addWord(idw, word);
 										// Добавляем последовательность в языковую модель
 										this->set(seq, uppers, stod(weight), stod(backoff));
 									}

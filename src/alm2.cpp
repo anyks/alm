@@ -1161,7 +1161,7 @@ void anyks::Alm2::find(const wstring & text, function <void (const wstring &)> c
 					// Иначе продолжаем дальше
 					else {
 						// Проверяем является ли строка словом
-						const bool isWord = this->event(idw);
+						const bool isWord = !this->tokenizer->isToken(idw);
 						// Если это неизвестное слово
 						if((idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn();
 						// Иначе добавляем слово

@@ -179,12 +179,6 @@ namespace anyks {
 			mutable const char * logfile = nullptr;
 		private:
 			/**
-			 * event Метод проверки на спец-слово
-			 * @param idw идентификатор слова для проверки
-			 * @return    результат проверки
-			 */
-			const bool event(const size_t idw) const noexcept;
-			/**
 			 * isOption Метод проверки наличия опции
 			 * @param option опция для проверки
 			 * @return       результат проверки

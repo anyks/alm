@@ -1003,7 +1003,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 					// Иначе продолжаем дальше
 					else {
 						// Флаг проверки слова на событийное
-						const bool isWord = this->arpa->event(idw);
+						const bool isWord = !this->tokenizer->isToken(idw);
 						// Если это неизвестное слово
 						if((isBad || (idw == uid)) && !unkFn()) return true;
 						// Иначе добавляем слово
@@ -1049,7 +1049,7 @@ void anyks::Toolkit::addWord(const word_t & word, const size_t idw, const size_t
 		// Получаем идентификатор слова
 		const size_t id = (idw > 0 ? idw : this->getIdw(word));
 		// Если идентификатор нормальный
-		if((id > 0) && (id < idw_t::NIDW) && this->arpa->event(id) &&
+		if((id > 0) && (id < idw_t::NIDW) && !this->tokenizer->isToken(id) &&
 		(this->utokens.count(id) < 1) && (this->badwords.count(id) < 1)){
 			// Ищем слово в словаре
 			auto it = this->vocab.find(id);
@@ -1096,7 +1096,7 @@ void anyks::Toolkit::addWord(const wstring & word, const size_t idw, const size_
 		// Получаем идентификатор слова
 		const size_t id = (idw > 0 ? idw : this->getIdw(word));
 		// Если идентификатор нормальный
-		if((id > 0) && (id < idw_t::NIDW) && this->arpa->event(id) &&
+		if((id > 0) && (id < idw_t::NIDW) && !this->tokenizer->isToken(id) &&
 		(this->utokens.count(id) < 1) && (this->badwords.count(id) < 1)){
 			// Ищем слово в словаре
 			auto it = this->vocab.find(id);
@@ -1386,7 +1386,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 							// Добавляем слово в список последовательности
 							seq.emplace_back(idw, uppers);
 							// Если это правильное слово
-							if(this->arpa->event(idw) && (this->vocab.count(idw) < 1)){
+							if(!this->tokenizer->isToken(idw) && (this->vocab.count(idw) < 1)){
 								// Если слово еще не добавлено
 								if(added.count(idw) < 1)
 									// Запоминаем что слово добавили
@@ -1510,7 +1510,7 @@ void anyks::Toolkit::modify(const string & filename, modify_t flag, function <vo
 											// Устанавливаем идентификатор слова
 											seq2[i] = idw;
 											// Если слова нет в словаре и это не токен, добавляем в словарь
-											if(this->arpa->event(idw) && (this->vocab.count(idw) < 1)){
+											if(!this->tokenizer->isToken(idw) && (this->vocab.count(idw) < 1)){
 												// Если слово еще не добавлено
 												if(added.count(idw) < 1)
 													// Запоминаем что слово добавили
@@ -2707,7 +2707,7 @@ void anyks::Toolkit::readArpa(const string & filename, function <void (const u_s
 									// Добавляем последовательность в словарь
 									if(!seq.empty()){
 										// Проверяем отсутствует ли слово в списке запрещённых слов
-										if(this->arpa->event(idw) && (this->badwords.count(idw) < 1)){
+										if(!this->tokenizer->isToken(idw) && (this->badwords.count(idw) < 1)){
 											// Добавляем слово в словарь
 											this->addWord(word.wreal(), idw);
 										}
@@ -2976,7 +2976,7 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const st
 												// Добавляем слово в список последовательности
 												seq.emplace_back(idw, uppers);
 												// Если это правильное слово
-												if((idw > 0) && this->arpa->event(idw)){
+												if((idw > 0) && !this->tokenizer->isToken(idw)){
 													// Добавляем в слово его метаданные
 													word.setmeta(stoull(dc), stoull(oc));
 													// Добавляем слово в словарь
@@ -3104,10 +3104,10 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const stri
 						if((pos = item.find(L":{")) != wstring::npos){
 							// Получаем идентификатор слова
 							idw = stoull(item.substr(0, pos));
-							// Проверяем является ли слово спец-словом
-							bool noEvent = !this->arpa->event(idw);
 							// Проверяем существует ли слово в словаре
 							bool isWord = (this->vocab.count(idw) > 0);
+							// Проверяем является ли слово спец-словом
+							bool isToken = this->tokenizer->isToken(idw);
 							// Проверяем является ли слово пользовательским токеном
 							bool isUtoken = (this->utokens.count(idw) > 0);
 							// Проверяем отсутствует ли слово в списке запрещённых слов
@@ -3116,12 +3116,12 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const stri
 							 * Если это спец-слово, или слово существует в словаре оно также разрешено,
 							 * или в arpa разрешён учёт неизвестных слов
 							 */
-							if(noEvent || isUtoken || ((isWord && isAllow) || allowUnk)){
+							if(isToken || isUtoken || ((isWord && isAllow) || allowUnk)){
 								/**
 								 * Если это не спец-слово и слово не существует в словаре или запрещено,
 								 * устанавливаем идентификатор неизвестного слова
 								 */
-								if(!noEvent && !isUtoken && (!isWord || !isAllow)) idw = (size_t) token_t::unk;
+								if(!isToken && !isUtoken && (!isWord || !isAllow)) idw = (size_t) token_t::unk;
 								// Извлекаем параметров слова
 								this->alphabet->split(item.substr(pos + 2, item.length() - ((pos + 2) + 1)), L",", params);
 								// Если параметры получены
