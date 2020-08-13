@@ -712,7 +712,7 @@ void anyks::Alm1::setBin(const vector <char> & buffer) const noexcept {
 				if(!seq.empty()){
 					this->set(seq);
 
-					if(seq.size() == 1) kml++;
+					if(seq.size() == 2) kml++;
 				}
 			}
 		}
