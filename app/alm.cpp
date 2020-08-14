@@ -144,9 +144,9 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-text <value> | --w-text=<value>]                                         file address text of \x1B[1m*.txt\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-map <value> | --w-map=<value>]                                           file address map of \x1B[1m*.map\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-arpa <value> | --w-arpa=<value>]                                         file address arpa of \x1B[1m*.arpa\x1B[0m for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-abbr <value> | --w-abbr=<value>]                                         file address abbrs of \x1B[1m*.abbr\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-vocab <value> | --w-vocab=<value>]                                       file address vocab of \x1B[1m*.vocab\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-words <value> | --w-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m for export\r\n"
-	"\x1B[33m\x1B[1m×\x1B[0m [-w-abbrs <value> | --w-abbrs=<value>]                                       file address abbrs of \x1B[1m*.txt\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-ngram <value> | --w-ngram=<value>]                                       file address ngrams of \x1B[1m*.ngrams\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-oovfile <value> | --w-oovfile=<value>]                                   file address OOVs of \x1B[1m*.txt\x1B[0m for export oov words\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-json <value> | --w-json=<value>]                                         file address json data of \x1B[1m*.json\x1B[0m for export\r\n"
@@ -155,6 +155,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-words <value> | --r-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m or dir path for words import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-map <value> | --r-map=<value>]                                           file address map of \x1B[1m*.map\x1B[0m or dir path for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-arpa <value> | --r-arpa=<value>]                                         file address arpa of \x1B[1m*.arpa\x1B[0m or dir path for import\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-r-abbr <value> | --r-abbr=<value>]                                         file address abbrs of \x1B[1m*.abbr\x1B[0m or dir path for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-vocab <value> | --r-vocab=<value>]                                       file address vocab of \x1B[1m*.vocab\x1B[0m or dir path for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-r-ngram <value> | --r-ngram=<value>]                                       file address ngrams of \x1B[1m*.ngrams\x1B[0m or dir path for import\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-tokens-text <value> | --w-tokens-text=<value>]                           file address tokens of \x1B[1m*.txt\x1B[0m text for tokens export\r\n"
@@ -683,6 +684,40 @@ int main(int argc, char * argv[]) noexcept {
 					}
 				// Если arpa файл не указан
 				} else print("language model file address is empty\r\n", env.get("log"));
+				// Если требуется загрузить файл словаря abbr
+				if((value = env.get("r-abbr")) != nullptr){
+					// Запоминаем адрес файла
+					const string & filename = realpath(value, nullptr);
+					// Если отладка включена, выводим индикатор загрузки
+					if(debug > 0){
+						// Очищаем предыдущий прогресс-бар
+						pss.clear();
+						// Устанавливаем название файла
+						pss.description(filename);
+						// Устанавливаем заголовки прогресс-бара
+						pss.title("Read abbr", "Read abbr is done");
+						// Выводим индикатор прогресс-бара
+						switch(debug){
+							case 1: pss.update(); break;
+							case 2: pss.status(); break;
+						}
+					}
+					// Выполняем загрузку файла суффиксов цифровых аббревиатур
+					alm->readAbbreviations(filename, [debug, &pss](const string & filename, const u_short status) noexcept {
+						// Если отладка включена, выводим имя файла
+						if(debug > 0) pss.description(filename);
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(status); break;
+							case 2: pss.status(status); break;
+						}
+					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
+				}
 				// Если это генерация предложений
 				if(env.is("method", "sentences")){
 					// Получаем количество предложений для генерации
@@ -2358,7 +2393,7 @@ int main(int argc, char * argv[]) noexcept {
 			// Выводим сообщение, что файлы не переданы
 			} else print("arpa file is not loaded\r\n", env.get("log"));
 			// Если адрес файла списка суффиксов цифровых аббревиатур получен
-			if((value = env.get("w-abbrs")) != nullptr){
+			if((value = env.get("w-abbr")) != nullptr){
 				// Открываем файл на запись
 				ofstream file(value, ios::binary);
 				// Если файл открыт, выполняем запись в файл результата

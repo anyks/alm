@@ -497,6 +497,8 @@ void anyks::Toolkit::clear() noexcept {
 	this->tokenUnknown.clear();
 	// Очищаем список запрещённых токенов
 	this->tokenDisable.clear();
+	// Очищаем список аббревиатур
+	this->abbreviations.clear();
 	// Очищаем объект статистики
 	this->info = info_t();
 	// Очищаем словарь arpa
@@ -534,57 +536,27 @@ void anyks::Toolkit::clearUserTokens() noexcept {
  * setAllTokenUnknown Метод установки всех токенов идентифицируемых как <unk>
  */
 void anyks::Toolkit::setAllTokenUnknown() noexcept {
-	// Устанавливаем все токены для идентифицировоания как <unk>
-	this->tokenUnknown = {
-		token_t::num,
-		token_t::url,
-		token_t::abbr,
-		token_t::date,
-		token_t::time,
-		token_t::anum,
-		token_t::math,
-		token_t::rnum,
-		token_t::greek,
-		token_t::route,
-		token_t::specl,
-		token_t::aprox,
-		token_t::range,
-		token_t::score,
-		token_t::dimen,
-		token_t::fract,
-		token_t::punct,
-		token_t::isolat,
-		token_t::pcards,
-		token_t::currency
-	};
+	// Переходим по всем токенам
+	for(u_short i = 0; i < u_short(token_t::endtoken); i++){
+		// Если это не спец. токен, добавляем в список
+		if((i != u_short(token_t::null)) && (i != u_short(token_t::start)) && (i != u_short(token_t::finish)) && (i != u_short(token_t::unk))){
+			// Устанавливаем все токены для идентифицировоания как <unk>
+			this->tokenUnknown.emplace((token_t) i);
+		}
+	}
 }
 /**
  * setAllTokenDisable Метод установки всех токенов как не идентифицируемых
  */
 void anyks::Toolkit::setAllTokenDisable() noexcept {
-	// Устанавливаем все токены для отключения
-	this->tokenDisable = {
-		token_t::num,
-		token_t::url,
-		token_t::abbr,
-		token_t::date,
-		token_t::time,
-		token_t::anum,
-		token_t::math,
-		token_t::rnum,
-		token_t::greek,
-		token_t::route,
-		token_t::specl,
-		token_t::aprox,
-		token_t::range,
-		token_t::score,
-		token_t::dimen,
-		token_t::fract,
-		token_t::punct,
-		token_t::isolat,
-		token_t::pcards,
-		token_t::currency
-	};
+	// Переходим по всем токенам
+	for(u_short i = 0; i < u_short(token_t::endtoken); i++){
+		// Если это не спец. токен, добавляем в список
+		if((i != u_short(token_t::null)) && (i != u_short(token_t::start)) && (i != u_short(token_t::finish)) && (i != u_short(token_t::unk))){
+			// Устанавливаем все токены для отключения
+			this->tokenDisable.emplace((token_t) i);
+		}
+	}
 }
 /**
  * addBadword Метод добавления идентификатора похого слова в список

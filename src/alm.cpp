@@ -458,6 +458,32 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 	return result;
 }
 /**
+ * isAbbr Метод проверки слова на соответствие цифровой аббревиатуре
+ * @param word слово для проверки
+ * @return     результат проверки
+ */
+const bool anyks::Alm::isAbbr(const wstring & word) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(!word.empty() && !this->abbreviations.empty()){
+		// Если проверка пройедна
+		if(this->alphabet->isNumber(wstring(1, word.front())) && !this->alphabet->isNumber(wstring(1, word.back()))){
+			// Выполняем поиск дефиса
+			const size_t pos = word.rfind(L'-');
+			// Если дефис найден
+			if((pos != wstring::npos) && this->alphabet->isNumber(word.substr(0, pos))){
+				// Получаем идентификатор слова
+				const size_t idw = this->tokenizer->idw(word.substr(pos + 1));
+				// Если идентификатор получен
+				if(idw > 0) result = (this->abbreviations.count(idw) > 0);
+			}
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * check Метод проверки существования последовательности, с указанным шагом
  * @param text текст для проверки существования
  * @param size размер шаговой n-граммы
@@ -988,6 +1014,8 @@ void anyks::Alm::clear(){
 	this->tokenUnknown.clear();
 	// Очищаем список запрещённых токенов
 	this->tokenDisable.clear();
+	// Очищаем список аббревиатур
+	this->abbreviations.clear();
 	// Если объект питона установлен внешний
 	if(this->notCleanPython){
 		// Зануляем объект питона
@@ -1063,57 +1091,27 @@ void anyks::Alm::addGoodword(const string & word) noexcept {
  * setAllTokenUnknown Метод установки всех токенов идентифицируемых как <unk>
  */
 void anyks::Alm::setAllTokenUnknown() noexcept {
-	// Устанавливаем все токены для идентифицировоания как <unk>
-	this->tokenUnknown = {
-		token_t::num,
-		token_t::url,
-		token_t::abbr,
-		token_t::date,
-		token_t::time,
-		token_t::anum,
-		token_t::math,
-		token_t::rnum,
-		token_t::specl,
-		token_t::aprox,
-		token_t::range,
-		token_t::score,
-		token_t::dimen,
-		token_t::fract,
-		token_t::punct,
-		token_t::greek,
-		token_t::route,
-		token_t::isolat,
-		token_t::pcards,
-		token_t::currency
-	};
+	// Переходим по всем токенам
+	for(u_short i = 0; i < u_short(token_t::endtoken); i++){
+		// Если это не спец. токен, добавляем в список
+		if((i != u_short(token_t::null)) && (i != u_short(token_t::start)) && (i != u_short(token_t::finish)) && (i != u_short(token_t::unk))){
+			// Устанавливаем все токены для идентифицировоания как <unk>
+			this->tokenUnknown.emplace((token_t) i);
+		}
+	}
 }
 /**
  * setAllTokenDisable Метод установки всех токенов как не идентифицируемых
  */
 void anyks::Alm::setAllTokenDisable() noexcept {
-	// Устанавливаем все токены для отключения
-	this->tokenDisable = {
-		token_t::num,
-		token_t::url,
-		token_t::abbr,
-		token_t::date,
-		token_t::time,
-		token_t::anum,
-		token_t::math,
-		token_t::rnum,
-		token_t::specl,
-		token_t::aprox,
-		token_t::range,
-		token_t::score,
-		token_t::dimen,
-		token_t::fract,
-		token_t::punct,
-		token_t::greek,
-		token_t::route,
-		token_t::isolat,
-		token_t::pcards,
-		token_t::currency
-	};
+	// Переходим по всем токенам
+	for(u_short i = 0; i < u_short(token_t::endtoken); i++){
+		// Если это не спец. токен, добавляем в список
+		if((i != u_short(token_t::null)) && (i != u_short(token_t::start)) && (i != u_short(token_t::finish)) && (i != u_short(token_t::unk))){
+			// Устанавливаем все токены для отключения
+			this->tokenDisable.emplace((token_t) i);
+		}
+	}
 }
 /**
  * initPython Метод инициализации скриптов питона
@@ -1466,6 +1464,14 @@ void anyks::Alm::setTokenizer(const tokenizer_t * tokenizer) noexcept {
 	if(tokenizer != nullptr) this->tokenizer = tokenizer;
 }
 /**
+ * setAbbreviations Метод установки списка суффиксов цифровых аббревиатур
+ * @param abbrs список суффиксов цифровых аббревиатур
+ */
+void anyks::Alm::setAbbreviations(const std::set <size_t> & abbrs) noexcept {
+	// Если список аббревиатур передан
+	if(!abbrs.empty()) this->abbreviations = abbrs;
+}
+/**
  * setTokensUnknown Метод установки списка токенов приводимых к <unk>
  * @param tokens список токенов для установки
  */
@@ -1787,6 +1793,67 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 		});
 	// Выводим сообщение об ошибке
 	} else if(this->isOption(options_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is not exist");
+}
+/**
+ * readAbbreviations Метод чтения данных из файла суффиксов цифровых аббревиатур
+ * @param filename адрес файла для чтения
+ * @param status   функция вывода статуса
+ */
+void anyks::Alm::readAbbreviations(const string & filename, function <void (const string &, const u_short)> status) noexcept {
+	// Если адрес файла передан
+	if(!filename.empty()){
+		// Текущий и предыдущий статус
+		u_short actual = 0, past = 100;
+		// Количество обработанных данных
+		size_t index = 0, pos = 0, loc = 0;
+		/**
+		 * parseFn Функция парсинга аббревиатур
+		 * @param text     строка текста для парсинга
+		 * @param filename адрес файла для чтения
+		 * @param size     размер файла для парсинга
+		 */
+		auto parseFn = [&](const string & text, const string & filename, const uintmax_t size) noexcept {
+			// Если текст передан
+			if(!text.empty()){
+				// Если текст является числом
+				if(this->alphabet->isNumber(text)) this->abbreviations.emplace(stoull(text));
+				// Если функция вывода статуса передана
+				if(status != nullptr){
+					// Увеличиваем количество записанных n-грамм
+					index += text.size();
+					// Выполняем расчёт текущего статуса
+					actual = u_short(index / double(size) * 100.0);
+					// Если статус обновился
+					if(actual != past){
+						// Запоминаем текущий статус
+						past = actual;
+						// Выводим статус извлечения
+						status(filename, actual);
+					}
+				}
+			}
+		};
+		// Если это файл
+		if(fsys_t::isfile(filename)){
+			// Выполняем считывание всех строк текста
+			fsys_t::rfile(filename, [&filename, &parseFn](const string & text, const uintmax_t fileSize) noexcept {
+				// Выполняем обработку полученного текста
+				if(!text.empty()) parseFn(text, filename, fileSize);
+			});
+		// Если это каталог
+		} else if(fsys_t::isdir(filename)) {
+			// Переходим по всему списку словарей в каталоге
+			fsys_t::rdir(filename, "abbr", [&](const string & filename, const uintmax_t dirSize) noexcept {
+				// Выполняем считывание всех строк текста
+				fsys_t::rfile2(filename, [&filename, &dirSize, &parseFn](const string & text, const uintmax_t fileSize) noexcept {
+					// Выполняем обработку полученного текста
+					if(!text.empty()) parseFn(text, filename, dirSize);
+				});
+			});
+		// Выводим сообщение об ошибке
+		} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "abbr file or path is broken");
+	// Выводим сообщение об ошибке
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "abbr file is not exist");
 }
 /**
  * sentencesToFile Метод сборки указанного количества предложений и записи в файл
@@ -2687,6 +2754,14 @@ const std::set <size_t> & anyks::Alm::getBadwords() const noexcept {
 const std::set <size_t> & anyks::Alm::getGoodwords() const noexcept {
 	// Выводим результат
 	return this->goodwords;
+}
+/**
+ * getAbbreviations Метод извлечения списка суффиксов цифровых аббревиатур
+ * @return список цифровых аббревиатур
+ */
+const std::set <size_t> & anyks::Alm::getAbbreviations() const noexcept {
+	// Выводим результат
+	return this->abbreviations;
 }
 /**
  * getTokensUnknown Метод извлечения списка токенов приводимых к <unk>
