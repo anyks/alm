@@ -927,7 +927,7 @@ void anyks::Tokenizer::clear() noexcept {
  */
 void anyks::Tokenizer::update() noexcept {
 	// Устанавливаем алфавит и смещение в 23 позиций (количество системных токенов arpa)
-	this->wrdId.set(this->alphabet, u_short(token_t::endtoken) - 1);
+	this->wrdId.set(this->alphabet, u_short(token_t::endtoken));
 }
 /**
  * setExternal Метод установки внешней функции токенизатора
