@@ -529,8 +529,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Устанавливаем адрес файла для логирования
 				alm->setLogfile(env.get("log"));
 				// Если количество ядер передано
-				if(((value = env.get("threads")) != nullptr) &&
-				alphabet.isNumber(alphabet.convert(value))){
+				if(((value = env.get("threads")) != nullptr) && alphabet.isNumber(value)){
 					// Устанавливаем количество потоков
 					alm->setThreads(stoi(value));
 				// Иначе устанавливаем 1 поток
@@ -1577,8 +1576,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Расширение файлов текстового корпуса
 						const string ext = ((value = env.get("ext")) != nullptr ? value : "txt");
 						// Если количество ядер передано
-						if(((value = env.get("threads")) != nullptr) &&
-						alphabet.isNumber(alphabet.convert(value))){
+						if(((value = env.get("threads")) != nullptr) && alphabet.isNumber(value)){
 							// Объявляем объект коллектора
 							collector_t collector(&toolkit, &alphabet, &tokenizer, env.get("log"));
 							// Устанавливаем режим отладки
@@ -1682,8 +1680,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Запоминаем адрес файла
 						const string & filename = realpath(value, nullptr);
 						// Если количество ядер передано
-						if(((value = env.get("threads")) != nullptr) &&
-						alphabet.isNumber(alphabet.convert(value))){
+						if(((value = env.get("threads")) != nullptr) && alphabet.isNumber(value)){
 							// Объявляем объект коллектора
 							collector_t collector(&toolkit, &alphabet, &tokenizer, env.get("log"));
 							// Устанавливаем режим отладки
@@ -2233,11 +2230,11 @@ int main(int argc, char * argv[]) noexcept {
 				// Если нужно выполнить прунинг словаря
 				} else if(env.is("method", "vprune") && (env.is("vprune-wltf") || env.is("vprune-oc") || env.is("vprune-dc"))) {
 					// Получаем порог встречаемости слова
-					const size_t oc = (((value = env.get("vprune-oc")) != nullptr) && alphabet.isNumber(alphabet.convert(value)) ? stoull(value) : 0);
+					const size_t oc = (((value = env.get("vprune-oc")) != nullptr) && alphabet.isNumber(value) ? stoull(value) : 0);
 					// Получаем порог количества документов, где встретилось слово
-					const size_t dc = (((value = env.get("vprune-dc")) != nullptr) && alphabet.isNumber(alphabet.convert(value)) ? stoull(value) : 0);
+					const size_t dc = (((value = env.get("vprune-dc")) != nullptr) && alphabet.isNumber(value) ? stoull(value) : 0);
 					// Получаем порог веса слова
-					const double wltf = (((value = env.get("vprune-wltf")) != nullptr) && alphabet.isDecimal(alphabet.convert(value)) ? stod(value) : 0.0);
+					const double wltf = (((value = env.get("vprune-wltf")) != nullptr) && alphabet.isDecimal(value) ? stod(value) : 0.0);
 					// Проверяем на правильность входных параметров
 					if((wltf != 0.0) || (oc > 0) || (dc > 0)){
 						// Если отладка включена, выводим индикатор прунинга

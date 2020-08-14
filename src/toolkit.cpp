@@ -128,7 +128,7 @@ const size_t anyks::Toolkit::getIdw(const wstring & word, const bool check) cons
 							// Устанавливаем токен неизвестного слова
 							if(this->tokenUnknown.count(token_t::punct) > 0) result = (size_t) token_t::unk;
 						// Если буква является арабским числом
-						} else if(this->alphabet->isNumber({letter})) {
+						} else if(this->alphabet->isNumber(wstring(1, letter))) {
 							// Если идентифицирование токена не отключено
 							if(this->tokenDisable.count(token_t::num) < 1) result = (size_t) token_t::num;
 							// Устанавливаем токен неизвестного слова
@@ -210,7 +210,7 @@ const size_t anyks::Toolkit::getIdw(const wstring & word, const bool check) cons
 							}
 						}
 						// Если слово определено как число но это не число, значит это римское число
-						if((idt == token_t::num) && !this->alphabet->isNumber({tmp.back()})){
+						if((idt == token_t::num) && !this->alphabet->isNumber(wstring(1, tmp.back()))){
 							// Если идентифицирование токена не отключено
 							if(this->tokenDisable.count(token_t::rnum) < 1) result = (size_t) token_t::num;
 							// Устанавливаем токен неизвестного слова

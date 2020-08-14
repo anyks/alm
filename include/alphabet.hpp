@@ -397,7 +397,19 @@ namespace anyks {
 			 * @param  word слово для проверки
 			 * @return      результат проверки
 			 */
+			const bool isNumber(const string & word) const noexcept;
+			/**
+			 * isNumber Метод проверки является ли слово числом
+			 * @param  word слово для проверки
+			 * @return      результат проверки
+			 */
 			const bool isNumber(const wstring & word) const noexcept;
+			/**
+			 * isDecimal Метод проверки является ли слово дробным числом
+			 * @param  word слово для проверки
+			 * @return      результат проверки
+			 */
+			const bool isDecimal(const string & word) const noexcept;
 			/**
 			 * isDecimal Метод проверки является ли слово дробным числом
 			 * @param  word слово для проверки

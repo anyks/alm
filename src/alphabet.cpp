@@ -915,6 +915,15 @@ const bool anyks::Alphabet::isRoute(const wchar_t letter) const noexcept {
  * @param  word слово для проверки
  * @return      результат проверки
  */
+const bool anyks::Alphabet::isNumber(const string & word) const noexcept {
+	// Выполняем проверку
+	return this->isNumber(this->convert(word));
+}
+/**
+ * isNumber Метод проверки является ли слово числом
+ * @param  word слово для проверки
+ * @return      результат проверки
+ */
 const bool anyks::Alphabet::isNumber(const wstring & word) const noexcept {
 	// Результат работы функции
 	bool result = false;
@@ -940,6 +949,15 @@ const bool anyks::Alphabet::isNumber(const wstring & word) const noexcept {
 	}
 	// Выводим результат
 	return result;
+}
+/**
+ * isDecimal Метод проверки является ли слово дробным числом
+ * @param  word слово для проверки
+ * @return      результат проверки
+ */
+const bool anyks::Alphabet::isDecimal(const string & word) const noexcept {
+	// Выводим результат проверки
+	return this->isDecimal(this->convert(word));
 }
 /**
  * isDecimal Метод проверки является ли слово дробным числом
@@ -993,7 +1011,7 @@ const bool anyks::Alphabet::isANumber(const wstring & word) const noexcept {
 			// Длина слова
 			const size_t length = word.length();
 			// Проверяем являются ли первая и последняя буква слова, числом
-			result = (this->isNumber({word.front()}) || this->isNumber({word.back()}));
+			result = (this->isNumber(wstring(1, word.front())) || this->isNumber(wstring(1, word.back())));
 			// Если оба варианта не сработали
 			if(!result && (length > 2)){
 				// Первое слово
@@ -1003,7 +1021,7 @@ const bool anyks::Alphabet::isANumber(const wstring & word) const noexcept {
 					// Получаем первое слово
 					first.assign(1, word.at(i));
 					// Проверяем является ли слово арабским числом
-					result = (i == j ? this->isNumber(first) : this->isNumber(first) || this->isNumber({word[j]}));
+					result = (i == j ? this->isNumber(first) : this->isNumber(first) || this->isNumber(wstring(1, word[j])));
 					// Если хоть один символ является числом, выходим
 					if(result) break;
 				}
@@ -1220,7 +1238,7 @@ const bool anyks::Alphabet::check(const wchar_t letter) const noexcept {
 	// Результат проверки
 	if(letter > 0){
 		// Если это не число, тогда выполняем проверку
-		if(!(result = this->isNumber({letter}))){
+		if(!(result = this->isNumber(wstring(1, letter)))){
 			// Выполняем проверку буквы
 			result = (this->letters.count(letter) > 0);
 		}
@@ -1237,7 +1255,7 @@ const bool anyks::Alphabet::checkHome2(const wstring & word) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если слово передано, первая буква не является числом а последняя это число
-	if(!word.empty() && !this->isNumber({word.front()}) && this->isNumber({word.back()})){
+	if(!word.empty() && !this->isNumber(wstring(1, word.front())) && this->isNumber(wstring(1, word.back()))){
 		// Позиция дефиса в слове
 		size_t pos = 0;
 		// Ищим дефис в слове
@@ -1332,8 +1350,8 @@ const bool anyks::Alphabet::checkSimilars(const wstring & str) const noexcept {
 					// Выполняем проверку буквы
 					result = (
 						(letter != L'-') &&
-						!this->isNumber({letter}) &&
 						!this->isLatian({letter}) &&
+						!this->isNumber(wstring(1, letter)) &&
 						(this->letters.count(letter) > 0)
 					);
 				}
@@ -1625,7 +1643,9 @@ void anyks::Alphabet::add(const wchar_t letter) noexcept {
 	// Если буква передана и такой буквы еще нет
 	if((letter > 0) && (this->letters.count(letter) < 1)){
 		// Добавляем букву в список
-		if(!this->isNumber({letter}) && (this->allowedSymbols.count(letter) < 1)) this->letters.emplace(letter);
+		if(!this->isNumber(wstring(1, letter)) &&
+			(this->allowedSymbols.count(letter) < 1)
+		) this->letters.emplace(letter);
 	}
 }
 /**

@@ -173,9 +173,9 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 			// Получаем последний символ слова
 			const wchar_t second = word.back();
 			// Проверяем является ли первый символ числом
-			const bool frontNum = this->alphabet->isNumber({first});
+			const bool frontNum = this->alphabet->isNumber(wstring(1, first));
 			// Определяем является ли последний символ числом
-			const bool backNum = this->alphabet->isNumber({second});
+			const bool backNum = this->alphabet->isNumber(wstring(1, second));
 			// Если первый символ не является числом а второй является (+42, +22.84, -12, -15.64, -18,22, ~25, ~845.53, ~12,46, ±43, ±44.22)
 			if(!frontNum && backNum){
 				// Проверяем является ли первый символ (-/+ или ~)
@@ -482,27 +482,27 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 				else {
 					// Получаем символ токена в нижнем регистре
 					wchar_t letter = this->alphabet->toLower(token.front());
-					// Определяем тип символа
-					if(this->alphabet->isNumber({letter})) result = type_t::num;
 					// Если это математическая операция
-					else if(this->alphabet->isMath(letter)) result = type_t::math;
-					// Если это разрешённая буква алфавита
+					if(this->alphabet->isMath(letter)) result = type_t::math;
+					// Если - это разрешённая буква алфавита
 					else if(this->alphabet->check(letter)) result = type_t::allow;
-					// Если это символ пробела
+					// Если - это символ пробела
 					else if(this->alphabet->isSpace(letter)) result = type_t::space;
-					// Если это знак пунктуации
+					// Если - это знак пунктуации
 					else if(this->alphabet->isPunct(letter)) result = type_t::punct;
-					// Если это символ греческого алфавита
+					// Если - это символ греческого алфавита
 					else if(this->alphabet->isGreek(letter)) result = type_t::greek;
-					// Если это символ направления (стрелки)
+					// Если - это символ направления (стрелки)
 					else if(this->alphabet->isRoute(letter)) result = type_t::route;
-					// Если это спец-символ
+					// Если - это спец-символ
 					else if(this->alphabet->isSpecial(letter)) result = type_t::specl;
-					// Если это символ игральных карт
+					// Если - это символ игральных карт
 					else if(this->alphabet->isPlayCards(letter)) result = type_t::pcards;
-					// Если это символ мировой валюты
+					// Если - это символ мировой валюты
 					else if(this->alphabet->isCurrency(letter)) result = type_t::currency;
-					// Если это изоляционный символ
+					// Если - это арабское число
+					else if(this->alphabet->isNumber(wstring(1, letter))) result = type_t::num;
+					// Если - это изоляционный символ
 					else if(this->alphabet->isIsolation(letter)) {
 						// Определяем тип изоляционных знаков
 						const u_short type = (
@@ -726,27 +726,27 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 				else {
 					// Получаем символ токена в нижнем регистре
 					wchar_t letter = this->alphabet->toLower(token.front());
-					// Определяем тип символа
-					if(this->alphabet->isNumber({letter})) result = type_t::num;
-					// Если это математическая операция
-					else if(this->alphabet->isMath(letter)) result = type_t::math;
-					// Если это разрешённая буква алфавита
+					// Если - это математическая операция
+					if(this->alphabet->isMath(letter)) result = type_t::math;
+					// Если - это разрешённая буква алфавита
 					else if(this->alphabet->check(letter)) result = type_t::allow;
-					// Если это символ пробела
+					// Если - это символ пробела
 					else if(this->alphabet->isSpace(letter)) result = type_t::space;
-					// Если это знак пунктуации
+					// Если - это знак пунктуации
 					else if(this->alphabet->isPunct(letter)) result = type_t::punct;
-					// Если это символ греческого алфавита
+					// Если - это символ греческого алфавита
 					else if(this->alphabet->isGreek(letter)) result = type_t::greek;
-					// Если это символ направления (стрелки)
+					// Если - это символ направления (стрелки)
 					else if(this->alphabet->isRoute(letter)) result = type_t::route;
-					// Если это спец-символ
+					// Если - это спец-символ
 					else if(this->alphabet->isSpecial(letter)) result = type_t::specl;
-					// Если это символ игральных карт
+					// Если - это символ игральных карт
 					else if(this->alphabet->isPlayCards(letter)) result = type_t::pcards;
-					// Если это символ мировой валюты
+					// Если - это символ мировой валюты
 					else if(this->alphabet->isCurrency(letter)) result = type_t::currency;
-					// Если это изоляционный символ
+					// Если - это арабское число
+					else if(this->alphabet->isNumber(wstring(1, letter))) result = type_t::num;
+					// Если - это изоляционный символ
 					else if(this->alphabet->isIsolation(letter)) {
 						// Определяем тип изоляционных знаков
 						const u_short type = (
@@ -1154,10 +1154,10 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 					else if(this->alphabet->isPlayCards(next)) type = type_t::pcards;
 					// Если это символ мировой валюты
 					else if(this->alphabet->isCurrency(next)) type = type_t::currency;
-					// Если следующий символ является числом
-					else if(this->alphabet->isNumber({next})) type = type_t::num;
 					// Если следующий символ является символом изоляции
 					else if(this->alphabet->isIsolation(next)) type = type_t::isolat;
+					// Если следующий символ является числом
+					else if(this->alphabet->isNumber(wstring(1, next))) type = type_t::num;
 					// Если следующий символ является разрешённым
 					else if(this->alphabet->check(next)) type = type_t::allow;
 					// Иначе зануляем следующий тип
