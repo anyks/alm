@@ -235,6 +235,33 @@ const size_t anyks::Toolkit::getIdw(const wstring & word, const bool check) cons
 	return result;
 }
 /**
+ * parseAbbr Метод извлечения суффикса из цифровой аббревиатуры
+ * @param idw  идентификатор обрабатываемого слова
+ * @param word слово для извлечения суффикса аббревиатуры
+ */
+void anyks::Toolkit::parseAbbr(const size_t idw, const wstring & word) noexcept {
+	// Если слово передано и оно является аббревиатурой
+	if((idw == size_t(token_t::abbr)) && !word.empty() && (word.back() != L'-')){
+		// Если проверка пройедна
+		if(this->alphabet->isNumber(wstring(1, word.front())) && !this->alphabet->isNumber(wstring(1, word.back()))){
+			// Выполняем поиск дефиса
+			const size_t pos = word.rfind(L'-');
+			// Если дефис найден
+			if(pos != wstring::npos){
+				// Получаем новое слово
+				const wstring & suffix = word.substr(pos + 1);
+				// Если данные слова соответствуют
+				if(this->alphabet->check(suffix) && this->alphabet->isNumber(word.substr(0, pos))){
+					// Получаем идентификатор слова
+					const size_t idw = this->tokenizer->idw(suffix);
+					// Если идентификатор получен
+					if(idw > 0) this->abbreviations.emplace(idw);
+				}
+			}
+		}
+	}
+}
+/**
  * clearShielding Функция удаления экранирования
  * @param word  слово в котором следует удалить экранирование
  * @param front первый символ экранирования
@@ -347,6 +374,14 @@ const set <size_t> & anyks::Toolkit::getBadwords() const noexcept {
 const set <size_t> & anyks::Toolkit::getGoodwords() const noexcept {
 	// Выводим результат
 	return this->goodwords;
+}
+/**
+ * getAbbreviations Метод извлечения списка суффиксов цифровых аббревиатур
+ * @return список цифровых аббревиатур
+ */
+const set <size_t> & anyks::Toolkit::getAbbreviations() const noexcept {
+	// Выводим результат
+	return this->abbreviations;
 }
 /**
  * getTokensUnknown Метод извлечения списка токенов приводимых к <unk>
@@ -998,6 +1033,8 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 					const size_t idw = this->getIdw(tmp);
 					// Выполняем проверку на плохое слово
 					const bool isBad = (this->badwords.count(idw) > 0);
+					// Выполняем парсинг суффиксов цифровой аббревиатуры
+					this->parseAbbr(idw, tmp);
 					// Если это плохое слово, заменяем его на неизвестное
 					if((isBad || (idw == 0) || (idw == idw_t::NIDW)) && !unkFn()) return true;
 					// Иначе продолжаем дальше

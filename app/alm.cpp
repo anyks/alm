@@ -146,6 +146,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-arpa <value> | --w-arpa=<value>]                                         file address arpa of \x1B[1m*.arpa\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-vocab <value> | --w-vocab=<value>]                                       file address vocab of \x1B[1m*.vocab\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-words <value> | --w-words=<value>]                                       file address words of \x1B[1m*.txt\x1B[0m for export\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-w-abbrs <value> | --w-abbrs=<value>]                                       file address abbrs of \x1B[1m*.txt\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-ngram <value> | --w-ngram=<value>]                                       file address ngrams of \x1B[1m*.ngrams\x1B[0m for export\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-oovfile <value> | --w-oovfile=<value>]                                   file address OOVs of \x1B[1m*.txt\x1B[0m for export oov words\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-json <value> | --w-json=<value>]                                         file address json data of \x1B[1m*.json\x1B[0m for export\r\n"
@@ -2356,6 +2357,66 @@ int main(int argc, char * argv[]) noexcept {
 				}
 			// Выводим сообщение, что файлы не переданы
 			} else print("arpa file is not loaded\r\n", env.get("log"));
+			// Если адрес файла списка суффиксов цифровых аббревиатур получен
+			if((value = env.get("w-abbrs")) != nullptr){
+				// Открываем файл на запись
+				ofstream file(value, ios::binary);
+				// Если файл открыт, выполняем запись в файл результата
+				if(file.is_open()){
+					// Получаем список суффиксов цифровых аббревиатур
+					const auto & abbrs = toolkit.getAbbreviations();
+					// Если список суффиксов цифровых аббревиатур получен
+					if(!abbrs.empty()){
+						// Параметры индикаторы процесса
+						size_t index = 0, status = 0, rate = 0;
+						// Если отладка включена, выводим индикатор загрузки
+						if(debug > 0){
+							// Очищаем предыдущий прогресс-бар
+							pss.clear();
+							// Устанавливаем название файла
+							pss.description(value);
+							// Устанавливаем заголовки прогресс-бара
+							pss.title("Write abbrs", "Write abbrs is done");
+							// Выводим индикатор прогресс-бара
+							switch(debug){
+								case 1: pss.update(); break;
+								case 2: pss.status(); break;
+							}
+						}
+						// Переходим по всему списку аббревиатур
+						for(auto & abbr : abbrs){
+							// Создаём текст для записи
+							const string & text = alphabet.format("%zu\r\n", abbr);
+							// Выполняем запись данных в файл
+							file.write(text.data(), text.size());
+							// Если отладка включена
+							if(debug > 0){
+								// Общий полученный размер данных
+								index++;
+								// Подсчитываем статус выполнения
+								status = u_short(index / double(abbrs.size()) * 100.0);
+								// Если процентное соотношение изменилось
+								if(rate != status){
+									// Запоминаем текущее процентное соотношение
+									rate = status;
+									// Отображаем ход процесса
+									switch(debug){
+										case 1: pss.update(status); break;
+										case 2: pss.status(status); break;
+									}
+								}
+							}
+						}
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(100); break;
+							case 2: pss.status(100); break;
+						}
+					}
+					// Закрываем файл
+					file.close();
+				}
+			}
 			// Если файл для сохранения конфигурационных данных передан
 			if((value = env.get("w-json")) != nullptr){
 				// Открываем файл на запись
