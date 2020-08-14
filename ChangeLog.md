@@ -5,6 +5,8 @@
 - **check** - text validation method with a specified step of n-gram size
 ### Params
 - step size n-grams of language model
+- file address abbrs of *.abbr for export
+- file address abbrs of *.abbr or dir path for import
 
 ## [3.2.6](https://github.com/anyks/alm/archive/v3.2.6.tar.gz) Other optimization
 
