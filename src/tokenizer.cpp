@@ -112,6 +112,22 @@ const bool anyks::Tokenizer::isToken(const size_t idw) const noexcept {
 }
 /**
  * isAbbr Метод проверки слова на соответствие аббревиатуры
+ * @param idw идентификатор слова для проверки
+ * @return    результат проверки
+ */
+const bool anyks::Tokenizer::isAbbr(const size_t idw) const noexcept {
+		// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if((idw > 0) && (idw != idw_t::NIDW) && !this->abbrs.empty()){
+		// Выполняем проверку сущестования аббревиатуры
+		result = (this->abbrs.count(idw) > 0);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * isAbbr Метод проверки слова на соответствие аббревиатуры
  * @param  word слово для проверки
  * @return      результат проверки
  */
@@ -120,23 +136,18 @@ const bool anyks::Tokenizer::isAbbr(const wstring & word) const noexcept {
 	bool result = false;
 	// Если слово передано
 	if(!word.empty() && !this->abbrs.empty()){
-		// Позиция точки в слове
-		size_t pos = 0;
-		// Слово для проверки
-		wstring tmp = L"";
-		// Выполняем поиск точки
-		if((pos = word.find(L'.')) != wstring::npos){
-			// Обрезаем слово до точки
-			tmp = word.substr(0, pos);
-		// Иначе запоминаем слово как оно есть
-		} else tmp = move(word);
-		// Если слово не пустое
-		if(!tmp.empty()){
+		// Идентификатор слова
+		size_t idw = idw_t::NIDW;
+		// Если последний символ является точкой
+		if(word.back() == L'.'){
+			// Получаем слово для провеки
+			const wstring tmp(word.begin(), word.end() - 1);
 			// Получаем идентификатор слова
-			const size_t idw = this->idw(tmp);
-			// Выполняем проверку сущестования аббревиатуры
-			result = (this->abbrs.count(idw) > 0);
-		}
+			idw = this->idw(tmp);
+		// Если точка в слове не найдена
+		} else idw = this->idw(word);
+		// Выполняем проверку сущестования аббревиатуры
+		result = (this->abbrs.count(idw) > 0);
 	}
 	// Выводим результат
 	return result;

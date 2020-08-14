@@ -138,6 +138,12 @@ namespace anyks {
 			const bool isToken(const size_t idw) const noexcept;
 			/**
 			 * isAbbr Метод проверки слова на соответствие аббревиатуры
+			 * @param idw идентификатор слова для проверки
+			 * @return    результат проверки
+			 */
+			const bool isAbbr(const size_t idw) const noexcept;
+			/**
+			 * isAbbr Метод проверки слова на соответствие аббревиатуры
 			 * @param  word слово для проверки
 			 * @return      результат проверки
 			 */
