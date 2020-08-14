@@ -247,16 +247,20 @@ void anyks::Toolkit::parseAbbr(const size_t idw, const wstring & word) noexcept 
 			// Выполняем поиск дефиса
 			const size_t pos = word.rfind(L'-');
 			// Если дефис найден
-			if(pos != wstring::npos){
+			if((pos != wstring::npos) && this->alphabet->isNumber(word.substr(0, pos))){
 				// Получаем новое слово
 				const wstring & suffix = word.substr(pos + 1);
-				// Если данные слова соответствуют
-				if(this->alphabet->check(suffix) && this->alphabet->isNumber(word.substr(0, pos))){
-					// Получаем идентификатор слова
-					const size_t idw = this->tokenizer->idw(suffix);
-					// Если идентификатор получен
-					if(idw > 0) this->abbreviations.emplace(idw);
+				// Получаем установленный алфавит
+				const wstring & alphabet = this->alphabet->wget();
+				// Выполняем проверку на соответствие символов
+				for(auto & letter : suffix){
+					// Если буква не соответствует алфавиту, выходим
+					if(alphabet.find(letter) == wstring::npos) return;
 				}
+				// Получаем идентификатор слова
+				const size_t idw = this->tokenizer->idw(suffix);
+				// Если идентификатор получен
+				if(idw > 0) this->abbreviations.emplace(idw);
 			}
 		}
 	}
