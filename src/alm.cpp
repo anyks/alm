@@ -1779,11 +1779,14 @@ void anyks::Alm::readSuffix(const string & filename, function <void (const strin
 		auto parseFn = [&](const string & text, const string & filename, const uintmax_t size) noexcept {
 			// Если текст передан
 			if(!text.empty()){
+				// Идентификатор суффикса цифровой аббревиатуры
+				size_t idw = idw_t::NIDW;
 				// Если текст является числом
-				if(this->alphabet->isNumber(text)){
-					// Добавляем идентификатор аббревиатуры в токенизатор
-					const_cast <tokenizer_t *> (this->tokenizer)->setSuffix(stoull(text));
-				}
+				if(this->alphabet->isNumber(text)) idw = stoull(text);
+				// Если текст числом не является, получаем его идентификатор
+				else idw = this->tokenizer->idw(this->alphabet->convert(text));
+				// Добавляем идентификатор аббревиатуры в токенизатор
+				if((idw > 0) && (idw != idw_t::NIDW)) const_cast <tokenizer_t *> (this->tokenizer)->setSuffix(idw);
 				// Если функция вывода статуса передана
 				if(status != nullptr){
 					// Увеличиваем количество записанных n-грамм
