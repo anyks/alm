@@ -964,9 +964,9 @@ void anyks::Alm::setBin(const vector <char> & buffer) const noexcept {
  * getBin Метод извлечения данных arpa в бинарном виде
  * @param callback функция обратного вызова
  */
-void anyks::Alm::getBin(function <void (const vector <char> &, const u_short)> callback) const noexcept {
+void anyks::Alm::getBin(function <void (const vector <char> &, const size_t, const u_short)> callback) const noexcept {
 	// Выводим результат
-	callback({}, 100);
+	callback({}, 0, 100);
 }
 /**
  * clear Метод очистки всех данных

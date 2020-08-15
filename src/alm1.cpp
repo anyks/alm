@@ -715,27 +715,29 @@ void anyks::Alm1::setBin(const vector <char> & buffer) const noexcept {
  * getBin Метод извлечения данных arpa в бинарном виде
  * @param callback функция обратного вызова
  */
-void anyks::Alm1::getBin(function <void (const vector <char> &, const u_short)> callback) const noexcept {
+void anyks::Alm1::getBin(function <void (const vector <char> &, const size_t, const u_short)> callback) const noexcept {
 	// Если данные загружены
 	if(!this->arpa.empty()){
 		// Данные последовательности
 		seq_t sequence;
-		// Индекс обработки статуса
-		size_t index = 0;
 		// Собранная последовательность
 		vector <seq_t> seq;
 		// Буфер данных n-граммы
 		vector <char> buffer;
+		// Индекс обработки статуса и количество обработанных N-грамм
+		size_t index = 0, countNgrams = 0;
 		/**
 		 * resultFn Метод формирования результата
 		 * @param index индекс обработанного буфера
 		 * @param seq   список собранной последовательности
 		 */
-		auto resultFn = [&buffer, &callback, this](const size_t index, const vector <seq_t> & seq) noexcept {
+		auto resultFn = [&buffer, &countNgrams, &callback, this](const size_t index, const vector <seq_t> & seq) noexcept {
 			// Если последовательность не пустая
 			if(!seq.empty()){
 				// Получаем количество n-грамм в списке
 				u_short count = seq.size();
+				// Увеличиваем количество обработанных N-грамм
+				if(count == this->size) countNgrams++;
 				// Получаем бинарные данные количества слов
 				const char * bin = reinterpret_cast <const char *> (&count);
 				// Добавляем в буфер количество слов
@@ -750,7 +752,7 @@ void anyks::Alm1::getBin(function <void (const vector <char> &, const u_short)> 
 				// Если буфер имеет размер в 100Mb
 				if(buffer.size() >= BUFFER_SIZE){
 					// Выводим собранную последовательность
-					callback(buffer, u_short(index / double(this->arpa.size()) * 100.0));
+					callback(buffer, countNgrams, u_short(index / double(this->arpa.size()) * 100.0));
 					// Очищаем полученный буфер n-граммы
 					buffer.clear();
 				}
@@ -792,14 +794,14 @@ void anyks::Alm1::getBin(function <void (const vector <char> &, const u_short)> 
 		// Если буфер не пустой
 		if(!buffer.empty()){
 			// Выводим собранную последовательность
-			callback(buffer, u_short(index / double(this->arpa.size()) * 100.0));
+			callback(buffer, countNgrams, u_short(index / double(this->arpa.size()) * 100.0));
 			// Очищаем полученный буфер n-граммы
 			buffer.clear();
 			// Освобождаем выделенную память
 			vector <char> ().swap(buffer);
 		}
 	// Выводим пустой результат
-	} else callback({}, 0);
+	} else callback({}, 0, 0);
 }
 /**
  * sentences Метод генерации предложений

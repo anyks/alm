@@ -367,7 +367,7 @@ namespace anyks {
 			 * getBin Метод извлечения данных arpa в бинарном виде
 			 * @param callback функция обратного вызова
 			 */
-			virtual void getBin(function <void (const vector <char> &, const u_short)> callback) const noexcept;
+			virtual void getBin(function <void (const vector <char> &, const size_t, const u_short)> callback) const noexcept;
 		public:
 			/**
 			 * clear Метод очистки всех данных
@@ -901,7 +901,7 @@ namespace anyks {
 			 * getBin Метод извлечения данных arpa в бинарном виде
 			 * @param callback функция обратного вызова
 			 */
-			virtual void getBin(function <void (const vector <char> &, const u_short)> callback) const noexcept;
+			virtual void getBin(function <void (const vector <char> &, const size_t, const u_short)> callback) const noexcept;
 		public:
 			/**
 			 * sentences Метод генерации предложений
@@ -1061,7 +1061,7 @@ namespace anyks {
 			 * getBin Метод извлечения данных arpa в бинарном виде
 			 * @param callback функция обратного вызова
 			 */
-			void getBin(function <void (const vector <char> &, const u_short)> callback) const noexcept;
+			void getBin(function <void (const vector <char> &, const size_t, const u_short)> callback) const noexcept;
 		public:
 			/**
 			 * sentences Метод генерации предложений

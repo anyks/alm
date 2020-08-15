@@ -725,7 +725,7 @@ void anyks::Alm2::setBin2(const vector <char> & buffer) const noexcept {
  * getBin Метод извлечения данных arpa в бинарном виде
  * @param callback функция обратного вызова
  */
-void anyks::Alm2::getBin(function <void (const vector <char> &, const u_short)> callback) const noexcept {
+void anyks::Alm2::getBin(function <void (const vector <char> &, const size_t, const u_short)> callback) const noexcept {
 	// Если данные загружены
 	if(!this->arpa.empty()){
 		// Буфер данных n-граммы
@@ -735,7 +735,7 @@ void anyks::Alm2::getBin(function <void (const vector <char> &, const u_short)> 
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
 		// Количество всех записей N-грамм
-		size_t count = 0, size = 0, index = 0;
+		size_t count = 0, size = 0, index = 0, countNgrams = 0;
 		// Переходим по всему списку N-грамм
 		for(auto & item : this->arpa){
 			// Увеличиваем количество N-грамм
@@ -765,6 +765,8 @@ void anyks::Alm2::getBin(function <void (const vector <char> &, const u_short)> 
 				buffer.insert(buffer.end(), bin, bin + sizeof(value.second));
 				// Увеличиваем значение индекса
 				index++;
+				// Увеличиваем количество обработанных N-грамм
+				if(item.first == this->size) countNgrams++;
 				// Выполняем расчёт текущего статуса
 				actual = u_short(index / double(count) * 100.0);
 				// Если статус обновился
@@ -772,16 +774,20 @@ void anyks::Alm2::getBin(function <void (const vector <char> &, const u_short)> 
 					// Запоминаем текущий статус
 					past = actual;
 					// Выводим статус извлечения
-					callback({}, actual);
+					callback({}, countNgrams, actual);
 				}
 			}
 			// Выводим результат
-			callback(buffer, actual);
+			callback(buffer, countNgrams, actual);
 			// Очищаем буфер данных
 			buffer.clear();
 		}
+		// Очищаем полученный буфер n-граммы
+		buffer.clear();
+		// Освобождаем выделенную память
+		vector <char> ().swap(buffer);
 	// Выводим пустой результат
-	} else callback({}, 0);
+	} else callback({}, 0, 0);
 }
 /**
  * sentences Метод генерации предложений
