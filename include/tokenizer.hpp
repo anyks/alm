@@ -181,6 +181,12 @@ namespace anyks {
 			 * @return      результат проверки
 			 */
 			const bool isAbbr(const wstring & word) const noexcept;
+			/**
+			 * isSuffix Метод проверки слова на суффикс цифровой аббревиатуры
+			 * @param  word слово для проверки
+			 * @return      результат проверки
+			 */
+			const bool isSuffix(const wstring & word) const noexcept;
 		public:
 			/**
 			 * idt Метод извлечения идентификатора токена

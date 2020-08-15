@@ -242,6 +242,32 @@ const bool anyks::Tokenizer::isAbbr(const wstring & word) const noexcept {
 	return result;
 }
 /**
+ * isSuffix Метод проверки слова на суффикс цифровой аббревиатуры
+ * @param  word слово для проверки
+ * @return      результат проверки
+ */
+const bool anyks::Tokenizer::isSuffix(const wstring & word) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если слово передано
+	if(!word.empty() && !this->suffix.empty()){
+		// Если проверка пройедна
+		if(this->alphabet->isNumber(wstring(1, word.front())) && !this->alphabet->isNumber(wstring(1, word.back()))){
+			// Выполняем поиск дефиса
+			const size_t pos = word.rfind(L'-');
+			// Если дефис найден
+			if((pos != wstring::npos) && this->alphabet->isNumber(word.substr(0, pos))){
+				// Получаем идентификатор слова
+				const size_t idw = this->idw(word.substr(pos + 1));
+				// Если идентификатор получен
+				if(idw > 0) result = (this->suffix.count(idw) > 0);
+			}
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * idt Метод извлечения идентификатора токена
  * @param  word слово для получения идентификатора
  * @return      идентификатор токена
