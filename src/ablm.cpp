@@ -47,7 +47,7 @@ const bool anyks::AbLM::write(function <void (const u_short)> status) noexcept {
 	// Устанавливаем неизвестное слово если есть
 	this->aspl->set("unknown", this->toolkit->getUnknown());
 	// Устанавливаем список суффиксов цифровых аббревиатур
-	this->aspl->setValues("abbrs-idw", this->toolkit->getAbbreviations());
+	this->aspl->setValues("abbrs-idw", this->tokenizer->getSuffix());
 	// Устанавливаем список токенов приводимых к <unk>
 	this->aspl->setValues("tokensUnknown", this->toolkit->getTokensUnknown());
 	// Устанавливаем список запрещённых токенов
@@ -371,7 +371,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status, const bo
 				// Устанавливаем список суффиксов цифровых аббревиатур
 				this->aspl->getValues("abbrs-idw", abbrs);
 				// Если список аббревиатур загружен
-				if(!abbrs.empty()) this->alm->setAbbreviations(abbrs);
+				if(!abbrs.empty()) this->tokenizer->setSuffix(abbrs);
 				// Если нужно вывести статистику загрузки
 				if(status != nullptr){
 					// Увеличиваем количество блоков
@@ -772,6 +772,24 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status, cons
 					// Выходим из функции
 					return result;
 				}
+				// Если нужно вывести статистику загрузки
+				if(status != nullptr){
+					// Увеличиваем количество блоков
+					index++;
+					// Выводим результат если необходимо
+					status(u_short(index / double(count) * 100.0));
+				}
+			}
+			/**
+			 * Блок извлечения списков суффиксов цифровых аббревиатур
+			 */
+			{
+				// Список суффиксов цифровых аббревиатур
+				std::set <size_t> abbrs;
+				// Устанавливаем список суффиксов цифровых аббревиатур
+				this->aspl->getValues("abbrs-idw", abbrs);
+				// Если список аббревиатур загружен
+				if(!abbrs.empty()) this->tokenizer->setSuffix(abbrs);
 				// Если нужно вывести статистику загрузки
 				if(status != nullptr){
 					// Увеличиваем количество блоков

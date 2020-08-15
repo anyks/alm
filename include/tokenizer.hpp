@@ -75,12 +75,15 @@ namespace anyks {
 			// Тип функции внешнего токенизатора
 			typedef function <void (const wstring &, function <const bool (const wstring &, const vector <string> &, const bool, const bool)>)> tokenz_t;
 		private:
-			// Разрешение использовать символы ударения
-			bool stress;
 			// Объект идентификатора
 			idw_t wrdId;
-			// Список аббревиатур
-			set <size_t> abbrs;
+			/*
+			 * Разрешение использовать символы ударения и 
+			 * разрешаем сборку суффиксов цифровых аббревиатур
+			 */
+			bool stress, collect;
+			// Списки суффиксов цифровых и буквенных аббревиатур
+			mutable set <size_t> abbrs, suffix;
 		private:
 			// Внешняя функция токенизатора
 			tokenz_t extFn;
@@ -95,6 +98,14 @@ namespace anyks {
 			 * disallowStress Метод запрещения использовать ударение в словах
 			 */
 			void disallowStress() noexcept;
+			/**
+			 * allowCollectSuffix Метод разрешения сборки суффиксов цифровых аббревиатур
+			 */
+			void allowCollectSuffix() noexcept;
+			/**
+			 * disallowCollectSuffix Метод запрещения сборки суффиксов цифровых аббревиатур
+			 */
+			void disallowCollectSuffix() noexcept;
 			/**
 			 * setAbbr Метод добавления аббревиатуры
 			 * @param word слово для добавления
@@ -117,10 +128,32 @@ namespace anyks {
 			void setAlphabet(const alphabet_t * alphabet) noexcept;
 		public:
 			/**
+			 * setSuffix Метод установки суффикса цифровой аббревиатуры
+			 * @param idw идентификатор суффикса цифровой аббревиатуры
+			 */
+			void setSuffix(const size_t idw) const noexcept;
+			/**
+			 * setSuffix Метод установки списка суффиксов цифровых аббревиатур
+			 * @param suffix список суффиксов цифровых аббревиатур
+			 */
+			void setSuffix(const set <size_t> & suffix) const noexcept;
+			/**
+			 * setSuffix Метод извлечения суффикса из цифровой аббревиатуры
+			 * @param word слово для извлечения суффикса аббревиатуры
+			 * @param idw  идентификатор обрабатываемого слова
+			 */
+			void setSuffix(const wstring & word, const size_t idw = idw_t::NIDW) const noexcept;
+		public:
+			/**
 			 * getAbbrs Метод извлечения списка аббревиатур
 			 * @return список аббревиатур
 			 */
 			const set <size_t> & getAbbrs() const noexcept;
+			/**
+			 * getSuffix Метод извлечения списка суффиксов цифровых аббревиатур
+			 * @return список цифровых аббревиатур
+			 */
+			const set <size_t> & getSuffix() const noexcept;
 		public:
 			/**
 			 * fti Метод удаления дробной части числа

@@ -23,6 +23,20 @@ void anyks::Tokenizer::disallowStress() noexcept {
 	this->stress = false;
 }
 /**
+ * allowCollectSuffix Метод разрешения сборки суффиксов цифровых аббревиатур
+ */
+void anyks::Tokenizer::allowCollectSuffix() noexcept {
+	// Разрешаем сборку суффиксов цифровых аббревиатур
+	this->collect = true;
+}
+/**
+ * disallowCollectSuffix Метод запрещения сборки суффиксов цифровых аббревиатур
+ */
+void anyks::Tokenizer::disallowCollectSuffix() noexcept {
+	// Запрещаем сборку суффиксов цифровых аббревиатур
+	this->collect = false;
+}
+/**
  * setAbbr Метод добавления аббревиатуры
  * @param word слово для добавления
  */
@@ -57,12 +71,69 @@ void anyks::Tokenizer::setAlphabet(const alphabet_t * alphabet) noexcept {
 	this->update();
 }
 /**
+ * setSuffix Метод установки суффикса цифровой аббревиатуры
+ * @param idw идентификатор суффикса цифровой аббревиатуры
+ */
+void anyks::Tokenizer::setSuffix(const size_t idw) const noexcept {
+	// Если суффикс передан
+	if(idw > 0) this->suffix.emplace(idw);
+}
+/**
+ * setSuffix Метод установки списка суффиксов цифровых аббревиатур
+ * @param suffix список суффиксов цифровых аббревиатур
+ */
+void anyks::Tokenizer::setSuffix(const set <size_t> & suffix) const noexcept {
+	// Если список аббревиатур передан
+	if(!suffix.empty()) this->suffix = suffix;
+}
+/**
+ * setSuffix Метод извлечения суффикса из цифровой аббревиатуры
+ * @param word слово для извлечения суффикса аббревиатуры
+ * @param idw  идентификатор обрабатываемого слова
+ */
+void anyks::Tokenizer::setSuffix(const wstring & word, const size_t idw) const noexcept {
+	// Если слово передано и оно является аббревиатурой
+	if(!word.empty() && (word.back() != L'-')){
+		// Если проверка пройедна
+		if(((idw == idw_t::NIDW) || (idw == size_t(token_t::abbr))) &&
+		this->alphabet->isNumber(wstring(1, word.front())) &&
+		!this->alphabet->isNumber(wstring(1, word.back()))){
+			// Выполняем поиск дефиса
+			const size_t pos = word.rfind(L'-');
+			// Если дефис найден
+			if((pos != wstring::npos) && this->alphabet->isNumber(word.substr(0, pos))){
+				// Получаем новое слово
+				const wstring & suffix = word.substr(pos + 1);
+				// Получаем установленный алфавит
+				const wstring & alphabet = this->alphabet->wget();
+				// Выполняем проверку на соответствие символов
+				for(auto & letter : suffix){
+					// Если буква не соответствует алфавиту, выходим
+					if(alphabet.find(letter) == wstring::npos) return;
+				}
+				// Получаем идентификатор слова
+				const size_t idw = this->idw(suffix);
+				// Если идентификатор получен
+				if(idw > 0) this->suffix.emplace(idw);
+			}
+		}
+	}
+}
+/**
  * getAbbrs Метод извлечения списка аббревиатур
  * @return список аббревиатур
  */
 const set <size_t> & anyks::Tokenizer::getAbbrs() const noexcept {
 	// Выводим список аббревиатур
 	return this->abbrs;
+}
+/**
+ * getSuffix Метод извлечения списка суффиксов цифровых аббревиатур
+ * @return список цифровых аббревиатур
+ */
+const set <size_t> & anyks::Tokenizer::getSuffix() const noexcept {
+	// Выводим список суффиксов цифровых аббревиатур
+	return this->suffix;
 }
 /**
  * fti Метод удаления дробной части числа
@@ -135,19 +206,37 @@ const bool anyks::Tokenizer::isAbbr(const wstring & word) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если слово передано
-	if(!word.empty() && !this->abbrs.empty()){
-		// Идентификатор слова
-		size_t idw = idw_t::NIDW;
-		// Если последний символ является точкой
-		if(word.back() == L'.'){
-			// Получаем слово для провеки
-			const wstring tmp(word.begin(), word.end() - 1);
-			// Получаем идентификатор слова
-			idw = this->idw(tmp);
-		// Если точка в слове не найдена
-		} else idw = this->idw(word);
-		// Выполняем проверку сущестования аббревиатуры
-		result = (this->abbrs.count(idw) > 0);
+	if(!word.empty()){
+		// Если проверка пройедна
+		if(this->alphabet->isNumber(wstring(1, word.front())) && !this->alphabet->isNumber(wstring(1, word.back()))){
+			// Если список суффиксов цифровых аббревиатур передан
+			if(!this->collect && !this->suffix.empty()){
+				// Выполняем поиск дефиса
+				const size_t pos = word.rfind(L'-');
+				// Если дефис найден
+				if((pos != wstring::npos) && this->alphabet->isNumber(word.substr(0, pos))){
+					// Получаем идентификатор слова
+					const size_t idw = this->idw(word.substr(pos + 1));
+					// Если идентификатор получен
+					if(idw > 0) result = (this->suffix.count(idw) > 0);
+				}
+			// Иначе проверяем на аббревиатуру с помощью алфавита
+			} else result = this->alphabet->isAbbr(word);
+		// Если список буквенных аббревиатур передан
+		} else if(!this->abbrs.empty()){
+			// Идентификатор слова
+			size_t idw = idw_t::NIDW;
+			// Если последний символ является точкой
+			if(word.back() == L'.'){
+				// Получаем слово для провеки
+				const wstring tmp(word.begin(), word.end() - 1);
+				// Получаем идентификатор слова
+				idw = this->idw(tmp);
+			// Если точка в слове не найдена
+			} else idw = this->idw(word);
+			// Выполняем проверку сущестования аббревиатуры
+			result = (this->abbrs.count(idw) > 0);
+		}
 	}
 	// Выводим результат
 	return result;
@@ -235,7 +324,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 					// Сообщаем что это псевдо-число
 					else result = token_t::anum;
 				// Если это аббревиатура, запоминаем тип токена
-				} else if(this->alphabet->isAbbr(word))
+				} else if(this->isAbbr(word))
 					// Запоминаем что это аббревиатура
 					result = token_t::abbr;
 				// Иначе - это просто, псевдо-число
@@ -333,16 +422,14 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 				} else {
 					// Переводим слово в нижний регистр
 					const wstring & tmp = this->alphabet->toLower(word);
-					// Запоминаем что это число
-					if(this->alphabet->roman2Arabic(tmp) > 0) result = token_t::num;
-					// Если это аббревиатура
-					else if(this->alphabet->isAbbr(tmp)) result = token_t::abbr;
+					// Если - это аббревиатура
+					if(this->isAbbr(tmp)) result = token_t::abbr;
 					// Проверяем, является ли слово url-адресом
 					else if(this->alphabet->isUrl(tmp)) result = token_t::url;
 					// Определяем является ли слово, псевдо-числом
 					else if(this->alphabet->isANumber(tmp)) result = token_t::anum;
-					// Проверяем является ли слово аббревиатурой
-					else if(this->isAbbr(tmp)) result = token_t::abbr;
+					// Запоминаем что это число
+					else if(this->alphabet->roman2Arabic(tmp) > 0) result = token_t::num;
 				}
 			}
 		// Если это число то выводим токен числа
@@ -921,6 +1008,12 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 void anyks::Tokenizer::clear() noexcept {
 	// Очищаем список аббревиатур
 	this->abbrs.clear();
+	// Очищаем список суффиксов цифровых аббревиатур
+	this->suffix.clear();
+	// Сбрасываем флаг ударений
+	this->stress = false;
+	// Сбрасываем флаг сборки цифровых аббревиатур
+	this->collect = false;
 }
 /**
  * update Метод обновления параметров
@@ -1086,7 +1179,9 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 			 * @param end  конец обработки текста
 			 * @return     нужно ли завершить работу
 			 */
-			auto callbackFn = [&begin, &context, &callback](const wstring & word, const bool end) noexcept {
+			auto callbackFn = [&begin, &context, &callback, this](const wstring & word, const bool end) noexcept {
+				// Выполняем сборку суффиксов цифровых аббревиатур
+				if(this->collect) this->setSuffix(word);
 				// Отдаём результат
 				const bool result = callback(word, context, begin && context.empty(), end);
 				// Запоминаем что работа началась
@@ -1489,7 +1584,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
  * Tokenizer Конструктор
  * @param alphabet объект алфавита
  */
-anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : stress(false), extFn(nullptr), alphabet(alphabet) {
+anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : stress(false), collect(false), extFn(nullptr), alphabet(alphabet) {
 	// Устанавливаем лафавит
 	if(alphabet != nullptr) this->setAlphabet(alphabet);
 }

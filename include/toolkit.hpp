@@ -130,8 +130,6 @@ namespace anyks {
 			set <size_t> goodwords;
 			// Мютекс блокировки потока
 			recursive_mutex locker;
-			// Список суффиксов цифровых аббревиатур
-			set <size_t> abbreviations;
 			// Список токенов приводимых к <unk>
 			set <token_t> tokenUnknown;
 			// Список запрещённых токенов
@@ -176,12 +174,6 @@ namespace anyks {
 			 */
 			const size_t getIdw(const wstring & word, const bool check = true) const noexcept;
 		public:
-			/**
-			 * parseAbbr Метод извлечения суффикса из цифровой аббревиатуры
-			 * @param idw  идентификатор обрабатываемого слова
-			 * @param word слово для извлечения суффикса аббревиатуры
-			 */
-			void parseAbbr(const size_t idw, const wstring & word) noexcept;
 			/**
 			 * clearShielding Функция удаления экранирования
 			 * @param word  слово в котором следует удалить экранирование
@@ -230,11 +222,6 @@ namespace anyks {
 			 * @return белый список слов
 			 */
 			const set <size_t> & getGoodwords() const noexcept;
-			/**
-			 * getAbbreviations Метод извлечения списка суффиксов цифровых аббревиатур
-			 * @return список цифровых аббревиатур
-			 */
-			const set <size_t> & getAbbreviations() const noexcept;
 			/**
 			 * getTokensUnknown Метод извлечения списка токенов приводимых к <unk>
 			 * @return список токенов

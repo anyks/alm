@@ -703,7 +703,7 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Выполняем загрузку файла суффиксов цифровых аббревиатур
-					alm->readAbbreviations(filename, [debug, &pss](const string & filename, const u_short status) noexcept {
+					alm->readSuffix(filename, [debug, &pss](const string & filename, const u_short status) noexcept {
 						// Если отладка включена, выводим имя файла
 						if(debug > 0) pss.description(filename);
 						// Отображаем ход процесса
@@ -1607,6 +1607,8 @@ int main(int argc, char * argv[]) noexcept {
 				} else {
 					// Если путь получен
 					if(((value = env.get("corpus")) != nullptr) && fsys_t::isdir(value)){
+						// Активируем сборку суффиксов цифровых аббревиатур
+						tokenizer.allowCollectSuffix();
 						// Запоминаем путь к файлам
 						const string & path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
@@ -1713,6 +1715,8 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					// Если файл корпуса получен
 					} else if(((value = env.get("corpus")) != nullptr) && fsys_t::isfile(value)){
+						// Активируем сборку суффиксов цифровых аббревиатур
+						tokenizer.allowCollectSuffix();
 						// Запоминаем адрес файла
 						const string & filename = realpath(value, nullptr);
 						// Если количество ядер передано
@@ -2394,14 +2398,14 @@ int main(int argc, char * argv[]) noexcept {
 			} else print("arpa file is not loaded\r\n", env.get("log"));
 			// Если адрес файла списка суффиксов цифровых аббревиатур получен
 			if((value = env.get("w-abbr")) != nullptr){
-				// Открываем файл на запись
-				ofstream file(value, ios::binary);
-				// Если файл открыт, выполняем запись в файл результата
-				if(file.is_open()){
-					// Получаем список суффиксов цифровых аббревиатур
-					const auto & abbrs = toolkit.getAbbreviations();
-					// Если список суффиксов цифровых аббревиатур получен
-					if(!abbrs.empty()){
+				// Получаем список суффиксов цифровых аббревиатур
+				const auto & abbrs = tokenizer.getSuffix();
+				// Если список суффиксов цифровых аббревиатур получен
+				if(!abbrs.empty()){
+					// Открываем файл на запись
+					ofstream file(value, ios::binary);
+					// Если файл открыт, выполняем запись в файл результата
+					if(file.is_open()){
 						// Параметры индикаторы процесса
 						size_t index = 0, status = 0, rate = 0;
 						// Если отладка включена, выводим индикатор загрузки
@@ -2447,21 +2451,21 @@ int main(int argc, char * argv[]) noexcept {
 							case 1: pss.update(100); break;
 							case 2: pss.status(100); break;
 						}
+						// Закрываем файл
+						file.close();
 					}
-					// Закрываем файл
-					file.close();
 				}
 			}
 			// Если файл для сохранения конфигурационных данных передан
 			if((value = env.get("w-json")) != nullptr){
-				// Открываем файл на запись
-				ofstream file(value, ios::binary);
-				// Если файл открыт
-				if(file.is_open()){
-					// Получаем конфигурационные данные в формате JSON
-					const json & config = env.getJson();
-					// Если конфигурационные данные получены
-					if(!config.empty()){
+				// Получаем конфигурационные данные в формате JSON
+				const json & config = env.getJson();
+				// Если конфигурационные данные получены
+				if(!config.empty()){
+					// Открываем файл на запись
+					ofstream file(value, ios::binary);
+					// Если файл открыт
+					if(file.is_open()){
 						// Формируем текст результата
 						const string & text = config.dump(4);
 						// Если текст получен, записываем данные в файл

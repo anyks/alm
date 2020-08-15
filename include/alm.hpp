@@ -144,8 +144,6 @@ namespace anyks {
 			std::set <size_t> badwords;
 			// Список хороших слов
 			std::set <size_t> goodwords;
-			// Список суффиксов цифровых аббревиатур
-			std::set <size_t> abbreviations;
 			// Список токенов приводимых к <unk>
 			std::set <token_t> tokenUnknown;
 			// Список запрещённых токенов
@@ -276,12 +274,6 @@ namespace anyks {
 			 */
 			const ppl_t pplByFiles(const string & path, function <void (const u_short)> status = nullptr, const string & ext = "txt") const noexcept;
 		public:
-			/**
-			 * isAbbr Метод проверки слова на соответствие цифровой аббревиатуре
-			 * @param word слово для проверки
-			 * @return     результат проверки
-			 */
-			const bool isAbbr(const wstring & word) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности, с указанным шагом
 			 * @param text текст для проверки существования
@@ -521,11 +513,6 @@ namespace anyks {
 			 */
 			void setTokenizer(const tokenizer_t * tokenizer) noexcept;
 			/**
-			 * setAbbreviations Метод установки списка суффиксов цифровых аббревиатур
-			 * @param abbrs список суффиксов цифровых аббревиатур
-			 */
-			void setAbbreviations(const std::set <size_t> & abbrs) noexcept;
-			/**
 			 * setTokensUnknown Метод установки списка токенов приводимых к <unk>
 			 * @param tokens список токенов для установки
 			 */
@@ -613,11 +600,11 @@ namespace anyks {
 			 */
 			void read(const string & filename, function <void (const u_short)> status = nullptr) noexcept;
 			/**
-			 * readAbbreviations Метод чтения данных из файла суффиксов цифровых аббревиатур
+			 * readSuffix Метод чтения данных из файла суффиксов цифровых аббревиатур
 			 * @param filename адрес файла для чтения
 			 * @param status   функция вывода статуса
 			 */
-			void readAbbreviations(const string & filename, function <void (const string &, const u_short)> status = nullptr) noexcept;
+			void readSuffix(const string & filename, function <void (const string &, const u_short)> status = nullptr) noexcept;
 			/**
 			 * sentencesToFile Метод сборки указанного количества предложений и записи в файл
 			 * @param counts   количество предложений для сборки
@@ -734,11 +721,6 @@ namespace anyks {
 			 * @return белый список слов
 			 */
 			const std::set <size_t> & getGoodwords() const noexcept;
-			/**
-			 * getAbbreviations Метод извлечения списка суффиксов цифровых аббревиатур
-			 * @return список цифровых аббревиатур
-			 */
-			const std::set <size_t> & getAbbreviations() const noexcept;
 			/**
 			 * getTokensUnknown Метод извлечения списка токенов приводимых к <unk>
 			 * @return список токенов

@@ -458,32 +458,6 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 	return result;
 }
 /**
- * isAbbr Метод проверки слова на соответствие цифровой аббревиатуре
- * @param word слово для проверки
- * @return     результат проверки
- */
-const bool anyks::Alm::isAbbr(const wstring & word) const noexcept {
-	// Результат работы функции
-	bool result = false;
-	// Если слово передано
-	if(!word.empty() && !this->abbreviations.empty()){
-		// Если проверка пройедна
-		if(this->alphabet->isNumber(wstring(1, word.front())) && !this->alphabet->isNumber(wstring(1, word.back()))){
-			// Выполняем поиск дефиса
-			const size_t pos = word.rfind(L'-');
-			// Если дефис найден
-			if((pos != wstring::npos) && this->alphabet->isNumber(word.substr(0, pos))){
-				// Получаем идентификатор слова
-				const size_t idw = this->tokenizer->idw(word.substr(pos + 1));
-				// Если идентификатор получен
-				if(idw > 0) result = (this->abbreviations.count(idw) > 0);
-			}
-		}
-	}
-	// Выводим результат
-	return result;
-}
-/**
  * check Метод проверки существования последовательности, с указанным шагом
  * @param text текст для проверки существования
  * @param size размер шаговой n-граммы
@@ -1014,8 +988,6 @@ void anyks::Alm::clear(){
 	this->tokenUnknown.clear();
 	// Очищаем список запрещённых токенов
 	this->tokenDisable.clear();
-	// Очищаем список аббревиатур
-	this->abbreviations.clear();
 	// Если объект питона установлен внешний
 	if(this->notCleanPython){
 		// Зануляем объект питона
@@ -1464,14 +1436,6 @@ void anyks::Alm::setTokenizer(const tokenizer_t * tokenizer) noexcept {
 	if(tokenizer != nullptr) this->tokenizer = tokenizer;
 }
 /**
- * setAbbreviations Метод установки списка суффиксов цифровых аббревиатур
- * @param abbrs список суффиксов цифровых аббревиатур
- */
-void anyks::Alm::setAbbreviations(const std::set <size_t> & abbrs) noexcept {
-	// Если список аббревиатур передан
-	if(!abbrs.empty()) this->abbreviations = abbrs;
-}
-/**
  * setTokensUnknown Метод установки списка токенов приводимых к <unk>
  * @param tokens список токенов для установки
  */
@@ -1795,11 +1759,11 @@ void anyks::Alm::read(const string & filename, function <void (const u_short)> s
 	} else if(this->isOption(options_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is not exist");
 }
 /**
- * readAbbreviations Метод чтения данных из файла суффиксов цифровых аббревиатур
+ * readSuffix Метод чтения данных из файла суффиксов цифровых аббревиатур
  * @param filename адрес файла для чтения
  * @param status   функция вывода статуса
  */
-void anyks::Alm::readAbbreviations(const string & filename, function <void (const string &, const u_short)> status) noexcept {
+void anyks::Alm::readSuffix(const string & filename, function <void (const string &, const u_short)> status) noexcept {
 	// Если адрес файла передан
 	if(!filename.empty()){
 		// Текущий и предыдущий статус
@@ -1816,7 +1780,10 @@ void anyks::Alm::readAbbreviations(const string & filename, function <void (cons
 			// Если текст передан
 			if(!text.empty()){
 				// Если текст является числом
-				if(this->alphabet->isNumber(text)) this->abbreviations.emplace(stoull(text));
+				if(this->alphabet->isNumber(text)){
+					// Добавляем идентификатор аббревиатуры в токенизатор
+					const_cast <tokenizer_t *> (this->tokenizer)->setSuffix(stoull(text));
+				}
 				// Если функция вывода статуса передана
 				if(status != nullptr){
 					// Увеличиваем количество записанных n-грамм
@@ -2754,14 +2721,6 @@ const std::set <size_t> & anyks::Alm::getBadwords() const noexcept {
 const std::set <size_t> & anyks::Alm::getGoodwords() const noexcept {
 	// Выводим результат
 	return this->goodwords;
-}
-/**
- * getAbbreviations Метод извлечения списка суффиксов цифровых аббревиатур
- * @return список цифровых аббревиатур
- */
-const std::set <size_t> & anyks::Alm::getAbbreviations() const noexcept {
-	// Выводим результат
-	return this->abbreviations;
 }
 /**
  * getTokensUnknown Метод извлечения списка токенов приводимых к <unk>
