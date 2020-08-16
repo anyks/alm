@@ -380,6 +380,8 @@ int main(int argc, char * argv[]) noexcept {
 			/** Начало работы основных методов **/
 			// Создаём токенизатор
 			tokenizer_t tokenizer(&alphabet);
+			// Устанавливаем адрес файла для логирования
+			tokenizer.setLogfile(env.get("log"));
 			// Замеряем время начала работы
 			auto timeShifting = chrono::system_clock::now();
 			// Если разрешено использовать символы ударения, активируем
@@ -703,7 +705,7 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					}
 					// Выполняем загрузку файла суффиксов цифровых аббревиатур
-					alm->readSuffix(filename, [debug, &pss](const string & filename, const u_short status) noexcept {
+					tokenizer.readSuffix(filename, [debug, &pss](const string & filename, const u_short status) noexcept {
 						// Если отладка включена, выводим имя файла
 						if(debug > 0) pss.description(filename);
 						// Отображаем ход процесса
@@ -2148,6 +2150,40 @@ int main(int argc, char * argv[]) noexcept {
 						case 2: pss.status(100); break;
 					}
 				}
+				// Если требуется загрузить файл словаря abbr
+				if((value = env.get("r-abbr")) != nullptr){
+					// Запоминаем адрес файла
+					const string & filename = realpath(value, nullptr);
+					// Если отладка включена, выводим индикатор загрузки
+					if(debug > 0){
+						// Очищаем предыдущий прогресс-бар
+						pss.clear();
+						// Устанавливаем название файла
+						pss.description(filename);
+						// Устанавливаем заголовки прогресс-бара
+						pss.title("Read abbr", "Read abbr is done");
+						// Выводим индикатор прогресс-бара
+						switch(debug){
+							case 1: pss.update(); break;
+							case 2: pss.status(); break;
+						}
+					}
+					// Выполняем загрузку файла суффиксов цифровых аббревиатур
+					tokenizer.readSuffix(filename, [debug, &pss](const string & filename, const u_short status) noexcept {
+						// Если отладка включена, выводим имя файла
+						if(debug > 0) pss.description(filename);
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(status); break;
+							case 2: pss.status(status); break;
+						}
+					});
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(100); break;
+						case 2: pss.status(100); break;
+					}
+				}
 				// Если требуется загрузить карту последовательности или список карт последовательностей
 				if(env.is("r-map") && env.is("r-vocab")){
 					// Если нужно загрузить карту последовательности
@@ -2398,62 +2434,32 @@ int main(int argc, char * argv[]) noexcept {
 			} else print("arpa file is not loaded\r\n", env.get("log"));
 			// Если адрес файла списка суффиксов цифровых аббревиатур получен
 			if((value = env.get("w-abbr")) != nullptr){
-				// Получаем список суффиксов цифровых аббревиатур
-				const auto & abbrs = tokenizer.getSuffix();
-				// Если список суффиксов цифровых аббревиатур получен
-				if(!abbrs.empty()){
-					// Открываем файл на запись
-					ofstream file(value, ios::binary);
-					// Если файл открыт, выполняем запись в файл результата
-					if(file.is_open()){
-						// Параметры индикаторы процесса
-						size_t index = 0, status = 0, rate = 0;
-						// Если отладка включена, выводим индикатор загрузки
-						if(debug > 0){
-							// Очищаем предыдущий прогресс-бар
-							pss.clear();
-							// Устанавливаем название файла
-							pss.description(value);
-							// Устанавливаем заголовки прогресс-бара
-							pss.title("Write abbrs", "Write abbrs is done");
-							// Выводим индикатор прогресс-бара
-							switch(debug){
-								case 1: pss.update(); break;
-								case 2: pss.status(); break;
-							}
-						}
-						// Переходим по всему списку аббревиатур
-						for(auto & abbr : abbrs){
-							// Создаём текст для записи
-							const string & text = alphabet.format("%zu\r\n", abbr);
-							// Выполняем запись данных в файл
-							file.write(text.data(), text.size());
-							// Если отладка включена
-							if(debug > 0){
-								// Общий полученный размер данных
-								index++;
-								// Подсчитываем статус выполнения
-								status = u_short(index / double(abbrs.size()) * 100.0);
-								// Если процентное соотношение изменилось
-								if(rate != status){
-									// Запоминаем текущее процентное соотношение
-									rate = status;
-									// Отображаем ход процесса
-									switch(debug){
-										case 1: pss.update(status); break;
-										case 2: pss.status(status); break;
-									}
-								}
-							}
-						}
-						// Отображаем ход процесса
-						switch(debug){
-							case 1: pss.update(100); break;
-							case 2: pss.status(100); break;
-						}
-						// Закрываем файл
-						file.close();
+				// Если отладка включена, выводим индикатор загрузки
+				if(debug > 0){
+					// Очищаем предыдущий прогресс-бар
+					pss.clear();
+					// Устанавливаем название файла
+					pss.description(value);
+					// Устанавливаем заголовки прогресс-бара
+					pss.title("Write abbrs", "Write abbrs is done");
+					// Выводим индикатор прогресс-бара
+					switch(debug){
+						case 1: pss.update(); break;
+						case 2: pss.status(); break;
 					}
+				}
+				// Выполняем модификацию файла
+				tokenizer.writeSuffix(value, [debug, &pss](const u_short status) noexcept {
+					// Отображаем ход процесса
+					switch(debug){
+						case 1: pss.update(status); break;
+						case 2: pss.status(status); break;
+					}
+				});
+				// Отображаем ход процесса
+				switch(debug){
+					case 1: pss.update(100); break;
+					case 2: pss.status(100); break;
 				}
 			}
 			// Если файл для сохранения конфигурационных данных передан

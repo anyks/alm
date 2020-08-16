@@ -61,6 +61,14 @@ void anyks::Tokenizer::setAbbrs(const set <size_t> & abbrs) noexcept {
 	if(!abbrs.empty()) this->abbrs = move(abbrs);
 }
 /**
+ * setLogfile Метод установки файла для вывода логов
+ * @param logifle адрес файла для вывода отладочной информации
+ */
+void anyks::Tokenizer::setLogfile(const char * logfile) noexcept {
+	// Устанавливаем адрес log файла
+	this->logfile = logfile;
+}
+/**
  * setAlphabet Метод установки алфавита
  * @param alphabet объект алфавита
  */
@@ -1145,6 +1153,123 @@ void anyks::Tokenizer::textToJson(const string & text, function <void (const str
 	}
 }
 /**
+ * writeSuffix Метод записи данных в файл суффиксов цифровых аббревиатур
+ * @param filename адрес файла для записи
+ * @param status   функция вывода статуса
+ */
+void anyks::Tokenizer::writeSuffix(const string & filename, function <void (const u_short)> status) noexcept {
+	// Если адрес файла передан
+	if(!filename.empty()){
+		// Получаем список суффиксов цифровых аббревиатур
+		const auto & abbrs = this->getSuffix();
+		// Если список суффиксов цифровых аббревиатур получен
+		if(!abbrs.empty()){
+			// Открываем файл на запись
+			ofstream file(filename, ios::binary);
+			// Если файл открыт, выполняем запись в файл результата
+			if(file.is_open()){
+				// Количество обработанных данных
+				size_t index = 0;
+				// Текущий и предыдущий статус
+				u_short actual = 0, past = 100;
+				// Переходим по всему списку аббревиатур
+				for(auto & abbr : abbrs){
+					// Создаём текст для записи
+					const string & text = this->alphabet->format("%zu\r\n", abbr);
+					// Выполняем запись данных в файл
+					file.write(text.data(), text.size());
+					// Если отладка включена
+					if(status != nullptr){
+						// Общий полученный размер данных
+						index++;
+						// Подсчитываем статус выполнения
+						actual = u_short(index / double(abbrs.size()) * 100.0);
+						// Если процентное соотношение изменилось
+						if(past != actual){
+							// Запоминаем текущее процентное соотношение
+							past = actual;
+							// Выводим статистику
+							status(actual);
+						}
+					}
+				}
+				// Выводим статистику
+				if(status != nullptr) status(100);
+				// Закрываем файл
+				file.close();
+			}
+		}
+	// Выводим сообщение об ошибке
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "abbr file is not set");
+}
+/**
+ * readSuffix Метод чтения данных из файла суффиксов цифровых аббревиатур
+ * @param filename адрес файла для чтения
+ * @param status   функция вывода статуса
+ */
+void anyks::Tokenizer::readSuffix(const string & filename, function <void (const string &, const u_short)> status) noexcept {
+	// Если адрес файла передан
+	if(!filename.empty()){
+		// Текущий и предыдущий статус
+		u_short actual = 0, past = 100;
+		// Количество обработанных данных
+		size_t index = 0, pos = 0, loc = 0;
+		/**
+		 * parseFn Функция парсинга аббревиатур
+		 * @param text     строка текста для парсинга
+		 * @param filename адрес файла для чтения
+		 * @param size     размер файла для парсинга
+		 */
+		auto parseFn = [&](const string & text, const string & filename, const uintmax_t size) noexcept {
+			// Если текст передан
+			if(!text.empty()){
+				// Идентификатор суффикса цифровой аббревиатуры
+				size_t idw = idw_t::NIDW;
+				// Если текст является числом
+				if(this->alphabet->isNumber(text)) idw = stoull(text);
+				// Если текст числом не является, получаем его идентификатор
+				else idw = this->idw(this->alphabet->convert(text));
+				// Добавляем идентификатор аббревиатуры в токенизатор
+				if((idw > 0) && (idw != idw_t::NIDW)) this->setSuffix(idw);
+				// Если функция вывода статуса передана
+				if(status != nullptr){
+					// Увеличиваем количество записанных n-грамм
+					index += text.size();
+					// Выполняем расчёт текущего статуса
+					actual = u_short(index / double(size) * 100.0);
+					// Если статус обновился
+					if(actual != past){
+						// Запоминаем текущий статус
+						past = actual;
+						// Выводим статус извлечения
+						status(filename, actual);
+					}
+				}
+			}
+		};
+		// Если это файл
+		if(fsys_t::isfile(filename)){
+			// Выполняем считывание всех строк текста
+			fsys_t::rfile(filename, [&filename, &parseFn](const string & text, const uintmax_t fileSize) noexcept {
+				// Выполняем обработку полученного текста
+				if(!text.empty()) parseFn(text, filename, fileSize);
+			});
+		// Если это каталог
+		} else if(fsys_t::isdir(filename)) {
+			// Переходим по всему списку словарей в каталоге
+			fsys_t::rdir(filename, "abbr", [&](const string & filename, const uintmax_t dirSize) noexcept {
+				// Выполняем считывание всех строк текста
+				fsys_t::rfile2(filename, [&filename, &dirSize, &parseFn](const string & text, const uintmax_t fileSize) noexcept {
+					// Выполняем обработку полученного текста
+					if(!text.empty()) parseFn(text, filename, dirSize);
+				});
+			});
+		// Выводим сообщение об ошибке
+		} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "abbr file or path is broken");
+	// Выводим сообщение об ошибке
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "abbr file is not exist");
+}
+/**
  * run Метод разбивки текста на токены
  * @param text     входной текст для обработки
  * @param callback функция обратного вызова, на каждой итерации
@@ -1610,7 +1735,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
  * Tokenizer Конструктор
  * @param alphabet объект алфавита
  */
-anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : stress(false), collect(false), extFn(nullptr), alphabet(alphabet) {
+anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : stress(false), collect(false), extFn(nullptr), logfile(nullptr), alphabet(alphabet) {
 	// Устанавливаем лафавит
 	if(alphabet != nullptr) this->setAlphabet(alphabet);
 }

@@ -25,6 +25,7 @@
  * Наши модули
  */
 #include <idw.hpp>
+#include <fsys.hpp>
 #include <alphabet.hpp>
 #include <nlohmann/json.hpp>
 
@@ -87,6 +88,8 @@ namespace anyks {
 		private:
 			// Внешняя функция токенизатора
 			tokenz_t extFn;
+			// Объект log файла
+			const char * logfile;
 			// Объект алфавита
 			const alphabet_t * alphabet;
 		public:
@@ -106,6 +109,7 @@ namespace anyks {
 			 * disallowCollectSuffix Метод запрещения сборки суффиксов цифровых аббревиатур
 			 */
 			void disallowCollectSuffix() noexcept;
+		public:
 			/**
 			 * setAbbr Метод добавления аббревиатуры
 			 * @param word слово для добавления
@@ -121,6 +125,12 @@ namespace anyks {
 			 * @param abbrs список аббревиатур
 			 */
 			void setAbbrs(const set <size_t> & abbrs) noexcept;
+		public:
+			/**
+			 * setLogfile Метод установки файла для вывода логов
+			 * @param logifle адрес файла для вывода отладочной информации
+			 */
+			void setLogfile(const char * logfile) noexcept;
 			/**
 			 * setAlphabet Метод установки алфавита
 			 * @param alphabet объект алфавита
@@ -240,6 +250,7 @@ namespace anyks {
 			 * @param fn внешняя функция токенизатора
 			 */
 			void setExternal(tokenz_t fn) noexcept;
+		public:
 			/**
 			 * jsonToText Метод преобразования текста в формате json в текст
 			 * @param text     текст для преобразования в формате json
@@ -252,6 +263,20 @@ namespace anyks {
 			 * @param callback функция обратного вызова, на каждой итерации
 			 */
 			void textToJson(const string & text, function <void (const string &)> callback) const noexcept;
+		public:
+			/**
+			 * writeSuffix Метод записи данных в файл суффиксов цифровых аббревиатур
+			 * @param filename адрес файла для записи
+			 * @param status   функция вывода статуса
+			 */
+			void writeSuffix(const string & filename, function <void (const u_short)> status = nullptr) noexcept;
+			/**
+			 * readSuffix Метод чтения данных из файла суффиксов цифровых аббревиатур
+			 * @param filename адрес файла для чтения
+			 * @param status   функция вывода статуса
+			 */
+			void readSuffix(const string & filename, function <void (const string &, const u_short)> status = nullptr) noexcept;
+		public:
 			/**
 			 * run Метод разбивки текста на токены
 			 * @param text     входной текст для обработки

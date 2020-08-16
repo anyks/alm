@@ -600,12 +600,6 @@ namespace anyks {
 			 */
 			void read(const string & filename, function <void (const u_short)> status = nullptr) noexcept;
 			/**
-			 * readSuffix Метод чтения данных из файла суффиксов цифровых аббревиатур
-			 * @param filename адрес файла для чтения
-			 * @param status   функция вывода статуса
-			 */
-			void readSuffix(const string & filename, function <void (const string &, const u_short)> status = nullptr) noexcept;
-			/**
 			 * sentencesToFile Метод сборки указанного количества предложений и записи в файл
 			 * @param counts   количество предложений для сборки
 			 * @param filename адрес файла для записи результата
