@@ -1267,7 +1267,7 @@ void anyks::Tokenizer::readSuffix(const string & filename, function <void (const
 		// Выводим сообщение об ошибке
 		} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "abbr file or path is broken");
 	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "abbr file is not exist");
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "abbr file is not set");
 }
 /**
  * run Метод разбивки текста на токены

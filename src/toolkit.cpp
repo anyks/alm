@@ -1837,7 +1837,7 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 			for(size_t i = 1; i < arpas.size(); i++) delete arpas.at(i).second;
 		}
 	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is not exist");
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is not set");
 }
 /**
  * mix Метод интерполяции нескольких arpa алгоритмами (Баеса и Логарифмическо-линейным)
@@ -2076,7 +2076,7 @@ void anyks::Toolkit::mix(const vector <string> & filenames, const vector <double
 			for(size_t i = 1; i < arpas.size(); i++) delete arpas.at(i).second;
 		}
 	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is not exist");
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "arpa file is not set");
 }
 /**
  * loadVocab Метод загрузки бинарных данных в словарь
@@ -2842,11 +2842,11 @@ void anyks::Toolkit::readVocab(const string & filename, function <void (const st
 				});
 			});
 		// Выводим сообщение об ошибке
-		} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "vocab file or path is broken");
+		} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "vocab file or path is not exist");
 		// Обновляем количество уникальных слов
 		this->info.unq = this->vocab.size();
 	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "vocab file is not exist");
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "vocab file is not set");
 }
 /**
  * readNgram Метод чтения данных из файла ngrams
@@ -3026,11 +3026,11 @@ void anyks::Toolkit::readNgram(const string & filename, function <void (const st
 				});
 			});
 		// Выводим сообщение об ошибке
-		} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ngrams file or path is broken");
+		} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ngrams file or path is not exist");
 		// Обновляем количество уникальных слов
 		this->info.unq = this->vocab.size();
 	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ngrams file is not exist");
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ngrams file is not set");
 }
 /**
  * readMap Метод чтения карты последовательности из файла
@@ -3159,9 +3159,9 @@ void anyks::Toolkit::readMap(const string & filename, function <void (const stri
 				idd++;
 			});
 		// Выводим сообщение об ошибке
-		} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "map file or path is broken");
+		} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "map file or path is not exist");
 	// Выводим сообщение об ошибке
-	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "map file is not exist");
+	} else this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "map file is not set");
 }
 /**
  * Toolkit Конструктор
