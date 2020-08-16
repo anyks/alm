@@ -973,10 +973,8 @@ const string anyks::Arpa::stamp() const noexcept {
 	const time_t dateBuild = time(nullptr);
 	// Получаем структуру локального времени
 	struct tm * timeinfo = localtime(&dateBuild);
-	// Создаем формат полученного времени
-	const string & dateformat = "%m/%d/%Y %H:%M:%S";
 	// Копируем в буфер полученную дату и время
-	strftime(date, sizeof(date), dateformat.c_str(), timeinfo);
+	strftime(date, sizeof(date), "%m/%d/%Y %H:%M:%S", timeinfo);
 	// Блок для записи
 	return this->alphabet->format(
 		"#\n#  version:   %s\n"

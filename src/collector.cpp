@@ -159,10 +159,8 @@ const string & anyks::Collector::createDir() const noexcept {
 			memset(date, 0, sizeof(date));
 			// Получаем структуру локального времени
 			struct tm * timeinfo = localtime(&timeStamp);
-			// Создаем формат полученного времени
-			const string & dateformat = "%m-%d-%Y_%H-%M-%S";
 			// Копируем в буфер полученную дату и время
-			const int length = strftime(date, sizeof(date), dateformat.c_str(), timeinfo);
+			const int length = strftime(date, sizeof(date), "%m-%d-%Y_%H-%M-%S", timeinfo);
 			// Если дата создана
 			if(length > 0){
 				// Получаем данные строки

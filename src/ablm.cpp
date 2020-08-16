@@ -1197,12 +1197,10 @@ void anyks::AbLM::info() const noexcept {
 			char date[80];
 			// Заполняем его нулями
 			memset(date, 0, sizeof(date));
-			// Создаем формат полученного времени
-			const string & dateformat = "%m/%d/%Y %H:%M:%S";
 			// Получаем структуру локального времени
 			struct tm * timeinfo = localtime((const time_t *) &this->meta.date);
 			// Копируем в буфер полученную дату и время
-			const int length = strftime(date, sizeof(date), dateformat.c_str(), timeinfo);
+			const int length = strftime(date, sizeof(date), "%m/%d/%Y %H:%M:%S", timeinfo);
 			// Если дата создана
 			if(length > 0){
 				// Создаем строку с датой
