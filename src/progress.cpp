@@ -18,10 +18,8 @@ const string anyks::Progress::date(const time_t seconds) const noexcept {
 	char date[80];
 	// Заполняем его нулями
 	memset(date, 0, sizeof(date));
-	// Получаем дату словаря
-	const time_t dateBuild = time(seconds);
 	// Получаем структуру локального времени
-	struct tm * timeinfo = localtime(&dateBuild);
+	struct tm * timeinfo = localtime(&seconds);
 	// Копируем в буфер полученную дату и время
 	strftime(date, sizeof(date), "%m/%d/%Y %H:%M", timeinfo);
 	// Выводим полученную дату и время
