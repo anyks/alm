@@ -14,23 +14,16 @@
  * @return        строка с датой и временем
  */
 const string anyks::Progress::date(const time_t seconds) const noexcept {
-	// Если количество секунд больше 2-х часов, выводим дату завершения работы
-	if((seconds / 60.0) > 120){
-		// Создаем буфер для хранения даты
-		char date[80];
-		// Заполняем его нулями
-		memset(date, 0, sizeof(date));
-		// Получаем текущее значение даты
-		const time_t current = (time(nullptr) + seconds);
-		// Получаем структуру локального времени
-		struct tm * timeinfo = localtime(&current);
-		// Копируем в буфер полученную дату и время
-		strftime(date, sizeof(date), "%m/%d/%Y %H:%M", timeinfo);
-		// Выводим полученную дату и время
-		return date;
-	}
-	// Выводим пустой результат
-	return "";
+	// Создаем буфер для хранения даты
+	char date[80];
+	// Заполняем его нулями
+	memset(date, 0, sizeof(date));
+	// Получаем структуру локального времени
+	struct tm * timeinfo = localtime(&seconds);
+	// Копируем в буфер полученную дату и время
+	strftime(date, sizeof(date), "%m/%d/%Y %H:%M", timeinfo);
+	// Выводим полученную дату и время
+	return date;
 }
 /**
  * clear Метод сброса данных
@@ -65,11 +58,11 @@ void anyks::Progress::status(const u_short status) noexcept {
 			else if(this->startTime > 0) {
 				// Получаем оставшееся время до завершения, в секундах
 				const time_t seconds = ((100 - status) * ((current - this->startTime) / double(status)));
-				// Получаем дату и время завершения работы
-				const string & endDate = this->date(seconds);
 				// Выполняем расчёт оставшихся секунд
 				// Получаем оставшееся время
 				const auto & dimension = this->dimension(seconds);
+				// Получаем дату и время завершения работы
+				const string & endDate = ((seconds / 60.0) > 120 ? this->date(current + seconds) : "");
 				// Если конечная дата не получена
 				if(endDate.empty()){
 					// Если описание передано
@@ -124,10 +117,10 @@ void anyks::Progress::update(const u_short status) noexcept {
 			else if(this->startTime > 0) {
 				// Получаем оставшееся время до завершения, в секундах
 				const time_t seconds = ((100 - status) * ((current - this->startTime) / double(status)));
-				// Получаем дату и время завершения работы
-				const string & endDate = this->date(seconds);
 				// Получаем оставшееся время
 				const auto & dimension = this->dimension(seconds);
+				// Получаем дату и время завершения работы
+				const string & endDate = ((seconds / 60.0) > 120 ? this->date(current + seconds) : "");
 				// Если конечная дата не получена
 				if(endDate.empty())
 					// Выводим заголовок индикатора загрузки
