@@ -14,16 +14,21 @@
  * @return        строка с датой и временем
  */
 const string anyks::Progress::date(const time_t seconds) const noexcept {
-	// Создаем буфер для хранения даты
-	char date[80];
-	// Заполняем его нулями
-	memset(date, 0, sizeof(date));
-	// Получаем структуру локального времени
-	struct tm * timeinfo = localtime(&seconds);
-	// Копируем в буфер полученную дату и время
-	strftime(date, sizeof(date), "%m/%d/%Y %H:%M", timeinfo);
-	// Выводим полученную дату и время
-	return date;
+	// Если количество секунд больше 2-х часов, выводим дату завершения работы
+	if((seconds / 60.0) > 120){
+		// Создаем буфер для хранения даты
+		char date[80];
+		// Заполняем его нулями
+		memset(date, 0, sizeof(date));
+		// Получаем структуру локального времени
+		struct tm * timeinfo = localtime(&seconds);
+		// Копируем в буфер полученную дату и время
+		strftime(date, sizeof(date), "%m/%d/%Y %H:%M", timeinfo);
+		// Выводим полученную дату и время
+		return date;
+	}
+	// Выводим пустой результат
+	return "";
 }
 /**
  * clear Метод сброса данных
@@ -63,12 +68,23 @@ void anyks::Progress::status(const u_short status) noexcept {
 				// Выполняем расчёт оставшихся секунд
 				// Получаем оставшееся время
 				const auto & dimension = this->dimension(seconds);
-				// Если описание передано
-				if(!this->desc.empty()){
-					// Выводим заголовок индикатора загрузки с описанием
-					printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s, %s]: %s\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), endDate.c_str(), this->desc.c_str());
-				// Выводим заголовок индикатора загрузки без описания
-				} else printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s, %s]\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), endDate.c_str());
+				// Если конечная дата не получена
+				if(endDate.empty()){
+					// Если описание передано
+					if(!this->desc.empty()){
+						// Выводим заголовок индикатора загрузки с описанием
+						printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s]: %s\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), this->desc.c_str());
+					// Выводим заголовок индикатора загрузки без описания
+					} else printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s]\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str());
+				// Если конечная дата получена
+				} else {
+					// Если описание передано
+					if(!this->desc.empty()){
+						// Выводим заголовок индикатора загрузки с описанием
+						printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s, %s]: %s\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), endDate.c_str(), this->desc.c_str());
+					// Выводим заголовок индикатора загрузки без описания
+					} else printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s, %s]\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), endDate.c_str());
+				}
 			}
 		}
 		// Запоминаем текущий статус
@@ -110,8 +126,12 @@ void anyks::Progress::update(const u_short status) noexcept {
 				const string & endDate = this->date(current + seconds);
 				// Получаем оставшееся время
 				const auto & dimension = this->dimension(seconds);
-				// Выводим заголовок индикатора загрузки
-				printf("\r\n \x1B[36m\x1B[1m%s:\x1B[0m \x1B[32m\x1B[1m%u%%\x1B[0m \x1B[33m\x1B[1m[%ld %s, %s]\x1B[0m\r\n ", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), endDate.c_str());
+				// Если конечная дата не получена
+				if(endDate.empty())
+					// Выводим заголовок индикатора загрузки
+					printf("\r\n \x1B[36m\x1B[1m%s:\x1B[0m \x1B[32m\x1B[1m%u%%\x1B[0m \x1B[33m\x1B[1m[%ld %s]\x1B[0m\r\n ", this->title1.c_str(), status, dimension.first, dimension.second.c_str());
+				// Если конечная дата получена, выводим заголовок индикатора загрузки с датой
+				else printf("\r\n \x1B[36m\x1B[1m%s:\x1B[0m \x1B[32m\x1B[1m%u%%\x1B[0m \x1B[33m\x1B[1m[%ld %s, %s]\x1B[0m\r\n ", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), endDate.c_str());
 			}
 		}
 		// Запоминаем текущий статус
@@ -192,31 +212,31 @@ const pair <time_t, string> anyks::Progress::dimension(const time_t sec) const n
 		// Если это минуты, переводим секунды в минуты
 		if(result.first >= 60){
 			// Переводим секунды в минуты
-			result.first /= 60;
+			result.first /= 60.0;
 			// Меняем индикатор размерности
 			result.second = (dipaz.count(result.first) > 0 ? "minute" : "minutes");
 			// Если это часы
 			if(result.first >= 60){
 				// Переводим минуты в часы
-				result.first /= 60;
+				result.first /= 60.0;
 				// Меняем индикатор размерности
 				result.second = (dipaz.count(result.first) > 0 ? "hour" : "hours");
 				// Если это дни
 				if(result.first >= 24){
 					// Переводим минуты в дни
-					result.first /= 24;
+					result.first /= 24.0;
 					// Меняем индикатор размерности
 					result.second = (dipaz.count(result.first) > 0 ? "day" : "days");
 					// Если это месяцы
 					if(result.first >= 31){
 						// Переводим минуты в месяцы
-						result.first /= 31;
+						result.first /= 31.0;
 						// Меняем индикатор размерности
 						result.second = (dipaz.count(result.first) > 0 ? "month" : "months");
 						// Если это годы
 						if(result.first >= 12){
 							// Переводим минуты в годы
-							result.first /= 12;
+							result.first /= 12.0;
 							// Меняем индикатор размерности
 							result.second = (dipaz.count(result.first) > 0 ? "year" : "years");
 						}
