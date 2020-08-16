@@ -244,7 +244,10 @@ const bool anyks::Tokenizer::isAbbr(const wstring & word) const noexcept {
 			} else idw = this->idw(word);
 			// Выполняем проверку сущестования аббревиатуры
 			result = (this->abbrs.count(idw) > 0);
-		}
+			// Если аббревиатура не найдена, проверяем слово по словарю
+			if(!result) result = this->alphabet->isAbbr(word);
+		// Иначе проверяем на аббревиатуру с помощью алфавита
+		} else result = this->alphabet->isAbbr(word);
 	}
 	// Выводим результат
 	return result;
