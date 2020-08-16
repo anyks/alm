@@ -9,6 +9,25 @@
 #include <progress.hpp>
 
 /**
+ * date Метод вывода даты и времени в текстовом виде
+ * @param seconds количество секунд из которых нужно сформировать дату
+ * @return        строка с датой и временем
+ */
+const string anyks::Progress::date(const time_t seconds) const noexcept {
+	// Создаем буфер для хранения даты
+	char date[80];
+	// Заполняем его нулями
+	memset(date, 0, sizeof(date));
+	// Получаем дату словаря
+	const time_t dateBuild = time(seconds);
+	// Получаем структуру локального времени
+	struct tm * timeinfo = localtime(&dateBuild);
+	// Копируем в буфер полученную дату и время
+	strftime(date, sizeof(date), "%m/%d/%Y %H:%M", timeinfo);
+	// Выводим полученную дату и время
+	return date;
+}
+/**
  * clear Метод сброса данных
  */
 void anyks::Progress::clear() noexcept {
@@ -31,27 +50,33 @@ void anyks::Progress::clear() noexcept {
 void anyks::Progress::status(const u_short status) noexcept {
 	// Если статус не 100%
 	if((status < 100) && (this->progress != status)){
+		// Получаем текущее значение времени
+		const time_t current = time(nullptr);
 		// Пишем процент загрузки
 		if(!this->title1.empty()){
 			// Выводим заголовок индикатора загрузки
 			if((status == 0) || (this->startTime == 0)) printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%%\r\n", this->title1.c_str(), status);
 			// Выводим примерное время завершения работы
 			else if(this->startTime > 0) {
+				// Получаем оставшееся время до завершения, в секундах
+				const time_t seconds = ((100 - status) * ((current - this->startTime) / double(status)));
+				// Получаем дату и время завершения работы
+				const string & endDate = this->date(current + seconds);
 				// Выполняем расчёт оставшихся секунд
 				// Получаем оставшееся время
-				auto dimension = this->dimension((100 - status) * ((time(nullptr) - this->startTime) / double(status)));
+				const auto & dimension = this->dimension(seconds);
 				// Если описание передано
 				if(!this->desc.empty()){
 					// Выводим заголовок индикатора загрузки с описанием
-					printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s]: %s\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), this->desc.c_str());
+					printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s, %s]: %s\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), endDate.c_str(), this->desc.c_str());
 				// Выводим заголовок индикатора загрузки без описания
-				} else printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s]\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str());
+				} else printf("\x1B[36m\x1B[1m%s:\x1B[0m %u%% [%ld %s, %s]\r\n", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), endDate.c_str());
 			}
 		}
 		// Запоминаем текущий статус
 		this->progress = status;
 		// Запоминаем время начала
-		if(status == 0) this->startTime = time(nullptr);
+		if(status == 0) this->startTime = current;
 	// Если статус перешёл 100%
 	} else if((status >= 100) && !this->title2.empty()) {
 		// Выводим сообщение результата
@@ -71,6 +96,8 @@ void anyks::Progress::update(const u_short status) noexcept {
 		struct winsize w;
 		// Очищаем консоль
 		printf("\033c\x1B[0m");
+		// Получаем текущее значение времени
+		const time_t current = time(nullptr);
 		// Получаем текущий размер консоли
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		// Пишем процент загрузки
@@ -79,10 +106,14 @@ void anyks::Progress::update(const u_short status) noexcept {
 			if((status == 0) || (this->startTime == 0)) printf("\r\n \x1B[36m\x1B[1m%s:\x1B[0m \x1B[32m\x1B[1m%u%%\x1B[0m\r\n ", this->title1.c_str(), status);
 			// Выводим примерное время завершения работы
 			else if(this->startTime > 0) {
+				// Получаем оставшееся время до завершения, в секундах
+				const time_t seconds = ((100 - status) * ((current - this->startTime) / double(status)));
+				// Получаем дату и время завершения работы
+				const string & endDate = this->date(current + seconds);
 				// Получаем оставшееся время
-				auto dimension = this->dimension((100 - status) * ((time(nullptr) - this->startTime) / double(status)));
+				const auto & dimension = this->dimension(seconds);
 				// Выводим заголовок индикатора загрузки
-				printf("\r\n \x1B[36m\x1B[1m%s:\x1B[0m \x1B[32m\x1B[1m%u%%\x1B[0m \x1B[33m\x1B[1m[%ld %s]\x1B[0m\r\n ", this->title1.c_str(), status, dimension.first, dimension.second.c_str());
+				printf("\r\n \x1B[36m\x1B[1m%s:\x1B[0m \x1B[32m\x1B[1m%u%%\x1B[0m \x1B[33m\x1B[1m[%ld %s, %s]\x1B[0m\r\n ", this->title1.c_str(), status, dimension.first, dimension.second.c_str(), endDate.c_str());
 			}
 		}
 		// Запоминаем текущий статус
@@ -90,7 +121,7 @@ void anyks::Progress::update(const u_short status) noexcept {
 		// Запоминаем время начала
 		if(status == 0){
 			// Запоминаем текущее время
-			this->startTime = time(nullptr);
+			this->startTime = current;
 			// Отображаем оставшиеся знаки загрузки
 			for(size_t i = 0; i < size_t(w.ws_col - 4); i++) printf("\e[47m \x1B[0m");
 			// Отображаем индикатор процесса

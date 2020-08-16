@@ -41,6 +41,13 @@ namespace anyks {
 			const char * litem = "|";
 			// Заголовки и описание при работе прогресса
 			string title1 = "", title2 = "", desc = "";
+		private:
+			/**
+			 * date Метод вывода даты и времени в текстовом виде
+			 * @param seconds количество секунд из которых нужно сформировать дату
+			 * @return        строка с датой и временем
+			 */
+			const string date(const time_t seconds) const noexcept;
 		public:
 			/**
 			 * clear Метод сброса данных
