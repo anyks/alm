@@ -20,8 +20,10 @@ const string anyks::Progress::date(const time_t seconds) const noexcept {
 		char date[80];
 		// Заполняем его нулями
 		memset(date, 0, sizeof(date));
+		// Получаем текущее значение даты
+		const time_t current = (time(nullptr) + seconds);
 		// Получаем структуру локального времени
-		struct tm * timeinfo = localtime(&seconds);
+		struct tm * timeinfo = localtime(&current);
 		// Копируем в буфер полученную дату и время
 		strftime(date, sizeof(date), "%m/%d/%Y %H:%M", timeinfo);
 		// Выводим полученную дату и время
@@ -64,7 +66,7 @@ void anyks::Progress::status(const u_short status) noexcept {
 				// Получаем оставшееся время до завершения, в секундах
 				const time_t seconds = ((100 - status) * ((current - this->startTime) / double(status)));
 				// Получаем дату и время завершения работы
-				const string & endDate = this->date(current + seconds);
+				const string & endDate = this->date(seconds);
 				// Выполняем расчёт оставшихся секунд
 				// Получаем оставшееся время
 				const auto & dimension = this->dimension(seconds);
@@ -123,7 +125,7 @@ void anyks::Progress::update(const u_short status) noexcept {
 				// Получаем оставшееся время до завершения, в секундах
 				const time_t seconds = ((100 - status) * ((current - this->startTime) / double(status)));
 				// Получаем дату и время завершения работы
-				const string & endDate = this->date(current + seconds);
+				const string & endDate = this->date(seconds);
 				// Получаем оставшееся время
 				const auto & dimension = this->dimension(seconds);
 				// Если конечная дата не получена
