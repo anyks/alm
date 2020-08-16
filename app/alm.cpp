@@ -264,7 +264,7 @@ int main(int argc, char * argv[]) noexcept {
 			// Если возникает ошибка
 			} catch(const exception & e) {
 				// Выводим сообщение об ошибке
-				print(alphabet.format("the JSON config [%s] is broken\r\n", value), env.get("log"));
+				print(alphabet.format("the JSON config [%s] is broken\r\n", data.c_str()), env.get("log"));
 			}
 		}
 	}
@@ -1346,8 +1346,8 @@ int main(int argc, char * argv[]) noexcept {
 								} else print("broken json file\r\n", env.get("log"));
 							// Если возникает ошибка
 							} catch(const exception & e) {
-								// Сообщаем, что json файл испорчен
-								print("broken json file\r\n", env.get("log"));
+								// Выводим сообщение об ошибке
+								print(alphabet.format("the JSON data [%s] is broken\r\n", textData.c_str()), env.get("log"));
 							}
 						// Сообщаем, что контекст пустой
 						} else print("context is empty\r\n", env.get("log"));
@@ -1457,8 +1457,8 @@ int main(int argc, char * argv[]) noexcept {
 										} else print("broken json file\r\n", env.get("log"));
 									// Если возникает ошибка
 									} catch(const exception & e) {
-										// Сообщаем, что json файл испорчен
-										print("broken json file\r\n", env.get("log"));
+										// Выводим сообщение об ошибке
+										print(alphabet.format("the JSON data [%s] is broken\r\n", textData.c_str()), env.get("log"));
 									}
 								// Сообщаем, что контекст пустой
 								} else print("context is empty\r\n", env.get("log"));
