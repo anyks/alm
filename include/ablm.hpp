@@ -131,6 +131,7 @@ namespace anyks {
 			 * info Метод вывода инормационных данных словаря
 			 */
 			void info() const noexcept;
+		public:
 			/**
 			 * setAlm Метод установки объекта языковой модели
 			 * @param alm объект языковой модели для установки
