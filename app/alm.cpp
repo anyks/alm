@@ -1151,24 +1151,6 @@ int main(int argc, char * argv[]) noexcept {
 				if(debug == 1) ablm.setFlag(ablm_t::flag_t::debug);
 				// Выполняем инициализацию словаря
 				ablm.init();
-				// Если отладка включена, выводим индикатор загрузки
-				if(debug > 0){
-					// Устанавливаем заголовки прогресс-бара
-					pss.title("Read dictionary", "Read dictionary is done");
-					// Выводим индикатор прогресс-бара
-					switch(debug){
-						case 1: pss.update(); break;
-						case 2: pss.status(); break;
-					}
-				}
-				// Выполняем чтение бинарных данных
-				ablm.readToolkit([debug, &pss](const u_short status) noexcept {
-					// Отображаем ход процесса
-					switch(debug){
-						case 1: pss.update(status); break;
-						case 2: pss.status(status); break;
-					}
-				}, env.is("method", "info"));
 				// Если это запрос информации о словаре
 				if(env.is("method", "info")){
 					// Выводим информацию о словаре
@@ -1181,6 +1163,26 @@ int main(int argc, char * argv[]) noexcept {
 						print(alphabet.format("work time shifting: %lld %s\r\n", dimension.first, dimension.second.c_str()), env.get("log"), alphabet_t::log_t::info);
 					// Выходим из приложения
 					} else exit(0);
+				// Если - это обычная загрузка из бинарного контейнера
+				} else {
+					// Если отладка включена, выводим индикатор загрузки
+					if(debug > 0){
+						// Устанавливаем заголовки прогресс-бара
+						pss.title("Read dictionary", "Read dictionary is done");
+						// Выводим индикатор прогресс-бара
+						switch(debug){
+							case 1: pss.update(); break;
+							case 2: pss.status(); break;
+						}
+					}
+					// Выполняем чтение бинарных данных
+					ablm.readToolkit([debug, &pss](const u_short status) noexcept {
+						// Отображаем ход процесса
+						switch(debug){
+							case 1: pss.update(status); break;
+							case 2: pss.status(status); break;
+						}
+					});
 				}
 			// Если это метод токенизации
 			} else if(env.is("method", "tokens")) {

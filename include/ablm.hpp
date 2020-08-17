@@ -76,7 +76,7 @@ namespace anyks {
 			} meta_t;
 		private:
 			// Метаданные словаря
-			meta_t meta = {};
+			meta_t meta;
 			// Флаги параметров
 			bitset <10> flags;
 			// Адрес файла словаря
@@ -105,21 +105,19 @@ namespace anyks {
 		public:
 			/**
 			 * write Метод записи данных словаря в файл
-			 * @param status статус расёта
+			 * @param status статус записи данных в бинарный контейнер
 			 */
 			const bool write(function <void (const u_short)> status = nullptr) noexcept;
 			/**
-			 * readAlm Метод чтения данных словаря из файла в объект alm
-			 * @param status статус расёта
-			 * @param info   выводить только информацию о словаре
+			 * readAlm Метод чтения данных из файла в объект alm
+			 * @param status статус чтения данных из бинарного контейнера
 			 */
-			const bool readAlm(function <void (const u_short)> status = nullptr, const bool info = false) noexcept;
+			const bool readAlm(function <void (const u_short)> status = nullptr) noexcept;
 			/**
-			 * readToolkit Метод чтения данных словаря из файла в объект toolkit
-			 * @param status статус расёта
-			 * @param info   выводить только информацию о словаре
+			 * readToolkit Метод чтения данных из файла в объект toolkit
+			 * @param status статус чтения данных из бинарного контейнера
 			 */
-			const bool readToolkit(function <void (const u_short)> status = nullptr, const bool info = false) noexcept;
+			const bool readToolkit(function <void (const u_short)> status = nullptr) noexcept;
 		public:
 			/**
 			 * Метод инициализации
