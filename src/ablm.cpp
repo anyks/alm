@@ -237,7 +237,7 @@ const bool anyks::AbLM::write(function <void (const u_short)> status) noexcept {
 	return result;
 }
 /**
- * readAlm Метод чтения данных словаря из файла в объект toolkit
+ * readAlm Метод чтения данных словаря из файла в объект alm
  * @param status статус расёта
  * @param info   выводить только информацию о словаре
  */
