@@ -181,6 +181,22 @@ const size_t anyks::Tokenizer::fti(const double num, const u_short count) const 
 	return result;
 }
 /**
+ * abbrEmpty Метод проверки на существование буквенных аббревиатур
+ * @return результат проверки
+ */
+const bool anyks::Tokenizer::abbrEmpty() const noexcept {
+	// Выводим результат проверки
+	return this->abbrs.empty();
+}
+/**
+ * suffixEmpty Метод проверки на существование суффиксов цифровых аббревиатур
+ * @return результат проверки
+ */
+const bool anyks::Tokenizer::suffixEmpty() const noexcept {
+	// Выводим результат проверки
+	return this->suffix.empty();
+}
+/**
  * isToken Метод проверки идентификатора на токен
  * @param idw идентификатор слова для проверки
  * @return    результат проверки

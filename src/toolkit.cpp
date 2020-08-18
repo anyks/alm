@@ -927,7 +927,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 				// Отправляем собранную последовательность
 				this->arpa->add(seq, idd);
 				// Если токен аббревиатуры не отключён
-				if(this->tokenDisable.count(token_t::abbr) < 1){
+				if(!this->tokenizer->abbrEmpty() && (this->tokenDisable.count(token_t::abbr) < 1)){
 					// Флаг найденной буквенной аббревиатуры
 					bool isAbbr = false;
 					// Новая последовательность

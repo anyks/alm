@@ -174,6 +174,16 @@ namespace anyks {
 			const size_t fti(const double num, const u_short count = 0) const noexcept;
 		public:
 			/**
+			 * abbrEmpty Метод проверки на существование буквенных аббревиатур
+			 * @return результат проверки
+			 */
+			const bool abbrEmpty() const noexcept;
+			/**
+			 * suffixEmpty Метод проверки на существование суффиксов цифровых аббревиатур
+			 * @return результат проверки
+			 */
+			const bool suffixEmpty() const noexcept;
+			/**
 			 * isToken Метод проверки идентификатора на токен
 			 * @param idw идентификатор слова для проверки
 			 * @return    результат проверки
