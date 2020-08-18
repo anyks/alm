@@ -215,39 +215,44 @@ const bool anyks::Tokenizer::isAbbr(const wstring & word) const noexcept {
 	bool result = false;
 	// Если слово передано
 	if(!word.empty()){
-		// Если проверка пройедна
-		if(this->alphabet->isNumber(wstring(1, word.front())) && !this->alphabet->isNumber(wstring(1, word.back()))){
-			// Если список суффиксов цифровых аббревиатур передан
-			if(!this->collect && !this->suffix.empty()){
-				// Выполняем поиск дефиса
-				const size_t pos = word.rfind(L'-');
-				// Если дефис найден
-				if((pos != wstring::npos) && this->alphabet->isNumber(word.substr(0, pos))){
+		// Если - это сборка данных, детектируем аббревиатуры только через модуль алфавита
+		if(this->collect) result = this->alphabet->isAbbr(word);
+		// Иначе выполняем детектирование аббревиатуры на основе собранных данных
+		else {
+			// Если проверка пройедна
+			if(this->alphabet->isNumber(wstring(1, word.front())) && !this->alphabet->isNumber(wstring(1, word.back()))){
+				// Если список суффиксов цифровых аббревиатур передан
+				if(!this->suffix.empty()){
+					// Выполняем поиск дефиса
+					const size_t pos = word.rfind(L'-');
+					// Если дефис найден
+					if((pos != wstring::npos) && this->alphabet->isNumber(word.substr(0, pos))){
+						// Получаем идентификатор слова
+						const size_t idw = this->idw(word.substr(pos + 1));
+						// Если идентификатор получен
+						if(idw > 0) result = (this->suffix.count(idw) > 0);
+					}
+				// Иначе проверяем на аббревиатуру с помощью алфавита
+				} else result = this->alphabet->isAbbr(word);
+			// Если список буквенных аббревиатур передан
+			} else if(!this->abbrs.empty()){
+				// Идентификатор слова
+				size_t idw = idw_t::NIDW;
+				// Если последний символ является точкой
+				if(word.back() == L'.'){
+					// Получаем слово для провеки
+					const wstring tmp(word.begin(), word.end() - 1);
 					// Получаем идентификатор слова
-					const size_t idw = this->idw(word.substr(pos + 1));
-					// Если идентификатор получен
-					if(idw > 0) result = (this->suffix.count(idw) > 0);
-				}
+					idw = this->idw(tmp);
+				// Если точка в слове не найдена
+				} else idw = this->idw(word);
+				// Выполняем проверку сущестования аббревиатуры
+				result = (this->abbrs.count(idw) > 0);
+				// Если аббревиатура не найдена, проверяем слово по словарю
+				if(!result) result = this->alphabet->isAbbr(word);
 			// Иначе проверяем на аббревиатуру с помощью алфавита
 			} else result = this->alphabet->isAbbr(word);
-		// Если список буквенных аббревиатур передан
-		} else if(!this->abbrs.empty()){
-			// Идентификатор слова
-			size_t idw = idw_t::NIDW;
-			// Если последний символ является точкой
-			if(word.back() == L'.'){
-				// Получаем слово для провеки
-				const wstring tmp(word.begin(), word.end() - 1);
-				// Получаем идентификатор слова
-				idw = this->idw(tmp);
-			// Если точка в слове не найдена
-			} else idw = this->idw(word);
-			// Выполняем проверку сущестования аббревиатуры
-			result = (this->abbrs.count(idw) > 0);
-			// Если аббревиатура не найдена, проверяем слово по словарю
-			if(!result) result = this->alphabet->isAbbr(word);
-		// Иначе проверяем на аббревиатуру с помощью алфавита
-		} else result = this->alphabet->isAbbr(word);
+		}
 	}
 	// Выводим результат
 	return result;

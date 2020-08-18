@@ -923,7 +923,29 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 			 * Если слова всего два, значит это начало и конец предложения
 			 * Нам же нужны только нормальные n-граммы
 			 */
-			if(seq.size() > 2) this->arpa->add(seq, idd);
+			if(seq.size() > 2){
+				// Флаг найденной буквенной аббревиатуры
+				bool isAbbr = false;
+				// Новая последовательность
+				vector <pair_t> tmp;
+				// Отправляем собранную последовательность
+				this->arpa->add(seq, idd);
+				// Переходим по всей последовательности
+				for(auto & item : seq){
+					// Если слово является аббревиатурой
+					if(this->tokenizer->isAbbr(item.first)){
+						// Запоминаем, что аббревиатура найдена
+						isAbbr = true;
+						// Заменяем слово на аббревиатуру
+						tmp.emplace_back((size_t) token_t::abbr, 0);
+					// Иначе добавляем слово как оно есть
+					} else tmp.push_back(item);
+				}
+				// Если последовательность собрана и аббревиатура найдена
+				if(isAbbr && !tmp.empty()) this->arpa->add(tmp, idd);
+				// Очищаем выделенную память
+				vector <pair_t> ().swap(tmp);
+			}
 			// Очищаем список последовательностей
 			seq.clear();
 			// Добавляем в список начало предложения
