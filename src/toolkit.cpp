@@ -898,13 +898,10 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 		auto resFn = [&seq, fid, sid, idd, this]() noexcept {
 			// Идентификатор предыдущего слова
 			size_t idw = idw_t::NIDW;
-			// Удаляем следующие друг за другом неизвестные слова
+			// Удаляем следующие друг за другом одинаковые слова
 			for(auto it = seq.begin(); it != seq.end();){
-				/**
-				 * Если текущее слово это неизвестный символ
-				 * и предыдущее слово тоже было неизвестным символом
-				 */
-				if((it->first == uid) && (idw == uid)){
+				// Если текущее слово совпадает с предыдущем словом
+				if(it->first == idw){
 					// Запоминаем текущее слово
 					idw = it->first;
 					// Удаляем текущее слово
