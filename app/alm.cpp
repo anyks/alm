@@ -1611,8 +1611,6 @@ int main(int argc, char * argv[]) noexcept {
 				} else {
 					// Если путь получен
 					if(((value = env.get("corpus")) != nullptr) && fsys_t::isdir(value)){
-						// Активируем сборку суффиксов цифровых аббревиатур
-						tokenizer.allowCollectSuffix();
 						// Запоминаем путь к файлам
 						const string & path = realpath(value, nullptr);
 						// Расширение файлов текстового корпуса
@@ -1719,8 +1717,6 @@ int main(int argc, char * argv[]) noexcept {
 						}
 					// Если файл корпуса получен
 					} else if(((value = env.get("corpus")) != nullptr) && fsys_t::isfile(value)){
-						// Активируем сборку суффиксов цифровых аббревиатур
-						tokenizer.allowCollectSuffix();
 						// Запоминаем адрес файла
 						const string & filename = realpath(value, nullptr);
 						// Если количество ядер передано
