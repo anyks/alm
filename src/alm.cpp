@@ -624,19 +624,6 @@ const bool anyks::Alm::check(const vector <wstring> & seq, const u_short step) c
 	return result;
 }
 /**
- * exist Метод проверки существования последовательности
- * @param seq  список слов последовательности
- * @param step размер шага проверки последовательности
- * @return     результат проверки
- */
-const bool anyks::Alm::exist(const vector <size_t> & seq, const u_short step) const noexcept {
-	// Блокируем варнинг
-	(void) seq;
-	(void) step;
-	// Выводим результат
-	return false;
-}
-/**
  * check Метод проверки существования последовательности, с указанным шагом
  * @param seq  список слов последовательности
  * @param step размер шага проверки последовательности
@@ -825,6 +812,19 @@ const pair <bool, size_t> anyks::Alm::check(const vector <size_t> & seq, const b
 	// Блокируем варнинг
 	(void) seq;
 	(void) accurate;
+	// Выводим результат
+	return {false, 0};
+}
+/**
+ * exist Метод проверки существования последовательности
+ * @param seq  список слов последовательности
+ * @param step размер шага проверки последовательности
+ * @return     результат проверки
+ */
+const pair <bool, size_t> anyks::Alm::exist(const vector <size_t> & seq, const u_short step) const noexcept {
+	// Блокируем варнинг
+	(void) seq;
+	(void) step;
 	// Выводим результат
 	return {false, 0};
 }

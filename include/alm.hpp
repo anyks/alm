@@ -303,13 +303,6 @@ namespace anyks {
 			 */
 			const bool check(const vector <wstring> & seq, const u_short step) const noexcept;
 			/**
-			 * exist Метод проверки существования последовательности
-			 * @param seq  список слов последовательности
-			 * @param step размер шага проверки последовательности
-			 * @return     результат проверки
-			 */
-			virtual const bool exist(const vector <size_t> & seq, const u_short step) const noexcept;
-			/**
 			 * check Метод проверки существования последовательности, с указанным шагом
 			 * @param seq  список слов последовательности
 			 * @param step размер шага проверки последовательности
@@ -351,6 +344,14 @@ namespace anyks {
 			 * @return         результат проверки
 			 */
 			virtual const pair <bool, size_t> check(const vector <size_t> & seq, const bool accurate = false) const noexcept;
+		public:
+			/**
+			 * exist Метод проверки существования последовательности
+			 * @param seq  список слов последовательности
+			 * @param step размер шага проверки последовательности
+			 * @return     результат проверки
+			 */
+			virtual const pair <bool, size_t> exist(const vector <size_t> & seq, const u_short step) const noexcept;
 		public:
 			/**
 			 * fixUppers Метод исправления регистров в тексте
@@ -879,19 +880,19 @@ namespace anyks {
 			 */
 			virtual const ppl_t perplexity(const vector <size_t> & seq) const noexcept;
 			/**
-			 * exist Метод проверки существования последовательности
-			 * @param seq  список слов последовательности
-			 * @param step размер шага проверки последовательности
-			 * @return     результат проверки
-			 */
-			virtual const bool exist(const vector <size_t> & seq, const u_short step) const noexcept;
-			/**
 			 * check Метод проверки существования последовательности, с указанным шагом
 			 * @param seq  список слов последовательности
 			 * @param step размер шага проверки последовательности
 			 * @return     результат проверки
 			 */
 			virtual const bool check(const vector <size_t> & seq, const u_short step) const noexcept;
+			/**
+			 * exist Метод проверки существования последовательности
+			 * @param seq  список слов последовательности
+			 * @param step размер шага проверки последовательности
+			 * @return     результат проверки
+			 */
+			virtual const pair <bool, size_t> exist(const vector <size_t> & seq, const u_short step) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности
 			 * @param seq      список слов последовательности
@@ -1041,19 +1042,19 @@ namespace anyks {
 			 */
 			const ppl_t perplexity(const vector <size_t> & seq) const noexcept;
 			/**
-			 * exist Метод проверки существования последовательности
-			 * @param seq  список слов последовательности
-			 * @param step размер шага проверки последовательности
-			 * @return     результат проверки
-			 */
-			const bool exist(const vector <size_t> & seq, const u_short step) const noexcept;
-			/**
 			 * check Метод проверки существования последовательности, с указанным шагом
 			 * @param seq  список слов последовательности
 			 * @param step размер шага проверки последовательности
 			 * @return     результат проверки
 			 */
 			const bool check(const vector <size_t> & seq, const u_short step) const noexcept;
+			/**
+			 * exist Метод проверки существования последовательности
+			 * @param seq  список слов последовательности
+			 * @param step размер шага проверки последовательности
+			 * @return     результат проверки
+			 */
+			const pair <bool, size_t> exist(const vector <size_t> & seq, const u_short step) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности
 			 * @param seq      список слов последовательности

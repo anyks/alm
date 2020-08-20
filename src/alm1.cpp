@@ -503,126 +503,6 @@ const anyks::Alm::ppl_t anyks::Alm1::perplexity(const vector <size_t> & seq) con
 	return result;
 }
 /**
- * exist Метод проверки существования последовательности
- * @param seq  список слов последовательности
- * @param step размер шага проверки последовательности
- * @return     результат проверки
- */
-const bool anyks::Alm1::exist(const vector <size_t> & seq, const u_short step) const noexcept {
-	// Результат работы функции
-	bool result = false;
-	// Если последовательность передана
-	if(!seq.empty() && (seq.size() >= size_t(step)) && (this->size >= step) && !this->arpa.empty()){
-		// Временная последовательность
-		vector <size_t> sequence;
-		// Если последовательность не экранированна
-		if((seq.back() == size_t(token_t::finish)) &&
-		(seq.front() == size_t(token_t::start))) sequence.assign(seq.begin() + 1, seq.end() - 1);
-		else if(seq.back() == size_t(token_t::finish)) sequence.assign(seq.begin(), seq.end() - 1);
-		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
-		else sequence.assign(seq.begin(), seq.end());
-		// Если последовательность, до сих пор соответствует
-		if(sequence.size() >= size_t(step)){
-			/**
-			 * isAllowedTokenFn Функция проверки на валидность токена
-			 * @param idw идентификатор токена для проверки
-			 * @return    результат проверки токена
-			 */
-			auto isAllowedTokenFn = [this](const size_t idw) noexcept {
-				// Результат работы функции
-				bool result = false;
-				// Если токен передан и он валиден
-				if((idw > 0) && (idw != idw_t::NIDW)){
-					// Выполняем проверку, является ли токен - нормальным словом
-					result = !this->tokenizer->isToken(idw);
-					// Если это системный токен
-					if(!result){
-						// Получаем идентификатор системного токена
-						const token_t idt = (token_t) idw;
-						// Проверяем, является ли токен разрешённым
-						result = (
-							(idt == token_t::num) ||
-							(idt == token_t::url) ||
-							(idt == token_t::abbr) ||
-							(idt == token_t::date) ||
-							(idt == token_t::time) ||
-							(idt == token_t::anum) ||
-							(idt == token_t::rnum) ||
-							(idt == token_t::greek) ||
-							(idt == token_t::specl) ||
-							(idt == token_t::aprox) ||
-							(idt == token_t::range) ||
-							(idt == token_t::score) ||
-							(idt == token_t::dimen) ||
-							(idt == token_t::fract) ||
-							(idt == token_t::currency)
-						);
-					}
-				}
-				// Выводим результат проверки
-				return result;
-			};
-			/**
-			 * Прототип функции проверки на существование последовательности
-			 * @param начальная позиция итератора в последовательности
-			 * @return результат проверки, сущестования последовательности
-			 */
-			function <const bool (u_short)> checkFn;
-			/**
-			 * checkFn Функция проверки на существование последовательности
-			 * @param start начальная позиция итератора в последовательности
-			 * @return      результат проверки, сущестования последовательности
-			 */
-			checkFn = [&isAllowedTokenFn, &checkFn, &sequence, step, this](u_short start) noexcept {
-				// Результат работы функции
-				bool result = false;
-				// Копируем основную карту
-				arpa_t * obj = &this->arpa;
-				// Идентификатор слова и количество слов в последовательности
-				size_t idw = idw_t::NIDW, count = sequence.size();
-				// Получаем конечный элемент
-				const u_short stop = (start + ((count - size_t(start)) >= size_t(step) ? step : count - start));
-				// Переходим по всему объекту
-				for(u_short i = start; i < stop; i++){
-					// Получаем идентификатор слова
-					idw = sequence.at(i);
-					// Если идентификатор токена - валиден
-					if(isAllowedTokenFn(idw)){
-						// Выполняем поиск нашего слова
-						auto it = obj->find(idw);
-						// Если слово найдено
-						if(it != obj->end()){
-							// Получаем блок структуры
-							obj = &it->second;
-							// Если мы дошли до конца
-							result = (i == (stop - 1));
-							// Увеличиваем начало следующей итерации
-							if(result) start++;
-						// Выходим из цикла
-						} else break;
-					// Если токен не валиден
-					} else {
-						// Запоминаем, что результат возможем
-						result = true;
-						// Увеличиваем начало следующей итерации
-						start += 2;
-						// Выходим из цикла
-						break;
-					}
-				}
-				// Если начало следующей итерации еще возможно
-				if(result && (size_t(start) < count)) result = checkFn(start);
-				// Выводим результат проверки
-				return result;
-			};
-			// Выполняем проверку
-			result = checkFn(0);
-		}
-	}
-	// Выводим результат
-	return result;
-}
-/**
  * check Метод проверки существования последовательности, с указанным шагом
  * @param seq  список слов последовательности
  * @param step размер шага проверки последовательности
@@ -696,6 +576,138 @@ const bool anyks::Alm1::check(const vector <size_t> & seq, const u_short step) c
 				offset1++;
 				offset2++;
 			}
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * exist Метод проверки существования последовательности
+ * @param seq  список слов последовательности
+ * @param step размер шага проверки последовательности
+ * @return     результат проверки
+ */
+const pair <bool, size_t> anyks::Alm1::exist(const vector <size_t> & seq, const u_short step) const noexcept {
+	// Результат работы функции
+	pair <bool, size_t> result = {false, 0};
+	// Если последовательность передана
+	if(!seq.empty() && (seq.size() >= size_t(step)) && (this->size >= step) && !this->arpa.empty()){
+		// Временная последовательность
+		vector <size_t> sequence;
+		// Если последовательность не экранированна
+		if((seq.back() == size_t(token_t::finish)) &&
+		(seq.front() == size_t(token_t::start))) sequence.assign(seq.begin() + 1, seq.end() - 1);
+		else if(seq.back() == size_t(token_t::finish)) sequence.assign(seq.begin(), seq.end() - 1);
+		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
+		else sequence.assign(seq.begin(), seq.end());
+		// Если последовательность, до сих пор соответствует
+		if(sequence.size() >= size_t(step)){
+			/**
+			 * isAllowedTokenFn Функция проверки на валидность токена
+			 * @param idw идентификатор токена для проверки
+			 * @return    результат проверки токена
+			 */
+			auto isAllowedTokenFn = [this](const size_t idw) noexcept {
+				// Результат работы функции
+				bool result = false;
+				// Если токен передан и он валиден
+				if((idw > 0) && (idw != idw_t::NIDW)){
+					// Выполняем проверку, является ли токен - нормальным словом
+					result = !this->tokenizer->isToken(idw);
+					// Если это системный токен
+					if(!result){
+						// Получаем идентификатор системного токена
+						const token_t idt = (token_t) idw;
+						// Проверяем, является ли токен разрешённым
+						result = (
+							(idt == token_t::num) ||
+							(idt == token_t::url) ||
+							(idt == token_t::abbr) ||
+							(idt == token_t::date) ||
+							(idt == token_t::time) ||
+							(idt == token_t::anum) ||
+							(idt == token_t::rnum) ||
+							(idt == token_t::greek) ||
+							(idt == token_t::specl) ||
+							(idt == token_t::aprox) ||
+							(idt == token_t::range) ||
+							(idt == token_t::score) ||
+							(idt == token_t::dimen) ||
+							(idt == token_t::fract) ||
+							(idt == token_t::currency)
+						);
+					}
+				}
+				// Выводим результат проверки
+				return result;
+			};
+			/**
+			 * Прототип функции проверки на существование последовательности
+			 * @param начальная позиция итератора в последовательности
+			 * @return результат проверки, сущестования последовательности
+			 */
+			function <const pair <bool, size_t> (u_short)> checkFn;
+			/**
+			 * checkFn Функция проверки на существование последовательности
+			 * @param start начальная позиция итератора в последовательности
+			 * @return      результат проверки, сущестования последовательности
+			 */
+			checkFn = [&isAllowedTokenFn, &checkFn, &sequence, step, this](u_short start) noexcept {
+				// Результат работы функции
+				pair <bool, size_t> result = {false, 0};
+				// Копируем основную карту
+				arpa_t * obj = &this->arpa;
+				// Идентификатор слова и количество слов в последовательности
+				size_t idw = idw_t::NIDW, count = sequence.size();
+				// Получаем конечный элемент
+				const u_short stop = (start + ((count - size_t(start)) >= size_t(step) ? step : count - start));
+				// Переходим по всему объекту
+				for(u_short i = start; i < stop; i++){
+					// Получаем идентификатор слова
+					idw = sequence.at(i);
+					// Если идентификатор токена - валиден
+					if(isAllowedTokenFn(idw)){
+						// Выполняем поиск нашего слова
+						auto it = obj->find(idw);
+						// Если слово найдено
+						if(it != obj->end()){
+							// Получаем блок структуры
+							obj = &it->second;
+							// Если мы дошли до конца
+							result.first = (i == (stop - 1));
+							// Увеличиваем начало следующей итерации
+							if(result.first){
+								// Увеличиваем стартовую позицию
+								start++;
+								// Устанавливаем количество совпадений
+								result.second = stop;
+							}
+						// Выходим из цикла
+						} else break;
+					// Если токен не валиден
+					} else {
+						// Увеличиваем начало следующей итерации
+						start += 2;
+						// Запоминаем, что результат возможем
+						result.first = true;
+						// Выходим из цикла
+						break;
+					}
+				}
+				// Если начало следующей итерации еще возможно
+				if(result.first && (size_t(start) < count)){
+					// Выполняем поиск дальше
+					const auto & res = checkFn(start);
+					// Устанавливаем результат поиска
+					result.first = res.first;
+					// Увеличиваем количество найденных совпадений
+					result.second += res.second;
+				}
+				// Выводим результат проверки
+				return result;
+			};
+			// Выполняем проверку
+			result = checkFn(0);
 		}
 	}
 	// Выводим результат
