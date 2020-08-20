@@ -587,7 +587,7 @@ const bool anyks::Alm1::exist(const vector <size_t> & seq, const u_short step) c
 					// Получаем идентификатор слова
 					idw = sequence.at(i);
 
-					cout << " !!!!!!!!!!!!!!1 " << this->alm->word(idw) << endl;
+					cout << " !!!!!!!!!!!!!!1 " << this->word(idw) << endl;
 
 					// Если идентификатор токена - валиден
 					if(isAllowedTokenFn(idw)){
