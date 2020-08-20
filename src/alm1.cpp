@@ -680,7 +680,7 @@ const pair <bool, size_t> anyks::Alm1::exist(const vector <size_t> & seq, const 
 								// Увеличиваем стартовую позицию
 								start++;
 								// Устанавливаем количество совпадений
-								result.second = stop;
+								if(step == stop) result.second = step;
 							}
 						// Выходим из цикла
 						} else break;
