@@ -191,16 +191,43 @@ void anyks::Alm2::clear(){
 	reinterpret_cast <alm_t *> (this)->clear();
 }
 /**
- * check Метод проверки существования последовательности, с указанным шагом
+ * exist Метод проверки существования последовательности
  * @param seq  список слов последовательности
- * @param size размер шаговой n-граммы
+ * @param step размер шага проверки последовательности
  * @return     результат проверки
  */
-const bool anyks::Alm2::check(const vector <size_t> & seq, const u_short size) const noexcept {
+const bool anyks::Alm2::exist(const vector <size_t> & seq, const u_short step) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если последовательность передана
-	if(!seq.empty() && (seq.size() >= size) && (this->size >= size) && !this->arpa.empty()){
+	if(!seq.empty() && (seq.size() >= size_t(step)) && (this->size >= step) && !this->arpa.empty()){
+		// Временная последовательность
+		vector <size_t> sequence;
+		// Если последовательность не экранированна
+		if((seq.back() == size_t(token_t::finish)) &&
+		(seq.front() == size_t(token_t::start))) sequence.assign(seq.begin() + 1, seq.end() - 1);
+		else if(seq.back() == size_t(token_t::finish)) sequence.assign(seq.begin(), seq.end() - 1);
+		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
+		else sequence.assign(seq.begin(), seq.end());
+		// Если последовательность, до сих пор соответствует
+		if(sequence.size() >= size_t(step)){
+
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * check Метод проверки существования последовательности, с указанным шагом
+ * @param seq  список слов последовательности
+ * @param step размер шага проверки последовательности
+ * @return     результат проверки
+ */
+const bool anyks::Alm2::check(const vector <size_t> & seq, const u_short step) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если последовательность передана
+	if(!seq.empty() && (seq.size() >= size_t(step)) && (this->size >= step) && !this->arpa.empty()){
 		// Временная последовательность
 		vector <size_t> tmp, sequence;
 		// Если последовательность не экранированна
@@ -209,52 +236,55 @@ const bool anyks::Alm2::check(const vector <size_t> & seq, const u_short size) c
 		else if(seq.back() == size_t(token_t::finish)) sequence.assign(seq.begin(), seq.end() - 1);
 		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
 		else sequence.assign(seq.begin(), seq.end());
-		/**
-		 * checkFn Функция проверки существования последовательности
-		 * @param seq список слов последовательности
-		 * @return    результат проверки
-		 */
-		auto checkFn = [this](const vector <size_t> & seq) noexcept {
-			// Регистры слова в последовательности
-			bool result = false;
-			// Если список последовательностей передан
-			if(!seq.empty() && (this->size > 0)){
-				// Получаем размер N-граммы
-				const u_short size = seq.size();
-				// Выполняем поиск списка N-грамм
-				auto it = this->arpa.find(size);
-				// Если список N-грамм получен
-				if(it != this->arpa.end()){
-					// Получаем идентификатор последовательности
-					const size_t ids = (size > 1 ? this->tokenizer->ids(seq) : seq.front());
-					// Выполняем проверку существования последовательности
-					auto jt = it->second.find(ids);
-					// Если последовательность существует
-					result = (jt != it->second.end());
+		// Если последовательность, до сих пор соответствует
+		if(sequence.size() >= size_t(step)){
+			/**
+			 * checkFn Функция проверки существования последовательности
+			 * @param seq список слов последовательности
+			 * @return    результат проверки
+			 */
+			auto checkFn = [this](const vector <size_t> & seq) noexcept {
+				// Регистры слова в последовательности
+				bool result = false;
+				// Если список последовательностей передан
+				if(!seq.empty() && (this->size > 0)){
+					// Получаем размер N-граммы
+					const u_short size = seq.size();
+					// Выполняем поиск списка N-грамм
+					auto it = this->arpa.find(size);
+					// Если список N-грамм получен
+					if(it != this->arpa.end()){
+						// Получаем идентификатор последовательности
+						const size_t ids = (size > 1 ? this->tokenizer->ids(seq) : seq.front());
+						// Выполняем проверку существования последовательности
+						auto jt = it->second.find(ids);
+						// Если последовательность существует
+						result = (jt != it->second.end());
+					}
 				}
+				// Выводим результат
+				return result;
+			};
+			// Количество переданных последовательностей
+			const size_t count = sequence.size();
+			// Определяем смещение в последовательности
+			size_t offset1 = 0, offset2 = (count > size_t(step) ? (step < 2 ? 2 : step) : count);
+			// Выполняем извлечение данных
+			while(offset2 < (count + 1)){
+				// Получаем первую часть последовательности
+				tmp.assign(sequence.begin() + offset1, sequence.begin() + offset2);
+				// Если последовательность получена
+				if(!tmp.empty()){
+					// Получаем регистр слова
+					result = checkFn(tmp);
+					// Если последовательность не найдена, выходим
+					if(!result) break;
+				// Выходим из цикла
+				} else break;
+				// Увеличиваем смещение
+				offset1++;
+				offset2++;
 			}
-			// Выводим результат
-			return result;
-		};
-		// Количество переданных последовательностей
-		const size_t count = sequence.size();
-		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > size ? (size < 2 ? 2 : size) : count);
-		// Выполняем извлечение данных
-		while(offset2 < (count + 1)){
-			// Получаем первую часть последовательности
-			tmp.assign(sequence.begin() + offset1, sequence.begin() + offset2);
-			// Если последовательность получена
-			if(!tmp.empty()){
-				// Получаем регистр слова
-				result = checkFn(tmp);
-				// Если последовательность не найдена, выходим
-				if(!result) break;
-			// Выходим из цикла
-			} else break;
-			// Увеличиваем смещение
-			offset1++;
-			offset2++;
 		}
 	}
 	// Выводим результат
@@ -280,7 +310,7 @@ const anyks::Alm::ppl_t anyks::Alm2::perplexity(const vector <size_t> & seq) con
 		// Текст данных отладки собранных при расчёте
 		map <size_t, pair <string, string>> debugMessages;
 		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+		size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 		// Проверяем разрешено ли неизвестное слово
 		const bool isAllowUnk = (this->frequency({size_t(token_t::unk)}).first != this->zero);
 		/**
@@ -568,7 +598,7 @@ const pair <bool, size_t> anyks::Alm2::check(const vector <size_t> & seq, const 
 		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
 		else sequence.assign(seq.begin(), seq.end());
 		/**
-		 * checkFn Прототип функции проверки существования последовательности
+		 * Прототип функции проверки существования последовательности
 		 * @param  список слов последовательности
 		 * @return результат проверки
 		 */
@@ -612,7 +642,7 @@ const pair <bool, size_t> anyks::Alm2::check(const vector <size_t> & seq, const 
 		// Количество переданных последовательностей
 		const size_t count = sequence.size();
 		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+		size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 		// Выполняем извлечение данных
 		while(offset2 < (count + 1)){
 			// Получаем первую часть последовательности
@@ -797,7 +827,7 @@ void anyks::Alm2::sentences(function <const bool (const wstring &)> callback) co
 	// Если языковая модель загружена
 	if(!this->arpa.empty()){
 		/**
-		 * runFn Прототип функции генерации предложений
+		 * Прототип функции генерации предложений
 		 * @param список собранной последовательности
 		 */
 		function <const bool (const vector <size_t> &)> runFn;
@@ -893,7 +923,7 @@ void anyks::Alm2::getUppers(const vector <size_t> & seq, vector <size_t> & upps)
 		if(!isFront) sequence.push_back((size_t) token_t::finish);
 		if(!isBack)  sequence.insert(sequence.begin(), (size_t) token_t::start);
 		/**
-		 * uppersFn Прототип функции извлечения регистров последовательности
+		 * Прототип функции извлечения регистров последовательности
 		 * @param  список слов последовательности
 		 * @return регистры последнего слова последовательности
 		 */
@@ -939,7 +969,7 @@ void anyks::Alm2::getUppers(const vector <size_t> & seq, vector <size_t> & upps)
 		// Количество переданных последовательностей
 		const size_t count = sequence.size();
 		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+		size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 		// Выполняем извлечение данных
 		while(offset2 < (count + 1)){
 			// Получаем первую часть последовательности
@@ -1039,7 +1069,7 @@ void anyks::Alm2::find(const wstring & text, function <void (const wstring &)> c
 			}
 		};
 		/**
-		 * checkFn Прототип функции проверки существования последовательности
+		 * Прототип функции проверки существования последовательности
 		 * @param список слов последовательности
 		 * @param список реальных слов в последовательности
 		 */
@@ -1102,7 +1132,7 @@ void anyks::Alm2::find(const wstring & text, function <void (const wstring &)> c
 				// Количество переданных последовательностей
 				const size_t count = seq.size();
 				// Определяем смещение в последовательности
-				size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+				size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 				// Выполняем извлечение данных
 				while(offset2 < (count + 1)){
 					// Получаем первую часть последовательности
@@ -1207,7 +1237,7 @@ const wstring anyks::Alm2::context(const vector <size_t> & seq, const bool nwrd)
 		if(seq.back() != size_t(token_t::finish)) sequence.push_back((size_t) token_t::finish);
 		if(seq.front() != size_t(token_t::start)) sequence.insert(sequence.begin(), (size_t) token_t::start);
 		/**
-		 * uppersFn Прототип функции извлечения регистров последовательности
+		 * Прототип функции извлечения регистров последовательности
 		 * @param  список слов последовательности
 		 * @return регистры последнего слова последовательности
 		 */
@@ -1255,7 +1285,7 @@ const wstring anyks::Alm2::context(const vector <size_t> & seq, const bool nwrd)
 		// Количество переданных последовательностей
 		const size_t count = sequence.size();
 		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+		size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 		// Выполняем извлечение данных
 		while(offset2 < (count + 1)){
 			// Получаем первую часть последовательности

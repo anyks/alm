@@ -461,7 +461,7 @@ list <anyks::Arpa::data_t *> * anyks::Arpa::get(const u_short gram) const noexce
 	// Результат работы функции
 	list <data_t *> * result = nullptr;
 	/**
-	 * runFn Прототип функции перехода по граммам
+	 * Прототип функции перехода по граммам
 	 * @param размер текущей n-граммы
 	 */
 	function <void (const u_short)> runFn;
@@ -1259,7 +1259,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 				return result;
 			};
 			/**
-			 * replaceFn Прототип функции замены данных последовательности
+			 * Прототип функции замены данных последовательности
 			 * @param последовательность которую нужно заменить
 			 * @param последовательность на которую нужно зменить
 			 * @param необходимо продолжить работу в следующих граммах
@@ -1324,7 +1324,7 @@ const bool anyks::Arpa::replace(const vector <size_t> & seq1, const vector <pair
 				}
 			};
 			/**
-			 * setChildren Прототип функции вставки дочерних n-грамм
+			 * Прототип функции вставки дочерних n-грамм
 			 * @param последовательность которую нужно заменить
 			 * @param последовательность на которую нужно зменить
 			 */
@@ -2066,7 +2066,7 @@ void anyks::Arpa::getBin(const bool arpa, function <void (const vector <char> &,
 			buffer.clear();
 		};
 		/**
-		 * runFn Прототип функции запуска формирования map карты последовательностей
+		 * Прототип функции запуска формирования map карты последовательностей
 		 * @param словарь для извлечения слова с его параметрами
 		 */
 		function <void (const data_t *)> runFn;
@@ -2132,7 +2132,7 @@ void anyks::Arpa::map(function <void (const string &, const u_short)> callback, 
 		// Индекс обработки статуса
 		size_t index = 0;
 		/**
-		 * runFn Прототип функции запуска формирования map карты последовательностей
+		 * Прототип функции запуска формирования map карты последовательностей
 		 * @param словарь для извлечения слова с его параметрами
 		 * @param сформированная строка последовательности
 		 */
@@ -2545,7 +2545,7 @@ void anyks::Arpa::sweep(function <void (const u_short)> status) const noexcept {
 		// Если количество элементов больше 0
 		if(count > 0){
 			/**
-			 * removeFn Прототип функции зануления всех дочерних n-грамм
+			 * Прототип функции зануления всех дочерних n-грамм
 			 * @param позиция текущего контекста
 			 */
 			function <void (data_t *)> removeFn;
@@ -2746,7 +2746,7 @@ void anyks::Arpa::train(function <void (const u_short)> status) const noexcept {
 			}
 		};
 		/**
-		 * runFn Прототип функции перехода по граммам
+		 * Прототип функции перехода по граммам
 		 */
 		function <void ()> runFn;
 		/**
@@ -2954,7 +2954,7 @@ void anyks::Arpa::repair(function <void (const u_short)> status) const noexcept 
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
 		/**
-		 * runFn Прототип функции перехода по граммам
+		 * Прототип функции перехода по граммам
 		 */
 		function <void ()> runFn;
 		/**
@@ -3505,7 +3505,7 @@ void anyks::Arpa::mixBackward(const Arpa * lm, const double lambda, function <vo
 			return result;
 		};
 		/**
-		 * weightFn Прототип функции получения частоты для контекста
+		 * Прототип функции получения частоты для контекста
 		 * @param список последовательности для обработки
 		 * @param языковая модель из которой нужно получить частоту
 		 * @param размер n-граммы для поиска
@@ -3722,7 +3722,7 @@ void anyks::Arpa::mixLoglinear(const vector <const Arpa *> & lms, const vector <
 			return result;
 		};
 		/**
-		 * weightFn Прототип функции получения частоты для контекста
+		 * Прототип функции получения частоты для контекста
 		 * @param список последовательности для обработки
 		 * @param языковая модель из которой нужно получить частоту
 		 * @param размер n-граммы для поиска
@@ -4026,7 +4026,7 @@ void anyks::Arpa::mixBayes(const vector <const Arpa *> & lms, const vector <doub
 			return result;
 		};
 		/**
-		 * weightFn Прототип функции получения частоты для контекста
+		 * Прототип функции получения частоты для контекста
 		 * @param список последовательности для обработки
 		 * @param языковая модель из которой нужно получить частоту
 		 * @param размер n-граммы для поиска

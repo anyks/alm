@@ -277,38 +277,45 @@ namespace anyks {
 			/**
 			 * check Метод проверки существования последовательности, с указанным шагом
 			 * @param text текст для проверки существования
-			 * @param size размер шаговой n-граммы
+			 * @param step размер шага проверки последовательности
 			 * @return     результат проверки
 			 */
-			const bool check(const string & text, const u_short size) const noexcept;
+			const bool check(const string & text, const u_short step) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности, с указанным шагом
 			 * @param text текст для проверки существования
-			 * @param size размер шаговой n-граммы
+			 * @param step размер шага проверки последовательности
 			 * @return     результат проверки
 			 */
-			const bool check(const wstring & text, const u_short size) const noexcept;
+			const bool check(const wstring & text, const u_short step) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности, с указанным шагом
 			 * @param seq  список слов последовательности
-			 * @param size размер шаговой n-граммы
+			 * @param step размер шага проверки последовательности
 			 * @return     результат проверки
 			 */
-			const bool check(const vector <string> & seq, const u_short size) const noexcept;
+			const bool check(const vector <string> & seq, const u_short step) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности, с указанным шагом
 			 * @param seq  список слов последовательности
-			 * @param size размер шаговой n-граммы
+			 * @param step размер шага проверки последовательности
 			 * @return     результат проверки
 			 */
-			const bool check(const vector <wstring> & seq, const u_short size) const noexcept;
+			const bool check(const vector <wstring> & seq, const u_short step) const noexcept;
+			/**
+			 * exist Метод проверки существования последовательности
+			 * @param seq  список слов последовательности
+			 * @param step размер шага проверки последовательности
+			 * @return     результат проверки
+			 */
+			virtual const bool exist(const vector <size_t> & seq, const u_short step) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности, с указанным шагом
 			 * @param seq  список слов последовательности
-			 * @param size размер шаговой n-граммы
+			 * @param step размер шага проверки последовательности
 			 * @return     результат проверки
 			 */
-			virtual const bool check(const vector <size_t> & seq, const u_short size) const noexcept;
+			virtual const bool check(const vector <size_t> & seq, const u_short step) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности
 			 * @param text     текст для проверки существования
@@ -872,12 +879,19 @@ namespace anyks {
 			 */
 			virtual const ppl_t perplexity(const vector <size_t> & seq) const noexcept;
 			/**
-			 * check Метод проверки существования последовательности, с указанным шагом
+			 * exist Метод проверки существования последовательности
 			 * @param seq  список слов последовательности
-			 * @param size размер шаговой n-граммы
+			 * @param step размер шага проверки последовательности
 			 * @return     результат проверки
 			 */
-			virtual const bool check(const vector <size_t> & seq, const u_short size) const noexcept;
+			virtual const bool exist(const vector <size_t> & seq, const u_short step) const noexcept;
+			/**
+			 * check Метод проверки существования последовательности, с указанным шагом
+			 * @param seq  список слов последовательности
+			 * @param step размер шага проверки последовательности
+			 * @return     результат проверки
+			 */
+			virtual const bool check(const vector <size_t> & seq, const u_short step) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности
 			 * @param seq      список слов последовательности
@@ -1027,12 +1041,19 @@ namespace anyks {
 			 */
 			const ppl_t perplexity(const vector <size_t> & seq) const noexcept;
 			/**
-			 * check Метод проверки существования последовательности, с указанным шагом
+			 * exist Метод проверки существования последовательности
 			 * @param seq  список слов последовательности
-			 * @param size размер шаговой n-граммы
+			 * @param step размер шага проверки последовательности
 			 * @return     результат проверки
 			 */
-			const bool check(const vector <size_t> & seq, const u_short size) const noexcept;
+			const bool exist(const vector <size_t> & seq, const u_short step) const noexcept;
+			/**
+			 * check Метод проверки существования последовательности, с указанным шагом
+			 * @param seq  список слов последовательности
+			 * @param step размер шага проверки последовательности
+			 * @return     результат проверки
+			 */
+			const bool check(const vector <size_t> & seq, const u_short step) const noexcept;
 			/**
 			 * check Метод проверки существования последовательности
 			 * @param seq      список слов последовательности

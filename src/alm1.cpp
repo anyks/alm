@@ -211,82 +211,6 @@ void anyks::Alm1::clear(){
 	reinterpret_cast <alm_t *> (this)->clear();
 }
 /**
- * check Метод проверки существования последовательности, с указанным шагом
- * @param seq  список слов последовательности
- * @param size размер шаговой n-граммы
- * @return     результат проверки
- */
-const bool anyks::Alm1::check(const vector <size_t> & seq, const u_short size) const noexcept {
-	// Результат работы функции
-	bool result = false;
-	// Если последовательность передана
-	if(!seq.empty() && (seq.size() >= size) && (this->size >= size) && !this->arpa.empty()){
-		// Временная последовательность
-		vector <size_t> tmp, sequence;
-		// Если последовательность не экранированна
-		if((seq.back() == size_t(token_t::finish)) &&
-		(seq.front() == size_t(token_t::start))) sequence.assign(seq.begin() + 1, seq.end() - 1);
-		else if(seq.back() == size_t(token_t::finish)) sequence.assign(seq.begin(), seq.end() - 1);
-		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
-		else sequence.assign(seq.begin(), seq.end());
-		/**
-		 * checkFn Функция проверки существования последовательности
-		 * @param seq список слов последовательности
-		 * @return    результат проверки
-		 */
-		auto checkFn = [this](const vector <size_t> & seq) noexcept {
-			// Регистры слова в последовательности
-			bool result = false;
-			// Если список последовательностей передан
-			if(!seq.empty() && (this->size > 0)){
-				// Итератор для подсчета длины n-граммы
-				u_short i = 0;
-				// Копируем основную карту
-				arpa_t * obj = &this->arpa;
-				// Переходим по всему объекту
-				for(auto & idw : seq){
-					// Выполняем поиск нашего слова
-					auto it = obj->find(idw);
-					// Если слово найдено
-					if(it != obj->end()){
-						// Получаем блок структуры
-						obj = &it->second;
-						// Если мы дошли до конца
-						result = (i == (seq.size() - 1));
-					// Выходим из цикла
-					} else break;
-					// Если количество n-грамм достигло предела, выходим
-					if((++i) > (this->size - 1)) break;
-				}
-			}
-			// Выводим результат
-			return result;
-		};
-		// Количество переданных последовательностей
-		const size_t count = sequence.size();
-		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > size ? (size < 2 ? 2 : size) : count);
-		// Выполняем извлечение данных
-		while(offset2 < (count + 1)){
-			// Получаем первую часть последовательности
-			tmp.assign(sequence.begin() + offset1, sequence.begin() + offset2);
-			// Если последовательность получена
-			if(!tmp.empty()){
-				// Получаем регистр слова
-				result = checkFn(tmp);
-				// Если последовательность не найдена, выходим
-				if(!result) break;
-			// Выходим из цикла
-			} else break;
-			// Увеличиваем смещение
-			offset1++;
-			offset2++;
-		}
-	}
-	// Выводим результат
-	return result;
-}
-/**
  * perplexity Метод расчёта перплексии
  * @param  seq список последовательностей
  * @return     результат расчёта
@@ -306,7 +230,7 @@ const anyks::Alm::ppl_t anyks::Alm1::perplexity(const vector <size_t> & seq) con
 		// Временная последовательность
 		vector <size_t> tmp;
 		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+		size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 		// Проверяем разрешено ли неизвестное слово
 		const bool isAllowUnk = (this->frequency({size_t(token_t::unk)}).first != this->zero);
 		/**
@@ -579,6 +503,205 @@ const anyks::Alm::ppl_t anyks::Alm1::perplexity(const vector <size_t> & seq) con
 	return result;
 }
 /**
+ * exist Метод проверки существования последовательности
+ * @param seq  список слов последовательности
+ * @param step размер шага проверки последовательности
+ * @return     результат проверки
+ */
+const bool anyks::Alm1::exist(const vector <size_t> & seq, const u_short step) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если последовательность передана
+	if(!seq.empty() && (seq.size() >= size_t(step)) && (this->size >= step) && !this->arpa.empty()){
+		// Временная последовательность
+		vector <size_t> sequence;
+		// Если последовательность не экранированна
+		if((seq.back() == size_t(token_t::finish)) &&
+		(seq.front() == size_t(token_t::start))) sequence.assign(seq.begin() + 1, seq.end() - 1);
+		else if(seq.back() == size_t(token_t::finish)) sequence.assign(seq.begin(), seq.end() - 1);
+		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
+		else sequence.assign(seq.begin(), seq.end());
+		// Если последовательность, до сих пор соответствует
+		if(sequence.size() >= size_t(step)){
+			/**
+			 * isAllowedTokenFn Функция проверки на валидность токена
+			 * @param idw идентификатор токена для проверки
+			 * @return    результат проверки токена
+			 */
+			auto isAllowedTokenFn = [this](const size_t idw) noexcept {
+				// Результат работы функции
+				bool result = false;
+				// Если токен передан и он валиден
+				if((idw > 0) && (idw != idw_t::NIDW)){
+					// Выполняем проверку, является ли токен - нормальным словом
+					result = !this->tokenizer->isToken(idw);
+					// Если это системный токен
+					if(!result){
+						// Получаем идентификатор системного токена
+						const token_t idt = (token_t) idw;
+						// Проверяем, является ли токен разрешённым
+						result = (
+							(idt == token_t::num) ||
+							(idt == token_t::url) ||
+							(idt == token_t::abbr) ||
+							(idt == token_t::date) ||
+							(idt == token_t::time) ||
+							(idt == token_t::anum) ||
+							(idt == token_t::rnum) ||
+							(idt == token_t::greek) ||
+							(idt == token_t::specl) ||
+							(idt == token_t::aprox) ||
+							(idt == token_t::range) ||
+							(idt == token_t::score) ||
+							(idt == token_t::dimen) ||
+							(idt == token_t::fract) ||
+							(idt == token_t::currency)
+						);
+					}
+				}
+				// Выводим результат проверки
+				return result;
+			};
+			/**
+			 * Прототип функции проверки на существование последовательности
+			 * @param начальная позиция итератора в последовательности
+			 * @return результат проверки, сущестования последовательности
+			 */
+			function <const bool (u_short)> checkFn;
+			/**
+			 * checkFn Функция проверки на существование последовательности
+			 * @param start начальная позиция итератора в последовательности
+			 * @return      результат проверки, сущестования последовательности
+			 */
+			checkFn = [&isAllowedTokenFn, &checkFn, &sequence, step, this](u_short start) noexcept {
+				// Результат работы функции
+				bool result = false;
+				// Копируем основную карту
+				arpa_t * obj = &this->arpa;
+				// Идентификатор слова и количество слов в последовательности
+				size_t idw = idw_t::NIDW, count = sequence.size();
+				// Получаем конечный элемент
+				const u_short stop = (start + ((count - size_t(start)) >= size_t(step) ? step : count - start));
+				// Переходим по всему объекту
+				for(u_short i = start; i < stop; i++){
+					// Получаем идентификатор слова
+					idw = sequence.at(i);
+					// Если идентификатор токена - валиден
+					if(isAllowedTokenFn(idw)){
+						// Выполняем поиск нашего слова
+						auto it = obj->find(idw);
+						// Если слово найдено
+						if(it != obj->end()){
+							// Получаем блок структуры
+							obj = &it->second;
+							// Если мы дошли до конца
+							result = (i == (stop - 1));
+							// Увеличиваем начало следующей итерации
+							if(result) start++;
+						// Выходим из цикла
+						} else break;
+					// Если токен не валиден
+					} else {
+						// Запоминаем, что результат возможем
+						result = true;
+						// Увеличиваем начало следующей итерации
+						start += 2;
+						// Выходим из цикла
+						break;
+					}
+				}
+				// Если начало следующей итерации еще возможно
+				if(result && (size_t(start) < count)) result = checkFn(start);
+				// Выводим результат проверки
+				return result;
+			};
+			// Выполняем проверку
+			result = checkFn(0);
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * check Метод проверки существования последовательности, с указанным шагом
+ * @param seq  список слов последовательности
+ * @param step размер шага проверки последовательности
+ * @return     результат проверки
+ */
+const bool anyks::Alm1::check(const vector <size_t> & seq, const u_short step) const noexcept {
+	// Результат работы функции
+	bool result = false;
+	// Если последовательность передана
+	if(!seq.empty() && (seq.size() >= size_t(step)) && (this->size >= step) && !this->arpa.empty()){
+		// Временная последовательность
+		vector <size_t> tmp, sequence;
+		// Если последовательность не экранированна
+		if((seq.back() == size_t(token_t::finish)) &&
+		(seq.front() == size_t(token_t::start))) sequence.assign(seq.begin() + 1, seq.end() - 1);
+		else if(seq.back() == size_t(token_t::finish)) sequence.assign(seq.begin(), seq.end() - 1);
+		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
+		else sequence.assign(seq.begin(), seq.end());
+		// Если последовательность, до сих пор соответствует
+		if(sequence.size() >= size_t(step)){
+			/**
+			 * checkFn Функция проверки существования последовательности
+			 * @param seq список слов последовательности
+			 * @return    результат проверки
+			 */
+			auto checkFn = [this](const vector <size_t> & seq) noexcept {
+				// Регистры слова в последовательности
+				bool result = false;
+				// Если список последовательностей передан
+				if(!seq.empty() && (this->size > 0)){
+					// Итератор для подсчета длины n-граммы
+					u_short i = 0;
+					// Копируем основную карту
+					arpa_t * obj = &this->arpa;
+					// Переходим по всему объекту
+					for(auto & idw : seq){
+						// Выполняем поиск нашего слова
+						auto it = obj->find(idw);
+						// Если слово найдено
+						if(it != obj->end()){
+							// Получаем блок структуры
+							obj = &it->second;
+							// Если мы дошли до конца
+							result = (i == (seq.size() - 1));
+						// Выходим из цикла
+						} else break;
+						// Если количество n-грамм достигло предела, выходим
+						if((++i) > (this->size - 1)) break;
+					}
+				}
+				// Выводим результат
+				return result;
+			};
+			// Количество переданных последовательностей
+			const size_t count = sequence.size();
+			// Определяем смещение в последовательности
+			size_t offset1 = 0, offset2 = (count > size_t(step) ? (step < 2 ? 2 : step) : count);
+			// Выполняем извлечение данных
+			while(offset2 < (count + 1)){
+				// Получаем первую часть последовательности
+				tmp.assign(sequence.begin() + offset1, sequence.begin() + offset2);
+				// Если последовательность получена
+				if(!tmp.empty()){
+					// Получаем регистр слова
+					result = checkFn(tmp);
+					// Если последовательность не найдена, выходим
+					if(!result) break;
+				// Выходим из цикла
+				} else break;
+				// Увеличиваем смещение
+				offset1++;
+				offset2++;
+			}
+		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * check Метод проверки существования последовательности
  * @param seq      список слов последовательности
  * @param accurate режим точной проверки
@@ -598,7 +721,7 @@ const pair <bool, size_t> anyks::Alm1::check(const vector <size_t> & seq, const 
 		else if(seq.front() == size_t(token_t::start)) sequence.assign(seq.begin() + 1, seq.end());
 		else sequence.assign(seq.begin(), seq.end());
 		/**
-		 * checkFn Прототип функции проверки существования последовательности
+		 * Прототип функции проверки существования последовательности
 		 * @param  список слов последовательности
 		 * @return результат проверки
 		 */
@@ -648,7 +771,7 @@ const pair <bool, size_t> anyks::Alm1::check(const vector <size_t> & seq, const 
 		// Количество переданных последовательностей
 		const size_t count = sequence.size();
 		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+		size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 		// Выполняем извлечение данных
 		while(offset2 < (count + 1)){
 			// Получаем первую часть последовательности
@@ -759,7 +882,7 @@ void anyks::Alm1::getBin(function <void (const vector <char> &, const size_t, co
 			}
 		};
 		/**
-		 * runFn Прототип функции запуска формирования map карты последовательностей
+		 * Прототип функции запуска формирования map карты последовательностей
 		 * @param словарь для извлечения слова с его параметрами
 		 */
 		function <void (const arpa_t *)> runFn;
@@ -843,7 +966,7 @@ void anyks::Alm1::sentences(function <const bool (const wstring &)> callback) co
 			return true;
 		};
 		/**
-		 * estimateFn Прототип функции оценки собранных последовательностей
+		 * Прототип функции оценки собранных последовательностей
 		 * @param  список собранной последовательности
 		 * @return список собранных последовательностей
 		 */
@@ -921,7 +1044,7 @@ void anyks::Alm1::sentences(function <const bool (const wstring &)> callback) co
 			return result;
 		};
 		/**
-		 * runFn Прототип функции запуска перебора предложения
+		 * Прототип функции запуска перебора предложения
 		 * @param  список собранной последовательности
 		 * @param  контекст в котором нужно собирать данные
 		 * @return флаг продолжения или завершения работы
@@ -988,7 +1111,7 @@ void anyks::Alm1::getUppers(const vector <size_t> & seq, vector <size_t> & upps)
 		if(!isFront) sequence.push_back((size_t) token_t::finish);
 		if(!isBack)  sequence.insert(sequence.begin(), (size_t) token_t::start);
 		/**
-		 * uppersFn Прототип функции извлечения регистров последовательности
+		 * Прототип функции извлечения регистров последовательности
 		 * @param  список слов последовательности
 		 * @return регистры последнего слова последовательности
 		 */
@@ -1040,7 +1163,7 @@ void anyks::Alm1::getUppers(const vector <size_t> & seq, vector <size_t> & upps)
 		// Количество переданных последовательностей
 		const size_t count = sequence.size();
 		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+		size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 		// Выполняем извлечение данных
 		while(offset2 < (count + 1)){
 			// Получаем первую часть последовательности
@@ -1141,7 +1264,7 @@ void anyks::Alm1::find(const wstring & text, function <void (const wstring &)> c
 			}
 		};
 		/**
-		 * checkFn Прототип функции проверки существования последовательности
+		 * Прототип функции проверки существования последовательности
 		 * @param список слов последовательности
 		 * @param список реальных слов в последовательности
 		 */
@@ -1208,7 +1331,7 @@ void anyks::Alm1::find(const wstring & text, function <void (const wstring &)> c
 				// Количество переданных последовательностей
 				const size_t count = seq.size();
 				// Определяем смещение в последовательности
-				size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+				size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 				// Выполняем извлечение данных
 				while(offset2 < (count + 1)){
 					// Получаем первую часть последовательности
@@ -1313,7 +1436,7 @@ const wstring anyks::Alm1::context(const vector <size_t> & seq, const bool nwrd)
 		if(seq.back() != size_t(token_t::finish)) sequence.push_back((size_t) token_t::finish);
 		if(seq.front() != size_t(token_t::start)) sequence.insert(sequence.begin(), (size_t) token_t::start);
 		/**
-		 * uppersFn Прототип функции извлечения регистров последовательности
+		 * Прототип функции извлечения регистров последовательности
 		 * @param  список слов последовательности
 		 * @return регистры последнего слова последовательности
 		 */
@@ -1367,7 +1490,7 @@ const wstring anyks::Alm1::context(const vector <size_t> & seq, const bool nwrd)
 		// Количество переданных последовательностей
 		const size_t count = sequence.size();
 		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+		size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 		// Выполняем извлечение данных
 		while(offset2 < (count + 1)){
 			// Получаем первую часть последовательности

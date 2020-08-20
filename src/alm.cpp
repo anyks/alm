@@ -460,24 +460,24 @@ const anyks::Alm::ppl_t anyks::Alm::pplByFiles(const string & path, function <vo
 /**
  * check Метод проверки существования последовательности, с указанным шагом
  * @param text текст для проверки существования
- * @param size размер шаговой n-граммы
+ * @param step размер шага проверки последовательности
  * @return     результат проверки
  */
-const bool anyks::Alm::check(const string & text, const u_short size) const noexcept {
+const bool anyks::Alm::check(const string & text, const u_short step) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если слово передано
-	if(!text.empty()) result = this->check(this->alphabet->convert(text), size);
+	if(!text.empty()) result = this->check(this->alphabet->convert(text), step);
 	// Выводим результат
 	return result;
 }
 /**
  * check Метод проверки существования последовательности, с указанным шагом
  * @param text текст для проверки существования
- * @param size размер шаговой n-граммы
+ * @param step размер шага проверки последовательности
  * @return     результат проверки
  */
-const bool anyks::Alm::check(const wstring & text, const u_short size) const noexcept {
+const bool anyks::Alm::check(const wstring & text, const u_short step) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если слово передано
@@ -499,12 +499,12 @@ const bool anyks::Alm::check(const wstring & text, const u_short size) const noe
 		/**
 		 * resFn Функция вывода результата
 		 */
-		auto resFn = [&result, &seq, size, this]() noexcept {
+		auto resFn = [&result, &seq, step, this]() noexcept {
 			/**
 			 * Если слова всего два, значит это начало и конец предложения
 			 * Нам же нужны только нормальные n-граммы
 			 */
-			if(seq.size() > 2) result = this->check(seq, size);
+			if(seq.size() > 2) result = this->check(seq, step);
 			// Очищаем список последовательностей
 			seq.clear();
 		};
@@ -578,10 +578,10 @@ const bool anyks::Alm::check(const wstring & text, const u_short size) const noe
 /**
  * check Метод проверки существования последовательности, с указанным шагом
  * @param seq  список слов последовательности
- * @param size размер шаговой n-граммы
+ * @param step размер шага проверки последовательности
  * @return     результат проверки
  */
-const bool anyks::Alm::check(const vector <string> & seq, const u_short size) const noexcept {
+const bool anyks::Alm::check(const vector <string> & seq, const u_short step) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если последовательность получена
@@ -594,7 +594,7 @@ const bool anyks::Alm::check(const vector <string> & seq, const u_short size) co
 			tmp.at(i) = this->getIdw(this->alphabet->convert(seq.at(i)));
 		}
 		// Получаем результат
-		result = this->check(tmp, size);
+		result = this->check(tmp, step);
 	}
 	// Выводим результат
 	return result;
@@ -602,10 +602,10 @@ const bool anyks::Alm::check(const vector <string> & seq, const u_short size) co
 /**
  * check Метод проверки существования последовательности, с указанным шагом
  * @param seq  список слов последовательности
- * @param size размер шаговой n-граммы
+ * @param step размер шага проверки последовательности
  * @return     результат проверки
  */
-const bool anyks::Alm::check(const vector <wstring> & seq, const u_short size) const noexcept {
+const bool anyks::Alm::check(const vector <wstring> & seq, const u_short step) const noexcept {
 	// Результат работы функции
 	bool result = false;
 	// Если последовательность получена
@@ -618,21 +618,34 @@ const bool anyks::Alm::check(const vector <wstring> & seq, const u_short size) c
 			tmp.at(i) = this->getIdw(seq.at(i));
 		}
 		// Получаем результат
-		result = this->check(tmp, size);
+		result = this->check(tmp, step);
 	}
 	// Выводим результат
 	return result;
 }
 /**
- * check Метод проверки существования последовательности, с указанным шагом
+ * exist Метод проверки существования последовательности
  * @param seq  список слов последовательности
- * @param size размер шаговой n-граммы
+ * @param step размер шага проверки последовательности
  * @return     результат проверки
  */
-const bool anyks::Alm::check(const vector <size_t> & seq, const u_short size) const noexcept {
+const bool anyks::Alm::exist(const vector <size_t> & seq, const u_short step) const noexcept {
 	// Блокируем варнинг
 	(void) seq;
-	(void) size;
+	(void) step;
+	// Выводим результат
+	return false;
+}
+/**
+ * check Метод проверки существования последовательности, с указанным шагом
+ * @param seq  список слов последовательности
+ * @param step размер шага проверки последовательности
+ * @return     результат проверки
+ */
+const bool anyks::Alm::check(const vector <size_t> & seq, const u_short step) const noexcept {
+	// Блокируем варнинг
+	(void) seq;
+	(void) step;
 	// Выводим результат
 	return false;
 }
@@ -2741,7 +2754,7 @@ const size_t anyks::Alm::grams(const vector <size_t> & seq) const noexcept {
 		// Количество переданных последовательностей
 		const size_t count = seq.size();
 		// Определяем смещение в последовательности
-		size_t offset1 = 0, offset2 = (count > this->size ? this->size : count);
+		size_t offset1 = 0, offset2 = (count > size_t(this->size) ? this->size : count);
 		// Выполняем извлечение данных
 		while(offset2 < (count + 1)){
 			// Получаем первую часть последовательности
