@@ -492,7 +492,7 @@ int main(int argc, char * argv[]) noexcept {
 									// Добавляем доменную зону
 									case 1: alphabet.setzone(text); break;
 									// Добавляем абреввиатуру
-									case 2: tokenizer.setAbbr(text); break;
+									case 2: tokenizer.addAbbr(text); break;
 								}
 							}
 							// Если отладка включена

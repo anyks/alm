@@ -111,15 +111,15 @@ namespace anyks {
 			void disallowCollectSuffix() noexcept;
 		public:
 			/**
-			 * setAbbr Метод добавления аббревиатуры
+			 * addAbbr Метод добавления аббревиатуры
 			 * @param word слово для добавления
 			 */
-			void setAbbr(const string & word) noexcept;
+			void addAbbr(const string & word) noexcept;
 			/**
-			 * setAbbr Метод добавления аббревиатуры
+			 * addAbbr Метод добавления аббревиатуры
 			 * @param word слово для добавления
 			 */
-			void setAbbr(const wstring & word) noexcept;
+			void addAbbr(const wstring & word) noexcept;
 			/**
 			 * setAbbrs Метод установки списка аббревиатур
 			 * @param abbrs список аббревиатур

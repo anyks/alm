@@ -37,20 +37,20 @@ void anyks::Tokenizer::disallowCollectSuffix() noexcept {
 	this->collect = false;
 }
 /**
- * setAbbr Метод добавления аббревиатуры
+ * addAbbr Метод добавления аббревиатуры
  * @param word слово для добавления
  */
-void anyks::Tokenizer::setAbbr(const string & word) noexcept {
+void anyks::Tokenizer::addAbbr(const string & word) noexcept {
 	// Если слово передано, добавляем его в список аббревиатур
-	if(!word.empty()) this->abbrs.emplace(this->idw(this->alphabet->convert(word)));
+	if(word.size() > 2) this->abbrs.emplace(this->idw(this->alphabet->convert(word)));
 }
 /**
- * setAbbr Метод добавления аббревиатуры
+ * addAbbr Метод добавления аббревиатуры
  * @param word слово для добавления
  */
-void anyks::Tokenizer::setAbbr(const wstring & word) noexcept {
+void anyks::Tokenizer::addAbbr(const wstring & word) noexcept {
 	// Если слово передано, добавляем его в список аббревиатур
-	if(!word.empty()) this->abbrs.emplace(this->idw(word));
+	if(word.size() > 2) this->abbrs.emplace(this->idw(word));
 }
 /**
  * setAbbrs Метод установки списка аббревиатур
@@ -734,8 +734,7 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 					case (u_short) type_t::currency: {
 						// Если предыдущий символ не является числом и пробелом
 						if((typeContext.empty() ||
-						((typeContext.top() != type_t::num) &&
-						(typeContext.top() != type_t::open) &&
+						((typeContext.top() != type_t::open) &&
 						(typeContext.top() != type_t::space))) &&
 						(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
 						// Добавляем слово
@@ -978,8 +977,7 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					case (u_short) type_t::currency: {
 						// Если предыдущий символ не является числом и пробелом
 						if((typeContext.empty() ||
-						((typeContext.top() != type_t::num) &&
-						(typeContext.top() != type_t::open) &&
+						((typeContext.top() != type_t::open) &&
 						(typeContext.top() != type_t::space))) &&
 						(!this->alphabet->isSpace(result.back()))) result.append(1, L' ');
 						// Добавляем слово
