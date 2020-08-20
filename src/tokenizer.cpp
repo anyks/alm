@@ -1507,7 +1507,8 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 							// Проверяем является ли слово аббревиатурой
 							bool abbr = (
 								(!word.empty() && (word.find(L'.') != wstring::npos)) ||
-								((sumbol > 0) && (word.length() <= 4) &&
+								((sumbol > 0) && ((word.length() < 3) ||
+								((word.length() > 2) && (this->abbrs.count(this->idw(word)) > 0))) &&
 								(!this->alphabet->isUpper(sumbol) || (word.length() == 1) ||
 								(letters.find(tolower(sumbol)) == wstring::npos)))
 							);
