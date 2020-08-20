@@ -586,6 +586,9 @@ const bool anyks::Alm1::exist(const vector <size_t> & seq, const u_short step) c
 				for(u_short i = start; i < stop; i++){
 					// Получаем идентификатор слова
 					idw = sequence.at(i);
+
+					cout << " !!!!!!!!!!!!!!1 " << this->alm->word(idw) << endl;
+
 					// Если идентификатор токена - валиден
 					if(isAllowedTokenFn(idw)){
 						// Выполняем поиск нашего слова
@@ -610,6 +613,9 @@ const bool anyks::Alm1::exist(const vector <size_t> & seq, const u_short step) c
 						break;
 					}
 				}
+
+				cout << " !!!!!!!!!!!!!!2 " << result << endl << endl;
+
 				// Если начало следующей итерации еще возможно
 				if(result && (size_t(start) < count)) result = checkFn(start);
 				// Выводим результат проверки
