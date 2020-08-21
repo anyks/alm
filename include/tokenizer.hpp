@@ -183,12 +183,20 @@ namespace anyks {
 			 * @return результат проверки
 			 */
 			const bool suffixEmpty() const noexcept;
+		public:
 			/**
 			 * isToken Метод проверки идентификатора на токен
 			 * @param idw идентификатор слова для проверки
 			 * @return    результат проверки
 			 */
 			const bool isToken(const size_t idw) const noexcept;
+			/**
+			 * isIdWord Функция проверки на соответствие идентификатора слову
+			 * @param idw идентификатор слова для проверки
+			 * @return    результат проверки идентификатора
+			 */
+			const bool isIdWord(const size_t idw) const noexcept;
+		public:
 			/**
 			 * isAbbr Метод проверки слова на соответствие аббревиатуры
 			 * @param idw идентификатор слова для проверки

@@ -441,7 +441,7 @@ const anyks::Alm::ppl_t anyks::Alm2::perplexity(const vector <size_t> & seq) con
 				// Получаем обрабатываемый текст
 				const wstring & text = this->context(seq, true);
 				// Выводим сообщение отладки - количество слов
-				this->alphabet->log("%s\n", alphabet_t::log_t::info, this->logfile, this->alphabet->convert(text).c_str());
+				this->alphabet->log("%ls\n", alphabet_t::log_t::info, this->logfile, text.c_str());
 				// Переходим по всему списку отладки
 				for(auto & mess : debugMessages){
 					// Выводим основное сообщение отладки

@@ -291,10 +291,10 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 			for(auto & item : oovs){
 				// Добавляем слово в файл
 				this->alphabet->log(
-					"%s\t%u",
+					"%ls\t%u",
 					alphabet_t::log_t::null,
 					this->oovfile,
-					this->alphabet->convert(item.first).c_str(),
+					item.first.c_str(),
 					item.second
 				);
 			}
@@ -1786,14 +1786,12 @@ void anyks::Alm::sentencesToFile(const u_short counts, const string & filename, 
 		this->sentences([&](const wstring & text){
 			// Увеличиваем индекс собранных данных
 			index++;
-			// Получаем строку текста для вывода
-			const string & str = this->alphabet->convert(text);
 			// Если текст получен
-			if(!str.empty()){
+			if(!text.empty()){
 				// Выполняем запись в файл
-				if(!filename.empty()) this->alphabet->log("%s", alphabet_t::log_t::null, filename.c_str(), str.c_str());
+				if(!filename.empty()) this->alphabet->log("%ls", alphabet_t::log_t::null, filename.c_str(), text.c_str());
 				// Выводим результат в консоль, если включён режим отладки или файл для записи не передан
-				if(this->isOption(options_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::info, nullptr, str.c_str());
+				if(this->isOption(options_t::debug)) this->alphabet->log("%ls", alphabet_t::log_t::info, nullptr, text.c_str());
 			}
 			// Если отладка включена
 			if(status != nullptr){

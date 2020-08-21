@@ -465,7 +465,7 @@ const anyks::Alm::ppl_t anyks::Alm1::perplexity(const vector <size_t> & seq) con
 				// Получаем обрабатываемый текст
 				const wstring & text = this->context(seq, true);
 				// Выводим сообщение отладки - количество слов
-				this->alphabet->log("%s\n", alphabet_t::log_t::info, this->logfile, this->alphabet->convert(text).c_str());
+				this->alphabet->log("%ls\n", alphabet_t::log_t::info, this->logfile, text.c_str());
 				// Переходим по всему списку отладки
 				for(auto & mess : debugMessages){
 					// Выводим основное сообщение отладки
@@ -603,45 +603,6 @@ const pair <bool, size_t> anyks::Alm1::exist(const vector <size_t> & seq, const 
 		// Если последовательность, до сих пор соответствует
 		if(sequence.size() >= size_t(step)){
 			/**
-			 * isAllowedTokenFn Функция проверки на валидность токена
-			 * @param idw идентификатор токена для проверки
-			 * @return    результат проверки токена
-			 */
-			auto isAllowedTokenFn = [this](const size_t idw) noexcept {
-				// Результат работы функции
-				bool result = false;
-				// Если токен передан и он валиден
-				if((idw > 0) && (idw != idw_t::NIDW)){
-					// Выполняем проверку, является ли токен - нормальным словом
-					result = !this->tokenizer->isToken(idw);
-					// Если это системный токен
-					if(!result){
-						// Получаем идентификатор системного токена
-						const token_t idt = (token_t) idw;
-						// Проверяем, является ли токен разрешённым
-						result = (
-							(idt == token_t::num) ||
-							(idt == token_t::url) ||
-							(idt == token_t::abbr) ||
-							(idt == token_t::date) ||
-							(idt == token_t::time) ||
-							(idt == token_t::anum) ||
-							(idt == token_t::rnum) ||
-							(idt == token_t::greek) ||
-							(idt == token_t::specl) ||
-							(idt == token_t::aprox) ||
-							(idt == token_t::range) ||
-							(idt == token_t::score) ||
-							(idt == token_t::dimen) ||
-							(idt == token_t::fract) ||
-							(idt == token_t::currency)
-						);
-					}
-				}
-				// Выводим результат проверки
-				return result;
-			};
-			/**
 			 * Прототип функции проверки на существование последовательности
 			 * @param начальная позиция итератора в последовательности
 			 * @return результат проверки, сущестования последовательности
@@ -652,7 +613,7 @@ const pair <bool, size_t> anyks::Alm1::exist(const vector <size_t> & seq, const 
 			 * @param start начальная позиция итератора в последовательности
 			 * @return      результат проверки, сущестования последовательности
 			 */
-			checkFn = [&isAllowedTokenFn, &checkFn, &sequence, step, this](u_short start) noexcept {
+			checkFn = [&checkFn, &sequence, step, this](u_short start) noexcept {
 				// Результат работы функции
 				pair <bool, size_t> result = {false, 0};
 				// Копируем основную карту
@@ -666,7 +627,7 @@ const pair <bool, size_t> anyks::Alm1::exist(const vector <size_t> & seq, const 
 					// Получаем идентификатор слова
 					idw = sequence.at(i);
 					// Если идентификатор токена - валиден
-					if(isAllowedTokenFn(idw)){
+					if(this->tokenizer->isIdWord(idw)){
 						// Выполняем поиск нашего слова
 						auto it = obj->find(idw);
 						// Если слово найдено
