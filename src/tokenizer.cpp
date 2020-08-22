@@ -1036,6 +1036,8 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 							} else if((result.back() == L'!') || (result.back() == L'?') || (result.back() == L'¡') || (result.back() == L'¿')) uppers = true;
 							// Если флаг увеличения регистра установлен
 							if(uppers) const_cast <wstring *> (&token)->front() = this->alphabet->toUpper(token.front());
+
+							cout << " !!!!!!!!!!!!!!! " << token << " === " << uppers << " ||| " << result << endl;
 						}
 						// Добавляем слово
 						result.append(token);
