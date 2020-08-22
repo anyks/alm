@@ -745,17 +745,6 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 					case (u_short) type_t::allow:
 					// Если это символ греческого алфавита
 					case (u_short) type_t::greek: {
-						// Если предыдущий символ не является открытым изоляционнмы символом
-						if((typeContext.empty() ||
-						(typeContext.top() != type_t::open)) &&
-						(text.back() != L'´') &&
-						(text.back() != L'¸') &&
-						(text.back() != L'\x301') &&
-						(text.back() != L'\x311') &&
-						!this->alphabet->isSpace(text.back()) &&
-						(!this->alphabet->isNumber(token.substr(0, 1)) ||
-						!this->alphabet->isMath(text.back()) ||
-						(text.back() == L'='))) text.append(1, L' ');
 						// Устанавливаем регистр у первой буквы в тексте
 						if(this->isOption(options_t::uppers)){
 							// Сбрасываем флаг регистра
@@ -773,6 +762,17 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 							// Если флаг увеличения регистра установлен
 							if(uppers) const_cast <wstring *> (&token)->front() = this->alphabet->toUpper(token.front());
 						}
+						// Если предыдущий символ не является открытым изоляционнмы символом
+						if((typeContext.empty() ||
+						(typeContext.top() != type_t::open)) &&
+						(text.back() != L'´') &&
+						(text.back() != L'¸') &&
+						(text.back() != L'\x301') &&
+						(text.back() != L'\x311') &&
+						!this->alphabet->isSpace(text.back()) &&
+						(!this->alphabet->isNumber(token.substr(0, 1)) ||
+						!this->alphabet->isMath(text.back()) ||
+						(text.back() == L'='))) text.append(1, L' ');
 						// Добавляем слово
 						text.append(token);
 					} break;
@@ -1009,17 +1009,6 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					case (u_short) type_t::allow:
 					// Если это символ греческого алфавита
 					case (u_short) type_t::greek: {
-						// Если предыдущий символ не является открытым изоляционнмы символом
-						if((typeContext.empty() ||
-						(typeContext.top() != type_t::open)) &&
-						(result.back() != L'´') &&
-						(result.back() != L'¸') &&
-						(result.back() != L'\x301') &&
-						(result.back() != L'\x311') &&
-						!this->alphabet->isSpace(result.back()) &&
-						(!this->alphabet->isNumber(token.substr(0, 1)) ||
-						!this->alphabet->isMath(result.back()) ||
-						(result.back() == L'='))) result.append(1, L' ');
 						// Устанавливаем регистр у первой буквы в тексте
 						if(this->isOption(options_t::uppers)){
 							// Сбрасываем флаг регистра
@@ -1036,9 +1025,18 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 							} else if((result.back() == L'!') || (result.back() == L'?') || (result.back() == L'¡') || (result.back() == L'¿')) uppers = true;
 							// Если флаг увеличения регистра установлен
 							if(uppers) const_cast <wstring *> (&token)->front() = this->alphabet->toUpper(token.front());
-
-							cout << " !!!!!!!!!!!!!!! " << token << " === " << uppers << " ||| " << result << endl;
 						}
+						// Если предыдущий символ не является открытым изоляционнмы символом
+						if((typeContext.empty() ||
+						(typeContext.top() != type_t::open)) &&
+						(result.back() != L'´') &&
+						(result.back() != L'¸') &&
+						(result.back() != L'\x301') &&
+						(result.back() != L'\x311') &&
+						!this->alphabet->isSpace(result.back()) &&
+						(!this->alphabet->isNumber(token.substr(0, 1)) ||
+						!this->alphabet->isMath(result.back()) ||
+						(result.back() == L'='))) result.append(1, L' ');
 						// Добавляем слово
 						result.append(token);
 					} break;
