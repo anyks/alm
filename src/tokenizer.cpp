@@ -983,6 +983,8 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 			// Выводим результат
 			return result;
 		};
+		// Общая длина текста
+		size_t length = 0;
 		// Флаг разрешающий увеличение регистра первой буквы
 		bool uppers = false;
 		// Переходим по всем токенам
@@ -1010,23 +1012,25 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					// Если это символ греческого алфавита
 					case (u_short) type_t::greek: {
 						// Устанавливаем регистр у первой буквы в тексте
-						if(this->isOption(options_t::uppers)){
+						if(this->isOption(options_t::uppers) && this->alphabet->isSpace(result.back())){
 							// Сбрасываем флаг регистра
 							uppers = false;
+							// Получаем длину собранного текста
+							length = result.length();
 							// Если последний символ является точка
-							if(result.back() == L'.'){
-								// Если размер текста больше 3-х символов
-								if(result.length() >= 3){
+							if(result.at(length - 2) == L'.'){
+								// Если размер текста больше 4-х символов
+								if(length >= 4){
 									// Если последние символы не многоточие, разрешаем увеличение регистра
-									if(result.substr(result.length() - 3).compare(L"..") != 0) uppers = true;
+									if(result.substr(length - 4, 3).compare(L"...") != 0) uppers = true;
 								// Если это короткое слово, разрешаем увеличение регистра
 								} else uppers = true;
 							// Если последний символ является знаком вопроса или восклицания, разрешаем увеличение регистра
-							} else if((result.back() == L'!') || (result.back() == L'?') || (result.back() == L'¡') || (result.back() == L'¿')) uppers = true;
+							} else if((result.at(length - 2) == L'!') || (result.at(length - 2) == L'?') || (result.at(length - 2) == L'¡') || (result.at(length - 2) == L'¿')) uppers = true;
 							// Если флаг увеличения регистра установлен
 							if(uppers) const_cast <wstring *> (&token)->front() = this->alphabet->toUpper(token.front());
 
-							cout << " !!!!!!!!!!!!!!!!! " << token << " === " << uppers << " === " << wstring(1, result.back()) << " ||| " << result << endl;
+							cout << " !!!!!!!!!!!!!!!!! " << token << " === " << uppers << " === " << wstring(1, result.at(length - 2)) << " ||| " << result << endl;
 						}
 						// Если предыдущий символ не является открытым изоляционнмы символом
 						if((typeContext.empty() ||
