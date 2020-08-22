@@ -93,10 +93,10 @@ namespace anyks {
 		private:
 			// Внешняя функция токенизатора
 			tokenz_t extFn;
-			// Объект log файла
-			const char * logfile;
 			// Объект алфавита
 			const alphabet_t * alphabet;
+			// Объект log файла
+			mutable const char * logfile;
 		private:
 			/**
 			 * isOption Метод проверки наличия опции

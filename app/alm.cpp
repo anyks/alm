@@ -111,6 +111,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-badwords | --w-bin-badwords]           flag export in binary dictionary of blacklisted words\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-goodwords | --w-bin-goodwords]         flag export in binary dictionary of whitelisted words\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-allow-apostrophe | --allow-apostrophe]       flag allowing the use of a hyphen as part of the word\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-only-token-words | --only-token-words]       flag that takes into account when assembling N-grams, only those tokens that match words\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-tokens-all-disable | --tokens-all-disable]   flag to disable all tokens\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-tokens-all-unknown | --tokens-all-unknown]   flag identifying all tokens as <unk>\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-kneserney-prepares | --kneserney-prepares]   flag allowing need to change grams, after calculating\r\n"
@@ -1069,6 +1070,8 @@ int main(int argc, char * argv[]) noexcept {
 			if(env.is("confidence")) toolkit.setOption(toolkit_t::options_t::confidence);
 			// Разрешаем выполнять интерполяцию при расчёте arpa
 			if(env.is("interpolate")) toolkit.setOption(toolkit_t::options_t::interpolate);
+			// Флаг учитывающий при сборке N-грамм, только те токены, которые соответствуют словам
+			if(env.is("only-token-words")) toolkit.setOption(toolkit_t::options_t::tokenWords);
 			// Если нужно установить все токены для идентифицирования как <unk>
 			if(env.is("tokens-all-unknown")) toolkit.setAllTokenUnknown();
 			// Если нужно установить все токены как не идентифицируемые

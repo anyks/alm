@@ -1838,7 +1838,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
  * Tokenizer Конструктор
  * @param alphabet объект алфавита
  */
-anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : extFn(nullptr), logfile(nullptr), alphabet(alphabet) {
+anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : extFn(nullptr), alphabet(alphabet), logfile(nullptr) {
 	// Устанавливаем лафавит
 	if(alphabet != nullptr) this->setAlphabet(alphabet);
 }
