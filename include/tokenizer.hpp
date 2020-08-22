@@ -14,6 +14,7 @@
  */
 #include <stack>
 #include <cmath>
+#include <bitset>
 #include <limits>
 #include <string>
 #include <vector>
@@ -73,16 +74,20 @@ namespace anyks {
 	 */
 	typedef struct Tokenizer {
 		public:
+			// Основные опции
+			enum class options_t : u_short {
+				debug,  // Флаг режима отладки
+				stress, // Флаг разрешения использовать символы ударения
+				uppers, // Флаг разрешения проставлять регистры букв в словах
+				collect // Флаг разрешения сборку суффиксов цифровых аббревиатур
+			};
 			// Тип функции внешнего токенизатора
 			typedef function <void (const wstring &, function <const bool (const wstring &, const vector <string> &, const bool, const bool)>)> tokenz_t;
 		private:
 			// Объект идентификатора
 			idw_t wrdId;
-			/*
-			 * Разрешение использовать символы ударения и 
-			 * разрешаем сборку суффиксов цифровых аббревиатур
-			 */
-			bool stress, collect;
+			// Флаги параметров
+			bitset <4> options;
 			// Списки суффиксов цифровых и буквенных аббревиатур
 			mutable set <size_t> abbrs, suffix;
 		private:
@@ -92,23 +97,13 @@ namespace anyks {
 			const char * logfile;
 			// Объект алфавита
 			const alphabet_t * alphabet;
-		public:
+		private:
 			/**
-			 * allowStress Метод разрешения, использовать ударение в словах
+			 * isOption Метод проверки наличия опции
+			 * @param option опция для проверки
+			 * @return       результат проверки
 			 */
-			void allowStress() noexcept;
-			/**
-			 * disallowStress Метод запрещения использовать ударение в словах
-			 */
-			void disallowStress() noexcept;
-			/**
-			 * allowCollectSuffix Метод разрешения сборки суффиксов цифровых аббревиатур
-			 */
-			void allowCollectSuffix() noexcept;
-			/**
-			 * disallowCollectSuffix Метод запрещения сборки суффиксов цифровых аббревиатур
-			 */
-			void disallowCollectSuffix() noexcept;
+			const bool isOption(const options_t option) const noexcept;
 		public:
 			/**
 			 * addAbbr Метод добавления аббревиатуры
@@ -131,6 +126,16 @@ namespace anyks {
 			 * @param logifle адрес файла для вывода отладочной информации
 			 */
 			void setLogfile(const char * logfile) noexcept;
+			/**
+			 * setOption Метод установки опций модуля
+			 * @param option опция для установки
+			 */
+			void setOption(const options_t option) noexcept;
+			/**
+			 * unsetOption Метод отключения опции модуля
+			 * @param option опция для отключения
+			 */
+			void unsetOption(const options_t option) noexcept;
 			/**
 			 * setAlphabet Метод установки алфавита
 			 * @param alphabet объект алфавита

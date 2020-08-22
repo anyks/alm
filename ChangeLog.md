@@ -9,6 +9,7 @@
 - step size n-grams of language model
 - file address abbrs of *.abbr for export
 - file address abbrs of *.abbr or dir path for import
+- flag allowing to set upper case in words
 
 ## [3.2.6](https://github.com/anyks/alm/archive/v3.2.6.tar.gz) Other optimization
 

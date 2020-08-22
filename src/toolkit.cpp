@@ -868,7 +868,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 		// Список последовательностей для обучения
 		vector <pair_t> seq = {{sid, 0}};
 		// Активируем сборку аббревиатур
-		const_cast <tokenizer_t *> (this->tokenizer)->allowCollectSuffix();
+		const_cast <tokenizer_t *> (this->tokenizer)->setOption(tokenizer_t::options_t::collect);
 		/**
 		 * unkFn Функция установки неизвестного слова в последовательность
 		 * @return нужно ли остановить сбор последовательности
@@ -1037,7 +1037,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 		// Выполняем разбивку текста на токены
 		this->tokenizer->run(text, modeFn);
 		// Деактивируем сборку аббревиатур
-		const_cast <tokenizer_t *> (this->tokenizer)->disallowCollectSuffix();
+		const_cast <tokenizer_t *> (this->tokenizer)->unsetOption(tokenizer_t::options_t::collect);
 	}
 }
 /**

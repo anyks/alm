@@ -100,6 +100,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-interpolate | --interpolate]                 flag allowing to use interpolation in estimating\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mixed-dicts | --mixed-dicts]                 flag allowing the use of words consisting of mixed dictionaries\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-allow-stress | --allow-stress]               flag allowing the use of a stress symbol as part of the word\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-allow-uppers | --allow-uppers]               flag allowing to set upper case in words\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-mix-backward | --mix-backward]               flag to mixing language models in the backward direction\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-utokens | --w-bin-utokens]             flag export in binary dictionary of users tokens\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-w-bin-options | --w-bin-options]             flag export in binary dictionary of toolkit options\r\n"
@@ -384,10 +385,14 @@ int main(int argc, char * argv[]) noexcept {
 			tokenizer.setLogfile(env.get("log"));
 			// Замеряем время начала работы
 			auto timeShifting = chrono::system_clock::now();
-			// Если разрешено использовать символы ударения, активируем
-			if(env.is("allow-stress")) tokenizer.allowStress();
 			// Если апостроф разрешён в токенизаторе, активируем его
 			if(env.is("allow-apostrophe")) alphabet.switchAllowApostrophe();
+			// Устанавливаем режим отладки, если он передан
+			if(debug == 2) tokenizer.setOption(tokenizer_t::options_t::debug);
+			// Активируем разрешение проставлять регистры в словах
+			if(env.is("allow-uppers")) tokenizer.setOption(tokenizer_t::options_t::uppers);
+			// Если разрешено использовать символы ударения, активируем
+			if(env.is("allow-stress")) tokenizer.setOption(tokenizer_t::options_t::stress);
 			// Если файл с буквами для восстановления слов, передан
 			if(((value = env.get("mix-restwords")) != nullptr) && fsys_t::isfile(value)){
 				// Идентификатор документа

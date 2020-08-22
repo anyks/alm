@@ -9,32 +9,17 @@
 #include <tokenizer.hpp>
 
 /**
- * allowStress Метод разрешения, использовать ударение в словах
+ * isOption Метод проверки наличия опции
+ * @param option опция для проверки
+ * @return       результат проверки
  */
-void anyks::Tokenizer::allowStress() noexcept {
-	// Разрешаем использовать ударение
-	this->stress = true;
-}
-/**
- * disallowStress Метод запрещения использовать ударение в словах
- */
-void anyks::Tokenizer::disallowStress() noexcept {
-	// Запрещаем использовать ударение
-	this->stress = false;
-}
-/**
- * allowCollectSuffix Метод разрешения сборки суффиксов цифровых аббревиатур
- */
-void anyks::Tokenizer::allowCollectSuffix() noexcept {
-	// Разрешаем сборку суффиксов цифровых аббревиатур
-	this->collect = true;
-}
-/**
- * disallowCollectSuffix Метод запрещения сборки суффиксов цифровых аббревиатур
- */
-void anyks::Tokenizer::disallowCollectSuffix() noexcept {
-	// Запрещаем сборку суффиксов цифровых аббревиатур
-	this->collect = false;
+const bool anyks::Tokenizer::isOption(const options_t option) const noexcept {
+	// Выполняем проверку наличия опции
+	const bool result = this->options.test((u_short) option);
+	// Если флаг дал положительный результат и это режим отладки
+	if(result && (option == options_t::debug)) this->logfile = nullptr;
+	// Выводим результат
+	return result;
 }
 /**
  * addAbbr Метод добавления аббревиатуры
@@ -67,6 +52,22 @@ void anyks::Tokenizer::setAbbrs(const set <size_t> & abbrs) noexcept {
 void anyks::Tokenizer::setLogfile(const char * logfile) noexcept {
 	// Устанавливаем адрес log файла
 	this->logfile = logfile;
+}
+/**
+ * setOption Метод установки опций модуля
+ * @param option опция для установки
+ */
+void anyks::Tokenizer::setOption(const options_t option) noexcept {
+	// Устанавливаем опции
+	this->options.set((u_short) option);
+}
+/**
+ * unsetOption Метод отключения опции модуля
+ * @param option опция для отключения
+ */
+void anyks::Tokenizer::unsetOption(const options_t option) noexcept {
+	// Устанавливаем опции
+	this->options.reset((u_short) option);
 }
 /**
  * setAlphabet Метод установки алфавита
@@ -272,7 +273,7 @@ const bool anyks::Tokenizer::isAbbr(const wstring & word) const noexcept {
 	// Если слово передано
 	if(!word.empty()){
 		// Если - это сборка данных, детектируем аббревиатуры только через модуль алфавита
-		if(this->collect) result = this->alphabet->isAbbr(word);
+		if(this->isOption(options_t::collect)) result = this->alphabet->isAbbr(word);
 		// Иначе выполняем детектирование аббревиатуры на основе собранных данных
 		else {
 			// Если проверка пройедна
@@ -718,6 +719,8 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 			// Выводим результат
 			return result;
 		};
+		// Флаг разрешающий увеличение регистра первой буквы
+		bool uppers = false;
 		// Переходим по всем токенам
 		for(size_t i = 0; i < context.size(); ++i){
 			// Получаем тип токена
@@ -753,6 +756,23 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 						(!this->alphabet->isNumber(token.substr(0, 1)) ||
 						!this->alphabet->isMath(text.back()) ||
 						(text.back() == L'='))) text.append(1, L' ');
+						// Устанавливаем регистр у первой буквы в тексте
+						if(this->isOption(options_t::uppers)){
+							// Сбрасываем флаг регистра
+							uppers = false;
+							// Если последний символ является точка
+							if(text.back() == L'.'){
+								// Если размер текста больше 3-х символов
+								if(text.length() >= 3){
+									// Если последние символы не многоточие, разрешаем увеличение регистра
+									if(text.substr(text.length() - 3).compare(L"...") != 0) uppers = true;
+								// Если это короткое слово, разрешаем увеличение регистра
+								} else uppers = true;
+							// Если последний символ является знаком вопроса или восклицания, разрешаем увеличение регистра
+							} else if((text.back() == L'!') || (text.back() == L'?') || (text.back() == L'¡') || (text.back() == L'¿')) uppers = true;
+							// Если флаг увеличения регистра установлен
+							if(uppers) const_cast <wstring *> (&token)->front() = this->alphabet->toUpper(token.front());
+						}
 						// Добавляем слово
 						text.append(token);
 					} break;
@@ -852,7 +872,7 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 			typeContext.push(tokenType);
 		}
 		// Устанавливаем регистр у первой буквы в тексте
-		text.front() = this->alphabet->toUpper(text.front());
+		if(this->isOption(options_t::uppers)) text.front() = this->alphabet->toUpper(text.front());
 		// Формируем результат
 		result = this->alphabet->convert(text);
 	}
@@ -963,6 +983,8 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 			// Выводим результат
 			return result;
 		};
+		// Флаг разрешающий увеличение регистра первой буквы
+		bool uppers = false;
 		// Переходим по всем токенам
 		for(size_t i = 0; i < context.size(); ++i){
 			// Получаем тип токена
@@ -998,6 +1020,23 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 						(!this->alphabet->isNumber(token.substr(0, 1)) ||
 						!this->alphabet->isMath(result.back()) ||
 						(result.back() == L'='))) result.append(1, L' ');
+						// Устанавливаем регистр у первой буквы в тексте
+						if(this->isOption(options_t::uppers)){
+							// Сбрасываем флаг регистра
+							uppers = false;
+							// Если последний символ является точка
+							if(result.back() == L'.'){
+								// Если размер текста больше 3-х символов
+								if(result.length() >= 3){
+									// Если последние символы не многоточие, разрешаем увеличение регистра
+									if(result.substr(result.length() - 3).compare(L"...") != 0) uppers = true;
+								// Если это короткое слово, разрешаем увеличение регистра
+								} else uppers = true;
+							// Если последний символ является знаком вопроса или восклицания, разрешаем увеличение регистра
+							} else if((result.back() == L'!') || (result.back() == L'?') || (result.back() == L'¡') || (result.back() == L'¿')) uppers = true;
+							// Если флаг увеличения регистра установлен
+							if(uppers) const_cast <wstring *> (&token)->front() = this->alphabet->toUpper(token.front());
+						}
 						// Добавляем слово
 						result.append(token);
 					} break;
@@ -1097,7 +1136,7 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 			typeContext.push(tokenType);
 		}
 		// Устанавливаем регистр у первой буквы в тексте
-		result.front() = this->alphabet->toUpper(result.front());
+		if(this->isOption(options_t::uppers)) result.front() = this->alphabet->toUpper(result.front());
 	}
 	// Выводим результат
 	return result;
@@ -1110,10 +1149,6 @@ void anyks::Tokenizer::clear() noexcept {
 	this->abbrs.clear();
 	// Очищаем список суффиксов цифровых аббревиатур
 	this->suffix.clear();
-	// Сбрасываем флаг ударений
-	this->stress = false;
-	// Сбрасываем флаг сборки цифровых аббревиатур
-	this->collect = false;
 }
 /**
  * update Метод обновления параметров
@@ -1398,7 +1433,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 			 */
 			auto callbackFn = [&begin, &context, &callback, this](const wstring & word, const bool end) noexcept {
 				// Выполняем сборку суффиксов цифровых аббревиатур
-				if(this->collect) this->setSuffix(word);
+				if(this->isOption(options_t::collect)) this->setSuffix(word);
 				// Отдаём результат
 				const bool result = callback(word, context, begin && context.empty(), end);
 				// Запоминаем что работа началась
@@ -1501,7 +1536,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 						// Проверяем является ли предыдущий символ также знаком пунктуации
 						backPunct = ((backLetter > 0) && this->alphabet->isPunct(backLetter));
 						// Запоминаем, что это символ ударения или подобный
-						stress = (this->stress && ((lletter == L'´') || (lletter == L'¸') || (lletter == L'\x301') || (lletter == L'\x311')));
+						stress = (this->isOption(options_t::stress) && ((lletter == L'´') || (lletter == L'¸') || (lletter == L'\x301') || (lletter == L'\x311')));
 						// Выводим результат как он есть
 						if(end){
 							// Если слово не пустое
@@ -1783,9 +1818,10 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 					// Если это другие символы
 					} else {
 						// Если это первая буква в первом слове
-						if(context.empty() && word.empty())
+						if(context.empty() && word.empty()){
 							// Приводим букву к верхнему регистру
-							letter = this->alphabet->toUpper(letter);
+							if(this->isOption(options_t::uppers)) letter = this->alphabet->toUpper(letter);
+						}
 						// Формируем слово
 						if(!this->alphabet->isSpace(lletter)) word.append(1, letter);
 						// Выводим полученное слово, если это конец текста
@@ -1802,7 +1838,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
  * Tokenizer Конструктор
  * @param alphabet объект алфавита
  */
-anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : stress(false), collect(false), extFn(nullptr), logfile(nullptr), alphabet(alphabet) {
+anyks::Tokenizer::Tokenizer(const alphabet_t * alphabet) noexcept : extFn(nullptr), logfile(nullptr), alphabet(alphabet) {
 	// Устанавливаем лафавит
 	if(alphabet != nullptr) this->setAlphabet(alphabet);
 }
