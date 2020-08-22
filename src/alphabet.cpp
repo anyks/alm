@@ -120,8 +120,11 @@ const string anyks::Alphabet::toLower(const string & str) const noexcept {
 	if(!str.empty()){
 		// Получаем временную строку
 		wstring tmp = this->convert(result);
-		// Переходим по всем символам
-		for(auto & c : tmp) c = towlower(c);
+		// Выполняем приведение к нижнему регистру
+		transform(tmp.begin(), tmp.end(), tmp.begin(), [](wchar_t letter){
+			// Приводим к нижнему регистру каждую букву
+			return towlower(letter);
+		});
 		// Конвертируем обратно
 		result = this->convert(tmp);
 	}
@@ -140,8 +143,11 @@ const string anyks::Alphabet::toUpper(const string & str) const noexcept {
 	if(!str.empty()){
 		// Получаем временную строку
 		wstring tmp = this->convert(result);
-		// Переходим по всем символам
-		for(auto & c : tmp) c = towupper(c);
+		// Выполняем приведение к верхнему регистру
+		transform(tmp.begin(), tmp.end(), tmp.begin(), [](wchar_t letter){
+			// Приводим к верхнему регистру каждую букву
+			return towupper(letter);
+		});
 		// Конвертируем обратно
 		result = this->convert(tmp);
 	}
@@ -329,15 +335,11 @@ const wstring anyks::Alphabet::toLower(const wstring & str) const noexcept {
 	wstring result = L"";
 	// Если строка передана
 	if(!str.empty()){
-		// Создаём конвертер
-		static const ctype <wchar_t> & conv = use_facet <ctype <wchar_t>> (this->locale);
 		// Выполняем приведение к нижнему регистру
-		transform(str.begin(), str.end(), str.begin(), [&conv](wchar_t letter){
+		transform(str.begin(), str.end(), str.begin(), [](wchar_t letter){
 			// Приводим к нижнему регистру каждую букву
-			return conv.tolower(letter);
+			return towlower(letter);
 		});
-		// Переходим по всем символам и приводим к нижнему регистру
-		// for(auto & c : str) result.append(1, towlower(c));
 	}
 	// Выводим результат
 	return result;
@@ -352,15 +354,11 @@ const wstring anyks::Alphabet::toUpper(const wstring & str) const noexcept {
 	wstring result = L"";
 	// Если строка передана
 	if(!str.empty()){
-		// Создаём конвертер
-		static const ctype <wchar_t> & conv = use_facet <ctype <wchar_t>> (this->locale);
-		// Выполняем приведение к нижнему регистру
-		transform(str.begin(), str.end(), str.begin(), [&conv](wchar_t letter){
-			// Приводим к нижнему регистру каждую букву
-			return conv.toupper(letter);
+		// Выполняем приведение к верхнему регистру
+		transform(str.begin(), str.end(), str.begin(), [](wchar_t letter){
+			// Приводим к верхнему регистру каждую букву
+			return towupper(letter);
 		});
-		// Переходим по всем символам и приводим к верхнему регистру
-		// for(auto & c : str) result.append(1, towupper(c));
 	}
 	// Выводим результат
 	return result;
