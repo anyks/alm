@@ -1018,13 +1018,15 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 								// Если размер текста больше 3-х символов
 								if(result.length() >= 3){
 									// Если последние символы не многоточие, разрешаем увеличение регистра
-									if(result.substr(result.length() - 3).compare(L"...") != 0) uppers = true;
+									if(result.substr(result.length() - 3).compare(L"..") != 0) uppers = true;
 								// Если это короткое слово, разрешаем увеличение регистра
 								} else uppers = true;
 							// Если последний символ является знаком вопроса или восклицания, разрешаем увеличение регистра
 							} else if((result.back() == L'!') || (result.back() == L'?') || (result.back() == L'¡') || (result.back() == L'¿')) uppers = true;
 							// Если флаг увеличения регистра установлен
 							if(uppers) const_cast <wstring *> (&token)->front() = this->alphabet->toUpper(token.front());
+
+							cout << " !!!!!!!!!!!!!!!!! " << token << " === " << uppers << " === " << wstring(1, result.back()) << " ||| " << result << endl;
 						}
 						// Если предыдущий символ не является открытым изоляционнмы символом
 						if((typeContext.empty() ||
