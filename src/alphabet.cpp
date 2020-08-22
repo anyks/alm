@@ -121,9 +121,9 @@ const string anyks::Alphabet::toLower(const string & str) const noexcept {
 		// Получаем временную строку
 		wstring tmp = this->convert(result);
 		// Выполняем приведение к нижнему регистру
-		transform(tmp.begin(), tmp.end(), tmp.begin(), [](wchar_t letter){
+		transform(tmp.begin(), tmp.end(), tmp.begin(), [](wchar_t c){
 			// Приводим к нижнему регистру каждую букву
-			return towlower(letter);
+			return towlower(c);
 		});
 		// Конвертируем обратно
 		result = this->convert(tmp);
@@ -144,9 +144,9 @@ const string anyks::Alphabet::toUpper(const string & str) const noexcept {
 		// Получаем временную строку
 		wstring tmp = this->convert(result);
 		// Выполняем приведение к верхнему регистру
-		transform(tmp.begin(), tmp.end(), tmp.begin(), [](wchar_t letter){
+		transform(tmp.begin(), tmp.end(), tmp.begin(), [](wchar_t c){
 			// Приводим к верхнему регистру каждую букву
-			return towupper(letter);
+			return towupper(c);
 		});
 		// Конвертируем обратно
 		result = this->convert(tmp);
@@ -336,7 +336,7 @@ const wstring anyks::Alphabet::toLower(const wstring & str) const noexcept {
 	// Если строка передана
 	if(!str.empty()){
 		// Переходим по всем буквам слова и формируем новую строку
-		for(auto & letter : str) result.append(1, towlower(letter));
+		for(auto & c : str) result.append(1, towlower(c));
 	}
 	// Выводим результат
 	return result;
@@ -352,7 +352,7 @@ const wstring anyks::Alphabet::toUpper(const wstring & str) const noexcept {
 	// Если строка передана
 	if(!str.empty()){
 		// Переходим по всем буквам слова и формируем новую строку
-		for(auto & letter : str) result.append(1, towupper(letter));
+		for(auto & c : str) result.append(1, towupper(c));
 	}
 	// Выводим результат
 	return result;
