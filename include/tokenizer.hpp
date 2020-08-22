@@ -104,6 +104,14 @@ namespace anyks {
 			 * @return       результат проверки
 			 */
 			const bool isOption(const options_t option) const noexcept;
+			/**
+			 * restore Метод восстановления текста из контекста
+			 * @param first   текущее слово для проверки
+			 * @param second  следующее слово для проверки
+			 * @param text    текст для сборки контекста
+			 * @param context контекст типов токенов
+			 */
+			void restore(const wstring & first, const wstring & second, wstring & text, stack <type_t> & context) const noexcept;
 		public:
 			/**
 			 * addAbbr Метод добавления аббревиатуры

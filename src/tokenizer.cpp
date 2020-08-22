@@ -22,6 +22,247 @@ const bool anyks::Tokenizer::isOption(const options_t option) const noexcept {
 	return result;
 }
 /**
+ * restore Метод восстановления текста из контекста
+ * @param first   текущее слово для проверки
+ * @param second  следующее слово для проверки
+ * @param text    текст для сборки контекста
+ * @param context контекст типов токенов
+ */
+void anyks::Tokenizer::restore(const wstring & first, const wstring & second, wstring & text, stack <type_t> & context) const noexcept {
+	// Если слово передано
+	if(!first.empty()){
+		// Типы флагов
+		enum class type_t : u_short {
+			end,     // Конец контекста
+			num,     // Символ числа в тексте
+			null,    // Не определено
+			word,    // нормальное слово
+			math,    // Математическая операция
+			open,    // Открытие изоляционного символа
+			greek,   // Символ греческого алфавита
+			route,   // Символ направления (стрелок)
+			close,   // Закрытие изоляционного символа
+			specl,   // Спец-символ в тексте
+			space,   // Символ пробела в тексте
+			allow,   // Разрешённый символ
+			punct,   // Знак препинания
+			pcards,  // Символ игральных карт
+			isolat,  // Изоляционный символ в строке
+			currency // Символ мировой валюты
+		};
+		/**
+		 * typeFn Функция определения типа токена
+		 * @param word слово для определения токена
+		 * @return     тип токена в контексте
+		 */
+		auto typeFn = [this](const wstring & word) noexcept {
+			// Результат работы функции
+			type_t result = type_t::null;
+			// Если слово передано
+			if(!word.empty()){
+				// Если длина слова больше 1-го символа, значит это слово
+				if(word.length() > 1) result = type_t::word;
+				// Если это всего один символ
+				else {
+					// Получаем символ токена в нижнем регистре
+					const wchar_t letter = this->alphabet->toLower(word.front());
+					// Если - это математическая операция
+					if(this->alphabet->isMath(letter)) result = type_t::math;
+					// Если - это разрешённая буква алфавита
+					else if(this->alphabet->check(letter)) result = type_t::allow;
+					// Если - это символ пробела
+					else if(this->alphabet->isSpace(letter)) result = type_t::space;
+					// Если - это знак пунктуации
+					else if(this->alphabet->isPunct(letter)) result = type_t::punct;
+					// Если - это символ греческого алфавита
+					else if(this->alphabet->isGreek(letter)) result = type_t::greek;
+					// Если - это символ направления (стрелки)
+					else if(this->alphabet->isRoute(letter)) result = type_t::route;
+					// Если - это спец-символ
+					else if(this->alphabet->isSpecial(letter)) result = type_t::specl;
+					// Если - это символ игральных карт
+					else if(this->alphabet->isPlayCards(letter)) result = type_t::pcards;
+					// Если - это символ мировой валюты
+					else if(this->alphabet->isCurrency(letter)) result = type_t::currency;
+					// Если - это арабское число
+					else if(this->alphabet->isNumber(wstring(1, letter))) result = type_t::num;
+					// Если - это изоляционный символ
+					else if(this->alphabet->isIsolation(letter)) {
+						// Определяем тип изоляционных знаков
+						const u_short type = (
+							(letter == L'(') || (letter == L'[') ||
+							(letter == L'{') || (letter == L'«') ||
+							(letter == L'„') || (letter == L'‹') ||
+							(letter == L'⌈') || (letter == L'⌊') || 
+							(letter == L'<') || (letter == L'〈') ? 1 :
+							((letter == L')') || (letter == L']') ||
+							(letter == L'}') || (letter == L'»') ||
+							(letter == L'“') || (letter == L'›') ||
+							(letter == L'⌉') || (letter == L'⌋') ||
+							(letter == L'>') || (letter == L'〉') ? 2 : 0)
+						);
+						// Определяем тип изоляционного символа
+						switch(type){
+							// Если это просто изоляционный символ
+							case 0: result = type_t::isolat; break;
+							// Если это изоляционный символ открытия
+							case 1: result = type_t::open;   break;
+							// Если это изоляционный символ закрытия
+							case 2: result = type_t::close;  break;
+						}
+					}
+				}
+			}
+			// Выводим результат
+			return result;
+		};
+		// Тип текущего токена контекста
+		type_t next = type_t::null, token = typeFn(first);
+		// Если это начало предложения
+		if(text.empty()) text.append(first);
+		// Иначе выполняем основную обработку
+		else {
+			// Определяем тип токена
+			switch((u_short) token){
+				// Если это неизвестный символ
+				case (u_short) type_t::null:
+				// Если это просто слово
+				case (u_short) type_t::word:
+				// Если это открытый изоляционный символ
+				case (u_short) type_t::open:
+				// Если это нормальная буква
+				case (u_short) type_t::allow:
+				// Если это символ греческого алфавита
+				case (u_short) type_t::greek: {
+					// Если предыдущий символ не является открытым изоляционнмы символом
+					if((context.empty() ||
+					(context.top() != type_t::open)) &&
+					(text.back() != L'´') &&
+					(text.back() != L'¸') &&
+					(text.back() != L'\x301') &&
+					(text.back() != L'\x311') &&
+					!this->alphabet->isSpace(text.back()) &&
+					(!this->alphabet->isNumber(first.substr(0, 1)) ||
+					!this->alphabet->isMath(text.back()) ||
+					(text.back() == L'='))) text.append(1, L' ');
+					// Устанавливаем регистр у первой буквы в тексте
+					if(this->isOption(options_t::uppers) && this->alphabet->isSpace(text.back())){
+						// Сбрасываем флаг регистра
+						bool uppers = false;
+						// Получаем длину собранного текста
+						const size_t length = text.length();
+						// Если последний символ является точка
+						if(text.at(length - 2) == L'.'){
+							// Если размер текста больше 4-х символов
+							if(length >= 4){
+								// Если последние символы не многоточие, разрешаем увеличение регистра
+								if(text.substr(length - 4, 3).compare(L"...") != 0) uppers = true;
+							// Если это короткое слово, разрешаем увеличение регистра
+							} else uppers = true;
+						// Если последний символ является знаком вопроса или восклицания, разрешаем увеличение регистра
+						} else if((text.at(length - 2) == L'!') || (text.at(length - 2) == L'?') || (text.at(length - 2) == L'¡') || (text.at(length - 2) == L'¿')) uppers = true;
+						// Если флаг увеличения регистра установлен
+						if(uppers) const_cast <wstring *> (&first)->front() = this->alphabet->toUpper(first.front());
+					}
+					// Добавляем слово
+					text.append(first);
+				} break;
+				// Если это число
+				case (u_short) type_t::num:
+				// Если это математическая операция
+				case (u_short) type_t::math: {
+					// Если предыдущий символ не является математической операцией и пробелом
+					if((context.empty() ||
+					((first.front() == L'=') && (text.back() != L'=')) ||
+					((first.front() != L'=') && (text.back() == L'=')) ||
+					((context.top() != type_t::open) &&
+					(context.top() != type_t::space))) &&
+					(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
+					// Добавляем слово
+					text.append(first);
+				} break;
+				// Если это символ мировых валют
+				case (u_short) type_t::currency: {
+					// Если предыдущий символ не является числом и пробелом
+					if((context.empty() ||
+					((context.top() != type_t::open) &&
+					(context.top() != type_t::space))) &&
+					(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
+					// Добавляем слово
+					text.append(first);
+				} break;
+				// Если это спец-символ
+				case (u_short) type_t::specl: {
+					// Если предыдущий символ не является спец-символом и пробелом
+					if((context.empty() ||
+					((context.top() != type_t::specl) &&
+					(context.top() != type_t::open) &&
+					(context.top() != type_t::space))) &&
+					(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
+					// Добавляем слово
+					text.append(first);
+				} break;
+				// Если это символ направления (стрелки)
+				case (u_short) type_t::route: {
+					// Если предыдущий символ не является символом направления и пробелом
+					if((context.empty() ||
+					((context.top() != type_t::route) &&
+					(context.top() != type_t::open) &&
+					(context.top() != type_t::space))) &&
+					(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
+					// Добавляем слово
+					text.append(first);
+				} break;
+				// Если это символ игральных карт
+				case (u_short) type_t::pcards: {
+					// Если предыдущий символ не является символом игральных карт и пробелом
+					if((context.empty() ||
+					((context.top() != type_t::pcards) &&
+					(context.top() != type_t::open) &&
+					(context.top() != type_t::space))) &&
+					(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
+					// Добавляем слово
+					text.append(first);
+				} break;
+				// Если это закрытый изоляционный символ
+				case (u_short) type_t::close:
+				// Если это знак-пунктуации
+				case (u_short) type_t::punct: {
+					// Получаем тип токена
+					next = (!second.empty() ? typeFn(second) : type_t::end);
+					// Добавляем слово
+					text.append(first);
+					// Если следующий символ не является знаком пунктуации
+					if((text.back() != L'´') &&
+					(text.back() != L'¸') &&
+					(text.back() != L'\x301') &&
+					(text.back() != L'\x311') &&
+					(next != type_t::punct) &&
+					(next != type_t::end) &&
+					(next != type_t::space) &&
+					(next != type_t::close)) text.append(1, L' ');
+				} break;
+				// Если это изоляционный символ
+				case (u_short) type_t::isolat: {
+					// Получаем тип токена
+					next = (!second.empty() ? typeFn(second) : type_t::end);
+					// Если предыдущий символ не является изоляционным символом
+					if((context.empty() || (context.top() != type_t::space)) &&
+					(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
+					// Добавляем слово
+					text.append(first);
+					// Если следующий символ является любым из слов кроме изоляционного символа и конца текста
+					if((next != type_t::end) &&
+					(next != type_t::space) &&
+					(next != type_t::punct)) text.append(1, L' ');
+				} break;
+			}
+		}
+		// Добавляем тип токена в контекст токенов
+		context.push(token);
+	}
+}
+/**
  * addAbbr Метод добавления аббревиатуры
  * @param word слово для добавления
  */
@@ -889,6 +1130,26 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 	wstring result = L"";
 	// Если контекст передан
 	if(!context.empty() && (this->alphabet != nullptr)){
+		
+		
+		// Стек типов собранного контекста
+		stack <type_t> types;
+		// Переходим по всем токенам
+		for(size_t i = 0; i < context.size(); ++i){
+			// Выполняем формирование контекста
+			this->restore(context[i], context[i + 1], result, types);
+		}
+		// Устанавливаем регистр у первой буквы в тексте
+		if(this->isOption(options_t::uppers)) result.front() = this->alphabet->toUpper(result.front());
+		
+		
+		
+		
+		
+		
+		
+		
+		/*
 		// Флаг конца текста
 		bool end = false;
 		// Типы флагов
@@ -914,11 +1175,13 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 		stack <type_t> typeContext;
 		// Тип текущего токена контекста
 		type_t tokenType = type_t::null, nextToken = type_t::null;
+		*/
 		/**
 		 * typeFn Функция определения типа токена
 		 * @param index индекс токена в контексте
 		 * @return      тип токена в контексте
 		 */
+		/*
 		auto typeFn = [&context, this](const size_t index = 0) noexcept {
 			// Результат работы функции
 			type_t result = type_t::null;
@@ -1011,6 +1274,17 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 					case (u_short) type_t::allow:
 					// Если это символ греческого алфавита
 					case (u_short) type_t::greek: {
+						// Если предыдущий символ не является открытым изоляционнмы символом
+						if((typeContext.empty() ||
+						(typeContext.top() != type_t::open)) &&
+						(result.back() != L'´') &&
+						(result.back() != L'¸') &&
+						(result.back() != L'\x301') &&
+						(result.back() != L'\x311') &&
+						!this->alphabet->isSpace(result.back()) &&
+						(!this->alphabet->isNumber(token.substr(0, 1)) ||
+						!this->alphabet->isMath(result.back()) ||
+						(result.back() == L'='))) result.append(1, L' ');
 						// Устанавливаем регистр у первой буквы в тексте
 						if(this->isOption(options_t::uppers) && this->alphabet->isSpace(result.back())){
 							// Сбрасываем флаг регистра
@@ -1032,17 +1306,6 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 
 							cout << " !!!!!!!!!!!!!!!!! " << token << " === " << uppers << " === " << wstring(1, result.at(length - 2)) << " ||| " << result << endl;
 						}
-						// Если предыдущий символ не является открытым изоляционнмы символом
-						if((typeContext.empty() ||
-						(typeContext.top() != type_t::open)) &&
-						(result.back() != L'´') &&
-						(result.back() != L'¸') &&
-						(result.back() != L'\x301') &&
-						(result.back() != L'\x311') &&
-						!this->alphabet->isSpace(result.back()) &&
-						(!this->alphabet->isNumber(token.substr(0, 1)) ||
-						!this->alphabet->isMath(result.back()) ||
-						(result.back() == L'='))) result.append(1, L' ');
 						// Добавляем слово
 						result.append(token);
 					} break;
@@ -1143,6 +1406,7 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 		}
 		// Устанавливаем регистр у первой буквы в тексте
 		if(this->isOption(options_t::uppers)) result.front() = this->alphabet->toUpper(result.front());
+		*/
 	}
 	// Выводим результат
 	return result;
