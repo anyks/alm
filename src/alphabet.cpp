@@ -985,7 +985,7 @@ const bool anyks::Alphabet::isNumber(const wstring & word) const noexcept {
  */
 const bool anyks::Alphabet::isLetter(const wchar_t letter) const noexcept {
 	// Выводим результат проверки
-	return (this->letters.count(letter) > 0);
+	return (this->alphabet.find(letter) != wstring::npos);
 }
 /**
  * isDecimal Метод проверки является ли слово дробным числом
