@@ -31,25 +31,6 @@ const bool anyks::Tokenizer::isOption(const options_t option) const noexcept {
 void anyks::Tokenizer::restore(const wstring & first, const wstring & second, wstring & text, stack <type_t> & context) const noexcept {
 	// Если слово передано
 	if(!first.empty()){
-		// Типы флагов
-		enum class type_t : u_short {
-			end,     // Конец контекста
-			num,     // Символ числа в тексте
-			null,    // Не определено
-			word,    // нормальное слово
-			math,    // Математическая операция
-			open,    // Открытие изоляционного символа
-			greek,   // Символ греческого алфавита
-			route,   // Символ направления (стрелок)
-			close,   // Закрытие изоляционного символа
-			specl,   // Спец-символ в тексте
-			space,   // Символ пробела в тексте
-			allow,   // Разрешённый символ
-			punct,   // Знак препинания
-			pcards,  // Символ игральных карт
-			isolat,  // Изоляционный символ в строке
-			currency // Символ мировой валюты
-		};
 		/**
 		 * typeFn Функция определения типа токена
 		 * @param word слово для определения токена
@@ -868,25 +849,6 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 		bool end = false;
 		// Собранный текст
 		wstring text = L"";
-		// Типы флагов
-		enum class type_t : u_short {
-			end,     // Конец контекста
-			num,     // Символ числа в тексте
-			null,    // Не определено
-			word,    // нормальное слово
-			math,    // Математическая операция
-			open,    // Открытие изоляционного символа
-			greek,   // Символ греческого алфавита
-			route,   // Символ направления (стрелок)
-			close,   // Закрытие изоляционного символа
-			specl,   // Спец-символ в тексте
-			space,   // Символ пробела в тексте
-			allow,   // Разрешённый символ
-			punct,   // Знак препинания
-			pcards,  // Символ игральных карт
-			isolat,  // Изоляционный символ в строке
-			currency // Символ мировой валюты
-		};
 		// Стек типов собранного контекста
 		stack <type_t> typeContext;
 		// Тип текущего токена контекста
