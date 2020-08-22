@@ -42,9 +42,11 @@ void anyks::Tokenizer::restore(const wstring & first, const wstring & second, ws
 			// Если слово передано
 			if(!word.empty()){
 				// Если длина слова больше 1-го символа, значит это слово
-				if(word.length() > 1) result = type_t::word;
+				if(word.length() > 1){
+					// Определяем, число это или нет
+					result = (this->alphabet->isNumber(word) || (this->alphabet->isDecimal(word) ? type_t::num : type_t::word);
 				// Если это всего один символ
-				else {
+				} else {
 					// Получаем символ токена в нижнем регистре
 					const wchar_t letter = this->alphabet->toLower(word.front());
 					// Если - это математическая операция
@@ -57,8 +59,6 @@ void anyks::Tokenizer::restore(const wstring & first, const wstring & second, ws
 					else if(this->alphabet->isGreek(letter)) result = type_t::greek;
 					// Если - это символ направления (стрелки)
 					else if(this->alphabet->isRoute(letter)) result = type_t::route;
-					// Если - это разрешённая буква алфавита
-					else if(this->alphabet->isLetter(letter)) result = type_t::allow;
 					// Если - это спец-символ
 					else if(this->alphabet->isSpecial(letter)) result = type_t::specl;
 					// Если - это символ игральных карт
@@ -91,7 +91,8 @@ void anyks::Tokenizer::restore(const wstring & first, const wstring & second, ws
 							// Если это изоляционный символ закрытия
 							case 2: result = type_t::close;  break;
 						}
-					}
+					// Если - это разрешённая буква алфавита
+					} else if(this->alphabet->isLetter(letter)) result = type_t::allow;
 				}
 			}
 			// Выводим результат
