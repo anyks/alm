@@ -335,11 +335,13 @@ const wstring anyks::Alphabet::toLower(const wstring & str) const noexcept {
 	wstring result = L"";
 	// Если строка передана
 	if(!str.empty()){
+		/*
 		// Выполняем приведение к нижнему регистру
 		transform(str.begin(), str.end(), str.begin(), [](wchar_t letter){
 			// Приводим к нижнему регистру каждую букву
 			return towlower(letter);
 		});
+		*/
 	}
 	// Выводим результат
 	return result;
