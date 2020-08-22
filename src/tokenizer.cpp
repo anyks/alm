@@ -160,9 +160,6 @@ void anyks::Tokenizer::restore(const wstring & first, const wstring & second, ws
 					((context.top() != type_t::open) &&
 					(context.top() != type_t::space))) &&
 					(!this->alphabet->isSpace(text.back()))) text.append(1, L' ');
-
-					cout << " !!!!!!!!!!!!!!!!!!!!!! " << text << " => " << first << endl;
-
 					// Добавляем слово
 					text.append(first);
 				} break;
