@@ -330,7 +330,7 @@ const wstring anyks::Alphabet::toLower(const wstring & str) const noexcept {
 	// Если строка передана
 	if(!str.empty()){
 		// Создаём конвертер
-		ctype <wchar_t> & conv = use_facet <ctype <wchar_t>> (this->locale);
+		static const ctype <wchar_t> & conv = use_facet <ctype <wchar_t>> (this->locale);
 		// Выполняем приведение к нижнему регистру
 		transform(str.begin(), str.end(), str.begin(), [&conv](wchar_t letter){
 			// Приводим к нижнему регистру каждую букву
@@ -353,7 +353,7 @@ const wstring anyks::Alphabet::toUpper(const wstring & str) const noexcept {
 	// Если строка передана
 	if(!str.empty()){
 		// Создаём конвертер
-		ctype <wchar_t> & conv = use_facet <ctype <wchar_t>> (this->locale);
+		static const ctype <wchar_t> & conv = use_facet <ctype <wchar_t>> (this->locale);
 		// Выполняем приведение к нижнему регистру
 		transform(str.begin(), str.end(), str.begin(), [&conv](wchar_t letter){
 			// Приводим к нижнему регистру каждую букву
