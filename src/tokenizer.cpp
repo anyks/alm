@@ -49,8 +49,6 @@ void anyks::Tokenizer::restore(const wstring & first, const wstring & second, ws
 					const wchar_t letter = this->alphabet->toLower(word.front());
 					// Если - это математическая операция
 					if(this->alphabet->isMath(letter)) result = type_t::math;
-					// Если - это разрешённая буква алфавита
-					else if(this->alphabet->check(letter)) result = type_t::allow;
 					// Если - это символ пробела
 					else if(this->alphabet->isSpace(letter)) result = type_t::space;
 					// Если - это знак пунктуации
@@ -59,6 +57,8 @@ void anyks::Tokenizer::restore(const wstring & first, const wstring & second, ws
 					else if(this->alphabet->isGreek(letter)) result = type_t::greek;
 					// Если - это символ направления (стрелки)
 					else if(this->alphabet->isRoute(letter)) result = type_t::route;
+					// Если - это разрешённая буква алфавита
+					else if(this->alphabet->isLetter(letter)) result = type_t::allow;
 					// Если - это спец-символ
 					else if(this->alphabet->isSpecial(letter)) result = type_t::specl;
 					// Если - это символ игральных карт

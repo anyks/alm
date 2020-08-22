@@ -979,6 +979,15 @@ const bool anyks::Alphabet::isNumber(const wstring & word) const noexcept {
 	return result;
 }
 /**
+ * isLetter Метод проверки на разрешённую букву
+ * @param  letter буква для проверки
+ * @return        результат проверки
+ */
+const bool anyks::Alphabet::isLetter(const wchar_t letter) const noexcept {
+	// Выводим результат проверки
+	return (this->letters.count(letter) > 0);
+}
+/**
  * isDecimal Метод проверки является ли слово дробным числом
  * @param  word слово для проверки
  * @return      результат проверки

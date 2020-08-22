@@ -412,6 +412,12 @@ namespace anyks {
 			 */
 			const bool isNumber(const wstring & word) const noexcept;
 			/**
+			 * isLetter Метод проверки на разрешённую букву
+			 * @param  letter буква для проверки
+			 * @return        результат проверки
+			 */
+			const bool isLetter(const wchar_t letter) const noexcept;
+			/**
 			 * isDecimal Метод проверки является ли слово дробным числом
 			 * @param  word слово для проверки
 			 * @return      результат проверки
