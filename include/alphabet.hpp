@@ -23,6 +23,13 @@
 #include <cstring>
 #include <algorithm>
 #include <sys/types.h>
+// Если используется BOOST
+#ifdef USE_BOOST_CONVERT
+	#include <boost/locale/encoding_utf.hpp>
+// Если нужно использовать стандартную библиотеку
+#else
+	#include <codecvt>
+#endif
 /**
  * Наши модули
  */

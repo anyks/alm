@@ -158,10 +158,22 @@ const string anyks::Alphabet::convert(const wstring & str) const noexcept {
 	string result = "";
 	// Если строка передана
 	if(!str.empty()){
+// Если используется BOOST
+#ifdef USE_BOOST_CONVERT
 		// Объявляем конвертер
-		wstring_convert <codecvt_utf8 <wchar_t>> conv;
+		using boost::locale::conv::utf_to_utf;
+		// Выполняем конвертирование в utf-8 строку
+		result = utf_to_utf <char> (str.c_str(), str.c_str() + str.size());
+// Если нужно использовать стандартную библиотеку
+#else
+		// Устанавливаем тип для конвертера UTF-8
+		using convert_type = codecvt_utf8 <wchar_t, 0x10ffff, little_endian>;
+		// Объявляем конвертер
+		wstring_convert <convert_type, wchar_t> conv;
+		// wstring_convert <codecvt_utf8 <wchar_t>> conv;
 		// Выполняем конвертирование в utf-8 строку
 		result = conv.to_bytes(str);
+#endif
 	}
 	// Выводим результат
 	return result;
@@ -289,10 +301,20 @@ const wstring anyks::Alphabet::convert(const string & str) const noexcept {
 	wstring result = L"";
 	// Если строка передана
 	if(!str.empty()){
+// Если используется BOOST
+#ifdef USE_BOOST_CONVERT
 		// Объявляем конвертер
-		wstring_convert <codecvt_utf8 <wchar_t>> conv;
+		using boost::locale::conv::utf_to_utf;
 		// Выполняем конвертирование в utf-8 строку
-		result.assign(conv.from_bytes(str));
+		result = utf_to_utf <wchar_t> (str.c_str(), str.c_str() + str.size());
+// Если нужно использовать стандартную библиотеку
+#else
+		// Объявляем конвертер
+		// wstring_convert <codecvt_utf8 <wchar_t>> conv;
+		wstring_convert <codecvt_utf8_utf16 <wchar_t, 0x10ffff, little_endian>> conv;
+		// Выполняем конвертирование в utf-8 строку
+		result = conv.from_bytes(str);
+#endif
 	}
 	// Выводим результат
 	return result;
@@ -307,8 +329,15 @@ const wstring anyks::Alphabet::toLower(const wstring & str) const noexcept {
 	wstring result = L"";
 	// Если строка передана
 	if(!str.empty()){
-		// Переходим по всем символам
-		for(auto & c : str) result.append(1, towlower(c));
+		// Создаём конвертер
+		ctype <wchar_t> & conv = use_facet <ctype <wchar_t>> (this->locale);
+		// Выполняем приведение к нижнему регистру
+		transform(str.begin(), str.end(), str.begin(), [](wchar_t letter){
+			// Приводим к нижнему регистру каждую букву
+			return conv.tolower(letter);
+		});
+		// Переходим по всем символам и приводим к нижнему регистру
+		// for(auto & c : str) result.append(1, towlower(c));
 	}
 	// Выводим результат
 	return result;
@@ -323,8 +352,15 @@ const wstring anyks::Alphabet::toUpper(const wstring & str) const noexcept {
 	wstring result = L"";
 	// Если строка передана
 	if(!str.empty()){
-		// Переходим по всем символам
-		for(auto & c : str) result.append(1, towupper(c));
+		// Создаём конвертер
+		ctype <wchar_t> & conv = use_facet <ctype <wchar_t>> (this->locale);
+		// Выполняем приведение к нижнему регистру
+		transform(str.begin(), str.end(), str.begin(), [](wchar_t letter){
+			// Приводим к нижнему регистру каждую букву
+			return conv.toupper(letter);
+		});
+		// Переходим по всем символам и приводим к верхнему регистру
+		// for(auto & c : str) result.append(1, towupper(c));
 	}
 	// Выводим результат
 	return result;
