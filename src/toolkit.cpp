@@ -962,7 +962,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 		 */
 		auto modeFn = [&](const wstring & word, const vector <string> & ctx, const bool reset, const bool stop) noexcept {
 			// Если это сброс контекста, отправляем результат
-			if(reset) resFn();
+			if(reset && !this->isOption(options_t::tokenWords)) resFn();
 			// Если слово передано
 			if(!word.empty()){
 				// Получаем данные слова
@@ -990,6 +990,13 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 				else if(!tmp.empty()) {
 					// Получаем идентификатор слова
 					const size_t idw = this->getIdw(tmp);
+					// Проверяем идентификатор на валидность слова
+					if((idw != idw_t::NIDW) && this->isOption(options_t::tokenWords) && !this->tokenizer->isIdWord(idw)){
+						// Отправляем результат
+						resFn();
+						// Выводим результат
+						return true;
+					}
 					// Выполняем проверку на плохое слово
 					const bool isBad = (this->badwords.count(idw) > 0);
 					// Если это плохое слово, заменяем его на неизвестное

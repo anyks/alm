@@ -587,7 +587,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status) noexcept
 			// Устанавливаем опции модуля
 			if(options > 0){
 				// Флаги параметров
-				bitset <9> opt = options;
+				bitset <10> opt = options;
 				// Устанавливаем все возможные опции языковой модели
 				if(opt.test((u_short) toolkit_t::options_t::debug))      this->alm->setOption(alm_t::options_t::debug);
 				if(opt.test((u_short) toolkit_t::options_t::onlyGood))   this->alm->setOption(alm_t::options_t::onlyGood);

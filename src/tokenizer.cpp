@@ -851,6 +851,8 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 			// Добавляем тип токена в контекст токенов
 			typeContext.push(tokenType);
 		}
+		// Устанавливаем регистр у первой буквы в тексте
+		text.front() = this->alphabet->toUpper(text.front());
 		// Формируем результат
 		result = this->alphabet->convert(text);
 	}
@@ -1094,6 +1096,8 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 			// Добавляем тип токена в контекст токенов
 			typeContext.push(tokenType);
 		}
+		// Устанавливаем регистр у первой буквы в тексте
+		result.front() = this->alphabet->toUpper(result.front());
 	}
 	// Выводим результат
 	return result;
