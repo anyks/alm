@@ -335,13 +335,13 @@ const wstring anyks::Alphabet::toLower(const wstring & str) const noexcept {
 	wstring result = L"";
 	// Если строка передана
 	if(!str.empty()){
-		/*
+		// Запоминаем результат
+		result = str;
 		// Выполняем приведение к нижнему регистру
-		transform(str.begin(), str.end(), str.begin(), [](wchar_t letter){
+		transform(result.begin(), result.end(), result.begin(), [](wchar_t letter){
 			// Приводим к нижнему регистру каждую букву
 			return towlower(letter);
 		});
-		*/
 	}
 	// Выводим результат
 	return result;
@@ -356,8 +356,10 @@ const wstring anyks::Alphabet::toUpper(const wstring & str) const noexcept {
 	wstring result = L"";
 	// Если строка передана
 	if(!str.empty()){
+		// Запоминаем результат
+		result = str;
 		// Выполняем приведение к верхнему регистру
-		transform(str.begin(), str.end(), str.begin(), [](wchar_t letter){
+		transform(result.begin(), result.end(), result.begin(), [](wchar_t letter){
 			// Приводим к верхнему регистру каждую букву
 			return towupper(letter);
 		});
