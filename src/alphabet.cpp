@@ -336,7 +336,7 @@ const wstring anyks::Alphabet::toLower(const wstring & str) const noexcept {
 	// Если строка передана
 	if(!str.empty()){
 		// Переходим по всем буквам слова и формируем новую строку
-		for(auto & letter : str) result.append(towlower(letter));
+		for(auto & letter : str) result.append(1, towlower(letter));
 	}
 	// Выводим результат
 	return result;
@@ -352,7 +352,7 @@ const wstring anyks::Alphabet::toUpper(const wstring & str) const noexcept {
 	// Если строка передана
 	if(!str.empty()){
 		// Переходим по всем буквам слова и формируем новую строку
-		for(auto & letter : str) result.append(towupper(letter));
+		for(auto & letter : str) result.append(1, towupper(letter));
 	}
 	// Выводим результат
 	return result;
