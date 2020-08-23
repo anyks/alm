@@ -572,7 +572,81 @@ const pair <bool, size_t> anyks::Alm2::exist(const vector <size_t> & seq, const 
 		else sequence.assign(seq.begin(), seq.end());
 		// Если последовательность, до сих пор соответствует
 		if(sequence.size() >= size_t(step)){
-
+			/**
+			 * Прототип функции проверки на существование последовательности
+			 * @param начальная позиция итератора в последовательности
+			 * @return результат проверки, сущестования последовательности
+			 */
+			function <const pair <bool, size_t> (u_short)> checkFn;
+			/**
+			 * checkFn Функция проверки на существование последовательности
+			 * @param start начальная позиция итератора в последовательности
+			 * @return      результат проверки, сущестования последовательности
+			 */
+			checkFn = [&checkFn, &sequence, step, this](u_short start) noexcept {
+				// Последовательность для проверки
+				vector <size_t> seq;
+				// Копируем основную карту
+				arpa_t * obj = &this->arpa;
+				// Результат работы функции
+				pair <bool, size_t> result = {false, 0};
+				// Идентификатор слова и количество слов в последовательности
+				size_t idw = idw_t::NIDW, count = sequence.size();
+				// Получаем конечный элемент
+				const u_short stop = (start + ((count - size_t(start)) >= size_t(step) ? step : count - start));
+				// Переходим по всему объекту
+				for(u_short i = start; i < stop; i++){
+					// Получаем идентификатор слова
+					idw = sequence.at(i);
+					// Если идентификатор токена - валиден
+					if(this->tokenizer->isIdWord(idw)) seq.push_back(idw);
+					// Если токен не валиден
+					else {
+						// Увеличиваем начало следующей итерации
+						start += 2;
+						// Запоминаем, что результат возможем
+						result.first = true;
+						// Выходим из цикла
+						break;
+					}
+				}
+				// Если последовательность предположительно чистая
+				if(!result.first && !seq.empty()){
+					// Получаем размер N-граммы
+					const u_short size = seq.size();
+					// Выполняем поиск списка N-грамм
+					auto it = this->arpa.find(size);
+					// Если список N-грамм получен
+					if(it != this->arpa.end()){
+						// Получаем идентификатор последовательности
+						const size_t ids = (size > 1 ? this->tokenizer->ids(seq) : seq.front());
+						// Выполняем проверку существования последовательности
+						auto jt = it->second.find(ids);
+						// Если последовательность существует
+						result.first = (jt != it->second.end());
+						// Увеличиваем начало следующей итерации
+						if(result.first){
+							// Увеличиваем стартовую позицию
+							start++;
+							// Устанавливаем количество совпадений
+							if(step == stop) result.second = step;
+						}
+					}
+				}
+				// Если начало следующей итерации еще возможно
+				if(result.first && (size_t(start) < count)){
+					// Выполняем поиск дальше
+					const auto & res = checkFn(start);
+					// Устанавливаем результат поиска
+					result.first = res.first;
+					// Увеличиваем количество найденных совпадений
+					result.second += res.second;
+				}
+				// Выводим результат проверки
+				return result;
+			};
+			// Выполняем проверку
+			result = checkFn(0);
 		}
 	}
 	// Выводим результат
