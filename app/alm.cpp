@@ -881,7 +881,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Получаем шаг N-граммы
 							const u_short step = ((value = env.get("step")) != nullptr ? ((stoi(value) < 2) ? 2 : stoi(value)) : 2);
 							// Выводим результат
-							alphabet.log("%s | %s\r\n", alphabet_t::log_t::null, nullptr, (alm->check(text, step) ? "YES" : "NO"), text.c_str());
+							alphabet.log("%s | %s\r\n", alphabet_t::log_t::null, nullptr, (alm->exist(text, step).first ? "YES" : "NO"), text.c_str());
 						}
 					// Если адрес текстового файла или каталог передан
 					} else if(((value = env.get("r-text")) != nullptr) && (fsys_t::isfile(value) || fsys_t::isdir(value)) && env.is("w-text")){

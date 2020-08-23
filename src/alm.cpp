@@ -817,6 +817,172 @@ const pair <bool, size_t> anyks::Alm::check(const vector <size_t> & seq, const b
 }
 /**
  * exist Метод проверки существования последовательности
+ * @param text текст для проверки существования
+ * @param step размер шага проверки последовательности
+ * @return     результат проверки
+ */
+const pair <bool, size_t> anyks::Alm::exist(const string & text, const u_short step) const noexcept {
+	// Результат работы функции
+	pair <bool, size_t> result = {false, 0};
+	// Если слово передано
+	if(!text.empty()) result = this->exist(this->alphabet->convert(text), step);
+	// Выводим результат
+	return result;
+}
+/**
+ * exist Метод проверки существования последовательности
+ * @param text текст для проверки существования
+ * @param step размер шага проверки последовательности
+ * @return     результат проверки
+ */
+const pair <bool, size_t> anyks::Alm::exist(const wstring & text, const u_short step) const noexcept {
+	// Результат работы функции
+	pair <bool, size_t> result = {false, 0};
+	// Если слово передано
+	if(!text.empty()){
+		// Список последовательностей для обучения
+		vector <size_t> seq = {};
+		// Идентификатор неизвестного слова
+		const size_t uid = (size_t) token_t::unk;
+		/**
+		 * unkFn Функция установки неизвестного слова в последовательность
+		 * @return нужно ли остановить сбор последовательности
+		 */
+		auto unkFn = [&seq, uid, this]() noexcept {
+			// Если неизвестное слово не установлено
+			if(this->unknown == 0) seq.push_back(uid);
+			// Если неизвестное слово установлено
+			else seq.push_back(this->unknown);
+		};
+		/**
+		 * resFn Функция вывода результата
+		 */
+		auto resFn = [&result, &seq, step, this]() noexcept {
+			/**
+			 * Если слова всего два, значит это начало и конец предложения
+			 * Нам же нужны только нормальные n-граммы
+			 */
+			if(seq.size() > 2) result = this->exist(seq, step);
+			// Очищаем список последовательностей
+			seq.clear();
+		};
+		/**
+		 * modeFn Функция обработки разбитого текста
+		 * @param word  слово для обработки
+		 * @param ctx   контекст к которому принадлежит слово
+		 * @param reset флаг сброса контекста
+		 * @param stop  флаг завершения обработки
+		 */
+		auto modeFn = [&](const wstring & word, const vector <string> & ctx, const bool reset, const bool stop) noexcept {
+			// Если это сброс контекста, отправляем результат
+			if(reset) resFn();
+			// Если слово передано
+			if(!word.empty()){
+				// Получаем данные слова
+				word_t tmp = word;
+				// Если модуль питона активирован
+				if(this->python != nullptr){
+					// Ищем скрипт обработки слов
+					auto it = this->scripts.find(1);
+					// Если скрипт обработки слов установлен
+					if(it != this->scripts.end()){
+						// Блокируем поток
+						this->locker.lock();
+						// Выполняем внешний python скрипт
+						const auto & res = this->python->run(it->second.second, {tmp.real()}, ctx);
+						// Если результат получен
+						if(!res.empty()) tmp = res;
+						// Разблокируем поток
+						this->locker.unlock();
+					}
+				// Если модуль предобработки слов, существует
+				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
+				// Если слово не разрешено
+				if(tmp.length() >= MAX_WORD_LENGTH) unkFn();
+				// Если слово разрешено
+				else if(!tmp.empty()) {
+					// Получаем идентификатор слова
+					const size_t idw = this->getIdw(tmp);
+					// Выполняем проверку на плохое слово
+					const bool isBad = (this->badwords.count(idw) > 0);
+					// Если это плохое слово, заменяем его на неизвестное
+					if(isBad || (idw == 0) || (idw == idw_t::NIDW)) unkFn();
+					// Иначе продолжаем дальше
+					else {
+						// Проверяем является ли строка словом
+						const bool isWord = !this->tokenizer->isToken(idw);
+						// Если это неизвестное слово
+						if(isBad || (idw == uid) || (isWord && (this->getWord(idw) == nullptr))) unkFn();
+						// Иначе добавляем слово
+						else if(!isBad && (!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)))
+							// Собираем последовательность
+							seq.push_back(idw);
+						// Отправляем слово как неизвестное
+						else unkFn();
+					}
+				}
+			}
+			// Если это конец, отправляем результат
+			if(stop) resFn();
+			// Выводим результат
+			return true;
+		};
+		// Выполняем разбивку текста на токены
+		this->tokenizer->run(text, modeFn);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * exist Метод проверки существования последовательности
+ * @param seq  список слов последовательности
+ * @param step размер шага проверки последовательности
+ * @return     результат проверки
+ */
+const pair <bool, size_t> anyks::Alm::exist(const vector <string> & seq, const u_short step) const noexcept {
+	// Результат работы функции
+	pair <bool, size_t> result = {false, 0};
+	// Если последовательность получена
+	if(!seq.empty()){
+		// Список последовательности для проверки
+		vector <size_t> tmp(seq.size());
+		// Переходим по всей последовательности
+		for(size_t i = 0; i < seq.size(); i++){
+			// Устанавливаем полученное слово
+			tmp.at(i) = this->getIdw(this->alphabet->convert(seq.at(i)));
+		}
+		// Получаем результат
+		result = this->exist(tmp, step);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * exist Метод проверки существования последовательности
+ * @param seq  список слов последовательности
+ * @param step размер шага проверки последовательности
+ * @return     результат проверки
+ */
+const pair <bool, size_t> anyks::Alm::exist(const vector <wstring> & seq, const u_short step) const noexcept {
+	// Результат работы функции
+	pair <bool, size_t> result = {false, 0};
+	// Если последовательность получена
+	if(!seq.empty()){
+		// Список последовательности для проверки
+		vector <size_t> tmp(seq.size());
+		// Переходим по всей последовательности
+		for(size_t i = 0; i < seq.size(); i++){
+			// Устанавливаем полученное слово
+			tmp.at(i) = this->getIdw(seq.at(i));
+		}
+		// Получаем результат
+		result = this->exist(tmp, step);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * exist Метод проверки существования последовательности
  * @param seq  список слов последовательности
  * @param step размер шага проверки последовательности
  * @return     результат проверки
@@ -2126,17 +2292,17 @@ void anyks::Alm::checkByFiles(const string & path, const string & filename, cons
 			// Если текст получен
 			if(!text.empty()){
 				// Выполняем првоерку текста
-				const bool check = this->check(text, u_short(step < 2 ? 2 : step));
+				const auto & check = this->exist(text, u_short(step < 2 ? 2 : step));
 				// Выполняем блокировку потока
 				this->locker.lock();
 				// Считаем количество обработанных предложений
 				count++;
 				// Если слово найдено считаем количество предложений
-				if(check) exists++;
+				if(check.first) exists++;
 				// Выполняем запись в файл
-				this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::null, filename.c_str(), count, (check ? "YES" : "NO"), text.c_str());
+				this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::null, filename.c_str(), count, (check.first ? "YES" : "NO"), text.c_str());
 				// Выводим результат
-				if(this->isOption(options_t::debug)) this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::info, nullptr, count, (check ? "YES" : "NO"), text.c_str());
+				if(this->isOption(options_t::debug)) this->alphabet->log("%zu | %s | %s\r\n", alphabet_t::log_t::info, nullptr, count, (check.first ? "YES" : "NO"), text.c_str());
 				// Выполняем разблокировку потока
 				this->locker.unlock();
 			}

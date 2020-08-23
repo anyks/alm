@@ -347,6 +347,34 @@ namespace anyks {
 		public:
 			/**
 			 * exist Метод проверки существования последовательности
+			 * @param text текст для проверки существования
+			 * @param step размер шага проверки последовательности
+			 * @return     результат проверки
+			 */
+			const pair <bool, size_t> exist(const string & text, const u_short step) const noexcept;
+			/**
+			 * exist Метод проверки существования последовательности
+			 * @param text текст для проверки существования
+			 * @param step размер шага проверки последовательности
+			 * @return     результат проверки
+			 */
+			const pair <bool, size_t> exist(const wstring & text, const u_short step) const noexcept;
+			/**
+			 * exist Метод проверки существования последовательности
+			 * @param seq  список слов последовательности
+			 * @param step размер шага проверки последовательности
+			 * @return     результат проверки
+			 */
+			const pair <bool, size_t> exist(const vector <string> & seq, const u_short step) const noexcept;
+			/**
+			 * exist Метод проверки существования последовательности
+			 * @param seq  список слов последовательности
+			 * @param step размер шага проверки последовательности
+			 * @return     результат проверки
+			 */
+			const pair <bool, size_t> exist(const vector <wstring> & seq, const u_short step) const noexcept;
+			/**
+			 * exist Метод проверки существования последовательности
 			 * @param seq  список слов последовательности
 			 * @param step размер шага проверки последовательности
 			 * @return     результат проверки
