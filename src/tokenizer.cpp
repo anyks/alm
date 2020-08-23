@@ -850,10 +850,12 @@ const string anyks::Tokenizer::restore(const vector <string> & context) const no
 		wstring text = L"";
 		// Стек типов собранного контекста
 		stack <type_t> types;
+		// Получаем количество слов в контексте
+		const size_t count = context.size();
 		// Переходим по всем токенам
-		for(size_t i = 0; i < context.size(); ++i){
+		for(size_t i = 0; i < count; ++i){
 			// Выполняем формирование контекста
-			this->restore(this->alphabet->convert(context[i]), this->alphabet->convert(context[i + 1]), text, types);
+			this->restore(this->alphabet->convert(context[i]), ((i + 1) < count ? this->alphabet->convert(context[i + 1]) : L""), text, types);
 		}
 		// Устанавливаем регистр у первой буквы в тексте
 		if(this->isOption(options_t::uppers)) text.front() = this->alphabet->toUpper(text.front());
@@ -875,10 +877,12 @@ const wstring anyks::Tokenizer::restore(const vector <wstring> & context) const 
 	if(!context.empty() && (this->alphabet != nullptr)){
 		// Стек типов собранного контекста
 		stack <type_t> types;
+		// Получаем количество слов в контексте
+		const size_t count = context.size();
 		// Переходим по всем токенам
-		for(size_t i = 0; i < context.size(); ++i){
+		for(size_t i = 0; i < count; ++i){
 			// Выполняем формирование контекста
-			this->restore(context[i], context[i + 1], result, types);
+			this->restore(context[i], ((i + 1) < count ? context[i + 1] : L""), result, types);
 		}
 		// Устанавливаем регистр у первой буквы в тексте
 		if(this->isOption(options_t::uppers)) result.front() = this->alphabet->toUpper(result.front());
