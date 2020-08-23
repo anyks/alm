@@ -961,14 +961,8 @@ const bool anyks::Alphabet::isNumber(const wstring & word) const noexcept {
 		const size_t length = word.length();
 		// Если длина слова больше 1-го символа
 		if(length > 1){
-			
-			cout << " ^^^^^^^^^^^^^^^^^1 " << word << endl;
-
 			// Переходим по всем буквам слова
 			for(size_t i = 0, j = (length - 1); j > ((length / 2) - 1); i++, j--){
-				
-				cout << " ^^^^^^^^^^^^^^^^^2 " << i << endl;
-
 				// Проверяем является ли слово арабским числом
 				result = !(
 					i == j ? (this->numsSymbols.arabs.count(word.at(i)) < 1) :
