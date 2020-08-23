@@ -43,6 +43,9 @@ void anyks::Tokenizer::restore(const wstring & first, const wstring & second, ws
 			if(!word.empty()){
 				// Если длина слова больше 1-го символа, значит это слово
 				if(word.length() > 1){
+
+					cout << " ^^^^^^^^^^^^^^^^^ " << word << endl;
+
 					// Определяем, число это или нет
 					result = (this->alphabet->isNumber(word) || this->alphabet->isDecimal(word) ? type_t::num : type_t::word);
 				// Если это всего один символ
