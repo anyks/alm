@@ -1068,10 +1068,10 @@ void anyks::Tokenizer::writeSuffix(const string & filename, function <void (cons
 void anyks::Tokenizer::readSuffix(const string & filename, function <void (const string &, const u_short)> status) noexcept {
 	// Если адрес файла передан
 	if(!filename.empty()){
+		// Количество обработанных данных
+		size_t index = 0;
 		// Текущий и предыдущий статус
 		u_short actual = 0, past = 100;
-		// Количество обработанных данных
-		size_t index = 0, pos = 0, loc = 0;
 		/**
 		 * parseFn Функция парсинга аббревиатур
 		 * @param text     строка текста для парсинга
