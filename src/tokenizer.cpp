@@ -438,7 +438,7 @@ const bool anyks::Tokenizer::isToken(const size_t idw) const noexcept {
 	return (idw < size_t(token_t::endtoken));
 }
 /**
- * isIdWord Функция проверки на соответствие идентификатора слову
+ * isIdWord Метод проверки на соответствие идентификатора слову
  * @param idw идентификатор слова для проверки
  * @return    результат проверки идентификатора
  */

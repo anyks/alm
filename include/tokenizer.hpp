@@ -229,7 +229,7 @@ namespace anyks {
 			 */
 			const bool isToken(const size_t idw) const noexcept;
 			/**
-			 * isIdWord Функция проверки на соответствие идентификатора слову
+			 * isIdWord Метод проверки на соответствие идентификатора слову
 			 * @param idw идентификатор слова для проверки
 			 * @return    результат проверки идентификатора
 			 */
