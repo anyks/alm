@@ -246,11 +246,19 @@ void anyks::Tokenizer::restore(const wstring & first, const wstring & second, ws
 }
 /**
  * addAbbr Метод добавления аббревиатуры
+ * @param idw идентификатор слова для добавления
+ */
+void anyks::Tokenizer::addAbbr(const size_t idw) noexcept {
+	// Устанавливаем идентификатор слова
+	if((idw > 0) && (idw != idw_t::NIDW)) this->abbrs.emplace(idw);
+}
+/**
+ * addAbbr Метод добавления аббревиатуры
  * @param word слово для добавления
  */
 void anyks::Tokenizer::addAbbr(const string & word) noexcept {
 	// Если слово передано, добавляем его в список аббревиатур
-	if(word.size() > 2) this->abbrs.emplace(this->idw(this->alphabet->convert(word)));
+	if(word.size() > 2) this->addAbbr(this->idw(this->alphabet->convert(word)));
 }
 /**
  * addAbbr Метод добавления аббревиатуры
@@ -258,7 +266,7 @@ void anyks::Tokenizer::addAbbr(const string & word) noexcept {
  */
 void anyks::Tokenizer::addAbbr(const wstring & word) noexcept {
 	// Если слово передано, добавляем его в список аббревиатур
-	if(word.size() > 2) this->abbrs.emplace(this->idw(word));
+	if(word.size() > 2) this->addAbbr(this->idw(word));
 }
 /**
  * setAbbrs Метод установки списка аббревиатур
@@ -303,27 +311,27 @@ void anyks::Tokenizer::setAlphabet(const alphabet_t * alphabet) noexcept {
 	this->update();
 }
 /**
- * setSuffix Метод установки суффикса цифровой аббревиатуры
+ * addSuffix Метод установки суффикса цифровой аббревиатуры
  * @param idw идентификатор суффикса цифровой аббревиатуры
  */
-void anyks::Tokenizer::setSuffix(const size_t idw) const noexcept {
+void anyks::Tokenizer::addSuffix(const size_t idw) const noexcept {
 	// Если суффикс передан
 	if(idw > 0) this->suffix.emplace(idw);
 }
 /**
- * setSuffix Метод установки списка суффиксов цифровых аббревиатур
+ * setSuffixes Метод установки списка суффиксов цифровых аббревиатур
  * @param suffix список суффиксов цифровых аббревиатур
  */
-void anyks::Tokenizer::setSuffix(const set <size_t> & suffix) const noexcept {
+void anyks::Tokenizer::setSuffixes(const set <size_t> & suffix) const noexcept {
 	// Если список аббревиатур передан
 	if(!suffix.empty()) this->suffix = suffix;
 }
 /**
- * setSuffix Метод извлечения суффикса из цифровой аббревиатуры
+ * addSuffix Метод извлечения суффикса из цифровой аббревиатуры
  * @param word слово для извлечения суффикса аббревиатуры
  * @param idw  идентификатор обрабатываемого слова
  */
-void anyks::Tokenizer::setSuffix(const wstring & word, const size_t idw) const noexcept {
+void anyks::Tokenizer::addSuffix(const wstring & word, const size_t idw) const noexcept {
 	// Если слово передано и оно является аббревиатурой
 	if(!word.empty() && (word.back() != L'-')){
 		// Если проверка пройедна
@@ -360,10 +368,10 @@ const set <size_t> & anyks::Tokenizer::getAbbrs() const noexcept {
 	return this->abbrs;
 }
 /**
- * getSuffix Метод извлечения списка суффиксов цифровых аббревиатур
+ * getSuffixes Метод извлечения списка суффиксов цифровых аббревиатур
  * @return список цифровых аббревиатур
  */
-const set <size_t> & anyks::Tokenizer::getSuffix() const noexcept {
+const set <size_t> & anyks::Tokenizer::getSuffixes() const noexcept {
 	// Выводим список суффиксов цифровых аббревиатур
 	return this->suffix;
 }
@@ -1011,7 +1019,7 @@ void anyks::Tokenizer::writeSuffix(const string & filename, function <void (cons
 	// Если адрес файла передан
 	if(!filename.empty()){
 		// Получаем список суффиксов цифровых аббревиатур
-		const auto & abbrs = this->getSuffix();
+		const auto & abbrs = this->getSuffixes();
 		// Если список суффиксов цифровых аббревиатур получен
 		if(!abbrs.empty()){
 			// Открываем файл на запись
@@ -1080,7 +1088,7 @@ void anyks::Tokenizer::readSuffix(const string & filename, function <void (const
 				// Если текст числом не является, получаем его идентификатор
 				else idw = this->idw(this->alphabet->convert(text));
 				// Добавляем идентификатор аббревиатуры в токенизатор
-				if((idw > 0) && (idw != idw_t::NIDW)) this->setSuffix(idw);
+				if((idw > 0) && (idw != idw_t::NIDW)) this->addSuffix(idw);
 				// Если функция вывода статуса передана
 				if(status != nullptr){
 					// Увеличиваем количество записанных n-грамм
@@ -1182,7 +1190,7 @@ void anyks::Tokenizer::run(const wstring & text, function <const bool (const wst
 			 */
 			auto callbackFn = [&begin, &context, &callback, this](const wstring & word, const bool end) noexcept {
 				// Выполняем сборку суффиксов цифровых аббревиатур
-				if(this->isOption(options_t::collect)) this->setSuffix(word);
+				if(this->isOption(options_t::collect)) this->addSuffix(word);
 				// Отдаём результат
 				const bool result = callback(word, context, begin && context.empty(), end);
 				// Запоминаем что работа началась

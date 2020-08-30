@@ -135,6 +135,11 @@ namespace anyks {
 		public:
 			/**
 			 * addAbbr Метод добавления аббревиатуры
+			 * @param idw идентификатор слова для добавления
+			 */
+			void addAbbr(const size_t idw) noexcept;
+			/**
+			 * addAbbr Метод добавления аббревиатуры
 			 * @param word слово для добавления
 			 */
 			void addAbbr(const string & word) noexcept;
@@ -171,21 +176,21 @@ namespace anyks {
 			void setAlphabet(const alphabet_t * alphabet) noexcept;
 		public:
 			/**
-			 * setSuffix Метод установки суффикса цифровой аббревиатуры
+			 * addSuffix Метод установки суффикса цифровой аббревиатуры
 			 * @param idw идентификатор суффикса цифровой аббревиатуры
 			 */
-			void setSuffix(const size_t idw) const noexcept;
+			void addSuffix(const size_t idw) const noexcept;
 			/**
-			 * setSuffix Метод установки списка суффиксов цифровых аббревиатур
+			 * setSuffixes Метод установки списка суффиксов цифровых аббревиатур
 			 * @param suffix список суффиксов цифровых аббревиатур
 			 */
-			void setSuffix(const set <size_t> & suffix) const noexcept;
+			void setSuffixes(const set <size_t> & suffix) const noexcept;
 			/**
-			 * setSuffix Метод извлечения суффикса из цифровой аббревиатуры
+			 * addSuffix Метод извлечения суффикса из цифровой аббревиатуры
 			 * @param word слово для извлечения суффикса аббревиатуры
 			 * @param idw  идентификатор обрабатываемого слова
 			 */
-			void setSuffix(const wstring & word, const size_t idw = idw_t::NIDW) const noexcept;
+			void addSuffix(const wstring & word, const size_t idw = idw_t::NIDW) const noexcept;
 		public:
 			/**
 			 * getAbbrs Метод извлечения списка аббревиатур
@@ -193,10 +198,10 @@ namespace anyks {
 			 */
 			const set <size_t> & getAbbrs() const noexcept;
 			/**
-			 * getSuffix Метод извлечения списка суффиксов цифровых аббревиатур
+			 * getSuffixes Метод извлечения списка суффиксов цифровых аббревиатур
 			 * @return список цифровых аббревиатур
 			 */
-			const set <size_t> & getSuffix() const noexcept;
+			const set <size_t> & getSuffixes() const noexcept;
 		public:
 			/**
 			 * fti Метод удаления дробной части числа
