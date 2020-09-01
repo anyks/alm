@@ -210,6 +210,8 @@ namespace anyks {
 					const size_t count = value.size();
 					// Общее количество записанных данных
 					size_t size = sizeof(count);
+					// Полученное значение
+					typename Container::value_type val;
 					// Получаем бинарные данные размера записываемых данных
 					const char * bin = reinterpret_cast <const char *> (&count);
 					// Выполняем запись в файл количество записей
@@ -217,7 +219,7 @@ namespace anyks {
 					// Переходим по всему списку записей
 					for(auto it = value.cbegin(); it != value.cend(); ++it){
 						// Получаем значение
-						typename Container::value_type val = (* it);
+						val = (* it);
 						// Получаем бинарные данные размера записываемых данных
 						const char * bin = reinterpret_cast <const char *> (&val);
 						// Выполняем запись в файл каждое значение
@@ -252,6 +254,8 @@ namespace anyks {
 				int result = -1;
 				// Если ключ передан
 				if((idw > 0) && file.is_open()){
+					// Размер записываемых данных
+					size_t length = 0;
 					// Количество записей в списке
 					const size_t count = value.size();
 					// Общее количество записанных данных
@@ -263,7 +267,7 @@ namespace anyks {
 					// Переходим по всему списку записей
 					for(auto it = value.cbegin(); it != value.cend(); ++it){
 						// Размер записываемых данных
-						const size_t length = it->size();
+						length = it->size();
 						// Получаем бинарные данные размера записываемых данных
 						const char * bin = reinterpret_cast <const char *> (&length);
 						// Выполняем запись в файл размер строки
@@ -446,7 +450,7 @@ namespace anyks {
 									// Увеличиваем количество прочитанных байт
 									result += (length + sizeof(length));
 								// Если происходит ошибка то игнорируем её
-								} catch(const bad_alloc&) {
+								} catch(const bad_alloc &) {
 									// Выходим из приложения
 									exit(EXIT_FAILURE);
 								}
@@ -640,7 +644,7 @@ namespace anyks {
 					// Сообщаем что всё удачно
 					return true;
 				// Если происходит ошибка то игнорируем её
-				} catch(const bad_alloc&) {
+				} catch(const bad_alloc &) {
 					// Выходим из приложения
 					exit(EXIT_FAILURE);
 				}
@@ -708,6 +712,8 @@ namespace anyks {
 						this->initAES();
 						// Экранируем возможность ошибки памяти
 						try {
+							// Максимальный размер считываемых данных
+							int chunk = 0;
 							// Размер буфера полученных данных
 							size_t count = 0;
 							// Определяем размер данных для считывания
@@ -719,7 +725,7 @@ namespace anyks {
 							// Выполняем извлечение оставшихся данных
 							do {
 								// Максимальный размер считываемых данных
-								int chunk = (len > CHUNKSIZE ? CHUNKSIZE : len);
+								chunk = (len > CHUNKSIZE ? CHUNKSIZE : len);
 								// Выполняем сжатие данных
 								AES_cfb128_encrypt(input + count, output + count, chunk, &this->aesKey, this->stateAES.ivec, &this->stateAES.num, AES_ENCRYPT);
 								// Увеличиваем смещение
@@ -732,7 +738,7 @@ namespace anyks {
 							// Очищаем буфер
 							delete [] output;
 						// Если происходит ошибка то игнорируем её
-						} catch(const bad_alloc&) {
+						} catch(const bad_alloc &) {
 							// Выходим из приложения
 							exit(EXIT_FAILURE);
 						}
@@ -759,6 +765,8 @@ namespace anyks {
 						this->initAES();
 						// Экранируем возможность ошибки памяти
 						try {
+							// Максимальный размер считываемых данных
+							int chunk = 0;
 							// Размер буфера полученных данных
 							size_t count = 0;
 							// Определяем размер данных для считывания
@@ -770,7 +778,7 @@ namespace anyks {
 							// Выполняем извлечение оставшихся данных
 							do {
 								// Максимальный размер считываемых данных
-								int chunk = (len > CHUNKSIZE ? CHUNKSIZE : len);
+								chunk = (len > CHUNKSIZE ? CHUNKSIZE : len);
 								// Выполняем сжатие данных
 								AES_cfb128_encrypt(input + count, output + count, chunk, &this->aesKey, this->stateAES.ivec, &this->stateAES.num, AES_DECRYPT);
 								// Увеличиваем смещение
@@ -783,7 +791,7 @@ namespace anyks {
 							// Очищаем буфер
 							delete [] output;
 						// Если происходит ошибка то игнорируем её
-						} catch(const bad_alloc&) {
+						} catch(const bad_alloc &) {
 							// Выходим из приложения
 							exit(EXIT_FAILURE);
 						}
@@ -814,8 +822,10 @@ namespace anyks {
 					uint8_t outbuff[CHUNKSIZE];
 					// Если поток инициализировать не удалось, выходим
 					if(deflateInit2(&zs, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MOD_GZIP_ZLIB_WINDOWSIZE + 16, MOD_GZIP_ZLIB_CFACTOR, Z_DEFAULT_STRATEGY) == Z_OK){
-						// Смещение в буфере
-						size_t offset = 0;
+						// Количество оставшихся байт
+						uint32_t nbytes = 0;
+						// Смещение в буфере и размеры доанных
+						size_t offset = 0, count = 0, avail = 0;
 						// Переменная сброса данных
 						int flush = Z_NO_FLUSH;
 						do {
@@ -824,9 +834,9 @@ namespace anyks {
 							// Заполняем нулями буфер исходящих данных
 							memset(outbuff, 0, sizeof(outbuff));
 							// Получаем размер доступных данных
-							const size_t count = (size - offset);
+							count = (size - offset);
 							// Высчитываем количество доступных данных
-							const size_t avail = (count > size_t(CHUNKSIZE) ? CHUNKSIZE : count);
+							avail = (count > size_t(CHUNKSIZE) ? CHUNKSIZE : count);
 							// Устанавливаем количество доступных данных
 							zs.avail_in = avail;
 							// Копируем в буфер данные для шифрования
@@ -843,7 +853,7 @@ namespace anyks {
 								// Выполняем шифрование данных
 								deflate(&zs, flush);
 								// Получаем количество оставшихся байт
-								const uint32_t nbytes = (CHUNKSIZE - zs.avail_out);
+								nbytes = (CHUNKSIZE - zs.avail_out);
 								// Добавляем оставшиеся данные в список
 								result.insert(result.end(), outbuff, outbuff + nbytes);
 							// Если все данные уже сжаты
@@ -880,8 +890,10 @@ namespace anyks {
 					uint8_t outbuff[CHUNKSIZE];
 					// Если поток инициализировать не удалось, выходим
 					if(inflateInit2(&zs, MOD_GZIP_ZLIB_WINDOWSIZE + 16) == Z_OK){
-						// Смещение в буфере
-						size_t offset = 0;
+						// Количество оставшихся байт
+						uint32_t nbytes = 0;
+						// Смещение в буфере и размеры доанных
+						size_t offset = 0, count = 0, avail = 0;
 						// Переменная сброса данных
 						int flush = Z_NO_FLUSH;
 						do {
@@ -890,9 +902,9 @@ namespace anyks {
 							// Заполняем нулями буфер исходящих данных
 							memset(outbuff, 0, sizeof(outbuff));
 							// Получаем размер доступных данных
-							const size_t count = (size - offset);
+							count = (size - offset);
 							// Высчитываем количество доступных данных
-							const size_t avail = (count > size_t(CHUNKSIZE) ? CHUNKSIZE : count);
+							avail = (count > size_t(CHUNKSIZE) ? CHUNKSIZE : count);
 							// Устанавливаем количество доступных данных
 							zs.avail_in = avail;
 							// Если доступных данных нет
@@ -920,7 +932,7 @@ namespace anyks {
 									return result;
 								}
 								// Получаем количество оставшихся байт
-								const uint32_t nbytes = (CHUNKSIZE - zs.avail_out);
+								nbytes = (CHUNKSIZE - zs.avail_out);
 								// Добавляем оставшиеся данные в список
 								result.insert(result.end(), outbuff, outbuff + nbytes);
 							// Если все данные уже дешифрованы
@@ -941,9 +953,9 @@ namespace anyks {
 			 * read Метод чтения данных из файлв в базу
 			 * @return результат операции (количество прочитанных байт)
 			 */
-			const int read() noexcept {
+			const long long read() noexcept {
 				// Результат работы функции
-				int result = -1;
+				long long result = -1;
 				// Адрес файла для открытия
 				const string & filename = this->filename();
 				// Если адрес файла получен
@@ -964,18 +976,21 @@ namespace anyks {
 						result = sizeof(count);
 						// Если количество записей больше 0
 						if(count > 0){
+							// Ключ и значение
+							size_t key = 0, val = 0;
 							// Загружаем полученное количество данных
 							for(size_t i = 0; i < count; i++){
-								// Ключ и значение
-								size_t idw = 0, val = 0;
+								// Сбрасываем ключ и значение
+								key = 0;
+								val = 0;
 								// Считываем ключ записи
-								this->ifs.read((char *) &idw, sizeof(idw));
+								this->ifs.read((char *) &key, sizeof(key));
 								// Считываем позицию записи
 								this->ifs.read((char *) &val, sizeof(val));
 								// Смещаем позицию в файле
 								result += (sizeof(size_t) * 2);
 								// Если значение получено, заполняем заголовки ключей
-								if(idw > 0) this->keys.insert({idw, val});
+								if(key > 0) this->keys.insert({key, val});
 							}
 						}
 						// Закрываем файл
@@ -991,9 +1006,9 @@ namespace anyks {
 			 * write Метод записи данных базы в файл
 			 * @return результат операции (количество записанных байт)
 			 */
-			const int write() noexcept {
+			const long long write() noexcept {
 				// Результат работы функции
-				int result = -1;
+				long long result = -1;
 				// Адрес файла для открытия
 				const string & raw = (this->filename() + ".raw");
 				// Если адрес файла получен
@@ -1004,6 +1019,8 @@ namespace anyks {
 					this->ofs.open(this->filename().c_str(), ios::binary);
 					// Если файл открыт
 					if(this->ofs.is_open()){
+						// Полученные ключ и значение
+						size_t key = 0, val = 0;
 						// Получаем количество записей
 						const size_t count = this->keys.size();
 						// Получаем бинарные данные количества ключей
@@ -1017,9 +1034,9 @@ namespace anyks {
 						// Переходим по всему количеству ключей
 						for(auto it = this->keys.cbegin(); it != this->keys.cend(); ++it){
 							// Получаем ключ
-							const size_t key = it->first;
+							key = it->first;
 							// Получаем значение ключа
-							const size_t val = it->second;
+							val = it->second;
 							// Получаем бинарные данные ключа
 							const char * binKey = reinterpret_cast <const char *> (&key);
 							// Получаем бинарные данные значения
@@ -1037,6 +1054,8 @@ namespace anyks {
 						ifstream file(raw.c_str(), ios::binary);
 						// Если файл открыт
 						if(file.is_open()){
+							// Полученный размер данных
+							size_t size = 0
 							// Создаем буфер для чтения данных
 							char bytes[CHUNKSIZE];
 							// Считываем до тех пор пока все удачно
@@ -1046,7 +1065,7 @@ namespace anyks {
 								// Выполняем чтение данных в буфер
 								file.read(bytes, CHUNKSIZE);
 								// Получаем количество прочитанных данных
-								const size_t size = file.gcount();
+								size = file.gcount();
 								// Выполняем запись в файл
 								this->ofs.write(bytes, size);
 								// Выполняем сброс данных в файл
