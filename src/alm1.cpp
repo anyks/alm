@@ -221,9 +221,6 @@ const anyks::Alm::ppl_t anyks::Alm1::perplexity(const vector <size_t> & seq) con
 	// Если текст передан
 	if(!this->arpa.empty() && (seq.size() > 2) && (this->size > 0) &&
 	(seq.front() == size_t(token_t::start)) && (seq.back() == size_t(token_t::finish))){
-
-		cout << " ^^^^^^^^^^^^^^^^^^1 " << endl;
-
 		// Позиция n-граммы в контексте
 		size_t index = 0;
 		// Количество переданных последовательностей
@@ -501,8 +498,6 @@ const anyks::Alm::ppl_t anyks::Alm1::perplexity(const vector <size_t> & seq) con
 			// Разблокируем поток
 			this->locker.unlock();
 		}
-
-		cout << " ^^^^^^^^^^^^^^^^^^2 " << result.logprob << endl;
 	}
 	// Выводим результат
 	return result;
