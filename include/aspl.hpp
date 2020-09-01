@@ -100,14 +100,14 @@ namespace anyks {
 			// Определяем длину шифрования по умолчанию
 			types_t aeslen = types_t::aes128;
 		private:
-			// Позиция raw данных в файле
-			long rawpos = -1;
 			// Устанавливаем количество раундов
 			int roundsAES = 5;
 			// Модуль вектора
 			size_t modulus = 0;
 			// Адрес начала данных
 			size_t address = 0;
+			// Позиция raw данных в файле
+			long long rawpos = -1;
 		private:
 			// Заголовок файла
 			const char * header = HEADER;
@@ -124,9 +124,9 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <typename Value>
-			static const int setval(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Value value) noexcept {
+			static const uintmax_t setval(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Value value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if((idw > 0) && file.is_open()){
 					// Размер записываемых данных
@@ -158,9 +158,9 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const int setdat(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value, const string & md5 = "") noexcept {
+			static const uintmax_t setdat(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value, const string & md5 = "") noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if((idw > 0) && file.is_open()){
 					// Размер записываемых данных
@@ -201,9 +201,9 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const int setvals(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value) noexcept {
+			static const uintmax_t setvals(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if((idw > 0) && file.is_open()){
 					// Количество записей в списке
@@ -249,9 +249,9 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const int setstrs(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value) noexcept {
+			static const uintmax_t setstrs(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if((idw > 0) && file.is_open()){
 					// Размер записываемых данных
@@ -297,9 +297,9 @@ namespace anyks {
 			 * @return      результат операции (количество записанных байт)
 			 */
 			template <typename Value>
-			static const int getval(const size_t pos, ifstream & file, Value & value) noexcept {
+			static const uintmax_t getval(const size_t pos, ifstream & file, Value & value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если файл открыт удачно
 				if(file.is_open()){
 					// Перемещаемся в указанную позицию файла
@@ -321,9 +321,9 @@ namespace anyks {
 			 * @return      результат операции (количество прочитанных байт)
 			 */
 			template <class Container>
-			static const int getdat(const size_t pos, ifstream & file, Container & value, string & md5) noexcept {
+			static const uintmax_t getdat(const size_t pos, ifstream & file, Container & value, string & md5) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если файл открыт удачно
 				if(file.is_open()){
 					// Размер записываемых данных
@@ -368,9 +368,9 @@ namespace anyks {
 			 * @return      результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const int getvals(const size_t pos, ifstream & file, Container & value) noexcept {
+			static const uintmax_t getvals(const size_t pos, ifstream & file, Container & value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если файл открыт удачно
 				if(file.is_open()){
 					// Количество записей в списке
@@ -409,9 +409,9 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const int getstrs(const size_t pos, ifstream & file, Container & value) noexcept {
+			static const uintmax_t getstrs(const size_t pos, ifstream & file, Container & value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если файл открыт удачно
 				if(file.is_open()){
 					// Количество записей в списке
@@ -1095,9 +1095,9 @@ namespace anyks {
 			 * @return      результат операции (количество записанных байт)
 			 */
 			template <typename Value>
-			const int set(const string & key, const Value value) noexcept {
+			const uintmax_t set(const string & key, const Value value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty()){
 					// Получаем идентификатор ключа
@@ -1120,9 +1120,9 @@ namespace anyks {
 			 * @param encrypt зашифровать данные
 			 * @return        результат операции (количество записанных байт)
 			 */
-			const int set(const string & key, const string & value, const bool encrypt = false) noexcept {
+			const uintmax_t set(const string & key, const string & value, const bool encrypt = false) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty() && !value.empty()){
 					// Получаем идентификатор ключа
@@ -1160,9 +1160,9 @@ namespace anyks {
 			 * @param encrypt зашифровать данные
 			 * @return        результат операции (количество записанных байт)
 			 */
-			const int set(const string & key, const vector <char> & value, const bool encrypt = false) noexcept {
+			const uintmax_t set(const string & key, const vector <char> & value, const bool encrypt = false) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty() && !value.empty()){
 					// Получаем идентификатор ключа
@@ -1204,9 +1204,9 @@ namespace anyks {
 			 * @param encrypt зашифровать данные
 			 * @return        результат операции (количество записанных байт)
 			 */
-			const int set(const string & key, const char * buffer, const size_t size, const bool encrypt = false) noexcept {
+			const uintmax_t set(const string & key, const char * buffer, const size_t size, const bool encrypt = false) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty() && (buffer != nullptr) && (size > 0)){
 					// Получаем идентификатор ключа
@@ -1248,9 +1248,9 @@ namespace anyks {
 			 * @return      результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			const int setValues(const string & key, const Container & value) noexcept {
+			const uintmax_t setValues(const string & key, const Container & value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty() && !value.empty()){
 					// Получаем идентификатор ключа
@@ -1273,9 +1273,9 @@ namespace anyks {
 			 * @return      результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			const int setStrings(const string & key, const Container & value) noexcept {
+			const uintmax_t setStrings(const string & key, const Container & value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty() && !value.empty()){
 					// Получаем идентификатор ключа
@@ -1299,9 +1299,9 @@ namespace anyks {
 			 * @return      результат операции (количество прочитанных байт)
 			 */
 			template <typename Value>
-			const int get(const string & key, Value & value) noexcept {
+			const uintmax_t get(const string & key, Value & value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty()){
 					// Получаем идентификатор ключа
@@ -1328,9 +1328,9 @@ namespace anyks {
 			 * @param decrypt расшифровать данные
 			 * @return        результат операции (количество прочитанных байт)
 			 */
-			const int get(const string & key, string & value, const bool decrypt = false) noexcept {
+			const uintmax_t get(const string & key, string & value, const bool decrypt = false) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty()){
 					// Получаем идентификатор ключа
@@ -1378,9 +1378,9 @@ namespace anyks {
 			 * @param decrypt расшифровать данные
 			 * @return        результат операции (количество прочитанных байт)
 			 */
-			const int get(const string & key, vector <char> & value, const bool decrypt = false) noexcept {
+			const uintmax_t get(const string & key, vector <char> & value, const bool decrypt = false) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty()){
 					// Получаем идентификатор ключа
@@ -1442,9 +1442,9 @@ namespace anyks {
 			 * @return      результат операции (количество прочитанных байт)
 			 */
 			template <class Container>
-			const int getValues(const string & key, Container & value) noexcept {
+			const uintmax_t getValues(const string & key, Container & value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0
 				// Если ключ передан
 				if(!key.empty()){
 					// Получаем идентификатор ключа
@@ -1471,9 +1471,9 @@ namespace anyks {
 			 * @return      результат операции (количество прочитанных байт)
 			 */
 			template <class Container>
-			const int getStrings(const string & key, Container & value) noexcept {
+			const uintmax_t getStrings(const string & key, Container & value) noexcept {
 				// Результат работы функции
-				int result = -1;
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty()){
 					// Получаем идентификатор ключа
