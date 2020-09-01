@@ -953,9 +953,9 @@ namespace anyks {
 			 * read Метод чтения данных из файлв в базу
 			 * @return результат операции (количество прочитанных байт)
 			 */
-			const long long read() noexcept {
+			const uintmax_t read() noexcept {
 				// Результат работы функции
-				long long result = -1;
+				uintmax_t result = 0;
 				// Адрес файла для открытия
 				const string & filename = this->filename();
 				// Если адрес файла получен
@@ -1006,9 +1006,9 @@ namespace anyks {
 			 * write Метод записи данных базы в файл
 			 * @return результат операции (количество записанных байт)
 			 */
-			const long long write() noexcept {
+			const uintmax_t write() noexcept {
 				// Результат работы функции
-				long long result = -1;
+				uintmax_t result = 0;
 				// Адрес файла для открытия
 				const string & raw = (this->filename() + ".raw");
 				// Если адрес файла получен

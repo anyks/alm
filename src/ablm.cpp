@@ -227,7 +227,7 @@ const bool anyks::AbLM::write(function <void (const u_short)> status) noexcept {
 		this->aspl->set("onlyArpa", this->isFlag(flag_t::onlyArpa));
 	}
 	// Выполняем запись данных словаря
-	if(this->aspl->write() < 0){
+	if(this->aspl->write() < 1){
 		// Выводим сообщение об ошибке
 		if(this->isFlag(flag_t::debug)) this->alphabet->log("%s", alphabet_t::log_t::error, this->logfile, "ablm - dictionary file is wrong");
 		// Сбрасываем флаг результата
@@ -248,7 +248,7 @@ const bool anyks::AbLM::readAlm(function <void (const u_short)> status) noexcept
 	// Количество основных блоков данных
 	size_t vocabCount = 0, arpaCount = 0;
 	// Выполняем чтение данных словаря
-	if((this->aspl->read() > -1) && (this->alm != nullptr)){
+	if((this->aspl->read() > 0) && (this->alm != nullptr)){
 		// Тип шифрования файла
 		u_short aes = 0;
 		// Извлекаем тип шифрования
@@ -662,7 +662,7 @@ const bool anyks::AbLM::readToolkit(function <void (const u_short)> status) noex
 	// Количество основных блоков данных
 	size_t vocabCount = 0, arpaCount = 0;
 	// Выполняем чтение данных словаря
-	if((this->aspl->read() > -1) && (this->toolkit != nullptr)){
+	if((this->aspl->read() > 0) && (this->toolkit != nullptr)){
 		// Тип шифрования файла
 		u_short aes = 0;
 		// Извлекаем тип шифрования
@@ -1153,7 +1153,7 @@ void anyks::AbLM::clear() noexcept {
  */
 void anyks::AbLM::info() const noexcept {
 	// Выполняем чтение данных словаря
-	if(this->aspl->read() > -1){
+	if(this->aspl->read() > 0){
 		// Название словаря
 		string name = "";
 		// Считываем название словаря
