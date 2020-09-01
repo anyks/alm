@@ -1055,7 +1055,7 @@ namespace anyks {
 						// Если файл открыт
 						if(file.is_open()){
 							// Полученный размер данных
-							size_t size = 0
+							size_t size = 0;
 							// Создаем буфер для чтения данных
 							char bytes[CHUNKSIZE];
 							// Считываем до тех пор пока все удачно
