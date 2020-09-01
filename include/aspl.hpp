@@ -107,7 +107,7 @@ namespace anyks {
 			// Адрес начала данных
 			size_t address = 0;
 			// Позиция raw данных в файле
-			long long rawpos = -1;
+			uintmax_t rawpos = 0;
 		private:
 			// Заголовок файла
 			const char * header = HEADER;
@@ -124,7 +124,7 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <typename Value>
-			static const uintmax_t setval(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Value value) noexcept {
+			static const uintmax_t setval(const size_t idw, uintmax_t & rawpos, map <size_t, size_t> & keys, ofstream & file, const Value value) noexcept {
 				// Результат работы функции
 				uintmax_t result = 0;
 				// Если ключ передан
@@ -158,7 +158,7 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const uintmax_t setdat(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value, const string & md5 = "") noexcept {
+			static const uintmax_t setdat(const size_t idw, uintmax_t & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value, const string & md5 = "") noexcept {
 				// Результат работы функции
 				uintmax_t result = 0;
 				// Если ключ передан
@@ -201,7 +201,7 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const uintmax_t setvals(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value) noexcept {
+			static const uintmax_t setvals(const size_t idw, uintmax_t & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value) noexcept {
 				// Результат работы функции
 				uintmax_t result = 0;
 				// Если ключ передан
@@ -249,7 +249,7 @@ namespace anyks {
 			 * @return       результат операции (количество записанных байт)
 			 */
 			template <class Container>
-			static const uintmax_t setstrs(const size_t idw, long & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value) noexcept {
+			static const uintmax_t setstrs(const size_t idw, uintmax_t & rawpos, map <size_t, size_t> & keys, ofstream & file, const Container & value) noexcept {
 				// Результат работы функции
 				uintmax_t result = 0;
 				// Если ключ передан
@@ -480,7 +480,7 @@ namespace anyks {
 			 */
 			void close() noexcept {
 				// Обнуляем последнюю позицию в файле
-				this->rawpos = -1;
+				this->rawpos = 0;
 				// Если файл открыт, закрываем его
 				if(this->ifs.is_open()) this->ifs.close();
 				// Если файл открыт, закрываем его
@@ -510,11 +510,11 @@ namespace anyks {
 							// Если файл открыт на запись
 							if(this->ofs.is_open()) this->close();
 							// Если файл существует
-							if((this->rawpos == -1) && !this->isFile(filename)) this->rawpos = 0;
+							if(!this->isFile(filename)) this->rawpos = 0;
 							// Открываем файл на запись
 							this->ofs.open(filename.c_str(), ios::binary);
 							// Если позиция не определена
-							if(this->rawpos == -1){
+							if(this->rawpos == 0){
 								// Перемещаемся в конец файла
 								this->ofs.seekp(0, this->ofs.end);
 								// Определяем размер файла
@@ -1500,10 +1500,10 @@ namespace anyks {
 			void clear() noexcept {
 				// Закрываем открытый файл
 				this->close();
+				// Очищаем позицию raw данных
+				this->rawpos = 0;
 				// Очищаем список ключей
 				this->keys.clear();
-				// Очищаем позицию raw данных
-				this->rawpos = -1;
 				// Смещаем указатель начала данных
 				this->address = strlen(HEADER);
 			}
