@@ -785,6 +785,12 @@ namespace anyks {
 			 * @return    количество найденных n-грамм
 			 */
 			const size_t grams(const vector <size_t> & seq) const noexcept;
+			/**
+			 * grams Метод проверки количества найденных n-грамм
+			 * @param words список слов для расчёта
+			 * @return      количество найденных n-грамм
+			 */
+			const size_t grams(const vector <wstring> & words) const noexcept;
 		public:
 			/**
 			 * bigrams Метод проверки количества найденных в тексте биграмм
@@ -798,6 +804,12 @@ namespace anyks {
 			 * @return    количество найденных биграмм
 			 */
 			const size_t bigrams(const vector <size_t> & seq) const noexcept;
+			/**
+			 * bigrams Метод проверки количества найденных биграмм
+			 * @param words список слов для расчёта
+			 * @return      количество найденных биграмм
+			 */
+			const size_t bigrams(const vector <wstring> & words) const noexcept;
 		public:
 			/**
 			 * trigrams Метод проверки количества найденных в тексте триграмм
@@ -811,6 +823,12 @@ namespace anyks {
 			 * @return    количество найденных триграмм
 			 */
 			const size_t trigrams(const vector <size_t> & seq) const noexcept;
+			/**
+			 * trigrams Метод проверки количества найденных последовательных триграмм
+			 * @param words список слов для расчёта
+			 * @return      количество найденных триграмм
+			 */
+			const size_t trigrams(const vector <wstring> & words) const noexcept;
 		public:
 			/**
 			 * Alm Конструктор

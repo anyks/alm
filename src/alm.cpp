@@ -2964,6 +2964,29 @@ const size_t anyks::Alm::grams(const vector <size_t> & seq) const noexcept {
 	return result;
 }
 /**
+ * grams Метод проверки количества найденных n-грамм
+ * @param words список слов для расчёта
+ * @return      количество найденных n-грамм
+ */
+const size_t anyks::Alm::grams(const vector <wstring> & words) const noexcept {
+	// Результат работы функции
+	size_t result = 0;
+	// Если список слов переданы
+	if(!words.empty()){
+		// Список последовательности
+		vector <size_t> seq(words.size());
+		// Переходим по всем словам последовательности
+		for(size_t i = 0; i < words.size(); i++){
+			// Получаем идентификатор слова в последовательности
+			seq.at(i) = this->getIdw(words.at(i));
+		}
+		// Выполняем расчёт перплексии
+		if(!seq.empty()) result = this->grams(seq);
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * bigrams Метод проверки количества найденных в тексте биграмм
  * @param text текст для расчёта
  * @return     количество найденных биграмм
@@ -3028,6 +3051,29 @@ const size_t anyks::Alm::bigrams(const vector <size_t> & seq) const noexcept {
 	return result;
 }
 /**
+ * bigrams Метод проверки количества найденных биграмм
+ * @param words список слов для расчёта
+ * @return      количество найденных биграмм
+ */
+const size_t anyks::Alm::bigrams(const vector <wstring> & words) const noexcept {
+	// Результат работы функции
+	size_t result = 0;
+	// Если список слов переданы
+	if(!words.empty()){
+		// Список последовательности
+		vector <size_t> seq(words.size());
+		// Переходим по всем словам последовательности
+		for(size_t i = 0; i < words.size(); i++){
+			// Получаем идентификатор слова в последовательности
+			seq.at(i) = this->getIdw(words.at(i));
+		}
+		// Выполняем расчёт перплексии
+		if(!seq.empty()) result = this->bigrams(seq);
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * trigrams Метод проверки количества найденных в тексте триграмм
  * @param text текст для расчёта
  * @return     количество найденных триграмм
@@ -3087,6 +3133,29 @@ const size_t anyks::Alm::trigrams(const vector <size_t> & seq) const noexcept {
 			offset1++;
 			offset2++;
 		}
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * trigrams Метод проверки количества найденных последовательных триграмм
+ * @param words список слов для расчёта
+ * @return      количество найденных триграмм
+ */
+const size_t anyks::Alm::trigrams(const vector <wstring> & words) const noexcept {
+	// Результат работы функции
+	size_t result = 0;
+	// Если список слов переданы
+	if(!words.empty()){
+		// Список последовательности
+		vector <size_t> seq(words.size());
+		// Переходим по всем словам последовательности
+		for(size_t i = 0; i < words.size(); i++){
+			// Получаем идентификатор слова в последовательности
+			seq.at(i) = this->getIdw(words.at(i));
+		}
+		// Выполняем расчёт перплексии
+		if(!seq.empty()) result = this->trigrams(seq);
 	}
 	// Выводим результат
 	return result;
