@@ -253,6 +253,12 @@ namespace anyks {
 			 */
 			const ppl_t perplexity(const wstring & text) const noexcept;
 			/**
+			 * perplexity Метод расчёта перплексии текста
+			 * @param  words список слов для расчёта
+			 * @return       результат расчёта
+			 */
+			const ppl_t perplexity(const vector <wstring> & words) const noexcept;
+			/**
 			 * perplexity Метод расчёта перплексии
 			 * @param  seq список последовательностей
 			 * @return     результат расчёта

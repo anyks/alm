@@ -306,6 +306,29 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 	return result;
 }
 /**
+ * perplexity Метод расчёта перплексии текста
+ * @param  words список слов для расчёта
+ * @return       результат расчёта
+ */
+const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <wstring> & words) const noexcept {
+	// Результат работы функции
+	ppl_t result;
+	// Если список слов переданы
+	if(!words.empty()){
+		// Список последовательности
+		vector <size_t> seq(words.size());
+		// Переходим по всем словам последовательности
+		for(size_t i = 0; i < words.size(); i++){
+			// Получаем идентификатор слова в последовательности
+			seq.at(i) = this->getIdw(words.at(i));
+		}
+		// Выполняем расчёт перплексии
+		if(!seq.empty()) result = this->perplexity(seq);
+	}
+	// Выводим результат
+	return result;
+}
+/**
  * perplexity Метод расчёта перплексии
  * @param  seq список последовательностей
  * @return     результат расчёта
