@@ -1444,7 +1444,7 @@ namespace anyks {
 			template <class Container>
 			const uintmax_t getValues(const string & key, Container & value) noexcept {
 				// Результат работы функции
-				uintmax_t result = 0
+				uintmax_t result = 0;
 				// Если ключ передан
 				if(!key.empty()){
 					// Получаем идентификатор ключа
