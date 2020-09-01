@@ -322,6 +322,12 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const vector <wstring> & words) c
 			// Получаем идентификатор слова в последовательности
 			seq.at(i) = this->getIdw(words.at(i));
 		}
+
+		for(auto & word : words) cout << " ^^^^^^^^^^^^1 " << word << endl;
+		cout << endl;
+		for(auto & idw : seq) cout << " ^^^^^^^^^^^^2 " << idw << endl;
+		cout << endl;
+
 		// Выполняем расчёт перплексии
 		if(!seq.empty()) result = this->perplexity(seq);
 	}
