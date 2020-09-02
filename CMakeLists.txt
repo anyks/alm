@@ -90,7 +90,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -fPIC -pthread -flto -fprofile-generate")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -fPIC -pthread -flto")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CC_OPT_FLAGS} ${CXX_OPT_FLAGS}")
 
 # Если режим отладки включён

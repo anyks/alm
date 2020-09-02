@@ -26,7 +26,6 @@ ifeq ($(OS), Darwin)
 		-lcrypto \
 		-lpthread \
 		-ljemalloc \
-		-fprofile-generate \
 		-l$(PYTHON) \
 		-L$(PYPATH)/lib \
 		-L/usr/local/Cellar/openssl@1.1/1.1.1g/lib
@@ -76,7 +75,6 @@ ifeq ($(OS), FreeBSD)
 		-lcrypto \
 		-lpthread \
 		-ljemalloc \
-		-fprofile-generate \
 		-l$(PYTHON) \
 		-L/usr/local/lib
 
@@ -124,7 +122,6 @@ ifeq ($(OS), Linux)
 		-lcrypto \
 		-lpthread \
 		-ljemalloc \
-		-fprofile-generate \
 		-l$(PYTHON)
 
 	# Расширение библиотеки
