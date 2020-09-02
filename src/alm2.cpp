@@ -586,8 +586,6 @@ const pair <bool, size_t> anyks::Alm2::exist(const vector <size_t> & seq, const 
 			checkFn = [&checkFn, &sequence, step, this](u_short start) noexcept {
 				// Последовательность для проверки
 				vector <size_t> seq;
-				// Копируем основную карту
-				arpa_t * obj = &this->arpa;
 				// Результат работы функции
 				pair <bool, size_t> result = {false, 0};
 				// Идентификатор слова и количество слов в последовательности

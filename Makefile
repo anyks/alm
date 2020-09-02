@@ -21,10 +21,12 @@ ifeq ($(OS), Darwin)
 		-lm \
 		-lz \
 		-lssl \
+		-flto \
 		-lstdc++ \
 		-lcrypto \
 		-lpthread \
 		-ljemalloc \
+		-fprofile-generate \
 		-l$(PYTHON) \
 		-L$(PYPATH)/lib \
 		-L/usr/local/Cellar/openssl@1.1/1.1.1g/lib
@@ -69,11 +71,13 @@ ifeq ($(OS), FreeBSD)
 		-lm \
 		-lz \
 		-lssl \
+		-flto \
 		-lstdc++ \
 		-lcrypto \
 		-lpthread \
-		-l$(PYTHON) \
 		-ljemalloc \
+		-fprofile-generate \
+		-l$(PYTHON) \
 		-L/usr/local/lib
 
 	# Расширение библиотеки
@@ -115,10 +119,12 @@ ifeq ($(OS), Linux)
 		-lm \
 		-lz \
 		-lssl \
+		-flto \
 		-lstdc++ \
 		-lcrypto \
 		-lpthread \
 		-ljemalloc \
+		-fprofile-generate \
 		-l$(PYTHON)
 
 	# Расширение библиотеки
