@@ -121,6 +121,7 @@ void help() noexcept {
 	"\x1B[33m\x1B[1m×\x1B[0m [-log <value> | --log=<value>]                                               address of log file\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-size <value> | --size=<value>]                                             size n-grams of language model\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-step <value> | --step=<value>]                                             step size n-grams of language model\r\n"
+	"\x1B[33m\x1B[1m×\x1B[0m [-locale <value> | --locale=<value>]                                         set \x1B[1malm\x1B[0m locale type\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-alphabet <value> | --alphabet=<value>]                                     list letters alphabet (file or value)\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-badwords <value> | --badwords=<value>]                                     file address of blacklist words\r\n"
 	"\x1B[33m\x1B[1m×\x1B[0m [-goodwords <value> | --goodwords=<value>]                                   file address of whitelist words\r\n"
