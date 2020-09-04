@@ -1,5 +1,7 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
+## [3.3.3](https://github.com/anyks/alm/archive/v3.3.3.tar.gz) Bug fixes
+
 ## [3.3.2](https://github.com/anyks/alm/archive/v3.3.2.tar.gz) Other optimization
 
 ## [3.3.1](https://github.com/anyks/alm/archive/v3.3.1.tar.gz) Other optimization
