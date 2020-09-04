@@ -583,14 +583,16 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 	if(!word.empty()){
 		// Длина переданного слова
 		const size_t size = word.size();
+		// Переводим слово в нижний регистр
+		const wstring & wrd = this->alphabet->toLower(word);
 		// Если это не одна буква
 		if(size > 1){
 			// Значение текущей буквы
 			wchar_t letter = 0;
 			// Получаем первый символ слова
-			const wchar_t first = word.front();
+			const wchar_t first = wrd.front();
 			// Получаем последний символ слова
-			const wchar_t second = word.back();
+			const wchar_t second = wrd.back();
 			// Проверяем является ли первый символ числом
 			const bool frontNum = this->alphabet->isNumber(wstring(1, first));
 			// Определяем является ли последний символ числом
@@ -600,7 +602,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 				// Проверяем является ли первый символ (-/+ или ~)
 				if((first == L'-') || (first == L'−') || (first == L'~') || (first == L'∼') || (first == L'+') || (first == L'±')){
 					// Получаем оставшуюся часть слова
-					const wstring & tmp = word.substr(1);
+					const wstring & tmp = wrd.substr(1);
 					// Проверяем оставшуюся часть слова является числом
 					if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp)){
 						// Определяем тип токена
@@ -620,12 +622,14 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 						}
 					// Сообщаем что это псевдо-число
 					} else result = token_t::anum;
+				// Если слово не идентифицируемо, проверяем является ли оно url-адресом
+				} else if(this->alphabet->isUrl(wrd)) result = token_t::url;
 				// Если это не отрицательное и не приблизительное число (Дом-2)
-				} else {
+				else {
 					// Ищем дефис в конце слова
-					size_t pos = word.rfind(L'-');
+					size_t pos = wrd.rfind(L'-');
 					// Если дефис не найден и не найдено завершение слова в виде числа
-					if((pos == wstring::npos) || !this->alphabet->isNumber(word.substr(pos + 1))){
+					if((pos == wstring::npos) || !this->alphabet->isNumber(wrd.substr(pos + 1))){
 						// Сообщаем что это псевдо-число
 						result = token_t::anum;
 					}
@@ -636,7 +640,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 				if((second == L'°') || (second == L'%') || (second == L'¹') || (second == L'²') ||
 				(second == L'³') || (second == L'½') || (second == L'⅓') || (second == L'¼') || (second == L'¾')){
 					// Получаем оставшуюся часть слова
-					const wstring & tmp = word.substr(0, word.length() - 1);
+					const wstring & tmp = wrd.substr(0, wrd.length() - 1);
 					// Проверяем оставшуюся часть слова является числом
 					if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp))
 						// Запоминаем, что это число
@@ -646,7 +650,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 				// Если последний символ, является символом валюты
 				} else if(this->alphabet->isCurrency(second)) {
 					// Получаем оставшуюся часть слова
-					const wstring & tmp = word.substr(0, word.length() - 1);
+					const wstring & tmp = wrd.substr(0, wrd.length() - 1);
 					// Проверяем оставшуюся часть слова является числом
 					if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp))
 						// Запоминаем, что это мировая валюта
@@ -654,15 +658,17 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 					// Сообщаем что это псевдо-число
 					else result = token_t::anum;
 				// Если это аббревиатура, запоминаем тип токена
-				} else if(this->isAbbr(word))
+				} else if(this->isAbbr(wrd))
 					// Запоминаем что это аббревиатура
 					result = token_t::abbr;
+				// Если слово не идентифицируемо, проверяем является ли оно url-адресом
+				else if(this->alphabet->isUrl(wrd)) result = token_t::url;
 				// Иначе - это просто, псевдо-число
 				else result = token_t::anum;
 			// Если оба символа являются числом (5353, 5353.243, 3:4, 18:00, 18:00:01, 18.02.2012, 18/02/2012, 2/3, 3х10, 3~4)
 			} else if(frontNum && backNum) {
 				// Если это число
-				if(this->alphabet->isNumber(word)) result = token_t::num;
+				if(this->alphabet->isNumber(wrd)) result = token_t::num;
 				// Если это псевдо-число
 				else {
 					// Разделитель слова найден
@@ -672,12 +678,12 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 					// Переходим по всем символам слова
 					for(size_t i = 0; i < size; i++){
 						// Получаем значение текущей буквы
-						letter = word.at(i);
+						letter = wrd.at(i);
 						// Если плавающая точка найдена
 						if((letter == L'.') || (letter == L',') || (letter == L':') || (letter == L'/') || (letter == L'x') ||
 						(letter == L'х') || (letter == L'×') || (letter == L'~') || (letter == L'∼') || (letter == L'-') || (letter == L'−')){
 							// Проверяем правые и левую части
-							delim = (this->alphabet->isNumber(word.substr(0, i)) && this->alphabet->isNumber(word.substr(i + 1)));
+							delim = (this->alphabet->isNumber(wrd.substr(0, i)) && this->alphabet->isNumber(wrd.substr(i + 1)));
 							// Если число собрано
 							if(delim){
 								// Определяем тип разделителя
@@ -699,7 +705,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 								// Список элементов слова
 								vector <wstring> words;
 								// Выполняем разбивку на составляющие
-								this->alphabet->split(word, {letter}, words);
+								this->alphabet->split(wrd, {letter}, words);
 								// Если список разбит правильно
 								if(words.size() == 3){
 									// Переходим по всему списку слова
@@ -721,17 +727,17 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 						}
 					}
 					// Если слово не идентифицируемо, проверяем является ли оно url-адресом
-					if((result == token_t::null) && this->alphabet->isUrl(word)) result = token_t::url;
+					if((result == token_t::null) && this->alphabet->isUrl(wrd)) result = token_t::url;
 				}
 			// Если это вообще не число, проверяем может это римское число
 			} else if(!frontNum && !backNum) {
 				// Проверяем является ли первый символ (-/+ или ~)
-				if((word.length() > 2) && ((first == L'-') || (first == L'−') || (first == L'~') || (first == L'∼') || (first == L'+') || (first == L'±'))){
+				if((wrd.length() > 2) && ((first == L'-') || (first == L'−') || (first == L'~') || (first == L'∼') || (first == L'+') || (first == L'±'))){
 					// Проверяем является ли первый символ числом со значением
 					if((second == L'°') || (second == L'%') || (second == L'¹') || (second == L'²') ||
 					(second == L'³') || (second == L'½') || (second == L'⅓') || (second == L'¼') || (second == L'¾')){
 						// Получаем оставшуюся часть слова
-						const wstring & tmp = word.substr(1, word.length() - 2);
+						const wstring & tmp = wrd.substr(1, wrd.length() - 2);
 						// Проверяем оставшуюся часть слова является числом
 						if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp))
 							// Запоминаем, что это число
@@ -741,7 +747,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 					// Если последний символ, является символом валюты
 					} else if(this->alphabet->isCurrency(second)) {
 						// Получаем оставшуюся часть слова
-						const wstring & tmp = word.substr(1, word.length() - 2);
+						const wstring & tmp = wrd.substr(1, wrd.length() - 2);
 						// Проверяем оставшуюся часть слова является числом
 						if(this->alphabet->isNumber(tmp) || this->alphabet->isDecimal(tmp))
 							// Запоминаем, что это мировая валюта
@@ -750,39 +756,38 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 						else result = token_t::anum;
 					// Сообщаем что это псевдо-число
 					} else result = token_t::anum;
+				// Если - это обычное слово, проверяем его
 				} else {
-					// Переводим слово в нижний регистр
-					const wstring & tmp = this->alphabet->toLower(word);
 					// Если - это аббревиатура
-					if(this->isAbbr(tmp)) result = token_t::abbr;
+					if(this->isAbbr(wrd)) result = token_t::abbr;
 					// Проверяем, является ли слово url-адресом
-					else if(this->alphabet->isUrl(tmp)) result = token_t::url;
+					else if(this->alphabet->isUrl(wrd)) result = token_t::url;
 					// Определяем является ли слово, псевдо-числом
-					else if(this->alphabet->isANumber(tmp)) result = token_t::anum;
+					else if(this->alphabet->isANumber(wrd)) result = token_t::anum;
 					// Запоминаем что это число
-					else if(this->alphabet->roman2Arabic(tmp) > 0) result = token_t::num;
+					else if(this->alphabet->roman2Arabic(wrd) > 0) result = token_t::num;
 				}
 			}
 		// Если это число то выводим токен числа
-		} else if(this->alphabet->isNumber(word)) result = token_t::num;
+		} else if(this->alphabet->isNumber(wrd)) result = token_t::num;
 		// Если это математический символ
-		else if(this->alphabet->isMath(word.front())) result = token_t::math;
+		else if(this->alphabet->isMath(wrd.front())) result = token_t::math;
 		// Если это символ знака пунктуации
-		else if(this->alphabet->isPunct(word.front())) result = token_t::punct;
+		else if(this->alphabet->isPunct(wrd.front())) result = token_t::punct;
 		// Если это символ греческого алфавита
-		else if(this->alphabet->isGreek(word.front())) result = token_t::greek;
+		else if(this->alphabet->isGreek(wrd.front())) result = token_t::greek;
 		// Если это символ направления (стрелка)
-		else if(this->alphabet->isRoute(word.front())) result = token_t::route;
+		else if(this->alphabet->isRoute(wrd.front())) result = token_t::route;
 		// Если это спец-символ
-		else if(this->alphabet->isSpecial(word.front())) result = token_t::specl;
+		else if(this->alphabet->isSpecial(wrd.front())) result = token_t::specl;
 		// Если это символ изоляции
-		else if(this->alphabet->isIsolation(word.front())) result = token_t::isolat;
+		else if(this->alphabet->isIsolation(wrd.front())) result = token_t::isolat;
 		// Если это символ игральных карт
-		else if(this->alphabet->isPlayCards(word.front())) result = token_t::pcards;
+		else if(this->alphabet->isPlayCards(wrd.front())) result = token_t::pcards;
 		// Если это символ мировой валюты
-		else if(this->alphabet->isCurrency(word.front())) result = token_t::currency;
+		else if(this->alphabet->isCurrency(wrd.front())) result = token_t::currency;
 		// Если слово не идентифицируемо и не разрешено, устанавливаем неизвестное слово
-		if((result == token_t::null) && (!this->alphabet->isAllowed(word) && !this->alphabet->isLatian(word))) result = token_t::unk;
+		if((result == token_t::null) && (!this->alphabet->isAllowed(wrd) && !this->alphabet->isLatian(wrd))) result = token_t::unk;
 	}
 	// Выводим результат
 	return result;
