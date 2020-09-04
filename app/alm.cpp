@@ -410,7 +410,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Устанавливаем название файла
 					pss.description(filename);
 					// Устанавливаем заголовки прогресс-бара
-					pss.title("Load mixed letters", "Load mixed letters is done");
+					pss.title("Load mixed letters", "Load mixed letters, is done");
 					// Выводим индикатор прогресс-бара
 					switch(debug){
 						case 1: pss.update(); break;
@@ -480,9 +480,9 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем заголовки прогресс-бара
 							switch(type){
 								// Если это загрузка доменных зон
-								case 1: pss.title("Load domain zones", "Load domain zones is done"); break;
+								case 1: pss.title("Load domain zones", "Load domain zones, is done"); break;
 								// Если это загрузка аббревиатур
-								case 2: pss.title("Load abbreviations", "Load abbreviations is done"); break;
+								case 2: pss.title("Load abbreviations", "Load abbreviations, is done"); break;
 							}
 							// Выводим индикатор прогресс-бара
 							switch(debug){
@@ -645,7 +645,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read dictionary", "Read dictionary is done");
+						pss.title("Read dictionary", "Read dictionary, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -671,7 +671,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Устанавливаем название файла
 						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read arpa file", "Read arpa file is done");
+						pss.title("Read arpa file", "Read arpa file, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -704,7 +704,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Устанавливаем название файла
 						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read abbr", "Read abbr is done");
+						pss.title("Read abbr", "Read abbr, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -740,7 +740,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Sentences generation", "Sentences generation is done");
+						pss.title("Sentences generation", "Sentences generation, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -788,7 +788,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем название файла
 							pss.description(path);
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Calculation perplexity", "Calculation perplexity is done");
+							pss.title("Calculation perplexity", "Calculation perplexity, is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
@@ -841,7 +841,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем название файла
 							pss.description(path);
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Find ngrams", "Find ngrams is done");
+							pss.title("Find ngrams", "Find ngrams, is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
@@ -899,7 +899,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем название файла
 							pss.description(path);
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Read text file", "Read text file is done");
+							pss.title("Read text file", "Read text file, is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
@@ -961,7 +961,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем название файла
 							pss.description(path);
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Read text file", "Read text file is done");
+							pss.title("Read text file", "Read text file, is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
@@ -1015,7 +1015,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем название файла
 							pss.description(path);
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Read text file", "Read text file is done");
+							pss.title("Read text file", "Read text file, is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
@@ -1177,7 +1177,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Если отладка включена, выводим индикатор загрузки
 					if(debug > 0){
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read dictionary", "Read dictionary is done");
+						pss.title("Read dictionary", "Read dictionary, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -1208,7 +1208,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Очищаем предыдущий прогресс-бар
 					pss.clear();
 					// Устанавливаем заголовки прогресс-бара
-					pss.title("Tokenization", "Tokenization is done");
+					pss.title("Tokenization", "Tokenization, is done");
 					// Выводим индикатор прогресс-бара
 					switch(debug){
 						case 1: pss.update(); break;
@@ -1596,7 +1596,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Train arpa", "Train arpa is done");
+						pss.title("Train arpa", "Train arpa, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -1654,7 +1654,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Если отладка включена, выводим индикатор загрузки
 							if(debug > 0){
 								// Устанавливаем заголовки прогресс-бара
-								pss.title("Load text corpus", "Load text corpus is done");
+								pss.title("Load text corpus", "Load text corpus, is done");
 								// Выводим индикатор прогресс-бара
 								switch(debug){
 									case 1: pss.update(); break;
@@ -1703,7 +1703,7 @@ int main(int argc, char * argv[]) noexcept {
 								// Очищаем предыдущий прогресс-бар
 								pss.clear();
 								// Устанавливаем заголовки прогресс-бара
-								pss.title("Train arpa", "Train arpa is done");
+								pss.title("Train arpa", "Train arpa, is done");
 								// Выводим индикатор прогресс-бара
 								switch(debug){
 									case 1: pss.update(); break;
@@ -1760,7 +1760,7 @@ int main(int argc, char * argv[]) noexcept {
 								// Устанавливаем название файла
 								pss.description(filename);
 								// Устанавливаем заголовки прогресс-бара
-								pss.title("Load text corpus", "Load text corpus is done");
+								pss.title("Load text corpus", "Load text corpus, is done");
 								// Выводим индикатор прогресс-бара
 								switch(debug){
 									case 1: pss.update(); break;
@@ -1802,7 +1802,7 @@ int main(int argc, char * argv[]) noexcept {
 								// Очищаем предыдущий прогресс-бар
 								pss.clear();
 								// Устанавливаем заголовки прогресс-бара
-								pss.title("Train arpa", "Train arpa is done");
+								pss.title("Train arpa", "Train arpa, is done");
 								// Выводим индикатор прогресс-бара
 								switch(debug){
 									case 1: pss.update(); break;
@@ -1837,7 +1837,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Очищаем предыдущий прогресс-бар
 					pss.clear();
 					// Устанавливаем заголовки прогресс-бара
-					pss.title("Mix arpa files", "Mix arpa files is done");
+					pss.title("Mix arpa files", "Mix arpa files, is done");
 					// Выводим индикатор прогресс-бара
 					switch(debug){
 						case 1: pss.update(); break;
@@ -1960,7 +1960,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Устанавливаем название файла
 						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read n-gram", "Read n-gram is done");
+						pss.title("Read n-gram", "Read n-gram, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -1994,7 +1994,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Устанавливаем название файла
 						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read arpa file", "Read arpa file is done");
+						pss.title("Read arpa file", "Read arpa file, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -2026,7 +2026,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Устанавливаем название файла
 						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read vocab", "Read vocab is done");
+						pss.title("Read vocab", "Read vocab, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -2062,7 +2062,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Устанавливаем название файла
 						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read words file", "Read words file is done");
+						pss.title("Read words file", "Read words file, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -2112,7 +2112,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read words file", "Read words file is done");
+						pss.title("Read words file", "Read words file, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -2168,7 +2168,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Устанавливаем название файла
 						pss.description(filename);
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Read abbr", "Read abbr is done");
+						pss.title("Read abbr", "Read abbr, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -2204,7 +2204,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем название файла
 							pss.description(filename);
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Read map", "Read map is done");
+							pss.title("Read map", "Read map, is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
@@ -2235,7 +2235,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Train arpa", "Train arpa is done");
+						pss.title("Train arpa", "Train arpa, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -2263,7 +2263,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Repair arpa", "Repair arpa is done");
+						pss.title("Repair arpa", "Repair arpa, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -2290,7 +2290,7 @@ int main(int argc, char * argv[]) noexcept {
 						// Очищаем предыдущий прогресс-бар
 						pss.clear();
 						// Устанавливаем заголовки прогресс-бара
-						pss.title("Sweep arpa", "Sweep arpa is done");
+						pss.title("Sweep arpa", "Sweep arpa, is done");
 						// Выводим индикатор прогресс-бара
 						switch(debug){
 							case 1: pss.update(); break;
@@ -2325,7 +2325,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Очищаем предыдущий прогресс-бар
 							pss.clear();
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Prune vocab", "Prune vocab is done");
+							pss.title("Prune vocab", "Prune vocab, is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
@@ -2364,7 +2364,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Очищаем предыдущий прогресс-бар
 							pss.clear();
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Prune arpa", "Prune arpa is done");
+							pss.title("Prune arpa", "Prune arpa, is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
@@ -2414,7 +2414,7 @@ int main(int argc, char * argv[]) noexcept {
 							// Устанавливаем название файла
 							pss.description(filename);
 							// Устанавливаем заголовки прогресс-бара
-							pss.title("Modify arpa", "Modify arpa is done");
+							pss.title("Modify arpa", "Modify arpa, is done");
 							// Выводим индикатор прогресс-бара
 							switch(debug){
 								case 1: pss.update(); break;
@@ -2448,7 +2448,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Устанавливаем название файла
 					pss.description(value);
 					// Устанавливаем заголовки прогресс-бара
-					pss.title("Write abbrs", "Write abbrs is done");
+					pss.title("Write abbrs", "Write abbrs, is done");
 					// Выводим индикатор прогресс-бара
 					switch(debug){
 						case 1: pss.update(); break;
@@ -2497,7 +2497,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Устанавливаем название файла
 					pss.description(value);
 					// Устанавливаем заголовки прогресс-бара
-					pss.title("Write words", "Write words is done");
+					pss.title("Write words", "Write words, is done");
 					// Выводим индикатор прогресс-бара
 					switch(debug){
 						case 1: pss.update(); break;
@@ -2527,7 +2527,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Устанавливаем название файла
 					pss.description(value);
 					// Устанавливаем заголовки прогресс-бара
-					pss.title("Write vocab", "Write vocab is done");
+					pss.title("Write vocab", "Write vocab, is done");
 					// Выводим индикатор прогресс-бара
 					switch(debug){
 						case 1: pss.update(); break;
@@ -2558,7 +2558,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Устанавливаем название файла
 					pss.description(value);
 					// Устанавливаем заголовки прогресс-бара
-					pss.title("Write map", "Write map is done");
+					pss.title("Write map", "Write map, is done");
 					// Выводим индикатор прогресс-бара
 					switch(debug){
 						case 1: pss.update(); break;
@@ -2588,7 +2588,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Устанавливаем название файла
 					pss.description(value);
 					// Устанавливаем заголовки прогресс-бара
-					pss.title("Write arpa", "Write arpa is done");
+					pss.title("Write arpa", "Write arpa, is done");
 					// Выводим индикатор прогресс-бара
 					switch(debug){
 						case 1: pss.update(); break;
@@ -2619,7 +2619,7 @@ int main(int argc, char * argv[]) noexcept {
 					// Устанавливаем название файла
 					pss.description(value);
 					// Устанавливаем заголовки прогресс-бара
-					pss.title("Write ngrams", "Write ngrams is done");
+					pss.title("Write ngrams", "Write ngrams, is done");
 					// Выводим индикатор прогресс-бара
 					switch(debug){
 						case 1: pss.update(); break;
@@ -2695,7 +2695,7 @@ int main(int argc, char * argv[]) noexcept {
 				// Если отладка включена, выводим индикатор загрузки
 				if(debug > 0){
 					// Устанавливаем заголовки прогресс-бара
-					pss.title("Write dictionary", "Write dictionary is done");
+					pss.title("Write dictionary", "Write dictionary, is done");
 					// Выводим индикатор прогресс-бара
 					switch(debug){
 						case 1: pss.update(); break;
