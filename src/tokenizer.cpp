@@ -674,7 +674,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 						// Получаем значение текущей буквы
 						letter = word.at(i);
 						// Если плавающая точка найдена
-						if((letter == L'.') || (letter == L',') || (letter == L':') || (letter == L'/') ||
+						if((letter == L'.') || (letter == L',') || (letter == L':') || (letter == L'/') || (letter == L'x') ||
 						(letter == L'х') || (letter == L'×') || (letter == L'~') || (letter == L'∼') || (letter == L'-') || (letter == L'−')){
 							// Проверяем правые и левую части
 							delim = (this->alphabet->isNumber(word.substr(0, i)) && this->alphabet->isNumber(word.substr(i + 1)));
@@ -689,6 +689,7 @@ const anyks::token_t anyks::Tokenizer::idt(const wstring & word) const noexcept 
 									case L'-':
 									case L'−': result = token_t::range; break;
 									case L'/': result = token_t::fract; break;
+									case L'x':
 									case L'х':
 									case L'×': result = token_t::dimen; break;
 									case L':': result = token_t::score; break;
