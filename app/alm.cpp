@@ -277,23 +277,17 @@ int main(int argc, char * argv[]) noexcept {
 		binDictFile = value;
 	}
 	// Если алфавит снова не найден
-	if(binDictFile.empty() && ((value = env.get("alphabet")) == nullptr)){
+	if(binDictFile.empty() && !env.is("alphabet")){
 		// Выводим сообщение в консоль
 		print("alphabet in not set\r\n", env.get("log"));
 	// Продолжаем дальше
 	} else {
 		// Объявляем прогресс бра
 		progress_t pss;
-		// Расширение файла
-		string ext = "txt";
 		// Переводим указатель в строку
-		string letters = (value != nullptr ? value : "");
-		// Если расширение файлов передано
-		if((value = env.get("ext")) != nullptr) ext = value;
-		// Добавляем точку к расширению
-		ext.insert(ext.begin(), 1, '.');
+		string letters = ((value = env.get("alphabet")) != nullptr ? value : "");
 		// Проверяем является ли алфавит файлом
-		if(letters.rfind(ext) != string::npos){
+		if(fsys_t::isfile(letters)){
 			// Получаем адрес файла
 			const string filename = letters;
 			// Очищаем список букв алфавита
