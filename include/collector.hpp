@@ -18,6 +18,7 @@
 #include <regex>
 #include <atomic>
 #include <vector>
+#include <functional>
 /**
  * Наши модули
  */
@@ -64,6 +65,8 @@ namespace anyks {
 			uintmax_t segmentSize = 0;
 			// Количество потоков для работы
 			size_t threads = thread::hardware_concurrency();
+			// Функция прогресс бара
+			function <void (const wstring &, const u_short)> progressFn = nullptr;
 		private:
 			// Создаем тредпул
 			tpool_t * tpool = nullptr;
@@ -169,6 +172,11 @@ namespace anyks {
 			 * @param size     размер каждого сегмента (auto - получить размер автоматически)
 			 */
 			void setSegment(const bool segments, const string & size = "auto") noexcept;
+			/**
+			 * setProgressFn Метод установки внешнего прогресс-бара
+			 * @param fn функция внешнего прогресс-бара
+			 */
+			void setProgressFn(function <void (const wstring &, const u_short)> fn) noexcept;
 		public:
 			/**
 			 * readFile Метод запуска чтение текстового корпуса из одного файла

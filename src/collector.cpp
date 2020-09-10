@@ -58,7 +58,7 @@ void anyks::Collector::dumpRaw(){
 			// Получаем адрес файла словаря собранных слов
 			const string & fileVocab = this->alphabet->format("%s/raw.vocab", dir.c_str());
 			// Если отладка включена, выводим индикатор загрузки
-			if(this->debug > 0){
+			if((this->debug > 0) && (this->progressFn == nullptr)){
 				// Очищаем предыдущий прогресс-бар
 				this->pss.clear();
 				// Устанавливаем название файла
@@ -73,19 +73,27 @@ void anyks::Collector::dumpRaw(){
 			}
 			// Выполняем сохранение каты последовательности
 			this->toolkit->writeMap(fileMap, [this](const u_short status) noexcept {
+				// Если внешний прогресс-бар отключен
+				if(this->progressFn == nullptr){
+					// Отображаем ход процесса
+					switch(this->debug){
+						case 1: this->pss.update(status); break;
+						case 2: this->pss.status(status); break;
+					}
+				// Выводим сообщение во внешний прогресс-бар
+				} else this->progressFn(L"Write raw map", status);
+			});
+			// Если внешний прогресс-бар отключен
+			if(this->progressFn == nullptr){
 				// Отображаем ход процесса
 				switch(this->debug){
-					case 1: this->pss.update(status); break;
-					case 2: this->pss.status(status); break;
+					case 1: this->pss.update(100); break;
+					case 2: this->pss.status(100); break;
 				}
-			});
-			// Отображаем ход процесса
-			switch(this->debug){
-				case 1: this->pss.update(100); break;
-				case 2: this->pss.status(100); break;
-			}
+			// Выводим сообщение во внешний прогресс-бар
+			} else this->progressFn(L"Write raw map", 100);
 			// Если отладка включена, выводим индикатор загрузки
-			if(this->debug > 0){
+			if((this->debug > 0) && (this->progressFn == nullptr)){
 				// Очищаем предыдущий прогресс-бар
 				this->pss.clear();
 				// Устанавливаем название файла
@@ -100,17 +108,25 @@ void anyks::Collector::dumpRaw(){
 			}
 			// Выполняем извлечение словаря в файл
 			this->toolkit->writeVocab(fileVocab, [this](const u_short status) noexcept {
+				// Если внешний прогресс-бар отключен
+				if(this->progressFn == nullptr){
+					// Отображаем ход процесса
+					switch(this->debug){
+						case 1: this->pss.update(status); break;
+						case 2: this->pss.status(status); break;
+					}
+				// Выводим сообщение во внешний прогресс-бар
+				} else this->progressFn(L"Write raw vocab", status);
+			});
+			// Если внешний прогресс-бар отключен
+			if(this->progressFn == nullptr){
 				// Отображаем ход процесса
 				switch(this->debug){
-					case 1: this->pss.update(status); break;
-					case 2: this->pss.status(status); break;
+					case 1: this->pss.update(100); break;
+					case 2: this->pss.status(100); break;
 				}
-			});
-			// Отображаем ход процесса
-			switch(this->debug){
-				case 1: this->pss.update(100); break;
-				case 2: this->pss.status(100); break;
-			}
+			// Выводим сообщение во внешний прогресс-бар
+			} else this->progressFn(L"Write raw vocab", 100);
 		}
 	}
 }
@@ -310,13 +326,17 @@ void anyks::Collector::train(const string & filename, const size_t idd) noexcept
 					this->rate.store(this->status, memory_order_relaxed);
 					// Блокируем поток
 					this->locker.lock();
-					// Устанавливаем название файла
-					this->pss.description(filename);
-					// Отображаем ход процесса
-					switch(this->debug){
-						case 1: this->pss.update(this->status); break;
-						case 2: this->pss.status(this->status); break;
-					}
+					// Если внешний прогресс-бар отключен
+					if(this->progressFn == nullptr){
+						// Устанавливаем название файла
+						this->pss.description(filename);
+						// Отображаем ход процесса
+						switch(this->debug){
+							case 1: this->pss.update(this->status); break;
+							case 2: this->pss.status(this->status); break;
+						}
+					// Выводим сообщение во внешний прогресс-бар
+					} else this->progressFn(L"Read text corpora", this->status);
 					// Разблокируем поток
 					this->locker.unlock();
 				}
@@ -387,11 +407,15 @@ void anyks::Collector::train(const vector <string> & texts, const size_t idd) no
 							this->rate.store(this->status, memory_order_relaxed);
 							// Блокируем поток
 							this->locker.lock();
-							// Отображаем ход процесса
-							switch(this->debug){
-								case 1: this->pss.update(this->status); break;
-								case 2: this->pss.status(this->status); break;
-							}
+							// Если внешний прогресс-бар отключен
+							if(this->progressFn == nullptr){
+								// Отображаем ход процесса
+								switch(this->debug){
+									case 1: this->pss.update(this->status); break;
+									case 2: this->pss.status(this->status); break;
+								}
+							// Выводим сообщение во внешний прогресс-бар
+							} else this->progressFn(L"Read text corpora", this->status);
 							// Разблокируем поток
 							this->locker.unlock();
 						}
@@ -518,6 +542,14 @@ void anyks::Collector::setSegment(const bool segments, const string & size) noex
 	this->segments = segments;
 }
 /**
+ * setProgressFn Метод установки внешнего прогресс-бара
+ * @param fn функция внешнего прогресс-бара
+ */
+void anyks::Collector::setProgressFn(function <void (const wstring &, const u_short)> fn) noexcept {
+	// Устанавливаем функцию внешнего прогресс-бара
+	this->progressFn = fn;
+}
+/**
  * readFile Метод запуска чтение текстового корпуса из одного файла
  * @param filename адрес файла для чтения
  */
@@ -535,7 +567,7 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 			// Список текстов для обработки
 			vector <string> texts;
 			// Если отладка включена, выводим индикатор загрузки
-			if(this->debug > 0){
+			if((this->debug > 0) && (this->progressFn == nullptr)){
 				// Сбрасываем общий размер собранных данных
 				this->allSize = 0;
 				// Очищаем предыдущий прогресс-бар
@@ -589,11 +621,15 @@ void anyks::Collector::readFile(const string & filename) noexcept {
 			}
 			// Завершаем работу тредпула
 			this->finish();
-			// Отображаем ход процесса
-			switch(this->debug){
-				case 1: this->pss.update(100); break;
-				case 2: this->pss.status(100); break;
-			}
+			// Если внешний прогресс-бар отключен
+			if(this->progressFn == nullptr){
+				// Отображаем ход процесса
+				switch(this->debug){
+					case 1: this->pss.update(100); break;
+					case 2: this->pss.status(100); break;
+				}
+			// Выводим сообщение во внешний прогресс-бар
+			} else this->progressFn(L"Read text corpora", 100);
 			// Выполняем дамп промежуточных данных
 			this->dumpRaw();
 		}
@@ -610,7 +646,7 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 		// Количество файлов
 		size_t count = 0;
 		// Если отладка включена, выводим индикатор загрузки
-		if(this->debug > 0){
+		if((this->debug > 0) && (this->progressFn == nullptr)){
 			// Сбрасываем общий размер собранных данных
 			this->allSize = 0;
 			// Очищаем предыдущий прогресс-бар
@@ -638,7 +674,7 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 			// Переходим по всему списку файлов в каталоге
 			fsys_t::rdir(path, ext, [&count, &size, &texts, this](const string & filename, const uintmax_t dirSize) noexcept {
 				// Устанавливаем название файла
-				this->pss.description(filename);
+				if(this->progressFn == nullptr) this->pss.description(filename);
 				// Выполняем считывание всех строк текста
 				fsys_t::rfile2(filename, [&count, &size, &texts, this](const string & text, const uintmax_t fileSize) noexcept {
 					// Если текст получен
@@ -678,11 +714,15 @@ void anyks::Collector::readDir(const string & path, const string & ext) noexcept
 		}
 		// Завершаем работу тредпула
 		this->finish();
-		// Отображаем ход процесса
-		switch(this->debug){
-			case 1: this->pss.update(100); break;
-			case 2: this->pss.status(100); break;
-		}
+		// Если внешний прогресс-бар отключен
+		if(this->progressFn == nullptr){
+			// Отображаем ход процесса
+			switch(this->debug){
+				case 1: this->pss.update(100); break;
+				case 2: this->pss.status(100); break;
+			}
+		// Выводим сообщение во внешний прогресс-бар
+		} else this->progressFn(L"Read text corpora", 100);
 		// Выполняем дамп промежуточных данных
 		this->dumpRaw();
 	}
