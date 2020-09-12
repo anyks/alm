@@ -135,7 +135,7 @@ void anyks::Collector::dumpRaw(){
  */
 void anyks::Collector::initPython(){
 	// Если объект питона еще не создан
-	if(this->python == nullptr){
+	if((this->python == nullptr) && !this->nopython){
 		// Экранируем возможность ошибки памяти
 		try {
 			// Создаём объект для работы с python
@@ -148,6 +148,20 @@ void anyks::Collector::initPython(){
 			exit(EXIT_FAILURE);
 		}
 	}
+}
+/**
+ * allowPython Метод разрешения использования объекта Python
+ */
+void anyks::Collector::allowPython(){
+	// Разрешаем использовать объект Python
+	this->nopython = false;
+}
+/**
+ * disallowPython Метод запрещения использования объекта Python
+ */
+void anyks::Collector::disallowPython(){
+	// Запрещаем использовать объект Python
+	this->nopython = true;
 }
 /**
  * createDir Метод создания каталога для сохранения результата
@@ -257,14 +271,14 @@ void anyks::Collector::train(const string & filename, const size_t idd) noexcept
 			toolkit_t toolkit(this->alphabet, this->tokenizer, this->order);
 			// Устанавливаем log файл
 			toolkit.setLogfile(this->logfile);
-			// Устанавливаем внешний объект питона
-			toolkit.setPythonObj(this->python);
 			// Устанавливаем неизвестное слово
 			toolkit.setUnknown(this->toolkit->getUnknown());
 			// Устанавливаем опции тулкита
 			toolkit.setOptions(this->toolkit->getOptions());
 			// Устанавливаем скрипт препроцессинга слов
 			toolkit.setWordScript(this->toolkit->getWordScript());
+			// Устанавливаем внешний объект питона
+			if(!this->nopython) toolkit.setPythonObj(this->python);
 			// Устанавливаем список токенов приводимых к <unk>
 			toolkit.setTokensUnknown(this->toolkit->getTokensUnknown());
 			// Устанавливаем список запрещённых токенов
@@ -358,14 +372,14 @@ void anyks::Collector::train(const vector <string> & texts, const size_t idd) no
 			toolkit_t toolkit(this->alphabet, this->tokenizer, this->order);
 			// Устанавливаем log файл
 			toolkit.setLogfile(this->logfile);
-			// Устанавливаем внешний объект питона
-			toolkit.setPythonObj(this->python);
 			// Устанавливаем неизвестное слово
 			toolkit.setUnknown(this->toolkit->getUnknown());
 			// Устанавливаем опции тулкита
 			toolkit.setOptions(this->toolkit->getOptions());
 			// Устанавливаем скрипт препроцессинга слов
 			toolkit.setWordScript(this->toolkit->getWordScript());
+			// Устанавливаем внешний объект питона
+			if(!this->nopython) toolkit.setPythonObj(this->python);
 			// Устанавливаем список токенов приводимых к <unk>
 			toolkit.setTokensUnknown(this->toolkit->getTokensUnknown());
 			// Устанавливаем список запрещённых токенов
@@ -758,5 +772,5 @@ anyks::Collector::Collector(toolkit_t * toolkit, const alphabet_t * alphabet, co
  */
 anyks::Collector::~Collector() noexcept {
 	// Удаляем объект питона
-	if(this->python != nullptr) delete this->python;
+	if((this->python != nullptr) && !this->nopython) delete this->python;
 }

@@ -2477,9 +2477,9 @@ int main(int argc, char * argv[]) noexcept {
 						const string & text = config.dump(4);
 						// Если текст получен, записываем данные в файл
 						if(!text.empty()) file.write(text.data(), text.size());
+						// Закрываем файл
+						file.close();
 					}
-					// Закрываем файл
-					file.close();
 				}
 			}
 			// Если файл для сохранения слов передан

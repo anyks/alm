@@ -80,6 +80,7 @@ namespace anyks {
 			// Основные опции
 			enum class options_t : u_short {
 				debug,     // Флаг режима отладки
+				nopython,  // Флаг запрещающий инициализацию питона
 				onlyGood,  // Флаг использования только слов из белого списка
 				mixdicts,  // Флаг разрешающий детектировать слова из смешанных словарей
 				confidence // Флаг разрешающий загружать n-граммы из arpa так-как они есть
@@ -139,7 +140,7 @@ namespace anyks {
 			size_t threads = thread::hardware_concurrency();
 		private:
 			// Флаги параметров
-			bitset <4> options;
+			bitset <5> options;
 			// Список плохих слов
 			std::set <size_t> badwords;
 			// Список хороших слов

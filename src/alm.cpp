@@ -213,7 +213,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if(this->python != nullptr){
+				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -553,7 +553,7 @@ const bool anyks::Alm::check(const wstring & text, const u_short step) const noe
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if(this->python != nullptr){
+				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -732,7 +732,7 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text, const bool acc
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if(this->python != nullptr){
+				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -911,7 +911,7 @@ const pair <bool, size_t> anyks::Alm::exist(const wstring & text, const u_short 
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if(this->python != nullptr){
+				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -1107,7 +1107,7 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if(this->python != nullptr){
+				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -1299,7 +1299,7 @@ void anyks::Alm::setAllTokenDisable() noexcept {
  */
 void anyks::Alm::initPython(){
 	// Если скрипт получен
-	if(((this->scripts.count(2) > 0) && !this->utokens.empty()) || (this->scripts.count(1) > 0)){
+	if(!this->isOption(options_t::nopython) && (((this->scripts.count(2) > 0) && !this->utokens.empty()) || (this->scripts.count(1) > 0))){
 		// Экранируем возможность ошибки памяти
 		try {
 			// Создаём объект для работы с python
@@ -1413,7 +1413,7 @@ void anyks::Alm::setOptions(const u_int options) noexcept {
  */
 void anyks::Alm::setPythonObj(python_t * python) noexcept {
 	// Если объект передан
-	if(python != nullptr){
+	if((python != nullptr) && !this->isOption(options_t::nopython)){
 		// Устанавливаем объект питона
 		this->python = python;
 		// Запрещаем очистку объекта
@@ -3207,5 +3207,5 @@ anyks::Alm::~Alm() noexcept {
 	// Очищаем языковую модель
 	this->clear();
 	// Очищаем выделенную память под python
-	if(!notCleanPython && (this->python != nullptr)) delete this->python;
+	if(!notCleanPython && (this->python != nullptr) && !this->isOption(options_t::nopython)) delete this->python;
 }

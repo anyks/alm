@@ -1344,7 +1344,7 @@ void anyks::Alm1::find(const wstring & text, function <void (const wstring &)> c
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if(this->python != nullptr){
+				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен

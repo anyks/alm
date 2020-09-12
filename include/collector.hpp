@@ -55,6 +55,8 @@ namespace anyks {
 			u_short debug = 0;
 			// Общий размер n-граммы
 			u_short order = 1;
+			// Запрещено использовать объект Python
+			bool nopython = false;
 			// Флаг проведения сегментации
 			bool segments = false;
 			// Флаг вывода промежуточных результатов
@@ -97,6 +99,14 @@ namespace anyks {
 			 * initPython Метод инициализации модуля питона
 			 */
 			void initPython();
+			/**
+			 * allowPython Метод разрешения использования объекта Python
+			 */
+			void allowPython();
+			/**
+			 * disallowPython Метод запрещения использования объекта Python
+			 */
+			void disallowPython();
 			/**
 			 * createDir Метод создания каталога для сохранения результата
 			 * @return адрес созданного каталога
