@@ -150,20 +150,6 @@ void anyks::Collector::initPython(){
 	}
 }
 /**
- * allowPython Метод разрешения использования объекта Python
- */
-void anyks::Collector::allowPython(){
-	// Разрешаем использовать объект Python
-	this->nopython = false;
-}
-/**
- * disallowPython Метод запрещения использования объекта Python
- */
-void anyks::Collector::disallowPython(){
-	// Запрещаем использовать объект Python
-	this->nopython = true;
-}
-/**
  * createDir Метод создания каталога для сохранения результата
  * @return адрес созданного каталога
  */
@@ -466,6 +452,20 @@ void anyks::Collector::train(const vector <string> & texts, const size_t idd) no
 		// Очищаем выделенную память
 		vector <string> ().swap(* obj);
 	}
+}
+/**
+ * allowPython Метод разрешения использования объекта Python
+ */
+void anyks::Collector::allowPython() noexcept {
+	// Разрешаем использовать объект Python
+	this->nopython = false;
+}
+/**
+ * disallowPython Метод запрещения использования объекта Python
+ */
+void anyks::Collector::disallowPython() noexcept {
+	// Запрещаем использовать объект Python
+	this->nopython = true;
 }
 /**
  * setOrder Метод установки размер n-граммы

@@ -100,14 +100,6 @@ namespace anyks {
 			 */
 			void initPython();
 			/**
-			 * allowPython Метод разрешения использования объекта Python
-			 */
-			void allowPython();
-			/**
-			 * disallowPython Метод запрещения использования объекта Python
-			 */
-			void disallowPython();
-			/**
 			 * createDir Метод создания каталога для сохранения результата
 			 * @return адрес созданного каталога
 			 */
@@ -131,6 +123,14 @@ namespace anyks {
 			 */
 			void train(const vector <string> & texts, const size_t idd) noexcept;
 		public:
+			/**
+			 * allowPython Метод разрешения использования объекта Python
+			 */
+			void allowPython() noexcept;
+			/**
+			 * disallowPython Метод запрещения использования объекта Python
+			 */
+			void disallowPython() noexcept;
 			/**
 			 * setOrder Метод установки размер n-граммы
 			 * @param order размер n-граммы
