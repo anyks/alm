@@ -1078,6 +1078,8 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 				// Если дополнительное слово не передано, меняем регистр у первой буквы
 				if(start && !word.empty() && (word.front() != L'!') &&
 				(word.front() != L'?') && (word.front() != L'.')) text.at(0) = towlower(text.front());
+				// Добавляем разделитель
+				if(!result.empty()) result.append(L" ");
 				// Добавляем исправленный текст
 				result.append(text);
 				// Если слово передано
@@ -1087,8 +1089,6 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 					// Добавляем переданное слово
 					result.append(word.wreal());
 				}
-				// Добавляем разделитель
-				result.append(L" ");
 			// Если слово передано
 			} else if(!word.empty()){
 				// Добавляем разделитель
@@ -1096,8 +1096,6 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 				else if((idw == size_t(token_t::punct)) && this->alphabet->isSpace(result.back())) result.pop_back();
 				// Добавляем переданное слово
 				result.append(word.wreal());
-				// Добавляем разделитель
-				result.append(L" ");
 			}
 			// Очищаем список последовательностей
 			seq.clear();
@@ -1155,7 +1153,7 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 						// Если это неизвестное слово
 						if(isBad || (idw == uid) || (isWord && (this->getWord(idw) == nullptr))) resFn(tmp, idw);
 						// Иначе добавляем слово
-						else if(!isBad && (!isWord || (this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)))
+						else if(!isBad && ((this->goodwords.count(idw) > 0) || this->alphabet->isAllowed(tmp)))
 							// Собираем последовательность
 							seq.push_back(idw);
 						// Отправляем слово как неизвестное
@@ -1170,8 +1168,6 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 		};
 		// Выполняем разбивку текста на токены
 		this->tokenizer->run(text, modeFn);
-		// Если результат получен, удаляем последний пробел
-		if(!result.empty()) result.pop_back();
 	}
 	// Выводим результат
 	return result;
