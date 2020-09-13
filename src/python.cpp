@@ -12,6 +12,8 @@
  * clear Метод очистки списка скриптов
  */
 void anyks::Python::clear() noexcept {
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Переходим по всем собранным скриптам
 	for(auto & script : this->scripts){
 		// Выполняем очистику всех параметров
@@ -22,6 +24,7 @@ void anyks::Python::clear() noexcept {
 	}
 	// Выполняем очистику всего списка
 	this->scripts.clear();
+#endif
 }
 /**
  * setDebug Метод установки режима отладки
@@ -42,6 +45,8 @@ void anyks::Python::unsetDebug() noexcept {
  * @param sid идентификатор скрипта
  */
 void anyks::Python::remove(const size_t sid) noexcept {
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Если имя скрипта передано
 	if(sid > 0){
 		// Извлекаем скрипт
@@ -57,6 +62,7 @@ void anyks::Python::remove(const size_t sid) noexcept {
 			this->scripts.erase(it);
 		}
 	}
+#endif
 }
 /**
  * setTokenizer Метод установки токенизатора
@@ -91,6 +97,8 @@ const size_t anyks::Python::count() const noexcept {
 const size_t anyks::Python::add(const string & script, const u_short args) noexcept {
 	// Результат работы функции
 	size_t result = 0;
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Если скрипт передан
 	if(!script.empty()){
 		// Получаем путь до скрипта
@@ -203,6 +211,7 @@ const size_t anyks::Python::add(const string & script, const u_short args) noexc
 			}
 		}
 	}
+#endif
 	// Выводим результат
 	return result;
 }
@@ -216,6 +225,8 @@ const size_t anyks::Python::add(const string & script, const u_short args) noexc
 const wstring anyks::Python::run(const size_t sid, const vector <string> & args, const vector <string> & arr) const noexcept {
 	// Результат работы функции
 	wstring result = L"";
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Если имя передано
 	if(sid > 0){
 		// Выполняем поиск скрипта
@@ -303,6 +314,7 @@ const wstring anyks::Python::run(const size_t sid, const vector <string> & args,
 			}
 		}
 	}
+#endif
 	// Выводим результат
 	return result;
 }
@@ -310,6 +322,8 @@ const wstring anyks::Python::run(const size_t sid, const vector <string> & args,
  * Python Конструктор
  */
 anyks::Python::Python() noexcept {
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Выполняем инициализацию питона
 	if(!Py_IsInitialized()){
 		// Выполняем инициализацию контекста питона
@@ -319,12 +333,15 @@ anyks::Python::Python() noexcept {
 		// Устанавливаем путь с подмодулями
 		// PyRun_SimpleString("sys.path.append(\"/path/to/python/module/here\")");
 	}
+#endif
 }
 /**
  * Python Конструктор
  * @param tokenizer указатель на токенизатор
  */
 anyks::Python::Python(const tokenizer_t * tokenizer) noexcept {
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Выполняем инициализацию питона
 	if(!Py_IsInitialized()){
 		// Выполняем инициализацию контекста питона
@@ -336,6 +353,7 @@ anyks::Python::Python(const tokenizer_t * tokenizer) noexcept {
 	}
 	// Выполняем установку токенизатора
 	this->setTokenizer(tokenizer);
+#endif
 }
 /**
  * ~Python Деструктор
@@ -343,6 +361,8 @@ anyks::Python::Python(const tokenizer_t * tokenizer) noexcept {
 anyks::Python::~Python() noexcept {
 	// Очищаем список полученных скриптов
 	this->clear();
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Выполняем завершение работы питона
 	if(Py_IsInitialized()) Py_Finalize();
 	/**
@@ -352,4 +372,5 @@ anyks::Python::~Python() noexcept {
 	 * По этому просто выходим из приложения, по завершению работы деструктора
 	 */
 	exit(0);
+#endif
 }
