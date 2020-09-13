@@ -1344,7 +1344,9 @@ void anyks::Alm1::find(const wstring & text, function <void (const wstring &)> c
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
+				if(this->python != nullptr){
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -1356,6 +1358,7 @@ void anyks::Alm1::find(const wstring & text, function <void (const wstring &)> c
 						// Разблокируем поток
 						this->locker.unlock();
 					}
+#endif
 				// Если модуль предобработки слов, существует
 				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено

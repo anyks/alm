@@ -609,13 +609,16 @@ void anyks::Toolkit::setOptions(const u_int options) noexcept {
  * @param python внешний объект питона
  */
 void anyks::Toolkit::setPythonObj(python_t * python) noexcept {
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Если объект передан
-	if((python != nullptr) && !this->isOption(options_t::nopython)){
+	if(python != nullptr){
 		// Устанавливаем объект питона
 		this->python = python;
 		// Запрещаем очистку объекта
 		this->notCleanPython = true;
 	}
+#endif
 }
 /**
  * setLogfile Метод установки файла для вывода логов
@@ -968,7 +971,9 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
+				if(this->python != nullptr){
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -982,6 +987,7 @@ void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 						// Разблокируем поток
 						this->locker.unlock();
 					}
+#endif
 				// Если модуль предобработки слов, существует
 				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
@@ -1206,63 +1212,63 @@ void anyks::Toolkit::init(const algorithm_t algorithm, const bool modified, cons
 			this->arpa->setSize(this->size);
 			// Устанавливаем файл логирования
 			this->arpa->setLogfile(this->logfile);
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 			// Если скрипт получен
 			if(((this->scripts.count(2) > 0) && !this->utokens.empty()) || (this->scripts.count(1) > 0)){
-				// Если объект питона разрешено создавать
-				if(!this->isOption(options_t::nopython)){
-					// Создаём объект для работы с python
-					if(this->python == nullptr) this->python = new python_t(this->tokenizer);
+				// Создаём объект для работы с python
+				if(this->python == nullptr) this->python = new python_t(this->tokenizer);
+				// Блокируем поток
+				this->locker.lock();
+				// Если нужно активировать режим отладки
+				if(this->isOption(options_t::debug)) this->python->setDebug();
+				// Разблокируем поток
+				this->locker.unlock();
+				// Ищем скрипт обработки слов
+				auto it = this->scripts.find(1);
+				// Если скрипт обработки слов установлен
+				if(it != this->scripts.end()){
 					// Блокируем поток
 					this->locker.lock();
-					// Если нужно активировать режим отладки
-					if(this->isOption(options_t::debug)) this->python->setDebug();
+					// Запоминаем идентификатор скрипта
+					it->second.second = this->python->add(it->second.first, 2);
 					// Разблокируем поток
 					this->locker.unlock();
-					// Ищем скрипт обработки слов
-					auto it = this->scripts.find(1);
-					// Если скрипт обработки слов установлен
-					if(it != this->scripts.end()){
-						// Блокируем поток
-						this->locker.lock();
-						// Запоминаем идентификатор скрипта
-						it->second.second = this->python->add(it->second.first, 2);
-						// Разблокируем поток
-						this->locker.unlock();
-					}
-					// Ищем скрипт обработки пользовательских токенов
-					it = this->scripts.find(2);
-					// Если скрипт обработки пользовательских токенов установлен
-					if((it != this->scripts.end()) && !this->utokens.empty()){
-						// Блокируем поток
-						this->locker.lock();
-						// Выполняем добавление скрипта
-						const size_t sid = this->python->add(it->second.first, 2);
-						// Разблокируем поток
-						this->locker.unlock();
-						// Переходим по всему списку пользовательских токенов
-						for(auto & token : this->utokens){
-							// Добавляем в пользовательский токен функцию проверки
-							token.second.test = [sid, this](const string & token, const string & word){
-								// Результат работы функции
-								bool result = false;
-								// Если слово и токен переданы
-								if(!token.empty() && !word.empty()){
-									// Блокируем поток
-									this->locker.lock();
-									// Выполняем скрипт
-									const wstring & res = this->python->run(sid, {token, word});
-									// Проверяем результат
-									result = (this->alphabet->toLower(res).compare(L"ok") == 0);
-									// Разблокируем поток
-									this->locker.unlock();
-								}
-								// Выводим результат
-								return result;
-							};
-						}
+				}
+				// Ищем скрипт обработки пользовательских токенов
+				it = this->scripts.find(2);
+				// Если скрипт обработки пользовательских токенов установлен
+				if((it != this->scripts.end()) && !this->utokens.empty()){
+					// Блокируем поток
+					this->locker.lock();
+					// Выполняем добавление скрипта
+					const size_t sid = this->python->add(it->second.first, 2);
+					// Разблокируем поток
+					this->locker.unlock();
+					// Переходим по всему списку пользовательских токенов
+					for(auto & token : this->utokens){
+						// Добавляем в пользовательский токен функцию проверки
+						token.second.test = [sid, this](const string & token, const string & word){
+							// Результат работы функции
+							bool result = false;
+							// Если слово и токен переданы
+							if(!token.empty() && !word.empty()){
+								// Блокируем поток
+								this->locker.lock();
+								// Выполняем скрипт
+								const wstring & res = this->python->run(sid, {token, word});
+								// Проверяем результат
+								result = (this->alphabet->toLower(res).compare(L"ok") == 0);
+								// Разблокируем поток
+								this->locker.unlock();
+							}
+							// Выводим результат
+							return result;
+						};
 					}
 				}
 			}
+#endif
 			// Если нужно активировать интерполяцию, активируем её
 			if(this->isOption(options_t::interpolate)
 			&& (algorithm != algorithm_t::constDiscount)
@@ -3270,6 +3276,9 @@ anyks::Toolkit::~Toolkit() noexcept {
 	this->clear();
 	// Очищаем выделенную память под arpa
 	if(this->arpa != nullptr) delete this->arpa;
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Очищаем выделенную память под python
-	if(!notCleanPython && (this->python != nullptr) && !this->isOption(options_t::nopython)) delete this->python;
+	if(!notCleanPython && (this->python != nullptr)) delete this->python;
+#endif
 }

@@ -134,6 +134,8 @@ void anyks::Collector::dumpRaw(){
  * initPython Метод инициализации модуля питона
  */
 void anyks::Collector::initPython(){
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Если объект питона еще не создан
 	if((this->python == nullptr) && !this->nopython){
 		// Экранируем возможность ошибки памяти
@@ -148,6 +150,7 @@ void anyks::Collector::initPython(){
 			exit(EXIT_FAILURE);
 		}
 	}
+#endif
 }
 /**
  * createDir Метод создания каталога для сохранения результата
@@ -263,8 +266,11 @@ void anyks::Collector::train(const string & filename, const size_t idd) noexcept
 			toolkit.setOptions(this->toolkit->getOptions());
 			// Устанавливаем скрипт препроцессинга слов
 			toolkit.setWordScript(this->toolkit->getWordScript());
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 			// Устанавливаем внешний объект питона
 			if(!this->nopython) toolkit.setPythonObj(this->python);
+#endif
 			// Устанавливаем список токенов приводимых к <unk>
 			toolkit.setTokensUnknown(this->toolkit->getTokensUnknown());
 			// Устанавливаем список запрещённых токенов
@@ -364,8 +370,11 @@ void anyks::Collector::train(const vector <string> & texts, const size_t idd) no
 			toolkit.setOptions(this->toolkit->getOptions());
 			// Устанавливаем скрипт препроцессинга слов
 			toolkit.setWordScript(this->toolkit->getWordScript());
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 			// Устанавливаем внешний объект питона
 			if(!this->nopython) toolkit.setPythonObj(this->python);
+#endif
 			// Устанавливаем список токенов приводимых к <unk>
 			toolkit.setTokensUnknown(this->toolkit->getTokensUnknown());
 			// Устанавливаем список запрещённых токенов
@@ -771,6 +780,9 @@ anyks::Collector::Collector(toolkit_t * toolkit, const alphabet_t * alphabet, co
  * Деструктор
  */
 anyks::Collector::~Collector() noexcept {
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Удаляем объект питона
 	if((this->python != nullptr) && !this->nopython) delete this->python;
+#endif
 }

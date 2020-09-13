@@ -72,8 +72,11 @@ namespace anyks {
 		private:
 			// Создаем тредпул
 			tpool_t * tpool = nullptr;
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 			// Объект работы с python
 			python_t * python = nullptr;
+#endif
 			// Объект тулкита
 			toolkit_t * toolkit = nullptr;
 			// Объект log файла

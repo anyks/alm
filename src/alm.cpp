@@ -213,7 +213,9 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
+				if(this->python != nullptr){
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -227,6 +229,7 @@ const anyks::Alm::ppl_t anyks::Alm::perplexity(const wstring & text) const noexc
 						// Разблокируем поток
 						this->locker.unlock();
 					}
+#endif
 				// Если модуль предобработки слов, существует
 				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
@@ -553,7 +556,9 @@ const bool anyks::Alm::check(const wstring & text, const u_short step) const noe
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
+				if(this->python != nullptr){
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -567,6 +572,7 @@ const bool anyks::Alm::check(const wstring & text, const u_short step) const noe
 						// Разблокируем поток
 						this->locker.unlock();
 					}
+#endif
 				// Если модуль предобработки слов, существует
 				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
@@ -732,7 +738,9 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text, const bool acc
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
+				if(this->python != nullptr){
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -746,6 +754,7 @@ const pair <bool, size_t> anyks::Alm::check(const wstring & text, const bool acc
 						// Разблокируем поток
 						this->locker.unlock();
 					}
+#endif
 				// Если модуль предобработки слов, существует
 				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
@@ -911,7 +920,9 @@ const pair <bool, size_t> anyks::Alm::exist(const wstring & text, const u_short 
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
+				if(this->python != nullptr){
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -925,6 +936,7 @@ const pair <bool, size_t> anyks::Alm::exist(const wstring & text, const u_short 
 						// Разблокируем поток
 						this->locker.unlock();
 					}
+#endif
 				// Если модуль предобработки слов, существует
 				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
@@ -1107,7 +1119,9 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 				// Получаем данные слова
 				word_t tmp = word;
 				// Если модуль питона активирован
-				if((this->python != nullptr) && !this->isOption(options_t::nopython)){
+				if(this->python != nullptr){
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 					// Ищем скрипт обработки слов
 					auto it = this->scripts.find(1);
 					// Если скрипт обработки слов установлен
@@ -1121,6 +1135,7 @@ const wstring anyks::Alm::fixUppers(const wstring & text) const noexcept {
 						// Разблокируем поток
 						this->locker.unlock();
 					}
+#endif
 				// Если модуль предобработки слов, существует
 				} else if(this->wordPress != nullptr) tmp = this->wordPress(tmp.real(), ctx);
 				// Если слово не разрешено
@@ -1298,8 +1313,10 @@ void anyks::Alm::setAllTokenDisable() noexcept {
  * initPython Метод инициализации скриптов питона
  */
 void anyks::Alm::initPython(){
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Если скрипт получен
-	if(!this->isOption(options_t::nopython) && (((this->scripts.count(2) > 0) && !this->utokens.empty()) || (this->scripts.count(1) > 0))){
+	if(((this->scripts.count(2) > 0) && !this->utokens.empty()) || (this->scripts.count(1) > 0)){
 		// Экранируем возможность ошибки памяти
 		try {
 			// Создаём объект для работы с python
@@ -1361,6 +1378,7 @@ void anyks::Alm::initPython(){
 			exit(EXIT_FAILURE);
 		}
 	}
+#endif
 }
 /**
  * setSize Метод установки размера n-граммы
@@ -1412,13 +1430,16 @@ void anyks::Alm::setOptions(const u_int options) noexcept {
  * @param python внешний объект питона
  */
 void anyks::Alm::setPythonObj(python_t * python) noexcept {
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Если объект передан
-	if((python != nullptr) && !this->isOption(options_t::nopython)){
+	if(python != nullptr){
 		// Устанавливаем объект питона
 		this->python = python;
 		// Запрещаем очистку объекта
 		this->notCleanPython = true;
 	}
+#endif
 }
 /**
  * setLogfile Метод установки файла для вывода логов
@@ -3206,6 +3227,9 @@ anyks::Alm::Alm(const alphabet_t * alphabet, const tokenizer_t * tokenizer) noex
 anyks::Alm::~Alm() noexcept {
 	// Очищаем языковую модель
 	this->clear();
+// Если работа идет не изнутри Python
+#ifndef NOPYTHON
 	// Очищаем выделенную память под python
-	if(!notCleanPython && (this->python != nullptr) && !this->isOption(options_t::nopython)) delete this->python;
+	if(!notCleanPython && (this->python != nullptr)) delete this->python;
+#endif
 }
