@@ -26,7 +26,7 @@ const double anyks::LEV::minimum(const double x, const double y, const double z)
  * @param  z третье число
  * @return   самое минимальное значение из 3-х чисел
  */
-const u_short anyks::LEV::minimum(const u_short x, const u_short y, const u_short z) const noexcept {
+const size_t anyks::LEV::minimum(const size_t x, const size_t y, const size_t z) const noexcept {
 	// Определяем минимальное значение
 	return lvmin(lvmin(x, y), z);
 }
@@ -36,9 +36,9 @@ const u_short anyks::LEV::minimum(const u_short x, const u_short y, const u_shor
  * @param  text    исходный текст
  * @return         дистанция
  */
-const u_short anyks::LEV::mulct(const string & pattern, const string & text) const noexcept {
+const size_t anyks::LEV::mulct(const string & pattern, const string & text) const noexcept {
 	// Результат работы функции
-	u_short result = 0;
+	size_t result = 0;
 	// Если шаблон для сравнения и исходный текст переданы
 	if(!pattern.empty() && !text.empty()){
 		// Объявляем конвертер
@@ -58,9 +58,9 @@ const u_short anyks::LEV::mulct(const string & pattern, const string & text) con
  * @param  text    исходный текст
  * @return         дистанция
  */
-const u_short anyks::LEV::mulct(const wstring & pattern, const wstring & text) const noexcept {
+const size_t anyks::LEV::mulct(const wstring & pattern, const wstring & text) const noexcept {
 	// Результат работы функции
-	u_short result = 0;
+	size_t result = 0;
 	// Если шаблон для сравнения и исходный текст переданы
 	if(!pattern.empty() && !text.empty()){
 		// Дефолтный взвешиватель весов
@@ -87,7 +87,7 @@ const u_short anyks::LEV::mulct(const wstring & pattern, const wstring & text) c
 			return ((a == d) && (b == c) ? 0.0 : 1.0);
 		};
 		// Выполняем сравнение
-		result = u_short(this->weighted(pattern, text, &weighter));
+		result = size_t(this->weighted(pattern, text, &weighter));
 	}
 	// Выводим результат
 	return result;
@@ -98,9 +98,9 @@ const u_short anyks::LEV::mulct(const wstring & pattern, const wstring & text) c
  * @param  text    исходный текст
  * @return         дистанция
  */
-const u_short anyks::LEV::damerau(const string & pattern, const string & text) const noexcept {
+const size_t anyks::LEV::damerau(const string & pattern, const string & text) const noexcept {
 	// Результат работы функции
-	u_short result = 0;
+	size_t result = 0;
 	// Если шаблон для сравнения и исходный текст переданы
 	if(!pattern.empty() && !text.empty()){
 		// Объявляем конвертер
@@ -120,9 +120,71 @@ const u_short anyks::LEV::damerau(const string & pattern, const string & text) c
  * @param  text    исходный текст
  * @return         дистанция
  */
-const u_short anyks::LEV::damerau(const wstring & pattern, const wstring & text) const noexcept {
+const size_t anyks::LEV::damerau(const wstring & pattern, const wstring & text) const noexcept {
 	// Результат работы функции
-	u_short result = 0;
+	size_t result = 0;
+	// Если шаблон для сравнения и исходный текст переданы
+	if(!pattern.empty() && !text.empty()){
+		// Дефолтный взвешиватель весов
+		weighter_t weighter;
+		/**
+		 * Функция для определения веса при вставке
+		 * @param a символ вставки
+		 * @return  вес символа
+		 */
+		weighter.ins = [](const wchar_t a) noexcept {return 1.0;};
+		/**
+		 * Функция для определения веса при удалении
+		 * @param a символ удаления
+		 * @return  вес символа
+		 */
+		weighter.del = [](const wchar_t a) noexcept {return 1.0;};
+		/**
+		 * Функция для определения веса при замене
+		 * @param a заменяемый символ
+		 * @param b символ замены
+		 * @return  вес символа
+		 */
+		weighter.rep = [](const wchar_t a, const wchar_t b, const wchar_t c, const wchar_t d) noexcept {
+			return ((a == d) && (b == c) ? 0.0 : 1.0);
+		};
+		// Выполняем сравнение
+		result = size_t(this->weighted(pattern, text, &weighter));
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * distance Определение дистанции в фразах
+ * @param  pattern шаблон с которым идет сравнение
+ * @param  text    исходный текст
+ * @return         дистанция
+ */
+const size_t anyks::LEV::distance(const string & pattern, const string & text) const noexcept {
+	// Результат работы функции
+	size_t result = 0;
+	// Если шаблон для сравнения и исходный текст переданы
+	if(!pattern.empty() && !text.empty()){
+		// Объявляем конвертер
+		wstring_convert <codecvt_utf8 <wchar_t>> conv;
+		// Конвертируем строки
+		const wstring & txt = conv.from_bytes(text);
+		const wstring & ptr = conv.from_bytes(pattern);
+		// Выводим результат
+		result = this->distance(ptr, txt);
+	}
+	// Выводим результат
+	return result;
+}
+/**
+ * distance Определение дистанции в фразах
+ * @param  pattern шаблон с которым идет сравнение
+ * @param  text    исходный текст
+ * @return         дистанция
+ */
+const size_t anyks::LEV::distance(const wstring & pattern, const wstring & text) const noexcept {
+	// Результат работы функции
+	size_t result = 0;
 	// Если шаблон для сравнения и исходный текст переданы
 	if(!pattern.empty() && !text.empty()){
 		// Дефолтный взвешиватель весов
@@ -149,81 +211,7 @@ const u_short anyks::LEV::damerau(const wstring & pattern, const wstring & text)
 			return 1.0;
 		};
 		// Выполняем сравнение
-		result = u_short(this->weighted(pattern, text, &weighter));
-	}
-	// Выводим результат
-	return result;
-}
-/**
- * distance Определение дистанции в фразах
- * @param  pattern шаблон с которым идет сравнение
- * @param  text    исходный текст
- * @return         дистанция
- */
-const u_short anyks::LEV::distance(const string & pattern, const string & text) const noexcept {
-	// Результат работы функции
-	u_short result = 0;
-	// Если шаблон для сравнения и исходный текст переданы
-	if(!pattern.empty() && !text.empty()){
-		// Объявляем конвертер
-		wstring_convert <codecvt_utf8 <wchar_t>> conv;
-		// Конвертируем строки
-		const wstring & txt = conv.from_bytes(text);
-		const wstring & ptr = conv.from_bytes(pattern);
-		// Выводим результат
-		result = this->distance(ptr, txt);
-	}
-	// Выводим результат
-	return result;
-}
-/**
- * distance Определение дистанции в фразах
- * @param  pattern шаблон с которым идет сравнение
- * @param  text    исходный текст
- * @return         дистанция
- */
-const u_short anyks::LEV::distance(const wstring & pattern, const wstring & text) const noexcept {
-	// Результат работы функции
-	u_short result = 0;
-	// Если шаблон для сравнения и исходный текст переданы
-	if(!pattern.empty() && !text.empty()){
-		// Конвертируем строки
-		const wstring txt = text;
-		const wstring ptr = pattern;
-		// Определяем размер исходного текста
-		const u_short txtlen = txt.length();
-		// Определяем размер шаблона
-		const u_short ptrlen = ptr.length();
-		// Если исходный текст не передан, то разница в длину шаблона
-		if(txtlen == 0) return ptrlen;
-		// Если шаблон не передан, то разница в длину исходного текста
-		else if(ptrlen == 0) return txtlen;
-		// Выполняем создание матрицы
-		vector <vector <u_short>> table(ptrlen + 1, vector <u_short> (txtlen + 1));
-		// Заполняем столбцы в нулевой строке таблицы
-		for(u_short i = 0; i <= txtlen; ++i) table[0][i] = i;
-		// Заполняем строки в таблице
-		for(u_short i = 0; i <= ptrlen; ++i) table[i][0] = i;
-		// Переменные для измерения дистанции Левенштейна
-		u_short aboveCell, leftCell, diagonalCell, cost;
-		// Переходим по всем строкам начиная с 1-й строки
-		for(u_short i = 1; i <= ptrlen; ++i){
-			// Переходим по всем столбцам начиная с 1-го столбца
-			for(u_short j = 1; j <= txtlen; ++j){
-				// Если текущие два символа обеих строк одинаковы, то значение стоимости будет равна 0, иначе будет 1
-				cost = ((ptr[i - 1] == txt[j - 1]) ? 0 : 1);
-				// Находим указанную ячейку в текущей ячейке
-				aboveCell = table[i - 1][j];
-				// Находим левую ячейку в текущей ячейке
-				leftCell = table[i][j - 1];
-				// Находим диагональную ячейку в текущей ячейке
-				diagonalCell = table[i - 1][j - 1];
-				// Вычисляем текущее значение (редактируемое расстояние) и результат в текущей ячейки матрицы
-				table[i][j] = this->minimum(u_short(aboveCell + 1), u_short(leftCell + 1), u_short(diagonalCell + cost));
-			}
-		}
-		// Определяем результат (что и есть расстояние Левенштейна)
-		result = table[ptrlen][txtlen];
+		result = size_t(this->weighted(pattern, text, &weighter));
 	}
 	// Выводим результат
 	return result;
@@ -235,7 +223,7 @@ const u_short anyks::LEV::distance(const wstring & pattern, const wstring & text
  * @param  stl    размер подстроки при сравнении двух слов (от 1 до минимального размера слова)
  * @return        коэффициент Танимото
  */
-const double anyks::LEV::tanimoto(const string & first, const string & second, const u_short stl) const noexcept {
+const double anyks::LEV::tanimoto(const string & first, const string & second, const size_t stl) const noexcept {
 	// Результат работы функции
 	double result = 0.0;
 	// Если первое и второе слово переданы
@@ -258,7 +246,7 @@ const double anyks::LEV::tanimoto(const string & first, const string & second, c
  * @param  stl    размер подстроки при сравнении двух слов (от 1 до минимального размера слова)
  * @return        коэффициент Танимото
  */
-const double anyks::LEV::tanimoto(const wstring & first, const wstring & second, const u_short stl) const noexcept {
+const double anyks::LEV::tanimoto(const wstring & first, const wstring & second, const size_t stl) const noexcept {
 	// Результат работы функции
 	double result = 0.0;
 	// Если первое и второе слово переданы
