@@ -51,7 +51,7 @@
     - [Sentences generation](https://github.com/anyks/alm/#sentences-generation)
     - [Mixing language models](https://github.com/anyks/alm/#mixing-language-models)
 - [License](https://github.com/anyks/alm/#license)
-- [Contact](https://github.com/anyks/alm/#contact)
+- [Contact](https://github.com/anyks/alm/#contact-info)
 
 ## Project goals and features
 
@@ -901,7 +901,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 * * *
 
-## Contact
+## Contact Info
 
 If you have questions regarding the library, I would like to invite you to [open an issue at GitHub](https://github.com/anyks/alm/issues/new/choose). Please describe your request, problem, or question as detailed as possible, and also mention the version of the library you are using as well as the version of your compiler and operating system. Opening an issue at GitHub allows other users and contributors to this library to collaborate.
 
