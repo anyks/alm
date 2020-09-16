@@ -128,21 +128,25 @@ void anyks::Tokenizer::restore(const wstring & first, const wstring & second, ws
 					!this->alphabet->isMath(text.back()) ||
 					(text.back() == L'='))) text.append(1, L' ');
 					// Устанавливаем регистр у первой буквы в тексте
-					if(this->isOption(options_t::uppers) && this->alphabet->isSpace(text.back())){
+					if(this->isOption(options_t::uppers) && (text.empty() || this->alphabet->isSpace(text.back()))){
 						// Сбрасываем флаг регистра
 						bool uppers = false;
-						// Получаем длину собранного текста
-						const size_t length = text.length();
-						// Если последний символ является точка
-						if(text.at(length - 2) == L'.'){
-							// Если размер текста больше 4-х символов
-							if(length >= 4){
-								// Если последние символы не многоточие, разрешаем увеличение регистра
-								if(text.substr(length - 4, 3).compare(L"...") != 0) uppers = true;
-							// Если это короткое слово, разрешаем увеличение регистра
-							} else uppers = true;
-						// Если последний символ является знаком вопроса или восклицания, разрешаем увеличение регистра
-						} else if((text.at(length - 2) == L'!') || (text.at(length - 2) == L'?') || (text.at(length - 2) == L'¡') || (text.at(length - 2) == L'¿')) uppers = true;
+						// Если текст не пустой
+						if(!text.empty()){
+							// Получаем длину собранного текста
+							const size_t length = text.length();
+							// Если последний символ является точка
+							if(text.at(length - 2) == L'.'){
+								// Если размер текста больше 4-х символов
+								if(length >= 4){
+									// Если последние символы не многоточие, разрешаем увеличение регистра
+									if(text.substr(length - 4, 3).compare(L"...") != 0) uppers = true;
+								// Если это короткое слово, разрешаем увеличение регистра
+								} else uppers = true;
+							// Если последний символ является знаком вопроса или восклицания, разрешаем увеличение регистра
+							} else if((text.at(length - 2) == L'!') || (text.at(length - 2) == L'?') || (text.at(length - 2) == L'¡') || (text.at(length - 2) == L'¿')) uppers = true;
+						// Разрешаем увеличение регистра
+						} else uppers = true;
 						// Если флаг увеличения регистра установлен
 						if(uppers) const_cast <wstring *> (&first)->front() = this->alphabet->toUpper(first.front());
 					}
