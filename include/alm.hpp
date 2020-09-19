@@ -406,6 +406,11 @@ namespace anyks {
 			 */
 			virtual void setBin(const vector <char> & buffer) const noexcept;
 			/**
+			 * setBin2 Метод установки бинарных данных в словарь
+			 * @param buffer буфер с бинарными данными
+			 */
+			virtual void setBin2(const vector <char> & buffer) const noexcept;
+			/**
 			 * getBin Метод извлечения данных arpa в бинарном виде
 			 * @param callback функция обратного вызова
 			 */

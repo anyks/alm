@@ -1181,6 +1181,14 @@ void anyks::Alm::setBin(const vector <char> & buffer) const noexcept {
 	(void) buffer;
 }
 /**
+ * setBin2 Метод установки бинарных данных в словарь
+ * @param buffer буфер с бинарными данными
+ */
+void anyks::Alm::setBin2(const vector <char> & buffer) const noexcept {
+	// Блокируем варнинг
+	(void) buffer;
+}
+/**
  * getBin Метод извлечения данных arpa в бинарном виде
  * @param callback функция обратного вызова
  */
