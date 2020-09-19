@@ -1,5 +1,7 @@
 # [Change Log](https://github.com/anyks/alm/archive/release.tar.gz)
 
+## [3.4.6](https://github.com/anyks/alm/archive/v3.4.6.tar.gz) Bug fixes
+
 ## [3.4.5](https://github.com/anyks/alm/archive/v3.4.5.tar.gz) Bug fixes
 
 ## [3.4.4](https://github.com/anyks/alm/archive/v3.4.4.tar.gz) Bug fixes and new version pip

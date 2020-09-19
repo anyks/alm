@@ -742,6 +742,8 @@ const pair <bool, size_t> anyks::Alm2::check(const vector <size_t> & seq, const 
 void anyks::Alm2::setBin(const vector <char> & buffer) const noexcept {
 	// Если буфер передан
 	if(!buffer.empty()){
+		// Полученная последовательность
+		seq_t sequence;
 		// Количество слов в последовательности
 		u_short count = 0;
 		// Смещение в буфере
@@ -750,27 +752,28 @@ void anyks::Alm2::setBin(const vector <char> & buffer) const noexcept {
 		vector <seq_t> seq;
 		// Получаем данные буфера
 		const char * data = buffer.data();
-		// Извлекаем количество слов в последовательности
-		memcpy(&count, data + offset, sizeof(count));
-		// Увеличиваем смещение
-		offset += sizeof(count);
-		// Если последовательность получена
-		if(count > 0){
-			// Полученная последовательность
-			seq_t sequence;
-			// Выделяем память для последовательности
-			seq.resize(count);
-			// Переходим по всем словам последовательности
-			for(u_short i = 0; i < count; i++){
-				// Извлекаем данные слова
-				memcpy(&sequence, data + offset, sizeof(sequence));
-				// Добавляем последовательность в список
-				seq[i] = sequence;
-				// Увеличиваем смещение
-				offset += sizeof(sequence);
+		// Выполняем перебор данных всего буфера
+		while(offset < buffer.size()){
+			// Извлекаем количество слов в последовательности
+			memcpy(&count, data + offset, sizeof(count));
+			// Увеличиваем смещение
+			offset += sizeof(count);
+			// Если последовательность получена
+			if(count > 0){
+				// Очищаем последовательность
+				seq.clear();
+				// Переходим по всем словам последовательности
+				for(u_short i = 0; i < count; i++){
+					// Извлекаем данные слова
+					memcpy(&sequence, data + offset, sizeof(sequence));
+					// Добавляем последовательность в список
+					seq.push_back(sequence);
+					// Увеличиваем смещение
+					offset += sizeof(sequence);
+				}
+				// Если нужно установить исходные данные
+				if(!seq.empty()) this->set(seq);
 			}
-			// Если нужно установить исходные данные
-			this->set(seq);
 		}
 	}
 }
