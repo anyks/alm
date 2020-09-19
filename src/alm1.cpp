@@ -808,6 +808,14 @@ void anyks::Alm1::setBin(const vector <char> & buffer) const noexcept {
 	}
 }
 /**
+ * setBin2 Метод установки бинарных данных в словарь
+ * @param buffer буфер с бинарными данными
+ */
+void anyks::Alm1::setBin2(const vector <char> & buffer) const noexcept {
+	// Блокируем варнинг
+	(void) buffer;
+}
+/**
  * getBin Метод извлечения данных arpa в бинарном виде
  * @param callback функция обратного вызова
  */
