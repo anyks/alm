@@ -10,15 +10,15 @@
     - [Build on Linux and FreeBSD](https://github.com/anyks/alm/#build-on-linux-and-freebsd)
     - [Build on MacOS X](https://github.com/anyks/alm/#build-on-macos-x)
 - [Files formats](https://github.com/anyks/alm/#file-formats)
-    - [Arpa](https://github.com/anyks/alm/#arpa)
+    - [ARPA](https://github.com/anyks/alm/#arpa)
     - [Ngrams](https://github.com/anyks/alm/#ngrams)
     - [Vocab](https://github.com/anyks/alm/#vocab)
     - [Map](https://github.com/anyks/alm/#map)
-    - [File of adding n-gram into existing arpa file](https://github.com/anyks/alm/#file-of-adding-n-gram-into-existing-arpa-file)
-    - [File of changing n-gram frequency in existing arpa file](https://github.com/anyks/alm/#file-of-changing-n-gram-frequency-in-existing-arpa-file)
-    - [File of replacing n-gram in existing arpa file](https://github.com/anyks/alm/#file-of-replacing-n-gram-in-existing-arpa-file)
+    - [File of adding n-gram into existing ARPA file](https://github.com/anyks/alm/#file-of-adding-n-gram-into-existing-arpa-file)
+    - [File of changing n-gram frequency in existing ARPA file](https://github.com/anyks/alm/#file-of-changing-n-gram-frequency-in-existing-arpa-file)
+    - [File of replacing n-gram in existing ARPA file](https://github.com/anyks/alm/#file-of-replacing-n-gram-in-existing-arpa-file)
     - [File of similar letters in different dictionaries](https://github.com/anyks/alm/#file-of-similar-letters-in-different-dictionaries)
-    - [File of removing n-gram from existing arpa file](https://github.com/anyks/alm/#file-of-removing-n-gram-from-existing-arpa-file)
+    - [File of removing n-gram from existing ARPA file](https://github.com/anyks/alm/#file-of-removing-n-gram-from-existing-arpa-file)
     - [File of abbreviations list words](https://github.com/anyks/alm/#file-of-abbreviations-list-words)
     - [File of domain zones list](https://github.com/anyks/alm/#file-of-domain-zones-list)
     - [Binary container metadata](https://github.com/anyks/alm/#binary-container-metadata)
@@ -27,14 +27,14 @@
 - [Environment variables](https://github.com/anyks/alm/#environment-variables)
 - [Examples](https://github.com/anyks/alm/#examples)
     - [Language Model training example](https://github.com/anyks/alm/#language-model-training-example)
-    - [Arpa patch example](https://github.com/anyks/alm/#arpa-patch-example)
+    - [ARPA patch example](https://github.com/anyks/alm/#arpa-patch-example)
     - [Example of removing n-grams with a frequency lower than backoff](https://github.com/anyks/alm/#example-of-removing-n-grams-with-a-frequency-lower-than-backoff)
     - [Example of merge raw data](https://github.com/anyks/alm/#example-of-merge-raw-data)
-    - [Arpa pruning example](https://github.com/anyks/alm/#arpa-pruning-example)
+    - [ARPA pruning example](https://github.com/anyks/alm/#arpa-pruning-example)
     - [Vocab pruning example](https://github.com/anyks/alm/#vocab-pruning-example)
     - [An example of detecting and correcting words consisting of mixed dictionaries](https://github.com/anyks/alm/#an-example-of-detecting-and-correcting-words-consisting-of-mixed-dictionaries)
     - [Binary container information](https://github.com/anyks/alm/#binary-container-information)
-    - [Arpa modification example](https://github.com/anyks/alm/#arpa-modification-example)
+    - [ARPA modification example](https://github.com/anyks/alm/#arpa-modification-example)
     - [Training with preprocessing of received words](https://github.com/anyks/alm/#training-with-preprocessing-of-received-words)
     - [Training using your own features](https://github.com/anyks/alm/#training-using-your-own-features)
     - [Example of disabling token identification](https://github.com/anyks/alm/#example-of-disabling-token-identification)
@@ -58,18 +58,18 @@
 The are many toolkits capable of creating language models: ([KenLM](https://github.com/kpu/kenlm), [SriLM](https://github.com/BitMindLab/SRILM), [IRSTLM](https://github.com/irstlm-team/irstlm)), and each of those toolkits may have a reason to exist. But our language model creation toolkit has the following goals and features:
 
 - **UTF-8 support**: Full UTF-8 support without third-party dependencies.
-- **Support of many data formats**: Arpa, Vocab, Map Sequence, N-grams, Binary alm dictionary.
+- **Support of many data formats**: ARPA, Vocab, Map Sequence, N-grams, Binary alm dictionary.
 - **Smoothing algorithms**: Kneser-Nay, Modified Kneser-Nay, Witten-Bell, Additive, Good-Turing, Absolute discounting.
 - **Normalisation and preprocessing for corpora**: Transferring corpus to lowercase, smart tokenization, ability to create black - and white - lists for n-grams.
-- **Arpa modification**: Frequencies and n-grams replacing, adding new n-grams with frequencies, removing n-grams.
+- **ARPA modification**: Frequencies and n-grams replacing, adding new n-grams with frequencies, removing n-grams.
 - **Pruning**: N-gram removal based on specified criteria.
 - **Removal of low-probability n-grams**: Removal of n-grams which backoff probability is higher than standard probability.
-- **Arpa recovery**: Recovery of damaged n-grams in arpa with subsequent recalculation of their backoff probabilities.
+- **ARPA recovery**: Recovery of damaged n-grams in ARPA with subsequent recalculation of their backoff probabilities.
 - **Support of additional word features**: Feature extraction: (numbers, roman numbers, ranges of numbers, numeric abbreviations, any other custom attributes) using scripts written in Python3.
 - **Text preprocessing**: Unlike all other language model toolkits, ALM can extract correct context from files with unnormalized texts.
 - **Unknown word token accounting**: Accounting of 〈unk〉 token as full n-gram.
 - **Redefinition of 〈unk〉 token**: Ability to redefine an attribute of an unknown token.
-- **N-grams preprocessing**: Ability to pre-process n-grams before adding them to arpa using custom Python3 scripts.
+- **N-grams preprocessing**: Ability to pre-process n-grams before adding them to ARPA using custom Python3 scripts.
 - **Binary container for Language Models**: The binary container supports compression, encryption and installation of copyrights.
 - **Convenient visualization of the Language model assembly process**: ALM implements several types of visualizations: textual, graphic, process indicator, and logging to files or console.
 - **Collection of all n-grams**: Unlike other language model toolkits, ALM is guaranteed to extract all possible n-grams from the corpus, regardless of their length (except for Modified Kneser-Nay); you can also force all n-grams to be taken into account even if they occured only once.
@@ -121,7 +121,7 @@ $ make
 
 ## File formats
 
-### Arpa
+### ARPA
 ```
 \data\
 ngram 1=52
@@ -351,11 +351,11 @@ unq=9390
 ...
 ```
 
-> This file is for technical use only. In combination with the **[vocab](https://github.com/anyks/alm#vocab)** file, you can combine several language models, modify, store, distribute and extract any formats ([arpa](https://github.com/anyks/alm#arpa), [ngrams](https://github.com/anyks/alm#ngrams), [vocab](https://github.com/anyks/alm#vocab), [alm](https://github.com/anyks/alm#binary-container-metadata)).
+> This file is for technical use only. In combination with the **[vocab](https://github.com/anyks/alm#vocab)** file, you can combine several language models, modify, store, distribute and extract any formats ([ARPA](https://github.com/anyks/alm#arpa), [ngrams](https://github.com/anyks/alm#ngrams), [vocab](https://github.com/anyks/alm#vocab), [alm](https://github.com/anyks/alm#binary-container-metadata)).
 
 ---
 
-### File of adding n-gram into existing arpa file
+### File of adding n-gram into existing ARPA file
 ```
 -3.002006	США
 -1.365296	границ США
@@ -373,7 +373,7 @@ unq=9390
 
 ---
 
-### File of changing n-gram frequency in existing arpa file
+### File of changing n-gram frequency in existing ARPA file
 ```
 -0.6588787	получайте удовольствие </s>
 -0.6588787	только в одном
@@ -395,7 +395,7 @@ unq=9390
 
 ---
 
-### File of replacing n-gram in existing arpa file
+### File of replacing n-gram in existing ARPA file
 ```
 коем случае нельзя	там да тут
 но тем не	да ты что
@@ -411,29 +411,7 @@ unq=9390
 
 ---
 
-### File of similar letters in different dictionaries
-```
-p  р
-c  с
-o  о
-t  т
-k  к
-e  е
-a  а
-h  н
-x  х
-b  в
-m  м
-...
-```
-
-| Letter for search | Separator | Letter for replace |
-|-------------------|-----------|--------------------|
-| t                 | \t        | т                  |
-
----
-
-### File of removing n-gram from existing arpa file
+### File of removing n-gram from existing ARPA file
 ```
 ну то есть
 ну очень большой
@@ -458,6 +436,28 @@ m  м
 все
 ...
 ```
+
+---
+
+### File of similar letters in different dictionaries
+```
+p  р
+c  с
+o  о
+t  т
+k  к
+e  е
+a  а
+h  н
+x  х
+b  в
+m  м
+...
+```
+
+| Letter for search | Separator | Letter for replace |
+|-------------------|-----------|--------------------|
+| t                 | \t        | т                  |
 
 ---
 
@@ -610,7 +610,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -r-bin ./lm.alm -bin-aes 128 -bin-password 911 -method train -debug 1 -size 3 -smoothing wittenbell -w-arpa ./lm.arpa
 ```
 
-### Arpa patch example
+### ARPA patch example
 
 ```bash
 ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method repair -debug 1 -w-arpa ./lm2.arpa -allow-unk -interpolate -r-arpa ./lm1.arpa
@@ -626,7 +626,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method merge -debug 1 -r-map ./path -r-vocab ./path -w-map ./lm.map -w-vocab ./lm.vocab
 ```
 
-### Arpa pruning example
+### ARPA pruning example
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method aprune -debug 1 -w-arpa ./lm2.arpa -allow-unk -r-map ./lm.map -r-vocab ./lm.vocab -aprune-threshold 0.003 -aprune-max-gram 2
 ```
@@ -664,24 +664,24 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -r-bin ./lm.alm -bin-aes 128 -bin-password 911 -method info
 ```
 
-### Arpa modification example
+### ARPA modification example
 
-**Adding n-gram to arpa**
+**Adding n-gram to ARPA**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method modify -modify emplace -modify-file ./app.txt -debug 1 -w-arpa ./lm.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab
 ```
 
-**Changing n-gram frequencies in arpa**
+**Changing n-gram frequencies in ARPA**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method modify -modify change -modify-file ./chg.txt -debug 1 -w-arpa ./lm.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab
 ```
 
-**Removing n-gram from arpa**
+**Removing n-gram from ARPA**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method modify -modify remove -modify-file ./rm.txt -debug 1 -w-arpa ./lm.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab
 ```
 
-**Changing n-gram in arpa**
+**Changing n-gram in ARPA**
 ```bash
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method modify -modify replace -modify-file ./rep.txt -debug 1 -w-arpa ./lm.arpa -allow-unk -interpolate -r-map ./lm.map -r-vocab ./lm.vocab
 ```
@@ -692,7 +692,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -word-script ./wordTest.py
 ```
 
-> Sometimes it is necessary to change a word before it is added to arpa - this can be done using the script [**wordTest.py**](https://github.com/anyks/alm#the-python-script-format-to-preprocess-the-received-words) the word and its context will be passed into script.
+> Sometimes it is necessary to change a word before it is added to ARPA - this can be done using the script [**wordTest.py**](https://github.com/anyks/alm#the-python-script-format-to-preprocess-the-received-words) the word and its context will be passed into script.
 
 ### Training using your own features
 
@@ -700,7 +700,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -utokens "usa|russia" -utoken-script ./utokenTest.py
 ```
 
-> The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](https://github.com/anyks/alm#the-python-script-format-to-define-the-word-features) marks as feature, will be added to arpa with feature name.
+> The example adds its own features **usa** and **russia**, when processing text all words, that script [**utokenTest.py**](https://github.com/anyks/alm#the-python-script-format-to-define-the-word-features) marks as feature, will be added to ARPA with feature name.
 
 ### Example of disabling token identification
 
@@ -716,7 +716,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -reset-unk -interpolate -tokens-all-disable -corpus ./text.txt
 ```
 
-> In the example, the identification of all tokens is disabled, disabled tokens will be added to arpa as separate words.
+> In the example, the identification of all tokens is disabled, disabled tokens will be added to ARPA as separate words.
 
 ### An example of identifying tokens as 〈unk〉
 
@@ -740,7 +740,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -goodwords ./goodwords.txt
 ```
 
-> If you specify a whitelist during training, all words specified in the white list will be forcibly added to arpa.
+> If you specify a whitelist during training, all words specified in the white list will be forcibly added to ARPA.
 
 ### Training using blacklist
 
@@ -756,7 +756,7 @@ $ ./alm -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмноп�
 ./bin/alm.exe -alphabet "abcdefghijklmnopqrstuvwxyzабвгдеёжзийклмнопрстуфхцчшщъыьэюя" -size 3 -smoothing wittenbell -method train -debug 1 -w-arpa ./lm.arpa -w-map ./lm.map -w-vocab ./lm.vocab -w-ngram ./lm.ngrams -allow-unk -interpolate -corpus ./corpus -ext txt -unknown-word goga
 ```
 
-> In this example the token **〈unk〉** in arpa will be replaced by the word specified in the parameter [-unknown-word | --unknown-word=〈value〉], in our case it's word **goga**.
+> In this example the token **〈unk〉** in ARPA will be replaced by the word specified in the parameter [-unknown-word | --unknown-word=〈value〉], in our case it's word **goga**.
 
 ### Text tokenization
 

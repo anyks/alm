@@ -385,11 +385,11 @@ namespace anyks {
 			 */
 			void setTokensDisable(const set <token_t> & tokens) noexcept;
 			/**
-			 * getStatistic Метод установки общей статистики
+			 * setStatistic Метод установки общей статистики
 			 * @param ad общее количество документов при обучении
 			 * @param cw общее количество слов при обучении
 			 */
-			void getStatistic(const size_t ad, const size_t cw) noexcept;
+			void setStatistic(const size_t ad, const size_t cw) noexcept;
 			/**
 			 * setBadwords Метод установки списка идентификаторов плохих слов в список
 			 * @param badwords список идентификаторов плохих слов

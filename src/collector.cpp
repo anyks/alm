@@ -305,7 +305,7 @@ void anyks::Collector::train(const string & filename, const size_t idd) noexcept
 			// Получаем данные статистики основного словаря
 			const auto & stat2 = this->toolkit->getStatistic();
 			// Увеличиваем статистику основного словаря
-			this->toolkit->getStatistic(stat1.first + stat2.first, stat1.second + stat2.second);
+			this->toolkit->setStatistic(stat1.first + stat2.first, stat1.second + stat2.second);
 			// Считываем все слова словаря
 			toolkit.words([this](const word_t & word, const size_t idw, const size_t size){
 				// Добавляем слово в словарь
@@ -438,7 +438,7 @@ void anyks::Collector::train(const vector <string> & texts, const size_t idd) no
 			// Получаем данные статистики основного словаря
 			const auto & stat2 = this->toolkit->getStatistic();
 			// Увеличиваем статистику основного словаря
-			this->toolkit->getStatistic(stat1.first + stat2.first, stat1.second + stat2.second);
+			this->toolkit->setStatistic(stat1.first + stat2.first, stat1.second + stat2.second);
 			// Считываем все слова словаря
 			toolkit.words([this](const word_t & word, const size_t idw, const size_t size){
 				// Добавляем слово в словарь

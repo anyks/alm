@@ -802,11 +802,11 @@ void anyks::Toolkit::setTokensDisable(const set <token_t> & tokens) noexcept {
 	if(!tokens.empty()) this->tokenDisable = move(tokens);
 }
 /**
- * getStatistic Метод установки общей статистики
+ * setStatistic Метод установки общей статистики
  * @param ad общее количество документов при обучении
  * @param cw общее количество слов при обучении
  */
-void anyks::Toolkit::getStatistic(const size_t ad, const size_t cw) noexcept {
+void anyks::Toolkit::setStatistic(const size_t ad, const size_t cw) noexcept {
 	// Устанавливаем общее количество документов
 	if(ad > 0) this->info.ad = ad;
 	// Устанавливаем общее количество слов
@@ -861,7 +861,7 @@ void anyks::Toolkit::setGoodwords(const vector <string> & goodwords) noexcept {
  */
 void anyks::Toolkit::addText(const string & text, const size_t idd) noexcept {
 	// Если текст передан
-	if(!text.empty()){
+	if(!text.empty() && (this->arpa != nullptr)){
 		// Идентификатор неизвестного слова
 		const size_t uid = (size_t) token_t::unk;
 		// Идентификатор начала предложения
