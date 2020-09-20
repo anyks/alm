@@ -1157,6 +1157,9 @@ void anyks::Tokenizer::run(const string & text, function <const bool (const wstr
 void anyks::Tokenizer::run(const wstring & text, function <const bool (const wstring &, const vector <string> &, const bool, const bool)> callback) const noexcept {
 	// Если текст передан, и текст не больше 100Mb в одну строку
 	if(!text.empty() && (text.size() <= MAX_STRING_BYTES) && (this->alphabet != nullptr)){
+		// Если последний символ равен переносу строки или возврату каретки, удаляем его
+		if(text.back() == L'\n') const_cast <wstring *> (&text)->pop_back();
+		if(text.back() == L'\r') const_cast <wstring *> (&text)->pop_back();
 		// Если внешняя функция существует, выполняем её
 		if(this->extFn != nullptr) this->extFn(text, callback);
 		// Иначе выполняем обработк собственными методами
