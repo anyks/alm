@@ -1021,7 +1021,7 @@ const bool anyks::Alphabet::isDecimal(const wstring & word) const noexcept {
 				// Если плавающая точка найдена
 				if((letter == L'.') || (letter == L',')){
 					// Проверяем правые и левую части
-					result = (this->isNumber(word.substr(pos, i - 1)) && this->isNumber(word.substr(i + 1)));
+					result = (this->isNumber(word.substr(pos, i)) && this->isNumber(word.substr(i + 1)));
 					// Выходим из цикла
 					break;
 				}
