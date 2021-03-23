@@ -841,8 +841,6 @@ namespace anyks {
 							zs.avail_in = avail;
 							// Копируем в буфер данные для шифрования
 							memcpy(inbuff, buffer + offset, zs.avail_in);
-							// Определяем закончено ли шифрование
-							flush = (count > 0 ? Z_NO_FLUSH : Z_FINISH);
 							// Устанавливаем буфер с данными для шифрования
 							zs.next_in = inbuff;
 							do {
@@ -851,7 +849,14 @@ namespace anyks {
 								// Устанавливаем количество доступных данных для записи
 								zs.avail_out = CHUNKSIZE;
 								// Выполняем шифрование данных
-								deflate(&zs, flush);
+								flush = deflate(&zs, Z_NO_FLUSH);
+								// Если данные не могут быть сжаты
+								if((flush != Z_OK) && (flush != Z_STREAM_END)){
+									// Выполняем сброс фрейма
+									if(deflateReset(&zs) != Z_OK) fprintf(stderr, "deflateReset failed: %d\n", flush);
+									// Пропускаем блок
+									continue;
+								}
 								// Получаем количество оставшихся байт
 								nbytes = (CHUNKSIZE - zs.avail_out);
 								// Добавляем оставшиеся данные в список
@@ -861,7 +866,7 @@ namespace anyks {
 							// Увеличиваем смещение в буфере
 							offset += avail;
 						// Если шифрование не зашифрованы
-						} while(flush != Z_FINISH);
+						} while(flush != Z_STREAM_END);
 						// Закрываем поток
 						deflateEnd(&zs);
 					}
@@ -921,15 +926,11 @@ namespace anyks {
 								// Выполняем дешифровку данных
 								flush = inflate(&zs, Z_NO_FLUSH);
 								// Если произошла ошибка дешифровки
-								if((flush == Z_NEED_DICT) || (flush == Z_DATA_ERROR) || (flush == Z_MEM_ERROR)){
-									// Выполняем запись ошибки в файловый поток
-									fprintf(stderr, "gzip decompress is failed: %d\n", flush);
-									// Завершаем дешифровку данных
-									inflateEnd(&zs);
-									// Очищаем блок данных
-									result.clear();
-									// Выходим из функции дешифровки
-									return result;
+								if((flush != Z_OK) && (flush != Z_STREAM_END)){
+									// Выполняем сброс фрейма
+									if(inflateReset(&zs) != Z_OK) fprintf(stderr, "inflateReset failed: %d\n", flush);
+									// Пропускаем блок
+									continue;
 								}
 								// Получаем количество оставшихся байт
 								nbytes = (CHUNKSIZE - zs.avail_out);
