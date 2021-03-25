@@ -115,7 +115,7 @@ $ make
 $ mkdir ./build
 $ cd ./build
 
-$ cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1g -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl@1.1/1.1.1g/include/lib ..
+$ cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1i -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl@1.1/1.1.1i/include/lib ..
 $ make
 ```
 

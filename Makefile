@@ -28,7 +28,7 @@ ifeq ($(OS), Darwin)
 		-ljemalloc \
 		-l$(PYTHON) \
 		-L$(PYPATH)/lib \
-		-L/usr/local/Cellar/openssl@1.1/1.1.1g/lib
+		-L/usr/local/Cellar/openssl@1.1/1.1.1i/lib
 
 	# Расширение библиотеки
 	EXT = dylib
@@ -47,7 +47,7 @@ ifeq ($(OS), Darwin)
 		-I/usr/local/include \
 		-I./gtest/include \
 		-I$(PYPATH)/include/$(PYTHON) \
-		-I/usr/local/Cellar/openssl@1.1/1.1.1g/include
+		-I/usr/local/Cellar/openssl@1.1/1.1.1i/include
 
 	# brew install google-perftools
 
