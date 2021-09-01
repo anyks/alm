@@ -112,9 +112,9 @@ void anyks::Idw::set(const alphabet_t * alphabet, const u_short offset) noexcept
 			if(!letters.empty()) this->letters.append(letters);
 		}
 		// Получаем длину алфавита
-		const size_t length = this->letters.length();
+		const int length = this->letters.length();
 		// Формируем диапазон значений
-		for(size_t i = 0; i < MAX_WORD_LENGTH; i++){
+		for(uint64_t i = 0; i < MAX_WORD_LENGTH; i++){
 			// Формируем список модулей
 			this->xs.push_back(modexp(length, i, this->mod).toUnsignedLong());
 		}

@@ -5,19 +5,19 @@
 // The templates used by these constructors and converters are at the bottom of
 // BigUnsigned.hh.
 
-BigUnsigned::BigUnsigned(unsigned long  x) { initFromPrimitive      (x); }
+BigUnsigned::BigUnsigned(uint64_t       x) { initFromPrimitive      (x); }
 BigUnsigned::BigUnsigned(unsigned int   x) { initFromPrimitive      (x); }
 BigUnsigned::BigUnsigned(unsigned short x) { initFromPrimitive      (x); }
 BigUnsigned::BigUnsigned(         long  x) { initFromSignedPrimitive(x); }
 BigUnsigned::BigUnsigned(         int   x) { initFromSignedPrimitive(x); }
 BigUnsigned::BigUnsigned(         short x) { initFromSignedPrimitive(x); }
 
-unsigned long  BigUnsigned::toUnsignedLong () const { return convertToPrimitive      <unsigned long >(); }
-unsigned int   BigUnsigned::toUnsignedInt  () const { return convertToPrimitive      <unsigned int  >(); }
-unsigned short BigUnsigned::toUnsignedShort() const { return convertToPrimitive      <unsigned short>(); }
-long           BigUnsigned::toLong         () const { return convertToSignedPrimitive<         long >(); }
-int            BigUnsigned::toInt          () const { return convertToSignedPrimitive<         int  >(); }
-short          BigUnsigned::toShort        () const { return convertToSignedPrimitive<         short>(); }
+uint64_t       BigUnsigned::toUnsignedLong () const { return convertToPrimitive       <uint64_t>(); }
+unsigned int   BigUnsigned::toUnsignedInt  () const { return convertToPrimitive   <unsigned int>(); }
+unsigned short BigUnsigned::toUnsignedShort() const { return convertToPrimitive <unsigned short>(); }
+long           BigUnsigned::toLong         () const { return convertToSignedPrimitive     <long>(); }
+int            BigUnsigned::toInt          () const { return convertToSignedPrimitive      <int>(); }
+short          BigUnsigned::toShort        () const { return convertToSignedPrimitive    <short>(); }
 
 // BIT/BLOCK ACCESSORS
 
@@ -100,11 +100,11 @@ BigUnsigned::CmpRes BigUnsigned::compareTo(const BigUnsigned &x) const {
  * variable and then copy it into the requested output variable *this.
  * Each put-here operation uses the DTRT_ALIASED macro (Do The Right Thing on
  * aliased calls) to generate code for this check.
- * 
+ *
  * I adopted this approach on 2007.02.13 (see Assignment Operators in
  * BigUnsigned.hh).  Before then, put-here operations rejected aliased calls
  * with an exception.  I think doing the right thing is better.
- * 
+ *
  * Some of the put-here operations can probably handle aliased calls safely
  * without the extra copy because (for example) they process blocks strictly
  * right-to-left.  At some point I might determine which ones don't need the
@@ -375,14 +375,14 @@ void BigUnsigned::multiply(const BigUnsigned &a, const BigUnsigned &b) {
  * The seemingly bizarre pattern of inputs and outputs was chosen so that the
  * function copies as little as possible (since it is implemented by repeated
  * subtraction of multiples of b from *this).
- * 
+ *
  * "modWithQuotient" might be a better name for this function, but I would
  * rather not change the name now.
  */
 void BigUnsigned::divideWithRemainder(const BigUnsigned &b, BigUnsigned &q) {
 	/* Defending against aliased calls is more complex than usual because we
 	 * are writing to both *this and q.
-	 * 
+	 *
 	 * It would be silly to try to write quotient and remainder to the
 	 * same variable.  Rule that out right away. */
 	if (this == &q)
@@ -430,7 +430,7 @@ void BigUnsigned::divideWithRemainder(const BigUnsigned &b, BigUnsigned &q) {
 	 *        Turn on bit i2 of block i of the quotient q.
 	 *        Copy subtractBuf back into *this.
 	 *    Otherwise bit i2 of block i remains off, and *this is unchanged.
-	 * 
+	 *
 	 * Eventually q will contain the entire quotient, and *this will
 	 * be left with the remainder.
 	 *
@@ -499,7 +499,7 @@ void BigUnsigned::divideWithRemainder(const BigUnsigned &b, BigUnsigned &q) {
 					temp--;
 				}
 				// Since 2005.01.11, indices of `subtractBuf' directly match those of `blk', so use `k'.
-				subtractBuf[k] = temp; 
+				subtractBuf[k] = temp;
 				borrowIn = borrowOut;
 			}
 			// No more extra iteration to deal with `bHigh'.
@@ -524,7 +524,7 @@ void BigUnsigned::divideWithRemainder(const BigUnsigned &b, BigUnsigned &q) {
 					k--;
 					blk[k] = subtractBuf[k];
 				}
-			} 
+			}
 		}
 	}
 	// Zap possible leading zero in quotient

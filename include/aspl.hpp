@@ -102,10 +102,10 @@ namespace anyks {
 		private:
 			// Устанавливаем количество раундов
 			int roundsAES = 5;
-			// Модуль вектора
-			size_t modulus = 0;
 			// Адрес начала данных
 			size_t address = 0;
+			// Модуль вектора
+			uint64_t modulus = 0;
 			// Позиция raw данных в файле
 			uintmax_t rawpos = 0;
 		private:
@@ -471,9 +471,11 @@ namespace anyks {
 				// Выполняем расчёт модуля слова
 				this->modulus = (pow(2, MAXWORD + 1) - 1);
 				// Получаем длину алфавита
-				const size_t length = this->alphabet.length();
+				const int length = this->alphabet.length();
 				// Формируем диапазон значений
-				for(size_t i = 0; i < MAXWORD; i++) this->xs.push_back(modexp(length, i, this->modulus).toUnsignedLong());
+				for(uint64_t i = 0; i < MAXWORD; i++)
+					// Формируем список модулей
+					this->xs.push_back(modexp(length, i, this->modulus).toUnsignedLong());
 			}
 			/**
 			 * close Метод закрытия файла базы на чтение или запись

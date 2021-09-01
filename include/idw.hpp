@@ -38,7 +38,7 @@ namespace anyks {
 	typedef class Idw {
 		private:
 			// Модули векторов
-			size_t mod;
+			uint64_t mod;
 			// Смещение в алфавите
 			u_short offset;
 			// Список букв разрешенных в последовательности

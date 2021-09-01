@@ -153,22 +153,16 @@ set(BIGINTEGERALGORITHMS_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigInte
 if(APPLE)
 	# Выводим сообщение
 	message("Select MacOS X")
-	# Добавляем библиотеку Gperftools
-	set(GPERFTOOLS_LIB /usr/local/lib/libtcmalloc.a)
 elseif(UNIX)
 	# Если это Linux
 	if(CMAKE_SYSTEM_NAME STREQUAL Linux)
 		# Выводим сообщение
 		message("Select Linux")
-		# Добавляем библиотеку Gperftools
-		set(GPERFTOOLS_LIB tcmalloc)
 	endif()
 	# Если это FreeBSD
 	if(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 		# Выводим сообщение
 		message("Select FreeBSD")
-		# Добавляем библиотеку Gperftools
-		set(GPERFTOOLS_LIB /usr/local/lib/libtcmalloc.a)
 	endif()
 endif()
 
@@ -182,4 +176,4 @@ add_library(lm STATIC ${LIB_LISTS})
 add_executable(alm ${ALM_EXE})
 
 # Выполняем линковку приложения
-target_link_libraries(alm lm Threads::Threads ${GPERFTOOLS_LIB} ${BIGINT_LIB} ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES} ${PYTHON_LIBRARIES})
+target_link_libraries(alm lm Threads::Threads ${BIGINT_LIB} ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES} ${PYTHON_LIBRARIES})

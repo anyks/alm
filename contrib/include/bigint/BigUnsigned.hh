@@ -1,23 +1,24 @@
 #ifndef BIGUNSIGNED_H
 #define BIGUNSIGNED_H
 
+#include <stdint.h>
 #include "NumberlikeArray.hh"
 
 /* A BigUnsigned object represents a nonnegative integer of size limited only by
  * available memory.  BigUnsigneds support most mathematical operators and can
  * be converted to and from most primitive integer types.
  *
- * The number is stored as a NumberlikeArray of unsigned longs as if it were
- * written in base 256^sizeof(unsigned long).  The least significant block is
+ * The number is stored as a NumberlikeArray of uint64_t as if it were
+ * written in base 256^sizeof(uint64_t).  The least significant block is
  * first, and the length is such that the most significant block is nonzero. */
-class BigUnsigned : protected NumberlikeArray<unsigned long> {
+class BigUnsigned : protected NumberlikeArray <uint64_t> {
 
 public:
 	// Enumeration for the result of a comparison.
 	enum CmpRes { less = -1, equal = 0, greater = 1 };
 
-	// BigUnsigneds are built with a Blk type of unsigned long.
-	typedef unsigned long Blk;
+	// BigUnsigneds are built with a Blk type of uint64_t.
+	typedef uint64_t Blk;
 
 	typedef NumberlikeArray<Blk>::Index Index;
 	using NumberlikeArray<Blk>::N;
@@ -27,7 +28,7 @@ protected:
 	BigUnsigned(int, Index c) : NumberlikeArray<Blk>(0, c) {}
 
 	// Decreases len to eliminate any leading zero blocks.
-	void zapLeadingZeros() { 
+	void zapLeadingZeros() {
 		while (len > 0 && blk[len - 1] == 0)
 			len--;
 	}
@@ -52,9 +53,9 @@ public:
 
 	// Destructor.  NumberlikeArray does the delete for us.
 	~BigUnsigned() {}
-	
+
 	// Constructors from primitive integer types
-	BigUnsigned(unsigned long  x);
+	BigUnsigned(uint64_t       x);
 	BigUnsigned(         long  x);
 	BigUnsigned(unsigned int   x);
 	BigUnsigned(         int   x);
@@ -69,7 +70,7 @@ public:
 	/* Converters to primitive integer types
 	 * The implicit conversion operators caused trouble, so these are now
 	 * named. */
-	unsigned long  toUnsignedLong () const;
+	uint64_t       toUnsignedLong () const;
 	long           toLong         () const;
 	unsigned int   toUnsignedInt  () const;
 	int            toInt          () const;
@@ -157,7 +158,7 @@ public:
 	 * object in which to store the quotient.  NOTE: If you are wondering
 	 * why these don't return a value, you probably mean to use the
 	 * overloaded return-by-value operators instead.
-	 * 
+	 *
 	 * Examples:
 	 *     BigInteger a(43), b(7), c, d;
 	 *
@@ -169,7 +170,7 @@ public:
 	 *
 	 *     // ``Aliased'' calls now do the right thing using a temporary
 	 *     // copy, but see note on `divideWithRemainder'.
-	 *     a.add(a, b); 
+	 *     a.add(a, b);
 	 */
 
 	// COPY-LESS OPERATIONS

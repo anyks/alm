@@ -53,7 +53,7 @@ BigInteger::BigInteger(const BigUnsigned &x, Sign s) : mag(x) {
  * negative BigInteger instead of an exception. */
 
 // Done longhand to let us use initialization.
-BigInteger::BigInteger(unsigned long  x) : mag(x) { sign = mag.isZero() ? zero : positive; }
+BigInteger::BigInteger(uint64_t       x) : mag(x) { sign = mag.isZero() ? zero : positive; }
 BigInteger::BigInteger(unsigned int   x) : mag(x) { sign = mag.isZero() ? zero : positive; }
 BigInteger::BigInteger(unsigned short x) : mag(x) { sign = mag.isZero() ? zero : positive; }
 
@@ -74,7 +74,7 @@ namespace {
 	}
 }
 
-BigInteger::BigInteger(long  x) : sign(signOf(x)), mag(magOf<long , unsigned long >(x)) {}
+BigInteger::BigInteger(long  x) : sign(signOf(x)), mag(magOf<long , uint64_t      >(x)) {}
 BigInteger::BigInteger(int   x) : sign(signOf(x)), mag(magOf<int  , unsigned int  >(x)) {}
 BigInteger::BigInteger(short x) : sign(signOf(x)), mag(magOf<short, unsigned short>(x)) {}
 
@@ -124,10 +124,10 @@ X BigInteger::convertToSignedPrimitive() const {
 		"Value is too big to fit in the requested type";
 }
 
-unsigned long  BigInteger::toUnsignedLong () const { return convertToUnsignedPrimitive<unsigned long >       (); }
+uint64_t       BigInteger::toUnsignedLong () const { return convertToUnsignedPrimitive<uint64_t >            (); }
 unsigned int   BigInteger::toUnsignedInt  () const { return convertToUnsignedPrimitive<unsigned int  >       (); }
 unsigned short BigInteger::toUnsignedShort() const { return convertToUnsignedPrimitive<unsigned short>       (); }
-long           BigInteger::toLong         () const { return convertToSignedPrimitive  <long , unsigned long> (); }
+long           BigInteger::toLong         () const { return convertToSignedPrimitive  <long , uint64_t>      (); }
 int            BigInteger::toInt          () const { return convertToSignedPrimitive  <int  , unsigned int>  (); }
 short          BigInteger::toShort        () const { return convertToSignedPrimitive  <short, unsigned short>(); }
 
