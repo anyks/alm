@@ -1,0 +1,9 @@
+[submodule "submodules/openssl"]
+	path = submodules/openssl
+	url = https://github.com/openssl/openssl.git
+[submodule "submodules/zlib"]
+	path = submodules/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "submodules/cpython"]
+	path = submodules/cpython
+	url = https://github.com/python/cpython

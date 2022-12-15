@@ -96,26 +96,21 @@ $ python3 -m pip install anyks-lm
 ### To clone the project
 
 ```bash
-$ git clone https://github.com/anyks/alm.git
+$ git clone --recursive https://github.com/anyks/alm.git
 ```
 
-### Build on Linux and FreeBSD
+### Build third party
+```bash
+$ ./build_third_party.sh
+```
+
+### Build on Linux/MacOS X and FreeBSD
 
 ```bash
 $ mkdir ./build
 $ cd ./build
 
 $ cmake ..
-$ make
-```
-
-### Build on MacOS X
-
-```bash
-$ mkdir ./build
-$ cd ./build
-
-$ cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1i -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl@1.1/1.1.1i/include/lib ..
 $ make
 ```
 

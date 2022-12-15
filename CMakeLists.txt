@@ -1,179 +1,217 @@
-# Example:
-# cmake \
-# -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl@1.1/1.1.1g \
-# -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl@1.1/1.1.1g/include/lib \
-# -DPYTHON_INCLUDE_DIR='/System/Volumes/Data/usr/local/Cellar/python@3.8/3.8.3_2/Frameworks/Python.framework/Versions/3.8/include/python3.8' \
-# -DPYTHON_LIBRARY='/System/Volumes/Data/usr/local/Cellar/python@3.8/3.8.3_2/Frameworks/Python.framework/Versions/3.8/lib/libpython3.8.dylib' \
-# ..
+# Подключаем версию CMake
+cmake_minimum_required(VERSION 3.15)
 
-# Проверка версии CMake.
-cmake_minimum_required(VERSION 2.8)
+# TODO: вписать рабочее название проекта
+project(alm LANGUAGES CXX)
 
-# Название проекта
-project(ANYKS LANGUAGES CXX)
+set(PROJECT_VENDOR_LONG "ANYKS Language Model")
 
-# Устанавливаем название вендора
-set(PROJECT_VENDOR_LONG "ANYKS")
-set(ORG_WEBSITE "https://anyks.com")
-set(APP_NAME "Smart Language Model")
+# Опции сборки
+# Сборка тестового ПО
+option(ENABLE_CONSOLE_APP "Build test app" TRUE)
 
-# Устанавливаем адрес установки
-if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local" OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local/")
-	set(INSTALL_TO_USR TRUE)
+set(PROJECT_COPYRIGHT "Copyright (c) ${CURRENT_YEAR} ${PROJECT_VENDOR_LONG}")
+
+# Тип сборки
+# cmake -DCMAKE_BUILD_TYPE=YES ..
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}\n")
+
+# Получаем архитектуру
+EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
+message( STATUS "Architecture: ${ARCHITECTURE}" )
+
+# Проверка версии OS
+string(REGEX MATCH "Linux" PROJECT_OS_LINUX ${CMAKE_SYSTEM_NAME})
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    message(STATUS "Detected OS: Linux")
+    set(DEBUGGER "-ggdb3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--no-as-needed -ldl")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    message(STATUS "Detected OS: MacOS X")
+    set(DEBUGGER "-glldb")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+    message(STATUS "Detected OS: FreeBSD")
+    set(DEBUGGER "-ggdb3")
 else()
-	set(INSTALL_TO_USR FALSE)
+    set(DEBUGGER "")
 endif()
 
-# Устанавливаем флаг использования потоков
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-# Ищем библиотеку Threads
-find_package(Threads REQUIRED)
+# Enable C++17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Ищем библиотеку ZLib
-find_package(ZLIB REQUIRED)
+# Устанавливаем опции компилятора
+set(CMAKE_CXX_COMPILER_ID "clang++")
+message(STATUS "Using C compiler: ${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "Using C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}\n")
 
-# Выводим сообщение
-message("Zlib include dir: ${ZLIB_INCLUDE_DIRS}")
-message("Zlib libraries: ${ZLIB_LIBRARIES}")
-
-# Подключаем заголовочные файлы
-include_directories(${ZLIB_INCLUDE_DIRS})
-# Добавляем библиотеки в список
-list(APPEND LIB_LIST ${ZLIB_LIBRARIES})
-
-# Ищем библиотеку Python
-find_package(PythonLibs 3.7 REQUIRED)
-
-# Выводим сообщение
-message("Python include dir: ${PYTHON_INCLUDE_DIRS}")
-message("Python libraries: ${PYTHON_LIBRARIES}")
-
-# Подключаем заголовочные файлы
-include_directories(${PYTHON_INCLUDE_DIRS})
-# Добавляем библиотеки в список
-list(APPEND LIB_LIST ${PYTHON_LIBRARIES})
-
-# Ищем зависимости OpenSSL
-# find_library(SSL_LIBRARY ssl)
-# find_library(CRYPTO_LIBRARY crypto)
-find_package(OpenSSL REQUIRED)
-
-# Выводим сообщение
-message("OpenSSL libraries: ${OPENSSL_LIBRARIES}")
-message("OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
-
-# Формируем время для копирайта
+# Информация и времени компиляции
 string(TIMESTAMP CURRENT_YEAR "%Y")
 string(TIMESTAMP CURRENT_TIME "%d.%m.%Y %H:%M:%S")
-# Формируем копирайт
-set(PROJECT_COPYRIGHT "Copyright (c) ${CURRENT_YEAR} ${PROJECT_VENDOR_LONG}")
-# Выводим сообщение о начале работы
-message(STATUS "Creating \"${APP_NAME}\" application")
 
-# Set build type
-# if(NOT CMAKE_BUILD_TYPE)
-#	set(CMAKE_BUILD_TYPE Debug)
-# endif()
-message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
+# Опции компилятора
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
-# Подключаем зависимости
-set_target_properties(${TARGET} PROPERTIES COMPILE_FLAGS "-stdlib=libc++")
-# Устанавливаем опции компилятора
-message(STATUS "Using C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-message(STATUS "Using C compiler: ${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-
-# Способ первый: затребовать от компилятора фичу cxx_std_17
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED on)
-
-# Подстраиваемся под компилятор
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -fPIC -pthread -flto")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CC_OPT_FLAGS} ${CXX_OPT_FLAGS}")
-
-# Если режим отладки включён
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-	message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
-	message(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set(TON_PARAMS "-Wno-cpp -Wno-deprecated")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    set(TON_PARAMS "-Wno-cpp -Wno-deprecated ")
 else()
-	message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
-	message(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
+    set(TON_PARAMS "-Wno-unknown-attributes")
 endif()
 
-# Устанавливаем путь установки приложения
-set(CMAKE_PREFIX_PATH $ENV{ALM_PREFIX_PATH} ${CMAKE_PREFIX_PATH})
-
-# Если установка требуется
-if(INSTALL_TO_USR)
-	set(CONFIG_INSTALL_DEST "/${CONFIG_INSTALL_DEST}")
+if (${ARCHITECTURE} MATCHES "aarch64" OR ${ARCHITECTURE} MATCHES "arm*")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -pipe -DNDEBUG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-permissive -Wno-pedantic -Wno-narrowing -Wno-deprecated-declarations ${TON_PARAMS}")
+else()
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -pipe -mrdrnd -march=core2 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fno-permissive -Wno-pedantic -Wno-narrowing -Wno-deprecated-declarations ${TON_PARAMS}")
 endif()
 
-# Устанавливаем адрес каталога установки
-set(CONFIG_INSTALL_DEST "etc/${PROJECT_NAME}")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -DDEBUG_MODE ${DEBUGGER}")
 
-# Подключаем заголовочные файлы
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    message(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
+    message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}\n")
+else()
+    message(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
+    message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}\n")
+endif()
+
+# Добавляем модули cmake
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Выполняем поиск нужных библиотек
+find_package(Zlib REQUIRED)
+find_package(Python REQUIRED)
+find_package(OpenSSL REQUIRED)
+
+# Провекра OpenSSL
+if (OpenSSL_FOUND)
+    message(STATUS "OpenSSL libs found: " ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
+    message(STATUS "OpenSSL include dir found: " ${OPENSSL_INCLUDE_DIR})
+else()
+    message(FATAL_ERROR "OpenSSL not found")
+endif()
+
+# Провекра ZLib
+if (Zlib_FOUND)
+    message(STATUS "ZLib lib found: " ${ZLIB_LIBRARY})
+    message(STATUS "ZLib include dir found: " ${ZLIB_INCLUDE_DIR})
+else()
+    message(FATAL_ERROR "ZLib not found")
+endif()
+
+# Провекра Python
+if (Python_FOUND)
+    message(STATUS "Python lib found: " ${PYTHON_LIBRARY})
+    message(STATUS "Python include dir found: " ${PYTHON_INCLUDE_DIR})
+else()
+    message(FATAL_ERROR "Python not found")
+endif()
+
+# Выполняем подключение хидеров
+include_directories(${ZLIB_INCLUDE_DIR})
+include_directories(${PYTHON_INCLUDE_DIR})
 include_directories(${OPENSSL_INCLUDE_DIR})
-# Добавляем библиотеки в список
-list(APPEND LIB_LIST ${OPENSSL_LIBRARIES})
+include_directories(${CMAKE_SOURCE_DIR}/)
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/contrib/include)
 
-# Устанавливаем каталог заголовков
-include_directories(${PROJECT_BINARY_DIR}/../)
-include_directories(${PROJECT_BINARY_DIR}/../include)
-include_directories(${PROJECT_BINARY_DIR}/../contrib/include)
+# Выполняем подключение исходников
+set(SOURCE_FILES
+    "${CMAKE_SOURCE_DIR}/src/idw.cpp"
+    "${CMAKE_SOURCE_DIR}/src/nwt.cpp"
+    "${CMAKE_SOURCE_DIR}/src/env.cpp"
+    "${CMAKE_SOURCE_DIR}/src/alm.cpp"
+    "${CMAKE_SOURCE_DIR}/src/alm1.cpp"
+    "${CMAKE_SOURCE_DIR}/src/alm2.cpp"
+    "${CMAKE_SOURCE_DIR}/src/arpa.cpp"
+    "${CMAKE_SOURCE_DIR}/src/ablm.cpp"
+    "${CMAKE_SOURCE_DIR}/src/python.cpp"
+    "${CMAKE_SOURCE_DIR}/src/toolkit.cpp"
+    "${CMAKE_SOURCE_DIR}/src/alphabet.cpp"
+    "${CMAKE_SOURCE_DIR}/src/progress.cpp"
+    "${CMAKE_SOURCE_DIR}/src/tokenizer.cpp"
+    "${CMAKE_SOURCE_DIR}/src/collector.cpp"
+    "${CMAKE_SOURCE_DIR}/src/levenshtein.cpp"
+    "${CMAKE_SOURCE_DIR}/contrib/src/cityhash/city.cc"
+    "${CMAKE_SOURCE_DIR}/contrib/src/bigint/BigInteger.cc"
+    "${CMAKE_SOURCE_DIR}/contrib/src/bigint/BigUnsigned.cc"
+    "${CMAKE_SOURCE_DIR}/contrib/src/bigint/BigIntegerUtils.cc"
+    "${CMAKE_SOURCE_DIR}/contrib/src/bigint/BigUnsignedInABase.cc"
+    "${CMAKE_SOURCE_DIR}/contrib/src/bigint/BigIntegerAlgorithms.cc"
+)
 
-# Установка переменной со списком исходников для исполняемого файла
-set(ALM_EXE ${PROJECT_BINARY_DIR}/../app/alm.cpp)
+set(ALM_LIB_NAME ${PROJECT_NAME})
+set(ALM_APP_NAME ${PROJECT_NAME}_bin)
 
-# Добавляем исходники
-set(ENV_LIB ${PROJECT_BINARY_DIR}/../src/env.cpp)
-set(IDW_LIB ${PROJECT_BINARY_DIR}/../src/idw.cpp)
-set(NWT_LIB ${PROJECT_BINARY_DIR}/../src/nwt.cpp)
-set(ALM_LIB ${PROJECT_BINARY_DIR}/../src/alm.cpp)
-set(ALM1_LIB ${PROJECT_BINARY_DIR}/../src/alm1.cpp)
-set(ALM2_LIB ${PROJECT_BINARY_DIR}/../src/alm2.cpp)
-set(ARPA_LIB ${PROJECT_BINARY_DIR}/../src/arpa.cpp)
-set(ABLM_LIB ${PROJECT_BINARY_DIR}/../src/ablm.cpp)
-set(PYTHON_LIB ${PROJECT_BINARY_DIR}/../src/python.cpp)
-set(TOOLKIT_LIB ${PROJECT_BINARY_DIR}/../src/toolkit.cpp)
-set(PROGRESS_LIB ${PROJECT_BINARY_DIR}/../src/progress.cpp)
-set(ALPHABET_LIB ${PROJECT_BINARY_DIR}/../src/alphabet.cpp)
-set(COLLECTOR_LIB ${PROJECT_BINARY_DIR}/../src/collector.cpp)
-set(TOKENIZER_LIB ${PROJECT_BINARY_DIR}/../src/tokenizer.cpp)
-set(LEVENSHTEIN_LIB ${PROJECT_BINARY_DIR}/../src/levenshtein.cpp)
-set(CITYHASH_LIB ${PROJECT_BINARY_DIR}/../contrib/src/cityhash/city.cc)
-set(BIGINTEGER_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigInteger.cc)
-set(BIGUNSIGNED_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigUnsigned.cc)
-set(BIGINTEGERUTILS_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigIntegerUtils.cc)
-set(BIGUNSIGNEDINBASE_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigUnsignedInABase.cc)
-set(BIGINTEGERALGORITHMS_LIB ${PROJECT_BINARY_DIR}/../contrib/src/bigint/BigIntegerAlgorithms.cc)
+# Делаем либу
+add_library(${ALM_LIB_NAME} STATIC ${SOURCE_FILES})
 
-# Определяем операционную систему
-if(APPLE)
-	# Выводим сообщение
-	message("Select MacOS X")
-elseif(UNIX)
-	# Если это Linux
-	if(CMAKE_SYSTEM_NAME STREQUAL Linux)
-		# Выводим сообщение
-		message("Select Linux")
-	endif()
-	# Если это FreeBSD
-	if(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
-		# Выводим сообщение
-		message("Select FreeBSD")
-	endif()
+# Если установлен флаг ENABLE_CONSOLE_APP собираем консольное приложение
+if (ENABLE_CONSOLE_APP)
+
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        set(WINFLAGS -lws2_32 -lgdi32 -lcrypt32 -lIphlpapi)
+    else()
+        set(WINFLAGS "")
+    endif()
+
+    # Устанавливаем иконку для windows под MinGW.
+    set(RES_FILES "")
+    if(MINGW)
+        set(RES_FILES "alm.rc")
+        set(CMAKE_RC_COMPILER_INIT windres)
+        ENABLE_LANGUAGE(RC)
+        SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> <FLAGS> -O coff <DEFINES> -i <SOURCE> -o <OBJECT>")
+    endif(MINGW)
+
+    add_executable(${ALM_APP_NAME} app/alm.cpp ${RES_FILES})
+
+    # Если операционной системой является Windows
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        target_link_libraries(${ALM_APP_NAME}
+            ${ALM_LIB_NAME}
+            ${ZLIB_LIBRARY}
+            ${PYTHON_LIBRARY}
+            ${OPENSSL_LIBRARIES}
+            ${WINFLAGS}
+        )
+    # Для всех остальных операционных систем
+    else()
+        target_link_libraries(${ALM_APP_NAME}
+            ${ALM_LIB_NAME}
+            ${ZLIB_LIBRARY}
+            ${PYTHON_LIBRARY}
+            ${OPENSSL_LIBRARIES}
+        )
+    endif()
+
+    set_target_properties(${ALM_APP_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 endif()
 
-# Создаем список модулей
-list(APPEND LIB_LISTS ${IDW_LIB} ${NWT_LIB} ${ALPHABET_LIB} ${ENV_LIB} ${LEVENSHTEIN_LIB} ${CITYHASH_LIB} ${COLLECTOR_LIB} ${TOKENIZER_LIB} ${ALM_LIB} ${ALM1_LIB} ${ALM2_LIB} ${ARPA_LIB} ${PYTHON_LIB} ${ABLM_LIB} ${PROGRESS_LIB} ${TOOLKIT_LIB} ${BIGINTEGER_LIB} ${BIGUNSIGNED_LIB} ${BIGINTEGERUTILS_LIB} ${BIGUNSIGNEDINBASE_LIB} ${BIGINTEGERALGORITHMS_LIB})
+# Устанавливаем адрес установки, запрет установки в /usr/local
+if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local" OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local/")
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}")
+endif()
 
-# Создание динамической библиотеки с именем alm
-add_library(lm STATIC ${LIB_LISTS})
+# Устанавливаем хидеры
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include" DESTINATION "${CMAKE_INSTALL_PREFIX}/include/${CMAKE_PROJECT_NAME}" FILES_MATCHING PATTERN "*.hpp")
+# Устанавливаем библиотеку
+install(TARGETS ${ALM_LIB_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
+# Устанавливаем исполнительные файлы
+install(TARGETS ${ALM_APP_NAME} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin/${CMAKE_PROJECT_NAME}")
 
-# Создает исполняемый файл с именем alm
-add_executable(alm ${ALM_EXE})
+# Устанавливаем хидеры сторонних библиотек
+install(DIRECTORY "${ZLIB_INCLUDE_DIR}" DESTINATION "${CMAKE_INSTALL_PREFIX}/include" FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY "${PYTHON_INCLUDE_DIR}" DESTINATION "${CMAKE_INSTALL_PREFIX}/include" FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY "${OPENSSL_INCLUDE_DIR}/openssl" DESTINATION "${CMAKE_INSTALL_PREFIX}/include" FILES_MATCHING PATTERN "*.h")
 
-# Выполняем линковку приложения
-target_link_libraries(alm lm Threads::Threads ${BIGINT_LIB} ${ZLIB_LIBRARIES} ${OPENSSL_LIBRARIES} ${PYTHON_LIBRARIES})
+# Устанавливаем стороние библиотеки
+install(FILES ${ZLIB_LIBRARY} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
+install(FILES ${PYTHON_LIBRARY} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
+install(FILES ${OPENSSL_LIBRARIES} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
