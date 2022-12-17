@@ -6,6 +6,9 @@ readonly ROOT=$(cd "$(dirname "$0")" && pwd)
 # Получаем версию OS
 OS=$(uname -a | awk '{print $1}')
 
+# Получаем архитектуру ОС
+AARCH=$(uname -m)
+
 if [[ $OS =~ "MINGW64" ]]; then
 	OS="Windows"
 fi
@@ -232,9 +235,23 @@ if [ ! -f "$src/.stamp_done" ]; then
 	# Выполняем переключение на указанную версию
 	git checkout tags/v${ver} -b v${ver}-branch
 
-	# Выполняем сборку
-	./configure \
-	 --prefix="$PREFIX" || exit 1
+	if [ $OS = "Darwin" ]; then
+		if [ $AARCH = "x86_64" ]; then
+			# Выполняем сборку
+			./configure \
+			 --enable-universalsdk \
+			 --with-universal-archs=intel-64 \
+		 	 --prefix="$PREFIX" || exit 1
+		else 
+			# Выполняем сборку
+			./configure \
+		 	 --prefix="$PREFIX" || exit 1
+		fi
+	else
+			# Выполняем сборку
+			./configure \
+		 	 --prefix="$PREFIX" || exit 1
+	fi
 
 	# Выполняем сборку на всех логических ядрах
 	$BUILD -j"$numproc" || exit 1
