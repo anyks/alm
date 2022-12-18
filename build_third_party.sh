@@ -160,9 +160,9 @@ if [ ! -f "$src/.stamp_done" ]; then
 fi
 
 # Устанавливаем переменные окружения
-export OPENSSL_CFLAGS="-I$BUILD/openssl/include"
-export OPENSSL_INCLUDES="-I$BUILD/openssl/include"
-export OPENSSL_LDFLAGS="-L$BUILD/openssl/lib"
+export OPENSSL_CFLAGS="-I$PREFIX/include"
+export OPENSSL_INCLUDES="-I$PREFIX/include"
+export OPENSSL_LDFLAGS="-L$PREFIX/lib"
 export OPENSSL_LIBS="-lssl -lcrypto"
 
 # Сборка Zlib
