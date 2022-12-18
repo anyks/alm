@@ -161,7 +161,9 @@ fi
 
 # Устанавливаем переменные окружения
 export OPENSSL_CFLAGS="-I$BUILD/openssl/include"
-export OPENSSL_LIBS="-L$BUILD/openssl/lib -lssl -lcrypto"
+export OPENSSL_INCLUDES="-I$BUILD/openssl/include"
+export OPENSSL_LDFLAGS="-L$BUILD/openssl/lib"
+export OPENSSL_LIBS="-lssl -lcrypto"
 
 # Сборка Zlib
 src="$ROOT/submodules/zlib"
@@ -235,21 +237,33 @@ if [ ! -f "$src/.stamp_done" ]; then
 	# Выполняем переключение на указанную версию
 	git checkout tags/v${ver} -b v${ver}-branch
 
+	# Применяем патч
+	apply_patch "cpython" "cpython.patch"
+
 	if [ $OS = "Darwin" ]; then
 		if [ $AARCH = "x86_64" ]; then
 			# Выполняем сборку
 			./configure \
+			 --enable-optimizations \
 			 --enable-universalsdk \
 			 --with-universal-archs=intel-64 \
+			 --disable-test-modules \
+			 --with-openssl=$PREFIX \
 		 	 --prefix="$PREFIX" || exit 1
 		else 
 			# Выполняем сборку
 			./configure \
+			 --enable-optimizations \
+			 --disable-test-modules \
+			 --with-openssl=$PREFIX \
 		 	 --prefix="$PREFIX" || exit 1
 		fi
 	else
 			# Выполняем сборку
 			./configure \
+			 --enable-optimizations \
+			 --disable-test-modules \
+			 --with-openssl=$PREFIX \
 		 	 --prefix="$PREFIX" || exit 1
 	fi
 
