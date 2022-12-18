@@ -1,5 +1,5 @@
 diff --git a/Modules/Setup b/Modules/Setup
-index d3647ecb99..2d4708a14f 100644
+index d3647ecb99..455fb7257b 100644
 --- a/Modules/Setup
 +++ b/Modules/Setup
 @@ -144,7 +144,7 @@ PYTHONPATH=$(COREPYTHONPATH)
@@ -11,7 +11,15 @@ index d3647ecb99..2d4708a14f 100644
  #_statistics _statisticsmodule.c
  #_struct _struct.c
  #_typing _typingmodule.c
-@@ -212,15 +212,15 @@ PYTHONPATH=$(COREPYTHONPATH)
+@@ -205,22 +205,22 @@ PYTHONPATH=$(COREPYTHONPATH)
+ #_gdbm _gdbmmodule.c -lgdbm
+ #_lzma _lzmamodule.c -llzma
+ #_uuid _uuidmodule.c -luuid
+-#zlib  zlibmodule.c -lz
++zlib  zlibmodule.c -lz
+ 
+ # The readline module also supports libeditline (-leditline).
+ # Some systems may require -ltermcap or -ltermlib.
  #readline readline.c -lreadline -ltermcap
  
  # OpenSSL bindings
