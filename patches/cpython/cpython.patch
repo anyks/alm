@@ -1,0 +1,36 @@
+diff --git a/Modules/Setup b/Modules/Setup
+index d3647ecb99..2d4708a14f 100644
+--- a/Modules/Setup
++++ b/Modules/Setup
+@@ -144,7 +144,7 @@ PYTHONPATH=$(COREPYTHONPATH)
+ #_pickle _pickle.c
+ #_queue _queuemodule.c
+ #_random _randommodule.c
+-#_socket socketmodule.c
++_socket socketmodule.c
+ #_statistics _statisticsmodule.c
+ #_struct _struct.c
+ #_typing _typingmodule.c
+@@ -212,15 +212,15 @@ PYTHONPATH=$(COREPYTHONPATH)
+ #readline readline.c -lreadline -ltermcap
+ 
+ # OpenSSL bindings
+-#_ssl _ssl.c $(OPENSSL_INCLUDES) $(OPENSSL_LDFLAGS) $(OPENSSL_LIBS)
+-#_hashlib _hashopenssl.c $(OPENSSL_INCLUDES) $(OPENSSL_LDFLAGS) -lcrypto
++_ssl _ssl.c $(OPENSSL_INCLUDES) $(OPENSSL_LDFLAGS) $(OPENSSL_LIBS)
++_hashlib _hashopenssl.c $(OPENSSL_INCLUDES) $(OPENSSL_LDFLAGS) -lcrypto
+ 
+ # To statically link OpenSSL:
+-# _ssl _ssl.c $(OPENSSL_INCLUDES) $(OPENSSL_LDFLAGS) \
+-#     -l:libssl.a -Wl,--exclude-libs,libssl.a \
+-#     -l:libcrypto.a -Wl,--exclude-libs,libcrypto.a
+-# _hashlib _hashopenssl.c $(OPENSSL_INCLUDES) $(OPENSSL_LDFLAGS) \
+-#     -l:libcrypto.a -Wl,--exclude-libs,libcrypto.a
++_ssl _ssl.c $(OPENSSL_INCLUDES) $(OPENSSL_LDFLAGS) \
++    -l:libssl.a -Wl,--exclude-libs,libssl.a \
++    -l:libcrypto.a -Wl,--exclude-libs,libcrypto.a
++_hashlib _hashopenssl.c $(OPENSSL_INCLUDES) $(OPENSSL_LDFLAGS) \
++    -l:libcrypto.a -Wl,--exclude-libs,libcrypto.a
+ 
+ # The _tkinter module.
+ #
