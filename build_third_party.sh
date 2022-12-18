@@ -244,25 +244,19 @@ if [ ! -f "$src/.stamp_done" ]; then
 		if [ $AARCH = "x86_64" ]; then
 			# Выполняем сборку
 			./configure \
-			 --enable-optimizations \
 			 --enable-universalsdk \
 			 --with-universal-archs=intel-64 \
-			 --disable-test-modules \
 			 --with-openssl=$PREFIX \
 		 	 --prefix="$PREFIX" || exit 1
 		else 
 			# Выполняем сборку
 			./configure \
-			 --enable-optimizations \
-			 --disable-test-modules \
 			 --with-openssl=$PREFIX \
 		 	 --prefix="$PREFIX" || exit 1
 		fi
 	else
 			# Выполняем сборку
 			./configure \
-			 --enable-optimizations \
-			 --disable-test-modules \
 			 --with-openssl=$PREFIX \
 		 	 --prefix="$PREFIX" || exit 1
 	fi

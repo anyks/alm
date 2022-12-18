@@ -176,18 +176,18 @@ if (ENABLE_CONSOLE_APP)
     if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         target_link_libraries(${ALM_APP_NAME}
             ${ALM_LIB_NAME}
-            ${ZLIB_LIBRARY}
             ${PYTHON_LIBRARY}
             ${OPENSSL_LIBRARIES}
+            ${ZLIB_LIBRARY}
             ${WINFLAGS}
         )
     # Для всех остальных операционных систем
     else()
         target_link_libraries(${ALM_APP_NAME}
             ${ALM_LIB_NAME}
-            ${ZLIB_LIBRARY}
             ${PYTHON_LIBRARY}
             ${OPENSSL_LIBRARIES}
+            ${ZLIB_LIBRARY}
         )
     endif()
 
