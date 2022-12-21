@@ -58,7 +58,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(TON_PARAMS "-Wno-cpp -Wno-deprecated")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set(TON_PARAMS "-lutil -Wno-cpp -Wno-deprecated ")
+    set(TON_PARAMS "-Wno-cpp -Wno-deprecated")
 else()
     set(TON_PARAMS "-Wno-unknown-attributes")
 endif()
@@ -155,10 +155,15 @@ add_library(${ALM_LIB_NAME} STATIC ${SOURCE_FILES})
 # Если установлен флаг ENABLE_CONSOLE_APP собираем консольное приложение
 if (ENABLE_CONSOLE_APP)
 
-    if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-        set(WINFLAGS -lws2_32 -lgdi32 -lcrypt32 -lIphlpapi)
-    else()
-        set(WINFLAGS "")
+    # Проставляем платформозависимые зависимости
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        set(OS_FLAGS "-lutil -Xlinker -export-dynamic")
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+        set(OS_FLAGS "-lutil -Xlinker -export-dynamic")
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        set(OS_FLAGS -lws2_32 -lgdi32 -lcrypt32 -lIphlpapi)
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+        set(OS_FLAGS "")
     endif()
 
     # Устанавливаем иконку для windows под MinGW.
@@ -179,7 +184,7 @@ if (ENABLE_CONSOLE_APP)
             ${PYTHON_LIBRARY}
             ${OPENSSL_LIBRARIES}
             ${ZLIB_LIBRARY}
-            ${WINFLAGS}
+            ${OS_FLAGS}
         )
     # Для всех остальных операционных систем
     else()
@@ -188,6 +193,7 @@ if (ENABLE_CONSOLE_APP)
             ${PYTHON_LIBRARY}
             ${OPENSSL_LIBRARIES}
             ${ZLIB_LIBRARY}
+            ${OS_FLAGS}
         )
     endif()
 
